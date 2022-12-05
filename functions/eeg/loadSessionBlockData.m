@@ -1,7 +1,6 @@
 function [AllData, Freqs, Chanlocs, AllTrials] = loadSessionBlockData(P, Source, SessionBlocks)
 % loads in EEG data and trial data, pooling based on session blocks
 
-SessionBlocksLabels = fieldnames(SessionBlocks);
 
 
 for Indx_B = 1:numel(SessionBlocksLabels)

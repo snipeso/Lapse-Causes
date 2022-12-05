@@ -1,6 +1,7 @@
 function P = analysisParameters()
 % Here is located all the common variables, paths, and parameters that get
 % repeatedly called by more than one preprocessing script.
+% From Lapse-Causes.
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -20,6 +21,8 @@ Labels.Sessions.Labels = {'BL', 'Pre', 'SD1', 'SD2.1', 'SD2.2', 'SD2.3', 'Post'}
 
 SessionBlocks.SD = { 'Session2Beam1', 'Session2Beam2', 'Session2Beam3'};
 SessionBlocks.BL = {'BaselineBeam',  'MainPre', 'MainPost'};
+
+P.Sessions = [SessionBlocks.BL, SessionBlocks.SD];
 
 P.SessionBlocks = SessionBlocks;
 
