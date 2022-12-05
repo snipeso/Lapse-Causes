@@ -18,8 +18,10 @@ P.Nights = {'Baseline', 'NightPre', 'NightPost'};
 Labels.Sessions.IDs = {'BaselineBeam', 'MainPre', 'Session1Beam', 'Session2Beam1', 'Session2Beam2', 'Session2Beam3', 'MainPost'};
 Labels.Sessions.Labels = {'BL', 'Pre', 'SD1', 'SD2.1', 'SD2.2', 'SD2.3', 'Post'};
 
-Labels.Sessions_SD.IDs = { 'Session2Beam1', 'Session2Beam2', 'Session2Beam3'};
-Labels.Sessions_BL.IDs = {'BaselineBeam',  'MainPre', 'MainPost'};
+SessionBlocks.SD = { 'Session2Beam1', 'Session2Beam2', 'Session2Beam3'};
+SessionBlocks.BL = {'BaselineBeam',  'MainPre', 'MainPost'};
+
+P.SessionBlocks = SessionBlocks;
 
 Labels.Tally = {'Lapses', 'Late', 'Correct'};
 
@@ -42,6 +44,20 @@ P.Labels = Labels;
 Triggers.SyncEyes = 'S192';
 Triggers.Start = 'S  1';
 Triggers.End = 'S  2';
+Triggers.Stim = 'S  3';
+Triggers.Resp = 'S  4';
+Triggers.FA = 'S  5';
+Triggers.StartBlank = 'S  6';
+Triggers.EndBlank = 'S  7';
+Triggers.Alarm = 'S  8';
+Triggers.LeftBlock = 'S 10';
+Triggers.RightBlock = 'S 11';
+Tones = 'S 12';
+
+Triggers.Extras = {'boundary', Triggers.Start, Triggers.End, Triggers.Resp, ...
+    Triggers.FA, Triggers.StartBlank, Triggers.EndBlank, Triggers.Alarm, ...
+    Triggers.LeftBlock, Triggers.RightBlock, Tones};
+
 
 P.Triggers = Triggers;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -74,7 +90,7 @@ Paths.Core = Core;
 
 Paths.Datasets = 'G:\LSM\Data\Raw';
 Paths.Data  = fullfile(Core, 'Final'); % where data gets saved once its been turned into something else
-Paths.PaperResults = fullfile(Core, 'Results', 'Theta-SD-vs-WM'); % where figures and tables end up
+Paths.PaperResults = fullfile(Core, 'Results', 'Lapse-Causes'); % where figures and tables end up
 % Paths.Paper = 'C:\Users\colas\Dropbox\Research\Publications and Presentations\Sleep\Paper2\Figures';
 % Paths.Poster = 'C:\Users\colas\Dropbox\Research\Publications and Presentations\Sleep\SSSSC2022\Figures';
 % Paths.Powerpoint = 'C:\Users\colas\Dropbox\Research\Projects\HuberSleepLab\LSM\Repeat Figures\MatlabFigures';
@@ -83,34 +99,19 @@ Paths.Scoring = fullfile(Core, 'Scoring');
 Paths.Results = fullfile(Core, 'Results\Theta_Bursts');
 
 
-% get path where these scripts were saved
-CD = mfilename('fullpath');
-% Paths.Analysis = fullfile(extractBefore(Paths.Analysis, 'Analysis'));
-Paths.Analysis = fullfile(extractBefore(CD, 'Lapse-Causes'), 'Lapse-Causes');
-
-% add location of subfunctions (from older scripts TODO: copy scripts that
-% I use here
-addpath(fullfile(Paths.Analysis, 'functions','general'))
-addpath(fullfile(Paths.Analysis, 'functions','eeg'))
-addpath(fullfile(Paths.Analysis, 'functions','plots'))
-addpath(fullfile(Paths.Analysis, 'functions','tasks'))
-addpath(fullfile(Paths.Analysis, 'functions','stats'))
-addpath(fullfile(Paths.Analysis, 'functions','questionnaires'))
-run(fullfile(Paths.Analysis, 'functions', 'external', 'addExternalFunctions'))
-
 
 % get path where these scripts were saved
 Paths.Analysis = mfilename('fullpath');
 Paths.Analysis = fullfile(extractBefore(Paths.Analysis, '\Analysis\'));
 
 % add location of subfunctions
-addpath(fullfile(Paths.Analysis, 'functions','general'))
+% addpath(fullfile(Paths.Analysis, 'functions','general'))
 addpath(fullfile(Paths.Analysis, 'functions','eeg'))
-addpath(fullfile(Paths.Analysis, 'functions','plots'))
+% addpath(fullfile(Paths.Analysis, 'functions','plots'))
 addpath(fullfile(Paths.Analysis, 'functions','tasks'))
-addpath(fullfile(Paths.Analysis, 'functions','stats'))
-addpath(fullfile(Paths.Analysis, 'functions','pupils'))
-addpath(fullfile(Paths.Analysis, 'functions','external'))
+% addpath(fullfile(Paths.Analysis, 'functions','stats'))
+% addpath(fullfile(Paths.Analysis, 'functions','pupils'))
+% addpath(fullfile(Paths.Analysis, 'functions','external'))
 
 P.Paths = Paths;
 
