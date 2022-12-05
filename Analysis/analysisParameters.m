@@ -101,7 +101,7 @@ Paths.PaperResults = fullfile(Core, 'Results', 'Lapse-Causes'); % where figures 
 Paths.Scoring = fullfile(Core, 'Scoring');
 Paths.Results = fullfile(Core, 'Results\Theta_Bursts');
 
-
+Paths.Pool = fullfile(Paths.Data, 'All_Lapse-Causes');
 
 % get path where these scripts were saved
 Paths.Analysis = mfilename('fullpath');

@@ -15,10 +15,10 @@ TrialTypeLabels(isnan(TrialTypeLabels)) = [];
 % set up new matrix
 AllData = nan(numel(Participants), numel(TrialTypeLabels), 128, 1000); % bleah way of doing things, but handles if first participant is missing data
 
-for Indx_P = 1:numel(P.Participants)
+for Indx_P = 1:numel(Participants)
     Data = struct();
     for T = TrialTypeLabels % assign empty field for concatnation later
-Data.(T) = [];
+        Data.(T) = [];
     end
 
     for Indx_S = 1:numel(Sessions)
@@ -33,38 +33,28 @@ Data.(T) = [];
             continue
         end
 
-        if isempty(Trials) % if using unlocked data
+        load(Path, 'Power', 'Freqs', 'Chanlocs') % Power is Ch x F x T
 
-            load(Path, 'Power', 'Freqs', 'Chanlocs')
+        if isempty(Power)
+            continue
+        end
 
-            if isempty(Power)
-                AllData(Indx_P, Indx_S, :, :) = nan;
-                continue
-            end
+        % get the correct trials
+        TrialTypes = Trials{Indx_P, Indx_S};
 
-            AllData(Indx_P, Indx_S, 1:numel(Chanlocs), 1:numel(Freqs)) = Power;
-
-        else % is using data locked to trials
-            load(Path, 'Power', 'Freqs', 'Chanlocs')
-
-            if isempty(Power)
-                continue
-            end
-
-            % get the correct trials
-            TrialTypes = Trials{Indx_P, Indx_S};
-
-            for Indx_T = 1:numel(TrialTypeLabels)
-
-            Data.(TrialTypeLabels{Indx_T}) = cat(3, Data.(TrialTypeLabels{Indx_T}), Power(:, :, TrialTypes==TrialTypeLabels(Indx_T)));
-            end
-
+        for T = TrialTypeLabels
+            Data.(['T_',num2str(T)]) = cat(3, Data.(['T_',num2str(T)]), Power(:, :, TrialTypes==T));
         end
         clear Power
+    end
+
+    % average trials across sessions
+    for Indx_T  = 1:numel(TrialTypeLabels)
+        AllData(Indx_P, Indx_T, 1:numel(Chanlocs), 1:numel(Freqs)) = mean(Data.(TrialTypeLabels{Indx_T}), 3, 'omitnan');
     end
 end
 
 % remove extra padded nans
-AllData(:, :, :, numel(Chanlocs)+1:128, :) = [];
-AllData(:, :, :, :, numel(Freqs)+1:1000) = [];
+AllData(:, :, numel(Chanlocs)+1:128, :) = [];
+AllData(:, :, :, numel(Freqs)+1:1000) = [];
 
