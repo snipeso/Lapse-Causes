@@ -36,7 +36,16 @@ end
 
 Source =  fullfile(P.Paths.Data, 'EEG', 'Locked', Task, Tag);
 
+%%% get trial information
 Trials = loadBehavior(Participants, Sessions, Task, Paths, false);
+
+% get time of stim and response trigger
+EEGPath = fullfile(Paths.Preprocessed, 'Waves', 'MAT', Task); % use Waves, since has an fs of 1000
+Trials = getTrialLatencies(Trials, EEGPath, P.Triggers);
+
+% get eyes-closed info
+MicrosleepPath = fullfile(Paths.Data, 'Pupils_1000'); % also 1000 fs
+Trials = getECtrials(Trials, MicrosleepPath, 1000);
 
 % set to nan all trials that are beyond 50% radius and with eyes closed
 Trials.FinalType = Trials.Type;
@@ -44,6 +53,9 @@ Trials.FinalType = Trials.Type;
 Q = quantile(Trials.Radius, 0.5);
 Trials.FinalType(Trials.Radius>Q) = nan;
 
+Trials.FinalType(isnan(Trials.EC)|Trials.EC) = nan;
+
+%%% Load EEG information, splitting by session blocks
 SessionBlocks = P.SessionBlocks;
 SB_Labels = fieldnames(SessionBlocks);
 
