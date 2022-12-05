@@ -2,11 +2,14 @@ function Trials = getTrialLatencies(Trials, EEGPath, Triggers)
 % for all trials, get information of stim time and response time (if
 % available). Used for finding eyes closed, bursts, etc.
 
+disp('Getting trial latencies from EEG')
+
 Participants = unique(Trials.Participant);
 Sessions = unique(Trials.Session);
 
 Trials.StimTime = nan(size(Trials, 1), 1);
 Trials.RespTime = Trials.StimTime;
+Trials.RT_Triggers = Trials.StimTime;
 
 % get whatever tag I used for that EEG dataset
 Filenames = getContent(EEGPath);
@@ -18,6 +21,11 @@ for Indx_P = 1:numel(Participants)
         CurrentTrials = strcmp(Trials.Participant, Participants{Indx_P}) & ...
             strcmp(Trials.Session, Sessions{Indx_S});
         nTrials = nnz(CurrentTrials);
+
+        if isempty(nTrials) || nTrials < 5
+            warning(['Missing ', Participants{Indx_P}, Sessions{Indx_S}])
+            continue
+        end
 
         % load EEG metadata
         Filename = Filenames(contains(Filenames, Participants{Indx_P}) & ...
@@ -50,5 +58,7 @@ for Indx_P = 1:numel(Participants)
         end
 
         Trials.RespTime(CurrentTrials) = RespLatencies;
+        Trials.RT_Triggers(CurrentTrials) = RespLatencies - StimLatencies;
     end
+    disp(['Finished ', Participants{Indx_P}])
 end

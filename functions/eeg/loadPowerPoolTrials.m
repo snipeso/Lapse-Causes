@@ -1,4 +1,4 @@
-function [AllData, Freqs, Chanlocs] = loadPowerPoolTrials(Source, Participants, Sessions, Task, Trials)
+function [AllData, Freqs, Chanlocs] = loadPowerPoolTrials(Source, Participants, Sessions, Task, TrialTypeLabels, Trials)
 % load all power from main tasks, averaging by trial category
 % Results in variable "AllData": P x S x T x Ch x F; and Chanlocs and Freqs
 % TrialTypes is a cell array, with each cell containing a list of
@@ -6,11 +6,10 @@ function [AllData, Freqs, Chanlocs] = loadPowerPoolTrials(Source, Participants, 
 % group (T). Trials is a P x S array
 % from Lapses-Causes.
 
+disp('Loading power')
+
 PowerType = 'Welch';
 
-% get total number of trial categories
-TrialTypeLabels = unique([Trials{:}]);
-TrialTypeLabels(isnan(TrialTypeLabels)) = [];
 
 % set up new matrix
 AllData = nan(numel(Participants), numel(TrialTypeLabels), 128, 1000); % bleah way of doing things, but handles if first participant is missing data
@@ -18,7 +17,7 @@ AllData = nan(numel(Participants), numel(TrialTypeLabels), 128, 1000); % bleah w
 for Indx_P = 1:numel(Participants)
     Data = struct();
     for T = TrialTypeLabels % assign empty field for concatnation later
-        Data.(T) = [];
+        Data.(['T_',num2str(T)]) = [];
     end
 
     for Indx_S = 1:numel(Sessions)
@@ -50,8 +49,10 @@ for Indx_P = 1:numel(Participants)
 
     % average trials across sessions
     for Indx_T  = 1:numel(TrialTypeLabels)
-        AllData(Indx_P, Indx_T, 1:numel(Chanlocs), 1:numel(Freqs)) = mean(Data.(TrialTypeLabels{Indx_T}), 3, 'omitnan');
+        AllData(Indx_P, Indx_T, 1:numel(Chanlocs), 1:numel(Freqs)) = mean(Data.(['T_',num2str(TrialTypeLabels(Indx_T))]), 3, 'omitnan');
     end
+
+    disp(['Finished ', Participants{Indx_P}])
 end
 
 % remove extra padded nans
