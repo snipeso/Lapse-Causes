@@ -22,9 +22,9 @@ StartTime = -.5;
 EndTime = 1.5;
 WelchWindow = 2;
 
-StartTime = -1;
-EndTime = 0;
-WelchWindow = 1;
+StartTime = 0.5;
+EndTime = 1;
+WelchWindow = .5;
 
 % temp
 BandLabels = fieldnames(Bands);
@@ -34,6 +34,7 @@ StatsP = P.StatsP;
 
 Tag =  ['s', num2str(StartTime), '_e', num2str(EndTime), '_w', num2str(WelchWindow)];
 TitleTag = strjoin({'LapseCauses', 'LAT', 'Power', Tag}, '_');
+TitleTag = replace(TitleTag, '.', '-');
 
 Pool = fullfile(Paths.Pool, 'Power'); % place to save matrices so they can be plotted in next script
 if ~exist(Pool, 'dir')

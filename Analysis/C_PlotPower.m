@@ -1,10 +1,6 @@
-
-
 clear
 clc
 close all
-
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -29,9 +25,6 @@ Tag =  ['s', num2str(StartTime), '_e', num2str(EndTime), '_w', num2str(WelchWind
 TitleTag = strjoin({'LapseCauses', 'LAT', 'Power', Tag}, '_');
 
 
-
-
-
 %% plot late vs correct and lapse vs correct
 
 load(fullfile(Pool, strjoin({TitleTag, 'Power', 'Band', 'Topography', 'Close', 'EO', 'TrialType.mat'}, '_')), 'Data', 'Chanlocs', 'Bands', 'SessionLabels')
@@ -51,7 +44,6 @@ for Indx_S = 1:2
             subfigure([], Grid, [Indx_T, Indx_B], [], false, '', PlotProps);
             Stats = topoDiff(BL, Tr, Chanlocs, CLims_Diff, StatsP, PlotProps);
             colorbar off
-            colormap(gca, Format.Color.Maps.Divergent)
 
             title([BandLabels{Indx_B}, ' ', P.Labels.Tally{Indx_T}, ' (n=', num2str(Stats.df(1)+1) ')'], 'FontSize', PlotProps.Text.TitleSize)
         end
