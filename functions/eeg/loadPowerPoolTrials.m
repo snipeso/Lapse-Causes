@@ -9,6 +9,7 @@ function [AllData, Freqs, Chanlocs] = loadPowerPoolTrials(Source, Participants, 
 disp('Loading power')
 
 PowerType = 'Welch';
+MinTrials = 10; % minimum number of trials before NaNing the participant
 
 
 % set up new matrix
@@ -49,7 +50,12 @@ for Indx_P = 1:numel(Participants)
 
     % average trials across sessions
     for Indx_T  = 1:numel(TrialTypeLabels)
-        AllData(Indx_P, Indx_T, 1:numel(Chanlocs), 1:numel(Freqs)) = mean(Data.(['T_',num2str(TrialTypeLabels(Indx_T))]), 3, 'omitnan');
+        D = Data.(['T_',num2str(TrialTypeLabels(Indx_T))]);
+        if size(D, 3) < MinTrials
+            continue
+        end
+
+        AllData(Indx_P, Indx_T, 1:numel(Chanlocs), 1:numel(Freqs)) = mean(D, 3, 'omitnan');
     end
 
     disp(['Finished ', Participants{Indx_P}])

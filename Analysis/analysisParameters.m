@@ -99,7 +99,11 @@ Paths.PaperResults = fullfile(Core, 'Results', 'Lapse-Causes'); % where figures 
 % Paths.Powerpoint = 'C:\Users\colas\Dropbox\Research\Projects\HuberSleepLab\LSM\Repeat Figures\MatlabFigures';
 % Paths.PaperStats =  'C:\Users\colas\Dropbox\Research\Publications and Presentations\Sleep\Paper2\Stats';
 Paths.Scoring = fullfile(Core, 'Scoring');
-Paths.Results = fullfile(Core, 'Results\Theta_Bursts');
+Paths.Results = fullfile(Core, 'Results\Lapses-Causes');
+
+if ~exist(Paths.Results, 'dir')
+    mkdir(Paths.Results)
+end
 
 Paths.Pool = fullfile(Paths.Data, 'All_Lapse-Causes');
 

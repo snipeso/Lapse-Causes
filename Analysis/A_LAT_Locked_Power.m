@@ -20,9 +20,9 @@ Triggers = P.Triggers;
 RemoveCh = P.Channels.Remove;
 
 Refresh = false;
-StartTime = -0.5; % relative to stim trigger
-EndTime = 1.5; % relative to stim trigger
-WelchWindow = 2;
+StartTime = 0; % relative to stim trigger
+EndTime = .5; % relative to stim trigger
+WelchWindow = .5;
 
 TitleTag = strjoin({'Bursts', 'LAT', 'Hemifield'}, '_');
 
