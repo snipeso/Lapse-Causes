@@ -10,9 +10,7 @@ P = analysisParameters();
 
 Participants = P.Participants;
 Sessions = P.Sessions;
-StatsP = P.StatsP;
 TallyLabels = P.Labels.Tally;
-Format = P.Format;
 Paths = P.Paths;
 Task = P.Labels.Task;
 Bands = P.Bands;
@@ -33,8 +31,9 @@ BandLabels = fieldnames(Bands);
 PlotProps = P.Manuscript;
 StatsP = P.StatsP;
 
-TitleTag = strjoin({'LapseCauses', 'LAT', 'Power'}, '_');
+
 Tag =  ['s', num2str(StartTime), '_e', num2str(EndTime), '_w', num2str(WelchWindow)];
+TitleTag = strjoin({'LapseCauses', 'LAT', 'Power', Tag}, '_');
 
 Pool = fullfile(Paths.Pool, 'Power'); % place to save matrices so they can be plotted in next script
 if ~exist(Pool, 'dir')
@@ -80,16 +79,23 @@ end
 SessionBlocks = P.SessionBlocks;
 SB_Labels = {'BL', 'SD'};
 
-%% lapse vs correct
+%%% lapse vs correct
 
 %%% Load EEG information, splitting by session blocks
 
+Trials.FinalType = Trials.Type;
+
+Q = quantile(Trials.Radius, 0.5);
+Trials.FinalType(Trials.Radius>Q) = nan;
+Trials.FinalType(isnan(Trials.EC)|Trials.EC==1) = nan;
+
+Trials.isRight = double(Trials.isRight);
 
 AllData = [];
 for Indx_B = 1:numel(SB_Labels)
     Sessions = SessionBlocks.(SB_Labels{Indx_B});
-        CellTrials = tasktable2cell(Trials, Participants, Sessions, 'FinalType');
-%     CellTrials = tasktable2cell(Trials, Participants, Sessions, 'Type');
+    CellTrials = tasktable2cell(Trials, Participants, Sessions, 'FinalType');
+    %     CellTrials = tasktable2cell(Trials, Participants, Sessions, 'Type');
     [Data, Freqs, Chanlocs] = loadPowerPoolTrials(Source, Participants, Sessions, Task, 1:3, CellTrials); % Data is P x T x Ch x F;
 
     AllData = cat(5, AllData, Data); % P x T x Ch x F x S

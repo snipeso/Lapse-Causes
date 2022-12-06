@@ -1,10 +1,23 @@
 
 
+clear
+clc
+close all
 
 
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Parameters
 
+P = analysisParameters();
+
+Participants = P.Participants;
+Sessions = P.Sessions;
+TallyLabels = P.Labels.Tally;
+Paths = P.Paths;
+Task = P.Labels.Task;
+Bands = P.Bands;
 
 
 BandLabels = fieldnames(Bands);
@@ -12,14 +25,8 @@ BandLabels = fieldnames(Bands);
 StatsP = P.StatsP;
 PlotProps = P.Manuscript;
 
-
-
-
-
-
-
-
-
+Tag =  ['s', num2str(StartTime), '_e', num2str(EndTime), '_w', num2str(WelchWindow)];
+TitleTag = strjoin({'LapseCauses', 'LAT', 'Power', Tag}, '_');
 
 
 
