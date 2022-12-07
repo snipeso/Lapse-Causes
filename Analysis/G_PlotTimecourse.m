@@ -1,4 +1,5 @@
 
+StatsP = P.StatsP;
 
 PlotProps = P.Manuscript;
 sProbMicrosleep =  smoothFreqs(ProbMicrosleep, t, 'last', .2);
@@ -6,10 +7,10 @@ zProbMicrosleep = zScoreData(sProbMicrosleep, 'first');
 
 
 %%
-Range = [-1.5 4];
+Range = [-1.5 2];
 
 figure
 hold on
-rectangle('position', [0 Range(1) 0.5, diff(Range)], 'EdgeColor','none', 'FaceColor', [PlotProps.Color.Generic, .15])
-plotAngelHair(t, zProbMicrosleep(:, [3 2 1], :), PlotProps.Color.Participants, {'Correct', 'Late', 'Lapses'}, PlotProps)
+% plotAngelHair(t, zProbMicrosleep(:, [3 2 1], :), PlotProps.Color.Participants, {'Correct', 'Late', 'Lapses'}, PlotProps)
+plotTimecourse(t, flip(zProbMicrosleep, 2), 1, Range, flip(TallyLabels), getColors(3), StatsP, PlotProps)
 ylim(Range)
