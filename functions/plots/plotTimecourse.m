@@ -34,3 +34,5 @@ if ~isempty(LineLabels)
     legend([LineLabels, 'p<.05'])
     set(legend, 'ItemTokenSize', [10 10], 'location', 'northwest')
 end
+
+xlabel('Time (s)')

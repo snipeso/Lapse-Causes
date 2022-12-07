@@ -26,7 +26,7 @@ EndTime = 2;
 fs = 1000;
 WelchWindow = 2;
 
-ConfidenceThreshold = 0.5;
+% ConfidenceThreshold = 0.5;
 minTrials = 10;
 MinNaN = 0.5;
 
@@ -34,9 +34,9 @@ Tag =  ['s', num2str(StartTime), '_e', num2str(EndTime), '_w', num2str(WelchWind
 TitleTag = strjoin({'LapseCauses', 'LAT', 'Power', Tag}, '_');
 TitleTag = replace(TitleTag, '.', '-');
 
-Pool = fullfile(Paths.Pool, 'Eyes'); % place to save matrices so they can be plotted in next script
+Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plotted in next script
 
-MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
+BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts_Old', Task); % Temp!
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -46,10 +46,10 @@ MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
 load(fullfile(Paths.Pool, 'Tasks', 'AllTrials.mat'), 'Trials')
 
 TrialTypeLabels = [1 2 3];
-Filenames = getContent(MicrosleepPath);
+Filenames = getContent(BurstPath);
 t = linspace(StartTime, EndTime, fs*(EndTime-StartTime));
 
-ProbMicrosleep = nan(numel(Participants), numel(TrialTypeLabels), numel(t));
+ProbBurst = nan(numel(Participants), numel(TrialTypeLabels), 2, numel(t)); % the 2 is theta and alpha
 for Indx_P = 1:numel(Participants)
 
     Data = struct();
@@ -64,28 +64,25 @@ for Indx_P = 1:numel(Participants)
             strcmp(Trials.Session, Sessions{Indx_S}));
         nTrials = nnz(CurrentTrials);
 
-        % load in eye data
+        % load in eeg data
         Filename = Filenames(contains(Filenames, Participants{Indx_P}) & ...
             contains(Filenames, Sessions{Indx_S}));
 
         if isempty(Filename)
             warning(['No data in ', Participants{Indx_P},  Sessions{Indx_S} ])
             continue
-        elseif ~exist(fullfile(MicrosleepPath, Filename), 'file')
+        elseif ~exist(fullfile(BurstPath, Filename), 'file')
             warning(['No data in ', Filename])
             continue
         end
-        load(fullfile(MicrosleepPath, Filename), 'Eyes')
 
-        if isnan(Eyes.DQ) || Eyes.DQ == 0 || Eyes.DQ < 1
-            warning(['Bad data in ', char(Filename)])
-            continue
-        end
+        load(fullfile(BurstPath, Filename), 'EEG', 'Bursts')
+        t = EEG.times;
 
-        Eye = round(Eyes.DQ); % which eye
-
-        % get 1s and 0s of whether eyes were open
-        [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold); % not using internal microsleep identifier so that I'm flexible
+        Freqs = 1./[Bursts.Mean_period];
+        ThetaTime = bursts2time(Bursts(Freqs>4 & Freqs<=8), t); % theta
+        AlphaTime = bursts2time(Bursts(Freqs>8 & Freqs<=12), t); % alpha
+        BurstTime = [ThetaTime; AlphaTime];
 
         % get each trial, save to field of trial type
         for Indx_T = 1:nTrials
@@ -94,11 +91,7 @@ for Indx_P = 1:numel(Participants)
             End = round(fs*(StimT+EndTime))-1;
             Type = Trials.Type(CurrentTrials(Indx_T));
 
-            if nnz(isnan(EyeOpen(Start:End)))/numel(Start:End) > MinNaN
-                continue
-            end
-
-            Trial = EyeOpen(Start:End)==0; % just keep track of eyes closed
+            Trial = permute(BurstTime(:, Start:End), [3 1 2]); % trial x band x time
             Data.(['T_', num2str(Type)]) = cat(1, Data.(['T_', num2str(Type)]), Trial);
         end
     end
@@ -109,13 +102,11 @@ for Indx_P = 1:numel(Participants)
 
         nTrials = size(AllTrials, 1);
 
-        Nans = sum(isnan(AllTrials), 1);
-
-        if isempty(AllTrials) || nTrials < minTrials || any(Nans > MinNaN) % makes sure every timepoint had at least 10 trials
+        if isempty(AllTrials) || nTrials < minTrials
             continue
         end
 
-        ProbMicrosleep(Indx_P, Indx_T, :)  = sum(AllTrials, 1, 'omitnan')/nTrials;
+        ProbBurst(Indx_P, Indx_T, :, :)  = sum(AllTrials, 1, 'omitnan')./nTrials;
     end
 
     disp(['Finished ', Participants{Indx_P}])
@@ -123,9 +114,10 @@ end
 
 % remove all data from participants missing any of the trial types
 for Indx_P = 1:numel(Participants)
-    if any(isnan(ProbMicrosleep(Indx_P, :, :)), 'all')
-        ProbMicrosleep(Indx_P, :, :) = nan;
+    if any(isnan(ProbBurst(Indx_P, :, :)), 'all')
+        ProbBurst(Indx_P, :, :) = nan;
     end
 end
 
-save(fullfile(Pool, 'ProbMicrosleep.mat'), 'ProbMicrosleep', 't')
+t = linspace(StartTime, EndTime, fs*(EndTime-StartTime));
+save(fullfile(Pool, 'ProbBurst.mat'), 'ProbBurst', 't')

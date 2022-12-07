@@ -36,17 +36,15 @@ Tag =  ['s', num2str(StartTime), '_e', num2str(EndTime), '_w', num2str(WelchWind
 TitleTag = strjoin({'LapseCauses', 'LAT', 'Power', Tag}, '_');
 TitleTag = replace(TitleTag, '.', '-');
 
-Pool = fullfile(Paths.Pool, 'Power'); % place to save matrices so they can be plotted in next script
-if ~exist(Pool, 'dir')
-    mkdir(Pool)
-end
+Pool = fullfile(Paths.Pool, 'Tasks'); % place to save matrices so they can be plotted in next script
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Load data
 
 Source =  fullfile(P.Paths.Data, 'EEG', 'Locked', Task, Tag);
 
-if RefreshTrials || ~exist(fullfile(Pool, 'AllTrials.mat'), 'file')
+if RefreshTrials || ~exist(fullfile(Paths.Pool, 'Tasks', 'AllTrials.mat'), 'file')
 
     disp('refreshing trials')
 
@@ -79,6 +77,9 @@ end
 
 SessionBlocks = P.SessionBlocks;
 SB_Labels = {'BL', 'SD'};
+
+
+Pool = fullfile(Paths.Pool, 'Power'); % place to save matrices so they can be plotted in next script
 
 %%% lapse vs correct
 
