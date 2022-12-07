@@ -44,18 +44,25 @@ BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts_Old', Task); % Temp!
 
 % load trial information
 load(fullfile(Paths.Pool, 'Tasks', 'AllTrials.mat'), 'Trials')
+Q = quantile(Trials.Radius, 0.5);
+
 
 TrialTypeLabels = [1 2 3];
 Filenames = getContent(BurstPath);
 t = linspace(StartTime, EndTime, fs*(EndTime-StartTime));
 
 ProbBurst = nan(numel(Participants), numel(TrialTypeLabels), 2, numel(t)); % the 2 is theta and alpha
+ProbBurstHemifield = nan(numel(Participants), numel(TrialTypeLabels), numel(t)); % just for alpha
+GenProbBurst = nan(numel(Participants), 2);
+HemiProbBurst = nan(numel(Participants), 1);
+
 for Indx_P = 1:numel(Participants)
 
     Data = struct();
     for T = TrialTypeLabels % assign empty field for concatnation later
         Data.(['T_',num2str(T)]) = [];
     end
+    HemiData = Data;
 
     for Indx_S = 1:numel(Sessions)
 
@@ -80,9 +87,26 @@ for Indx_P = 1:numel(Participants)
         t = EEG.times;
 
         Freqs = 1./[Bursts.Mean_period];
+
+        if numel(Freqs) < numel(Bursts) % weird bug
+            % find missing datapoints
+            BT = struct2table(Bursts);
+            A = find(cellfun(@isempty, BT.Mean_period));
+            Bursts(A) = [];
+            Freqs = 1./[Bursts.Mean_period];
+        end
+
         ThetaTime = bursts2time(Bursts(Freqs>4 & Freqs<=8), t); % theta
         AlphaTime = bursts2time(Bursts(Freqs>8 & Freqs<=12), t); % alpha
         BurstTime = [ThetaTime; AlphaTime];
+
+        % just for alpha hemifield
+        MainChannels = [Bursts.Channel];
+        isRight = ismember(MainChannels, P.Channels.Right);
+        AlphaRight = bursts2time(Bursts(Freqs>8 & Freqs<=12 & isRight), t);
+
+        isLeft = ismember(MainChannels, P.Channels.Left);
+        AlphaLeft = bursts2time(Bursts(Freqs>8 & Freqs<=12 & isLeft), t); % flip left, so negative values indicate left burst
 
         % get each trial, save to field of trial type
         for Indx_T = 1:nTrials
@@ -91,14 +115,33 @@ for Indx_P = 1:numel(Participants)
             End = round(fs*(StimT+EndTime))-1;
             Type = Trials.Type(CurrentTrials(Indx_T));
 
+            %             % skip if far stimulus
+            %             Radius = Trials.Radius(CurrentTrials(Indx_T));
+            %             if Radius > Q
+            %                 continue
+            %             end
+
             Trial = permute(BurstTime(:, Start:End), [3 1 2]); % trial x band x time
             Data.(['T_', num2str(Type)]) = cat(1, Data.(['T_', num2str(Type)]), Trial);
+
+            isRightStim = Trials.isRight(CurrentTrials(Indx_T));
+            if isRightStim
+                Trial = AlphaRight(Start:End)-AlphaLeft(Start:End); % sum, so that simultaneous left-right bursts are cancelled out
+            else
+                Trial = AlphaLeft(Start:End)-AlphaRight(Start:End); % sum, so that simultaneous left-right bursts are cancelled out
+            end
+
+            HemiData.(['T_', num2str(Type)]) = cat(1, HemiData.(['T_', num2str(Type)]), Trial);
         end
     end
 
     % get probabilities for each trial type
+    PooledTrials = [];
     for Indx_T = 1:numel(TrialTypeLabels) % assign empty field for concatnation later
+
+        % main bursts
         AllTrials = Data.(['T_',num2str(TrialTypeLabels(Indx_T))]);
+        PooledTrials = cat(1, PooledTrials, AllTrials);
 
         nTrials = size(AllTrials, 1);
 
@@ -109,6 +152,30 @@ for Indx_P = 1:numel(Participants)
         ProbBurst(Indx_P, Indx_T, :, :)  = sum(AllTrials, 1, 'omitnan')./nTrials;
     end
 
+
+    PooledHemiTrials = [];
+    for Indx_T = 1:numel(TrialTypeLabels) % assign empty field for concatnation later
+
+        % hemifield bursts
+        AllTrials = HemiData.(['T_',num2str(TrialTypeLabels(Indx_T))]);
+        PooledHemiTrials = cat(1, PooledHemiTrials, AllTrials);
+
+        nTrials = size(AllTrials, 1);
+
+        if isempty(AllTrials) || nTrials < minTrials
+            continue
+        end
+
+        ProbBurstHemifield(Indx_P, Indx_T, :)  = sum(AllTrials, 1, 'omitnan')./nTrials;
+    end
+
+    % get general probability of burst
+    nTrials = size(PooledTrials, 1);
+    GenProbBurst(Indx_P, :) = mean(sum(PooledTrials, 1, 'omitnan')/nTrials, 3, 'omitnan');
+
+    nTrials = size(PooledHemiTrials, 1);
+    HemiProbBurst(Indx_P) = mean(sum(PooledHemiTrials, 1, 'omitnan')/nTrials, 'omitnan');
+
     disp(['Finished ', Participants{Indx_P}])
 end
 
@@ -117,7 +184,11 @@ for Indx_P = 1:numel(Participants)
     if any(isnan(ProbBurst(Indx_P, :, :)), 'all')
         ProbBurst(Indx_P, :, :) = nan;
     end
+
+    if any(isnan(HemiProbBurst(Indx_P, :)), 'all')
+        HemiProbBurst(Indx_P, :, :) = nan;
+    end
 end
 
 t = linspace(StartTime, EndTime, fs*(EndTime-StartTime));
-save(fullfile(Pool, 'ProbBurst.mat'), 'ProbBurst', 't')
+save(fullfile(Pool, 'ProbBurst.mat'), 'ProbBurst', 't', 'GenProbBurst', 'HemiProbBurst', 'ProbBurstHemifield')

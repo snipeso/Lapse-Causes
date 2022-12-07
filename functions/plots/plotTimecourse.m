@@ -1,19 +1,17 @@
-function plotTimecourse(t, Data, BL_Indx, YLims, LineLabels, Colors, StatsP, PlotProps)
+function plotTimecourse(t, Data, B, YLims, LineLabels, Colors, StatsP, PlotProps)
 % plots the timecourse locked to stimulus onset.
 % Data is a P x T x t matrix
 
 %%% Get stats
 if ~isempty(StatsP)
-    Data1 = squeeze(Data(:, BL_Indx, :)); % baseline
+    Data1 = repmat(B, 1, size(Data, 3)); % baseline
     Data2 = Data;
-    Data2(:, BL_Indx, :) = []; % sessions to compare to the baseline
     Stats = pairedttest(Data1, Data2, StatsP);
     Stats.timepoints = t;
     Stats.lines = LineLabels;
-    Stats.lines(BL_Indx) = [];
     Dims = size(Data1);
 
-    Sig = [zeros(1, Dims(2)); Stats.p_fdr < StatsP.Alpha];
+    Sig = Stats.p_fdr < StatsP.Alpha;
 else
     Dims = size(Data);
     Sig = zeros(Dims(2), Dims(3));
@@ -28,7 +26,10 @@ end
 
 hold on
 rectangle('position', [0 Range(1) 0.5, diff(Range)], 'EdgeColor','none', 'FaceColor', [PlotProps.Color.Generic, .15])
+
+plot([min(t), max(t)], [mean(B, 'omitnan'), mean(B, 'omitnan')], ':', 'Color', PlotProps.Color.Generic, 'LineWidth', PlotProps.Line.Width/2, 'HandleVisibility', 'off')
 plotGloWorms(squeeze(mean(Data, 1, 'omitnan')), t, logical(Sig), Colors, PlotProps)
+plot([min(t), max(t)], mean(B), ':', 'LineWidth', 1, 'Color', PlotProps.Color.Generic)
 
 if ~isempty(LineLabels)
     legend([LineLabels, 'p<.05'])

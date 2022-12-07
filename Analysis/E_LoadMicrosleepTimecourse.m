@@ -44,12 +44,14 @@ MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
 
 % load trial information
 load(fullfile(Paths.Pool, 'Tasks', 'AllTrials.mat'), 'Trials')
+Q = quantile(Trials.Radius, 0.5);
 
 TrialTypeLabels = [1 2 3];
 Filenames = getContent(MicrosleepPath);
 t = linspace(StartTime, EndTime, fs*(EndTime-StartTime));
 
 ProbMicrosleep = nan(numel(Participants), numel(TrialTypeLabels), numel(t));
+GenProbMicrosleep = nan(numel(Participants), 1);
 for Indx_P = 1:numel(Participants)
 
     Data = struct();
@@ -94,9 +96,15 @@ for Indx_P = 1:numel(Participants)
             End = round(fs*(StimT+EndTime))-1;
             Type = Trials.Type(CurrentTrials(Indx_T));
 
-            if nnz(isnan(EyeOpen(Start:End)))/numel(Start:End) > MinNaN
+            % skip if far stimulus
+            Radius = Trials.Radius(CurrentTrials(Indx_T));
+            if Radius > Q
                 continue
             end
+
+%             if nnz(isnan(EyeOpen(Start:End)))/numel(Start:End) > MinNaN
+%                 continue
+%             end
 
             Trial = EyeOpen(Start:End)==0; % just keep track of eyes closed
             Data.(['T_', num2str(Type)]) = cat(1, Data.(['T_', num2str(Type)]), Trial);
@@ -104,8 +112,10 @@ for Indx_P = 1:numel(Participants)
     end
 
     % get probabilities for each trial type
+    PooledTrials = [];
     for Indx_T = 1:numel(TrialTypeLabels) % assign empty field for concatnation later
         AllTrials = Data.(['T_',num2str(TrialTypeLabels(Indx_T))]);
+        PooledTrials = cat(1, PooledTrials, AllTrials);
 
         nTrials = size(AllTrials, 1);
 
@@ -118,6 +128,10 @@ for Indx_P = 1:numel(Participants)
         ProbMicrosleep(Indx_P, Indx_T, :)  = sum(AllTrials, 1, 'omitnan')/nTrials;
     end
 
+    % get general probability of eyes closed
+    nTrials = size(PooledTrials, 1);
+    GenProbMicrosleep(Indx_P) = mean(sum(PooledTrials, 1, 'omitnan')/nTrials, 'omitnan');
+
     disp(['Finished ', Participants{Indx_P}])
 end
 
@@ -128,4 +142,4 @@ for Indx_P = 1:numel(Participants)
     end
 end
 
-save(fullfile(Pool, 'ProbMicrosleep.mat'), 'ProbMicrosleep', 't')
+save(fullfile(Pool, 'ProbMicrosleep.mat'), 'ProbMicrosleep', 't', 'GenProbMicrosleep')

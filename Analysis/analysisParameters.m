@@ -172,6 +172,9 @@ Channels.preROI.Front = Frontspot;
 Channels.preROI.Center = Centerspot;
 Channels.preROI.Back = Backspot;
 
+Channels.Right = [1:5, 8:10, 14, 76:80, 82:87, 88:125];
+Channels.Left = [12, 13, 18:54, 56:61, 63:71, 73, 74];
+
 Format.Colors.preROI = getColors(numel(fieldnames(Channels.preROI)));
 
 
