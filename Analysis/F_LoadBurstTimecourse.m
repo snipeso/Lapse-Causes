@@ -52,7 +52,8 @@ Filenames = getContent(BurstPath);
 t = linspace(StartTime, EndTime, fs*(EndTime-StartTime));
 
 ProbBurst = nan(numel(Participants), numel(TrialTypeLabels), 2, numel(t)); % the 2 is theta and alpha
-ProbBurstHemifield = nan(numel(Participants), numel(TrialTypeLabels), numel(t)); % just for alpha
+% ProbBurstHemifield = nan(numel(Participants), numel(TrialTypeLabels), numel(t)); % just for alpha
+ProbBurstHemifield = nan(numel(Participants), 2, numel(t)); % just for alpha
 GenProbBurst = nan(numel(Participants), 2);
 HemiProbBurst = nan(numel(Participants), 1);
 
@@ -62,7 +63,9 @@ for Indx_P = 1:numel(Participants)
     for T = TrialTypeLabels % assign empty field for concatnation later
         Data.(['T_',num2str(T)]) = [];
     end
-    HemiData = Data;
+    %     HemiData = Data;
+    HemiData.Left = []; % visual field of stim
+    HemiData.Right = [];
 
     for Indx_S = 1:numel(Sessions)
 
@@ -125,13 +128,16 @@ for Indx_P = 1:numel(Participants)
             Data.(['T_', num2str(Type)]) = cat(1, Data.(['T_', num2str(Type)]), Trial);
 
             isRightStim = Trials.isRight(CurrentTrials(Indx_T));
+%             Trial = AlphaRight(Start:End)-AlphaLeft(Start:End);
             if isRightStim
-                Trial = AlphaRight(Start:End)-AlphaLeft(Start:End); % sum, so that simultaneous left-right bursts are cancelled out
+                                Trial = AlphaRight(Start:End)-AlphaLeft(Start:End); % sum, so that simultaneous left-right bursts are cancelled out
+                HemiData.Right = cat(1, HemiData.Right, Trial);
             else
-                Trial = AlphaLeft(Start:End)-AlphaRight(Start:End); % sum, so that simultaneous left-right bursts are cancelled out
+                                Trial = AlphaLeft(Start:End)-AlphaRight(Start:End); % sum, so that simultaneous left-right bursts are cancelled out
+                HemiData.Left = cat(1, HemiData.Left, Trial);
             end
 
-            HemiData.(['T_', num2str(Type)]) = cat(1, HemiData.(['T_', num2str(Type)]), Trial);
+            %             HemiData.(['T_', num2str(Type)]) = cat(1, HemiData.(['T_', num2str(Type)]), Trial);
         end
     end
 
@@ -154,10 +160,12 @@ for Indx_P = 1:numel(Participants)
 
 
     PooledHemiTrials = [];
-    for Indx_T = 1:numel(TrialTypeLabels) % assign empty field for concatnation later
-
+    Sides  = {'Left', 'Right'};
+    %     for Indx_T = 1:numel(TrialTypeLabels) % assign empty field for concatnation later
+    for Indx_T = 1:numel(Sides)
         % hemifield bursts
-        AllTrials = HemiData.(['T_',num2str(TrialTypeLabels(Indx_T))]);
+        %         AllTrials = HemiData.(['T_',num2str(TrialTypeLabels(Indx_T))]);
+        AllTrials = HemiData.(Sides{Indx_T});
         PooledHemiTrials = cat(1, PooledHemiTrials, AllTrials);
 
         nTrials = size(AllTrials, 1);

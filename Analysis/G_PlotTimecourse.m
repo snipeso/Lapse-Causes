@@ -1,6 +1,6 @@
 
 StatsP = P.StatsP;
-
+PlotProps = P.Manuscript;
 TitleTag = 'Timecourses';
 
 
@@ -85,12 +85,20 @@ saveFig([TitleTag, '_Probof_raw'], Paths.Results, PlotProps)
 %% alpha hemifield effect
 
 load(fullfile(Paths.Pool, 'EEG', 'ProbBurst.mat'), 'HemiProbBurst', 't',  'ProbBurstHemifield')
+
+
+%%
+StatsP = P.StatsP;
+PlotProps = P.Manuscript;
+TitleTag = 'Timecourses';
+
+
 sHemiProbBurst =  smoothFreqs(ProbBurstHemifield, t, 'last', .5);
 
 %%
 Range = [];
 figure
-plotTimecourse(t, flip(sHemiProbBurst, 2),  HemiProbBurst, Range, flip(TallyLabels), getColors(3), StatsP, PlotProps)
+plotTimecourse(t, flip(sHemiProbBurst, 2),  HemiProbBurst, Range, {'Left', 'Right'}, getColors(3), StatsP, PlotProps)
 ylim(Range)
 ylabel('Probability of alpha')
 
