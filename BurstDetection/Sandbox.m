@@ -9,9 +9,14 @@ BandLabels = fieldnames(Bands);
 
 % place to try different parameters for burst detection
 
-Task = 'Game'; % Game or Standing
-Session = 'Session2';
-Participant = 'P10';
+% Task = 'Game'; % Game or Standing
+% Session = 'Session2';
+% Participant = 'P10';
+
+Task = 'PVT'; % Game or Standing
+Session = 'Session2Comp';
+Participant = 'P16';
+
 Filename_Source = strjoin({Participant, Task, Session, 'Clean.mat'}, '_');
 
 
@@ -99,21 +104,32 @@ end
 % BT.truePeak = 1;
 
 % long
+% BT = struct();
+% BT.monotonicity = .5;
+% BT.periodConsistency = .5;
+% BT.efficiency = .6;
+% BT.truePeak = 1;
+% BT.flankConsistency = .5;
+% BT.ampConsistency = .5;
+% BT.efficiencyAdj = .5;
+% Min_Peaks = 6;
+
+% clean
 BT = struct();
-BT.monotonicity = .5;
-BT.periodConsistency = .5;
+BT.monotonicity = .6;
+BT.periodConsistency = .6;
+BT.periodMeanConsistency = .6;
 BT.efficiency = .6;
 BT.truePeak = 1;
 BT.flankConsistency = .5;
-BT.ampConsistency = .5;
-BT.efficiencyAdj = .5;
-Min_Peaks = 6;
+BT.ampConsistency = .6;
+Min_Peaks = 4;
 
 
 %%% single channel
 
 Ch = 72;
-Indx_B = 2;
+Indx_B = 4;
 
 
 Ch = labels2indexes(Ch, EEG.chanlocs);
@@ -153,7 +169,7 @@ AllBursts = getAllBursts(EEG, FiltEEG, BT, [], Bands, Keep_Points);
 
 
 
-%%
+
 previewBursts(EEG, 20, AllBursts, 'Band')
 
 
@@ -214,15 +230,15 @@ Info.Min_Peaks = 4;
 
 Info.Max_Minutes = 6; % first number of clean minutes to look for bursts in
 
-BurstThresholds = struct();
-BurstThresholds.monotonicity = .6;
-BurstThresholds.periodConsistency = .6;
-BurstThresholds.periodMeanConsistency = .6;
-BurstThresholds.efficiency = .6;
-BurstThresholds.truePeak = 1;
-BurstThresholds.flankConsistency = .5;
-BurstThresholds.ampConsistency = .6;
-Info.BurstThresholds = BurstThresholds;
+BT = struct();
+BT.monotonicity = .6;
+BT.periodConsistency = .6;
+BT.periodMeanConsistency = .6;
+BT.efficiency = .6;
+BT.truePeak = 1;
+BT.flankConsistency = .5;
+BT.ampConsistency = .6;
+Info.BurstThresholds = BT;
 
 
 %%% Parameters to aggregate across channels
