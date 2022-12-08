@@ -98,7 +98,9 @@ sHemiProbBurst =  smoothFreqs(ProbBurstHemifield, t, 'last', .5);
 %%
 Range = [];
 figure
-plotTimecourse(t, flip(sHemiProbBurst, 2),  HemiProbBurst, Range, {'Left', 'Right'}, getColors(3), StatsP, PlotProps)
+% plotTimecourse(t, flip(sHemiProbBurst, 2),  HemiProbBurst, Range, {'Left', 'Right'}, getColors(3), StatsP, PlotProps)
+plotTimecourse(t, flip(sHemiProbBurst, 2),  HemiProbBurst, Range, flip(TallyLabels), getColors(3), StatsP, PlotProps)
+
 ylim(Range)
 ylabel('Probability of alpha')
 
