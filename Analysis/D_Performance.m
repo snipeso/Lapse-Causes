@@ -21,7 +21,7 @@ PlotProps = P.Manuscript;
 
 TitleTag = strjoin({'LapseCauses', 'LAT', 'Performance'}, '_');
 
-Pool = fullfile(Paths.Pool, 'Power');
+Pool = fullfile(Paths.Pool, 'Tasks');
 load(fullfile(Pool, 'AllTrials.mat'), 'Trials')
 
 
@@ -38,11 +38,11 @@ end
 
 %%
 
-Grid = [2 2];
+Grid = [1 2];
 
 figure('Units','centimeters', 'Position',[0 0  PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
 
-subfigure([], Grid, [2 1], [2 1], true, PlotProps.Indexes.Letters{1}, PlotProps);
+subfigure([], Grid, [1 1], [1 1], true, PlotProps.Indexes.Letters{1}, PlotProps);
 hold on
 plot([0 3], [.5 .5], 'Color', PlotProps.Color.Generic, 'LineStyle', ':', 'LineWidth', .5)
 plotFlames(FlameStruct, PlotProps.Color.Participants, .1, PlotProps)
@@ -53,45 +53,40 @@ legend off
 
 %%%
 SessionGroups = {[1:3], [4:6]};
-% Colors = [getColors(1, '', 'red'); getColors(1, '', 'green'); getColors(1, '', 'blue')];
-Colors = getColors([1 3], '', 'yellow');
+% Colors = [getColors([1 3], '', 'blue'); getColors([1 3], '', 'yellow')];
+Colors = [getColors([1 2], '', 'red'); getColors([1 2], '', 'yellow'); getColors([1 2], '', 'blue')];
+% Colors = getColors([2 3], '', 'yellow');
+% Colors = reshape(permute(Colors, [1 3 2]), 6, 3);
 
-subfigure([], Grid, [1,2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
+subfigure([], Grid, [1, 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
 
 % eyes open
 Q = quantile(Trials.Radius, 0.5);
 [EO_Matrix, Things] = tabulateTable(Trials(Trials.EC==0 & Trials.Radius<Q, :), 'Type', 'tabulate', Participants, Sessions, SessionGroups);
 [EC_Matrix, Things] = tabulateTable(Trials(Trials.EC==1 & Trials.Radius<Q, :), 'Type', 'tabulate', Participants, Sessions, SessionGroups);
 Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
-Data = squeeze(mean(100*EO_Matrix./Tots, 1, 'omitnan')); % average, normalizing totals
+
+Matrix = cat(3, EO_Matrix, EC_Matrix);
+
+Order = [1 4 2 5 3 6];
+% Colors = Colors(Order, :);
+Matrix = Matrix(:, :, Order);
+
+AllTallyLabels = [append(TallyLabels, ' EO'), append(TallyLabels, ' EC')];
+AllTallyLabels = AllTallyLabels(Order);
+
+Data = squeeze(mean(100*Matrix./Tots, 1, 'omitnan')); % average, normalizing totals
 B = bar(Data, 'stacked');
 setAxisProperties(PlotProps)
-title('Eyes Open')
 ylabel('% trials')
 xticklabels(SB_Labels)
-legend(TallyLabels)
+legend(AllTallyLabels)
 for Indx_B =1:numel(B)
     B(Indx_B).EdgeColor = 'none';
     B(Indx_B).FaceColor = Colors(Indx_B, :);
 end
 box off
-
-% eyes closed
-Colors = getColors([1 3], '', 'blue');
-
-subfigure([], Grid, [2,2], [], true, PlotProps.Indexes.Letters{3}, PlotProps);
-
-Data = squeeze(mean(100*EC_Matrix./Tots, 1, 'omitnan')); % average, normalizing totals
-B = bar(Data, 'stacked');
-setAxisProperties(PlotProps)
-title('Eyes Closed')
-ylabel('% trials')
-xticklabels(SB_Labels)
-legend(TallyLabels)
-for Indx_B =1:numel(B)
-    B(Indx_B).EdgeColor = 'none';
-    B(Indx_B).FaceColor = Colors(Indx_B, :);
-end
-box off
+ylim([0 100])
 
 
+%%% C: plot change in lapses with distance

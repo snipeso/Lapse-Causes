@@ -179,15 +179,13 @@ Freqs = 1./[Bursts.Mean_period];
 
 WelchWindow = 8; % duration of window to do FFT
 Overlap = .75; % overlap of hanning windows for FFT
-  nfft = 2^nextpow2(WelchWindow*fs);
-            noverlap = round(nfft*Overlap);
-            window = hanning(nfft);
-% BurstBand = Freqs>=8 & Freqs <=12;
-BurstBand = Freqs>=4 & Freqs <=8;
+
+BurstBand = Freqs>=8 & Freqs <=12;
 % BurstBand = Freqs
 EEG1 = pop_select(EEG, 'nopoint', [[AllBursts(BurstBand).Start]', [AllBursts(BurstBand).End]']);
- [Power1, Freqs] = pwelch(EEG1.data', window, noverlap, nfft, fs);
- [Power, ~] = pwelch(EEG.data', window, noverlap, nfft, fs);
+
+ [Power, Freqs] = powerEEG(EEG, WelchWindow, Overlap);
+ [Power1, ~] = powerEEG(EEG1, WelchWindow, Overlap);
 
  %
 

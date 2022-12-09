@@ -116,4 +116,7 @@ Bands.AlphaHigh = [10 14];
 
 Info.Bands = Bands;
 
+Channels.Hemifield.Right = [1:5, 8:10, 14, 76:80, 82:87, 88:125];
+Channels.Hemifield.Left = [12, 13, 18:54, 56:61, 63:71, 73, 74];
+Info.Channels = Channels;
 
