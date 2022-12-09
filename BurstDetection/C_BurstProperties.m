@@ -12,7 +12,7 @@ Paths = Info.Paths;
 Bands = Info.Bands;
 Tasks = Info.Tasks;
 MinFreqRange = 1; % min difference in frequency from reference burst
-
+ChannelGroups = Info.Channels.Hemifield;
 Refresh = false;
 
 for Indx_T = 1:numel(Tasks)
@@ -68,6 +68,7 @@ for Indx_T = 1:numel(Tasks)
 
         % classify the burst
         Bursts = classifyBursts(Bursts);
+        Bursts = localizeBursts(Bursts, ChannelGroups);
 
         % save
         EEG.data = [];
