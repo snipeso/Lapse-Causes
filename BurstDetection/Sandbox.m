@@ -70,35 +70,11 @@ end
 
 
 %%
-% %% clean
-% BT = struct();
-% BT.isProminent = 1;
-% BT.periodConsistency = .7;
-% BT.periodMeanConsistency = .7;
-% BT.truePeak = 1;
-% BT.efficiencyAdj = .6;
-% BT.flankConsistency = .5;
-% BT.ampConsistency = .25;
-% Min_Peaks = 4;
-
-% 
-% %% dirty
-% BT = struct();
-% BT.monotonicity = .6;
-% BT.periodConsistency = .6;
-% BT.periodMeanConsistency = .5;
-% BT.efficiency = .6;
-% BT.truePeak = 1;
-% BT.flankConsistency = .6;
-% BT.ampConsistency = .5;
-% % BT.efficiencyAdj = .6;
-% Min_Peaks = 4;
-
 
 % short
 % BT = struct();
 % BT.periodConsistency = .3;
-% BT.amplitude = 30;
+% BT.amplitude = 25;
 % Min_Peaks = 3;
 % BT.isProminent = 1;
 % BT.truePeak = 1;
@@ -112,6 +88,8 @@ end
 % BT.flankConsistency = .5;
 % BT.ampConsistency = .5;
 % BT.efficiencyAdj = .5;
+% BT.Min_Peaks = 6;
+% BT.periodMeanConsistency = .5;
 % Min_Peaks = 6;
 
 % clean
@@ -122,13 +100,14 @@ BT.periodMeanConsistency = .6;
 BT.efficiency = .6;
 BT.truePeak = 1;
 BT.flankConsistency = .5;
-BT.ampConsistency = .6;
-Min_Peaks = 4;
+BT.ampConsistency = .5;
+% BT.amplitude = 10;
+Min_Peaks = 3;
 
 
 %%% single channel
 
-Ch = 72;
+Ch = 70;
 Indx_B = 4;
 
 
@@ -149,7 +128,7 @@ plotBursts(Signal, fs, Peaks, BurstPeakIDs, BT)
 % short
 BT = struct();
 BT(1).periodConsistency = .3;
-BT(1).amplitude = 30;
+BT(1).amplitude = 25;
 BT(1).Min_Peaks = 3;
 BT(1).isProminent = 1;
 BT(1).truePeak = 1;
@@ -163,14 +142,23 @@ BT(2).flankConsistency = .5;
 BT(2).ampConsistency = .5;
 BT(2).efficiencyAdj = .5;
 BT(2).Min_Peaks = 6;
+BT(2).periodMeanConsistency = .5;
+
+% clean
+BT(3).monotonicity = .6;
+BT(3).periodConsistency = .6;
+BT(3).periodMeanConsistency = .6;
+BT(3).efficiency = .6;
+BT(3).truePeak = 1;
+BT(3).flankConsistency = .5;
+BT(3).ampConsistency = .6;
+BT(3).Min_Peaks = 4;
 
 % get bursts in all data
 AllBursts = getAllBursts(EEG, FiltEEG, BT, [], Bands, Keep_Points);
 
 
-
-
-previewBursts(EEG, 20, AllBursts, 'Band')
+previewBursts(EEG, 20, AllBursts, 'BT')
 
 
 %%
@@ -181,21 +169,26 @@ Bursts = burstPeakProperties(AllBursts, EEG);
 %% Final distibution of bursts
 
 figure
-histogram(1./[Bursts.Mean_period])
+Freqs = 1./[Bursts.Mean_period];
+histogram(Freqs)
 
 
 %% power in and out of bursts
+Freqs = 1./[Bursts.Mean_period];
+% histogram(Freqs)
+
 WelchWindow = 8; % duration of window to do FFT
 Overlap = .75; % overlap of hanning windows for FFT
   nfft = 2^nextpow2(WelchWindow*fs);
             noverlap = round(nfft*Overlap);
             window = hanning(nfft);
-
-EEG1 = pop_select(EEG, 'nopoint', [[AllBursts.Start]', [AllBursts.End]']);
+BurstBand = Freqs>=8 & Freqs <=12;
+% BurstBand = Freqs
+EEG1 = pop_select(EEG, 'nopoint', [[AllBursts(BurstBand).Start]', [AllBursts(BurstBand).End]']);
  [Power1, Freqs] = pwelch(EEG1.data', window, noverlap, nfft, fs);
  [Power, ~] = pwelch(EEG.data', window, noverlap, nfft, fs);
 
- %%
+ %
 
 figure('units', 'normalized', 'Position', [0 0 .5 .5])
 subplot(1, 3, 1)
@@ -221,6 +214,7 @@ Info = struct();
 
 Info.Tasks = {'Fixation', 'Standing', 'Oddball'};
 
+%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Burst Parameters
 
