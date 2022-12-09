@@ -13,9 +13,9 @@ BandLabels = fieldnames(Bands);
 % Session = 'Session2';
 % Participant = 'P10';
 
-Task = 'PVT'; % Game or Standing
+Task = 'LAT'; % Game or Standing
 Session = 'Session2Comp';
-Participant = 'P16';
+Participant = 'P15';
 
 Filename_Source = strjoin({Participant, Task, Session, 'Clean.mat'}, '_');
 
@@ -72,12 +72,12 @@ end
 %%
 
 % short
-% BT = struct();
-% BT.periodConsistency = .3;
-% BT.amplitude = 25;
-% Min_Peaks = 3;
-% BT.isProminent = 1;
-% BT.truePeak = 1;
+BT = struct();
+BT.periodConsistency = .3;
+BT.amplitude = 25;
+Min_Peaks = 3;
+BT.isProminent = 1;
+BT.truePeak = 1;
 
 % long
 % BT = struct();
@@ -93,22 +93,22 @@ end
 % Min_Peaks = 6;
 
 % clean
-BT = struct();
-BT.monotonicity = .6;
-BT.periodConsistency = .6;
-BT.periodMeanConsistency = .6;
-BT.efficiency = .6;
-BT.truePeak = 1;
-BT.flankConsistency = .5;
-BT.ampConsistency = .5;
-% BT.amplitude = 10;
-Min_Peaks = 3;
+% BT = struct();
+% BT.monotonicity = .6;
+% BT.periodConsistency = .6;
+% BT.periodMeanConsistency = .6;
+% BT.efficiency = .6;
+% BT.truePeak = 1;
+% BT.flankConsistency = .5;
+% BT.ampConsistency = .5;
+% % BT.amplitude = 10;
+% Min_Peaks = 3;
 
 
 %%% single channel
 
-Ch = 70;
-Indx_B = 4;
+Ch = 11;
+Indx_B = 2;
 
 
 Ch = labels2indexes(Ch, EEG.chanlocs);
@@ -182,7 +182,8 @@ Overlap = .75; % overlap of hanning windows for FFT
   nfft = 2^nextpow2(WelchWindow*fs);
             noverlap = round(nfft*Overlap);
             window = hanning(nfft);
-BurstBand = Freqs>=8 & Freqs <=12;
+% BurstBand = Freqs>=8 & Freqs <=12;
+BurstBand = Freqs>=4 & Freqs <=8;
 % BurstBand = Freqs
 EEG1 = pop_select(EEG, 'nopoint', [[AllBursts(BurstBand).Start]', [AllBursts(BurstBand).End]']);
  [Power1, Freqs] = pwelch(EEG1.data', window, noverlap, nfft, fs);

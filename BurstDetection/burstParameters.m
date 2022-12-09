@@ -101,11 +101,11 @@ Info.Paths = Paths;
 %%% EEG info
 
 % bands used to get bursts
-% Bands.ThetaLow = [2 6];
-% Bands.Theta = [4 8];
-% Bands.ThetaAlpha = [6 10];
-% Bands.Alpha = [8 12];
-Bands.AlphaHigh = [10 14]; % TODO!!
+Bands.ThetaLow = [2 6];
+Bands.Theta = [4 8];
+Bands.ThetaAlpha = [6 10];
+Bands.Alpha = [8 12];
+Bands.AlphaHigh = [10 14];
 
 % % bands used to
 % PowerBands.Delta = [1 4];
