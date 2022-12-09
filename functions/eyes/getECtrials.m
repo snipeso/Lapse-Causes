@@ -11,7 +11,7 @@ Trials.EC = nan(size(Trials, 1), 1);
 
 % timewindow relative to stim onset to see if eyes were open or closed
 StartWindow = 0;
-EndWindow = 1;
+EndWindow = 0.5;
 
 ConfidenceThreshold = 0.5;
 MinEO = 0.5;
@@ -39,7 +39,7 @@ for Indx_P = 1:numel(Participants)
         end
         load(fullfile(MicrosleepPath, Filename), 'Eyes')
 
-        if isnan(Eyes.DQ) || Eyes.DQ == 0
+        if isnan(Eyes.DQ) || Eyes.DQ == 0 || Eyes.DQ < 1
             warning(['Bad data in ', char(Filename)])
             continue
         end
