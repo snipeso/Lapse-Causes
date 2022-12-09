@@ -104,8 +104,8 @@ for Indx_P = 1:numel(Participants)
         BurstTime = [ThetaTime; AlphaTime];
 
         % just for alpha hemifield
-        MainChannels = [Bursts.Channel];
-        isRight = ismember(MainChannels, P.Channels.Right);
+        MainChannels = [Bursts.Channel_Label];
+        isRight = ismember(MainChannels, P.Channel_s.Right);
         AlphaRight = bursts2time(Bursts(Freqs>8 & Freqs<=12 & isRight), t);
 
         isLeft = ismember(MainChannels, P.Channels.Left);
