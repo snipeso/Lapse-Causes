@@ -163,4 +163,6 @@ for Indx_P = 1:numel(Participants)
     end
 end
 
-save(fullfile(Pool, 'ProbMicrosleep.mat'), 'ProbMicrosleep', 't', 'GenProbMicrosleep', 'ProbType')
+%%% save
+save(fullfile(Pool, 'ProbMicrosleep.mat'), 'ProbMicrosleep', 't', 'GenProbMicrosleep')
+save(fullfile(Pool, 'ProbType_EC.mat'), 'ProbType')
