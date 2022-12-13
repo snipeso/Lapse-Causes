@@ -36,8 +36,9 @@ AllFiles_Bursts = getContent(Source_Bursts);
 
 Durations = nan(numel(Participants), numel(SB_Labels));
 TimeSpent = nan(numel(Participants), numel(SB_Labels), numel(BandLabels)+1); % duration of bursts individually, and overlapping
-TimeSpent_ROI = nan(numel(Participants), numel(SB_Labels), numel(BandLabels), numel(ROI));
-TimeSpent_Hemifield = nan(numel(Participants), numel(SB_Labels), numel(BandLabels)+2, 2, 2); %for left and right screens, number of left and right bursts
+TimeSpent_ROI = nan(numel(Participants), numel(SB_Labels), numel(ROI), numel(BandLabels));
+Laterality = nan(numel(Participants), numel(SB_Labels), 2, numel(BandLabels)); %for left and right screens, number of left and right bursts
+LateralitySum = Laterality;
 
 Filename = Filenames(contains(Filenames, Participants{Indx_P}) & ...
     contains(Filenames, Sessions{Indx_S}));
@@ -84,10 +85,10 @@ for Indx_P = 1:numel(Participants)
             for Indx_B = 1:numel(BandLabels)
                 Band = Bands.(BandLabels{Indx_B});
                 BurstTime = burst2time(Bursts(Freqs>= Band(1) & Freqs <Band(2)));
-                BurstTime = BurstTime & TaskTime;
+                BurstTime = BurstTime & TaskTime; % only consider bursts during task
                 AllBurstTime = cat(1, AllBurstTime, BurstTime);
 
-                TimeSpent(Indx_P, Indx_SB, Indx_B) = nnz(BurstTime)/fs;
+                TimeSpent(Indx_P, Indx_SB, Indx_B) = Add(TimeSpent(Indx_P, Indx_SB, Indx_B), nnz(BurstTime)/fs);
             end
 
             % get overlap
@@ -95,14 +96,56 @@ for Indx_P = 1:numel(Participants)
             TimeSpent(Indx_P, Indx_SB, end) = Add(TimeSpent(Indx_P, Indx_SB, end), nnz(BothBurstTime)/fs);
 
 
+            %%% get time, split by ROI
+            Groups = {Bursts.preROI};
+            for Indx_B = 1:numel(BandLabels)
+
+                Band = Bands.(BandLabels{Indx_B});
+                for Indx_Ch = 1:numel(ROI)
+                    BurstTime = burst2time(Bursts(Freqs>= Band(1) & Freqs <Band(2) & ...
+                        strcmp(Groups, ROI{Indx_Ch})));
+                    BurstTime = BurstTime & TaskTime; % only consider bursts during task
+
+                    TimeSpent_ROI(Indx_P, Indx_SB, Indx_Ch, Indx_B) = ...
+                        Add(TimeSpent_ROI(Indx_P, Indx_SB, Indx_Ch, Indx_B), nnz(BurstTime)/fs);
+                end
+            end
+
+
+            %%% get laterality
+BurstStarts = [Bursts.All_Start];
+BurstEnds = [Bursts.All_End];
+            Hemifields = {'LeftBlock', 'RightBlock'};
+            for Indx_L = 1:2
+
+                            % get vector of sides
+                Starts = TriggerTimes(strcmp(TriggerTypes, Triggers.(Hemifields{Indx_L})));
+                Ends = Starts + 2*60*fs; % 2 minutes for each block
+
+            for Indx_B = 1:numel(BandLabels)
+
+                Indexes = Freqs>= Band(1) & Freqs <Band(2) & ...
+BurstStarts
+
+                % left
+            Laterality(Indx_P, Indx_SB, 1, Indx_B)
+              LateralitySum(Indx_P, Indx_SB, 1, Indx_B)
+
+              % right
+            end
+            end
         end
 
         %%% remove overlapping bands times and normalize by total duration
+        Duration = Durations(Indx_P, Indx_SB);
         for Indx_B = 1:numel(BandLabels)
-            Duration = Durations(Indx_P, Indx_SB);
             TimeSpent(Indx_P, Indx_SB, Indx_B) = (TimeSpent(Indx_P, Indx_SB, Indx_B)-...
                 TimeSpent(Indx_P, Indx_SB, end))/Duration;
+
+            TimeSpent_ROI(Indx_P, Indx_SB, Indx_Ch, Indx_B) = TimeSpent_ROI(Indx_P, Indx_SB, Indx_Ch, Indx_B)/Duration;
         end
+
+        TimeSpent(Indx_P, Indx_SB, end) =TimeSpent(Indx_P, Indx_SB, Indx_B)/Duration;
 
     end
 end
@@ -112,6 +155,7 @@ end
 save(fullfile(Pool, 'BurstDurations.mat'), 'TimeSpent')
 
 function z = Add(x, y)
+% little function to handle default nan values that get added on
 if isnan(x)
     z = y;
 else
