@@ -4,16 +4,10 @@ function Info = burstParameters()
 
 Info = struct();
 
-Info.Tasks = {'Fixation', 'Standing', 'Oddball'};
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Burst Parameters
 
 %%% parameters to find bursts in single channels
-
-Info.Min_Peaks = 4;
-
-Info.Max_Minutes = 6; % first number of clean minutes to look for bursts in
 
 % short
 BT = struct();

@@ -14,8 +14,8 @@ BandLabels = fieldnames(Bands);
 % Participant = 'P10';
 
 Task = 'LAT'; % Game or Standing
-Session = 'Session2Comp';
-Participant = 'P15';
+Session = 'BaselineBeam';
+Participant = 'P01';
 
 Filename_Source = strjoin({Participant, Task, Session, 'Clean.mat'}, '_');
 

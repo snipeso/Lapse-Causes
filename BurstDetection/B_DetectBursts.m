@@ -17,7 +17,7 @@ Refresh = false;
 
 % Parameters for bursts
 BT = Info.BurstThresholds;
-Min_Peaks = Info.Min_Peaks;
+Min_Peaks = [];
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -62,20 +62,6 @@ for Indx_F = 1:numel(Content)
         Keep_Points = ~isnan(NoiseEEG.data(1, :));
     else
         Keep_Points = ones(1, EEG.pnts);
-    end
-
-    % If present, only use time within triggers
-    Labels = {EEG.event.type};
-    Timepoints = [EEG.event.latency];
-    StartEvents = find(strcmp(Labels, 'S192'), 1, 'first');
-    LastEvent = Timepoints(end);
-
-    if ~isempty(StartEvents)
-        Keep_Points(1:round(Timepoints(StartEvents))) = 0;
-    end
-
-    if ~isempty(LastEvent)
-        Keep_Points(round(LastEvent):end) = 0;
     end
 
 
