@@ -4,3 +4,5 @@
 % - eyeclosure
 % - theta burst
 % - alpha bursts
+
+% P x T x 2 % T is already normalized to the number of total trials

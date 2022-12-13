@@ -29,6 +29,7 @@ WelchWindow = 2;
 ConfidenceThreshold = 0.5;
 minTrials = 10;
 MinNaN = 0.5;
+MinEC = .75; % minimum number of points to sort as trial as either eyes open or closed
 
 Tag =  ['s', num2str(StartTime), '_e', num2str(EndTime), '_w', num2str(WelchWindow)];
 TitleTag = strjoin({'LapseCauses', 'LAT', 'Power', Tag}, '_');
@@ -52,12 +53,12 @@ t = linspace(StartTime, EndTime, fs*(EndTime-StartTime));
 
 ProbMicrosleep = nan(numel(Participants), numel(TrialTypeLabels), numel(t));
 GenProbMicrosleep = nan(numel(Participants), 1);
+
+ProbType = nan(numel(Participants), 3, 2); % proportion of trials resulting in lapse, split by whether there was eyes closed or not
 for Indx_P = 1:numel(Participants)
 
-    Data = struct();
-    for T = TrialTypeLabels % assign empty field for concatnation later
-        Data.(['T_',num2str(T)]) = [];
-    end
+    AllTrials_EC = [];
+    AllTrials_Table = table();
 
     for Indx_S = 1:numel(Sessions)
 
@@ -90,47 +91,67 @@ for Indx_P = 1:numel(Participants)
         [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold); % not using internal microsleep identifier so that I'm flexible
 
         % get each trial, save to field of trial type
+        Trials_EC = nan(nTrials, numel(t));
         for Indx_T = 1:nTrials
             StimT = Trials.StimTime(CurrentTrials(Indx_T));
             Start = round(fs*(StimT+StartTime));
             End = round(fs*(StimT+EndTime))-1;
-            Type = Trials.Type(CurrentTrials(Indx_T));
-
-            % skip if far stimulus
-            Radius = Trials.Radius(CurrentTrials(Indx_T));
-            if Radius > Q
-                continue
-            end
-
-%             if nnz(isnan(EyeOpen(Start:End)))/numel(Start:End) > MinNaN
-%                 continue
-%             end
 
             Trial = EyeOpen(Start:End)==0; % just keep track of eyes closed
-            Data.(['T_', num2str(Type)]) = cat(1, Data.(['T_', num2str(Type)]), Trial);
+            Trials_EC(Indx_T, :) = Trial;
         end
+
+        %%% pool sessions
+        AllTrials_EC = cat(1, AllTrials_EC, Trials_EC);
+
+        % save table info
+        AllTrials_Table = cat(1, AllTrials_Table, CurrentTrials);
+
     end
 
-    % get probabilities for each trial type
-    PooledTrials = [];
-    for Indx_T = 1:numel(TrialTypeLabels) % assign empty field for concatnation later
-        AllTrials = Data.(['T_',num2str(TrialTypeLabels(Indx_T))]);
-        PooledTrials = cat(1, PooledTrials, AllTrials);
 
-        nTrials = size(AllTrials, 1);
+    %%% get probability of microsleep (in time) for each trial type
+    for Indx_T = 1:3
 
+        % choose trials
+        Trial_Indexes = AllTrials_Table.Type==Indx_T & ...
+            AllTrials_Table.Radius < Q;
+        nTrials = nnz(Trial_Indexes);
+        AllTrials = AllTrials_EC(Trial_Indexes);
+
+        % check if there's enough data
         Nans = sum(isnan(AllTrials), 1);
-
         if isempty(AllTrials) || nTrials < minTrials || any(Nans > MinNaN) % makes sure every timepoint had at least 10 trials
             continue
         end
 
+        % average trials
         ProbMicrosleep(Indx_P, Indx_T, :)  = sum(AllTrials, 1, 'omitnan')/nTrials;
     end
 
     % get general probability of eyes closed
-    nTrials = size(PooledTrials, 1);
-    GenProbMicrosleep(Indx_P) = mean(sum(PooledTrials, 1, 'omitnan')/nTrials, 'omitnan');
+    nTrials = size(AllTrials_EC, 1);
+    GenProbMicrosleep(Indx_P) = mean(sum(AllTrials_EC, 1, 'omitnan')/nTrials, 'omitnan');
+
+
+    %%% get probability of a lapse for every eyeclosure
+    StimEdges = dsearchn(t', [0; .5]);
+    StimWindow = StimEdges(1):StimEdges(2);
+
+
+    EyeStatus = [0 1]; % eyes open, then closed
+    for Indx_E = 1:2
+        Prcnt = nnz(AllTrials_EC(:, StimWindow)==EyeStatus(Indx_E))/numel(StimWindow); % percent of stimulus window with eyes either open or closed
+        Tots = nnz(Prcnt(AllTrials_Table.Radius < Q)>MinEC); % total trials to consider with eyes in that configuration
+
+        for Indx_T = 1:3 % loop through trial outcomes
+            Trial_Indexes = AllTrials_Table.Type==Indx_T & ...
+                AllTrials_Table.Radius < Q;
+
+            ProbType(Indx_P, Indx_T, Indx_E) = nnz(Prcnt(Trial_Indexes)>MinEC)/Tots;
+        end
+    end
+
 
     disp(['Finished ', Participants{Indx_P}])
 end
@@ -142,4 +163,4 @@ for Indx_P = 1:numel(Participants)
     end
 end
 
-save(fullfile(Pool, 'ProbMicrosleep.mat'), 'ProbMicrosleep', 't', 'GenProbMicrosleep')
+save(fullfile(Pool, 'ProbMicrosleep.mat'), 'ProbMicrosleep', 't', 'GenProbMicrosleep', 'ProbType')
