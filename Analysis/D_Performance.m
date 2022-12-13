@@ -105,6 +105,6 @@ Q = quantile(Trials.Radius, 0.5);
 ClosestProb = Closest./sum(Closest, 3, 'omitnan');
 FurthestProb = Furthest./sum(Furthest, 3, 'omitnan');
 
-ProbLapse = cat(3, ClosestProb(:, :, 1), FurthestProb(:, :, 3));
-save(fullfile(Pool, 'ProbLapse_Radius.mat'), 'ProbLapse')
+ProbType = cat(3, squeeze(ClosestProb(:, 2, :)), squeeze(FurthestProb(:, 2, :))); % use only SD data
+save(fullfile(Pool, 'ProbType_Radius.mat'), 'ProbType')
 

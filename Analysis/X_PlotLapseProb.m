@@ -13,11 +13,18 @@ close all
 
 P = analysisParameters();
 StatsP = P.StatsP;
+Paths  = P.Paths;
 
 
+%%% Load distance lapses
+Pool = fullfile(Paths.Pool, 'Tasks');
+load(fullfile(Pool, 'ProbType_Radius.mat'), 'ProbType')
+
+Stats = pairedttest(squeeze(ProbType(:, 1, 1)), squeeze(ProbType(:, 1, 2)), StatsP);
 
 
 %%% load microsleep lapses
+Pool = fullfile(Paths.Pool, 'Eyes');
 load(fullfile(Pool, 'ProbType_EC.mat'), 'ProbType')
 
 Stats = pairedttest(squeeze(ProbType(:, 1, 1)), squeeze(ProbType(:, 1, 2)), StatsP);
