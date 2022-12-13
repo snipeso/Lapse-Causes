@@ -42,7 +42,7 @@ Pool = fullfile(Paths.Pool, 'Power'); % place to save matrices so they can be pl
 
 %%% Load EEG information, splitting by session blocks
 AllFiles_EEG = getContent(Source_EEG);
-AllFiles_Bursts = getContent(Source_EEG);
+AllFiles_Bursts = getContent(Source_Bursts);
 AllData = nan(numel(Participants), numel(SB_Labels), numel(BandLabels)+2, 123, 502); % TODO, get right number of channels and freqs
 
 for Indx_SB = 1:numel(SB_Labels)

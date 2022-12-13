@@ -161,11 +161,11 @@ for Indx_P = 1:numel(Participants)
 
     PooledHemiTrials = [];
     Sides  = {'Left', 'Right'};
-        for Indx_T = 1:numel(TrialTypeLabels) % assign empty field for concatnation later
-%     for Indx_T = 1:numel(Sides)
+    for Indx_T = 1:numel(TrialTypeLabels) % assign empty field for concatnation later
+        %     for Indx_T = 1:numel(Sides)
         % hemifield bursts
-                AllTrials = HemiData.(['T_',num2str(TrialTypeLabels(Indx_T))]);
-%         AllTrials = HemiData.(Sides{Indx_T});
+        AllTrials = HemiData.(['T_',num2str(TrialTypeLabels(Indx_T))]);
+        %         AllTrials = HemiData.(Sides{Indx_T});
         PooledHemiTrials = cat(1, PooledHemiTrials, AllTrials);
 
         nTrials = size(AllTrials, 1);
