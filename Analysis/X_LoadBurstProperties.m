@@ -113,26 +113,19 @@ for Indx_P = 1:numel(Participants)
 
 
             %%% get laterality
-BurstStarts = [Bursts.All_Start];
-BurstEnds = [Bursts.All_End];
-            Hemifields = {'LeftBlock', 'RightBlock'};
-            for Indx_L = 1:2
+            Hemifields = [-1 1]; % left, right
+            BurstHemifield = [Bursts.Hemifield];
+            for Indx_H = 1:numel(Hemifields)
+                for Indx_B = 1:numel(BandLabels)
 
-                            % get vector of sides
-                Starts = TriggerTimes(strcmp(TriggerTypes, Triggers.(Hemifields{Indx_L})));
-                Ends = Starts + 2*60*fs; % 2 minutes for each block
+                    Indexes = Freqs>= Band(1) & Freqs <Band(2) & ...
+                        BurstHemifield == Hemifields(Indx_H);
 
-            for Indx_B = 1:numel(BandLabels)
-
-                Indexes = Freqs>= Band(1) & Freqs <Band(2) & ...
-BurstStarts
-
-                % left
-            Laterality(Indx_P, Indx_SB, 1, Indx_B)
-              LateralitySum(Indx_P, Indx_SB, 1, Indx_B)
-
-              % right
-            end
+                    Laterality(Indx_P, Indx_SB, Indx_H, Indx_B) = ...
+                        Add(Laterality(Indx_P, Indx_SB, Indx_H, Indx_B), Bursts(Indexes).Laterality);
+                    LateralitySum(Indx_P, Indx_SB, Indx_H, Indx_B) = ...
+                        Add(LateralitySum(Indx_P, Indx_SB, Indx_H, Indx_B), nnz(Indexes));
+                end
             end
         end
 
@@ -145,14 +138,21 @@ BurstStarts
             TimeSpent_ROI(Indx_P, Indx_SB, Indx_Ch, Indx_B) = TimeSpent_ROI(Indx_P, Indx_SB, Indx_Ch, Indx_B)/Duration;
         end
 
-        TimeSpent(Indx_P, Indx_SB, end) =TimeSpent(Indx_P, Indx_SB, Indx_B)/Duration;
+        TimeSpent(Indx_P, Indx_SB, end) =TimeSpent(Indx_P, Indx_SB, end)/Duration;
 
+        % get average of laterality values
+        for Indx_H = 1:numel(Hemifields)
+            for Indx_B = 1:numel(BandLabels)
+                Laterality(Indx_P, Indx_SB, Indx_H, Indx_B) = ...
+                    Laterality(Indx_P, Indx_SB, Indx_H, Indx_B)/LateralitySum(Indx_P, Indx_SB, Indx_H, Indx_B);
+            end
+        end
     end
 end
 
 
 %%% save to pool
-save(fullfile(Pool, 'BurstDurations.mat'), 'TimeSpent')
+save(fullfile(Pool, 'BurstDurations.mat'), 'TimeSpent', 'TimeSpent_ROI', 'LateralitySum', 'Laterality')
 
 function z = Add(x, y)
 % little function to handle default nan values that get added on
