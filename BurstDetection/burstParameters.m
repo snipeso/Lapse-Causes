@@ -123,3 +123,20 @@ Channels.Hemifield.Right = [1:5, 8:10, 14, 76:80, 82:87, 88:125];
 Channels.Hemifield.Left = [12, 13, 18:54, 56:61, 63:71, 73, 74];
 Info.Channels = Channels;
 
+
+
+
+Triggers.SyncEyes = 'S192';
+Triggers.Start = 'S  1';
+Triggers.End = 'S  2';
+Triggers.Stim = 'S  3';
+Triggers.Resp = 'S  4';
+Triggers.FA = 'S  5';
+Triggers.StartBlank = 'S  6';
+Triggers.EndBlank = 'S  7';
+Triggers.Alarm = 'S  8';
+Triggers.LeftBlock = 'S 10';
+Triggers.RightBlock = 'S 11';
+Triggers.Tones = 'S 12';
+
+P.Triggers = Triggers;
