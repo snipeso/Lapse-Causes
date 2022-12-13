@@ -110,6 +110,15 @@ Bands.AlphaHigh = [10 14];
 
 Info.Bands = Bands;
 
+Channels = struct();
+Frontspot = [22 15 9 23 18 16 10 3 24 19 11 4 124 20 12 5 118 13 6 112];
+Backspot = [66 71 76 84 65 70 75 83 90 69 74 82 89];
+Centerspot = [129 7 106 80 55 31 30 37 54 79 87 105 36 42 53 61 62 78 86 93 104 35 41 47  52 92 98 103 110, 60 85 51 97];
+
+Channels.preROI.Front = Frontspot;
+Channels.preROI.Center = Centerspot;
+Channels.preROI.Back = Backspot;
+
 Channels.Hemifield.Right = [1:5, 8:10, 14, 76:80, 82:87, 88:125];
 Channels.Hemifield.Left = [12, 13, 18:54, 56:61, 63:71, 73, 74];
 Info.Channels = Channels;

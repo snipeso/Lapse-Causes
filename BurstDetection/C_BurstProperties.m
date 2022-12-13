@@ -12,6 +12,7 @@ Paths = Info.Paths;
 Bands = Info.Bands;
 Task = 'LAT';
 MinFreqRange = 1; % min difference in frequency from reference burst
+MinROI = .5; % minimum percentage to assign a group
 ChannelGroups = Info.Channels.Hemifield;
 Refresh = false;
 
@@ -65,7 +66,8 @@ for Indx_F = 1:numel(Content)
 
     % classify the burst
     Bursts = classifyBursts(Bursts);
-    Bursts = localizeBursts(Bursts, ChannelGroups);
+    Bursts = localizeBursts(Bursts, ChannelGroups, 'Laterality'); % left or right
+    Bursts = localizeBursts(Bursts, ChannelGroups, 'preROI', MinROI); % ROI
 
     % save
     EEG.data = [];
