@@ -36,7 +36,7 @@ for Indx_S = 1:2
     end
 end
 
-%%
+%% Plot all behavior information 
 
 Grid = [1 2];
 
@@ -90,3 +90,21 @@ ylim([0 100])
 
 
 %%% C: plot change in lapses with distance
+
+
+
+
+
+%% stats & QC plot for lapses in closest or furthest 50%
+
+Q = quantile(Trials.Radius, 0.5);
+
+[Closest, Things] = tabulateTable(Trials(Trials.Radius<Q, :), 'Type', 'tabulate', Participants, Sessions, SessionGroups);
+[Furthest, ~] = tabulateTable(Trials(Trials.Radius<Q, :), 'Type', 'tabulate', Participants, Sessions, SessionGroups);
+
+ClosestProb = Closest./sum(Closest, 3, 'omitnan');
+FurthestProb = Furthest./sum(Furthest, 3, 'omitnan');
+
+ProbLapse = cat(3, ClosestProb(:, :, 1), FurthestProb(:, :, 3));
+save(fullfile(Pool, 'ProbLapse_Radius.mat'), 'ProbLapse')
+
