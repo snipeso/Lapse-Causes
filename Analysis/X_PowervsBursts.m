@@ -117,9 +117,9 @@ zData = zScoreData(AllData, 'last');
 
 % average frequencies into bands
 bData = bandData(zData, Freqs, Bands, 'last');
-save(fullfile(Pool, strjoin({TitleTag, 'bData.mat'}, '_')), 'bData')
+save(fullfile(Pool, strjoin({TitleTag, 'bData.mat'}, '_')), 'bData', 'AllFields', 'Chanlocs', 'Freqs')
 
 bChData =  meanChData(zData, Chanlocs, Channels.(ROI), 4);
-save(fullfile(Pool, strjoin({TitleTag, 'bChData.mat'}, '_')), 'bChData')
+save(fullfile(Pool, strjoin({TitleTag, 'bChData.mat'}, '_')), 'bChData', 'AllFields', 'Chanlocs', 'Freqs')
 
 
