@@ -111,9 +111,9 @@ Bands.AlphaHigh = [10 14];
 Info.Bands = Bands;
 
 Channels = struct();
-Frontspot = [22 15 9 23 18 16 10 3 24 19 11 4 124 20 12 5 118 13 6 112];
-Backspot = [66 71 76 84 65 70 75 83 90 69 74 82 89];
-Centerspot = [129 7 106 80 55 31 30 37 54 79 87 105 36 42 53 61 62 78 86 93 104 35 41 47  52 92 98 103 110, 60 85 51 97];
+Frontspot = [22 15 9 23 18 16 10 3 24 19 11 4 124 20 12 5 118 13 6 112 21 17 14 25 8 26 2 27 123 28 117];
+Backspot = [66 71 76 84 65 70 75 83 90 69 74 82 89 59 58 64 68 73 81 88 94 95 96 67 72 77 91];
+Centerspot = [129 7 106 80 55 31 30 37 54 79 87 105 36 42 53 61 62 78 86 93 104 41 47  52 92 98 103 60 85];
 
 Channels.preROI.Front = Frontspot;
 Channels.preROI.Center = Centerspot;
@@ -140,3 +140,20 @@ Triggers.RightBlock = 'S 11';
 Triggers.Tones = 'S 12';
 
 Info.Triggers = Triggers;
+
+
+Pix = get(0,'screensize');
+if Pix(3) < 2000
+    Format = getProperties({'LSM', 'SmallScreen'});
+else
+    Format = getProperties({'LSM', 'LargeScreen'});
+end
+
+Manuscript = getProperties({'LSM', 'Manuscript'});
+Powerpoint =  getProperties({'LSM', 'Powerpoint'});
+Poster =  getProperties({'LSM', 'Poster'});
+
+Info.Manuscript = Manuscript; % for papers
+Info.Powerpoint = Powerpoint; % for presentations
+Info.Poster = Poster;
+Info.Format = Format; % plots just to view data

@@ -72,25 +72,25 @@ end
 %%
 
 % short
-BT = struct();
-BT.periodConsistency = .3;
-BT.amplitude = 25;
-Min_Peaks = 3;
-BT.isProminent = 1;
-BT.truePeak = 1;
+% BT = struct();
+% BT.periodConsistency = .3;
+% BT.amplitude = 25;
+% Min_Peaks = 3;
+% BT.isProminent = 1;
+% BT.truePeak = 1;
 
 % long
-% BT = struct();
-% BT.monotonicity = .5;
-% BT.periodConsistency = .5;
-% BT.efficiency = .6;
-% BT.truePeak = 1;
-% BT.flankConsistency = .5;
-% BT.ampConsistency = .5;
-% BT.efficiencyAdj = .5;
-% BT.Min_Peaks = 6;
-% BT.periodMeanConsistency = .5;
-% Min_Peaks = 6;
+BT = struct();
+BT.monotonicity = .5;
+BT.periodConsistency = .5;
+BT.efficiency = .6;
+BT.truePeak = 1;
+BT.flankConsistency = .5;
+BT.ampConsistency = .5;
+BT.efficiencyAdj = .5;
+BT.Min_Peaks = 6;
+BT.periodMeanConsistency = .5;
+Min_Peaks = 6;
 
 % clean
 % BT = struct();
@@ -108,13 +108,13 @@ BT.truePeak = 1;
 %%% single channel
 
 Ch = 11;
-Indx_B = 2;
-
+Indx_B = 4;
+Sign = -1;
 
 Ch = labels2indexes(Ch, EEG.chanlocs);
 
-Signal = EEG.data(Ch, :);
-fSignal = FiltEEG(Indx_B).data(Ch, :);
+Signal = Sign*EEG.data(Ch, :);
+fSignal = Sign*FiltEEG(Indx_B).data(Ch, :);
 
 Peaks = peakDetection(Signal, fSignal);
 Peaks = peakProperties(Signal, Peaks, fs);
@@ -203,8 +203,8 @@ xlim(log([1 40]))
 
 subplot(1, 3, 3)
 hold on
-plot(log(Freqs), log(mean(Power, 2)), 'LineWidth',2)
-plot(log(Freqs), log(mean(Power1, 2)), 'LineWidth',2)
+plot(log(Freqs), log(mean(Power, 1)), 'LineWidth',2)
+plot(log(Freqs), log(mean(Power1, 1)), 'LineWidth',2)
 legend({'original', 'burstless'})
 xlim(log([1 40]))
 

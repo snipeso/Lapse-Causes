@@ -51,6 +51,9 @@ for Indx_F = 1:numel(Content)
     load(fullfile(Source_Bursts, Filename_Bursts), 'AllBursts', 'EEG')
     EEG.data = Data;
 
+    % remove bursts that were chopped
+    AllBursts = removeChopped(AllBursts);
+
     % get frequency of each burst
     AllBursts = meanFreq(AllBursts);
 
@@ -66,9 +69,20 @@ for Indx_F = 1:numel(Content)
 
     % classify the burst
     Bursts = localizeBursts(Bursts, ChannelGroups.Hemifield, 'Laterality'); % left or right
-    Bursts = localizeBursts(Bursts, ChannelGroups.preROI, 'preROI', MinROI); % ROI
+    Bursts = localizeBursts(Bursts, ChannelGroups.preROI, 'preROI', MinROI, EEG.chanlocs, Info.Manuscript); % ROI
     Bursts = hemifieldBursts(Bursts, EEG, Triggers);
 
+    % get vector of points from which the burst data was pooled (task,
+    % clean)
+    ValidPoints = zeros(1, nPnts);
+
+    TriggerTypes = {EEG.event.type};
+    TriggerLatencies = [EEG.event.latency];
+    StartTask = round(TriggerLatencies(strcmp(TriggerTypes, Triggers.Start)));
+    EndTask = round(TriggerLatencies(strcmp(TriggerTypes, Triggers.End)));
+    ValidPoints(StartTask:EndTask) = 1;
+    ValidPoints = ValidPoints & EEG.keep_points; % both when task starts and stops, and when data is clean
+    EEG.valid_t = ValidPoints;
 
     % save
     EEG.data = [];
