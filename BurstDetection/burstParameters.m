@@ -86,7 +86,7 @@ Subfolders = deblank(string(ls(fullfile(Paths.Analysis, 'functions')))); % all c
 Subfolders(contains(Subfolders, '.')) = []; % remove all files
 
 for Indx_F = 1:numel(Subfolders)
-    addpath(fullfile(CD, Subfolders{Indx_F}))
+    addpath(fullfile(Paths.Analysis, 'functions', Subfolders{Indx_F}))
 end
 
 Info.Paths = Paths;
@@ -139,4 +139,4 @@ Triggers.LeftBlock = 'S 10';
 Triggers.RightBlock = 'S 11';
 Triggers.Tones = 'S 12';
 
-P.Triggers = Triggers;
+Info.Triggers = Triggers;

@@ -2,14 +2,15 @@ function Bursts = hemifieldBursts(Bursts, EEG, Triggers)
 % determine whether the burst occured during a left (-1) or right (1) block
 % or neither (0)
 
+fs = EEG.srate;
 
-TriggerTypes = {EEG.events.type};
-TriggerTimes = [EEG.events.latency];
+TriggerTypes = {EEG.event.type};
+TriggerTimes = [EEG.event.latency];
 
 LeftStarts = TriggerTimes(strcmp(TriggerTypes, Triggers.LeftBlock));
 LeftEnds = LeftStarts + 2*60*fs; % 2 minutes for each block
 
-RightStarts = TriggerTimes(strcmp(TriggerTypes, Triggers.LeftBlock));
+RightStarts = TriggerTimes(strcmp(TriggerTypes, Triggers.RightBlock));
 RightEnds = RightStarts + 2*60*fs; % 2 minutes for each block
 
 
