@@ -76,17 +76,8 @@ AllTallyLabels = [append(TallyLabels, ' EO'), append(TallyLabels, ' EC')];
 AllTallyLabels = AllTallyLabels(Order);
 
 Data = squeeze(mean(100*Matrix./Tots, 1, 'omitnan')); % average, normalizing totals
-B = bar(Data, 'stacked');
-setAxisProperties(PlotProps)
-ylabel('% trials')
-xticklabels(SB_Labels)
-legend(AllTallyLabels)
-for Indx_B =1:numel(B)
-    B(Indx_B).EdgeColor = 'none';
-    B(Indx_B).FaceColor = Colors(Indx_B, :);
-end
-box off
-ylim([0 100])
+
+plotStackedBars(Data, SB_Labels, [0 100], AllTallyLabels, Colors, PlotProps)
 
 
 %%% C: plot change in lapses with distance
