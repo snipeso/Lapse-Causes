@@ -53,8 +53,8 @@ t = linspace(StartTime, EndTime, fs*(EndTime-StartTime));
 
 ProbMicrosleep = nan(numel(Participants), numel(TrialTypeLabels), numel(t));
 GenProbMicrosleep = nan(numel(Participants), 1);
-
 ProbType = nan(numel(Participants), 3, 2); % proportion of trials resulting in lapse, split by whether there was eyes closed or not
+
 for Indx_P = 1:numel(Participants)
 
     AllTrials_EC = [];
@@ -117,7 +117,7 @@ for Indx_P = 1:numel(Participants)
         Trial_Indexes = AllTrials_Table.Type==Indx_T & ...
             AllTrials_Table.Radius < Q;
         nTrials = nnz(Trial_Indexes);
-        AllTrials = AllTrials_EC(Trial_Indexes);
+        AllTrials = AllTrials_EC(Trial_Indexes, :, :);
 
         % check if there's enough data
         Nans = sum(isnan(AllTrials), 1);
