@@ -14,7 +14,7 @@ Triggers = Info.Triggers;
 Task = 'LAT';
 MinFreqRange = 1; % min difference in frequency from reference burst
 MinROI = .5; % minimum percentage to assign a group
-ChannelGroups = Info.Channels.Hemifield;
+ChannelGroups = Info.Channels;
 Refresh = false;
 
 Source_Bursts = fullfile(Paths.Data, 'EEG', 'Bursts_AllChannels', Task);
@@ -61,15 +61,13 @@ for Indx_F = 1:numel(Content)
         Bursts = AllBursts;
     end
 
-    % get properties of the main channel
-    Bursts = burstPeakProperties(Bursts, EEG);
-    Bursts = meanBurstPeakProperties(Bursts); % just does the mean of the main peak's properties
+    % get properties of the burst
+    Bursts = getBurstProperties(Bursts);
 
     % classify the burst
-    Bursts = classifyBursts(Bursts);
-    Bursts = localizeBursts(Bursts, ChannelGroups, 'Laterality'); % left or right
-    Bursts = localizeBursts(Bursts, ChannelGroups, 'preROI', MinROI); % ROI
-Bursts = hemifieldBursts(Bursts, EEG, Triggers);
+    Bursts = localizeBursts(Bursts, ChannelGroups.Hemifield, 'Laterality'); % left or right
+    Bursts = localizeBursts(Bursts, ChannelGroups.preROI, 'preROI', MinROI); % ROI
+    Bursts = hemifieldBursts(Bursts, EEG, Triggers);
 
 
     % save
