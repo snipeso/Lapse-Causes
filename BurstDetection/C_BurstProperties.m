@@ -69,7 +69,7 @@ for Indx_F = 1:numel(Content)
 
     % classify the burst
     Bursts = localizeBursts(Bursts, ChannelGroups.Hemifield, 'Laterality'); % left or right
-    Bursts = localizeBursts(Bursts, ChannelGroups.preROI, 'preROI', MinROI, EEG.chanlocs, Info.Manuscript); % ROI
+    Bursts = localizeBursts(Bursts, ChannelGroups.preROI, 'preROI', MinROI); % ROI
     Bursts = hemifieldBursts(Bursts, EEG, Triggers);
 
     % get vector of points from which the burst data was pooled (task,
