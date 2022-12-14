@@ -25,6 +25,8 @@ Bands.Alpha = [8 12];
 BandLabels = {'Theta', 'Alpha'};
 ROI = fieldnames(Channels.preROI);
 
+LateralityThreshold = .25;
+
 Pool = fullfile(Paths.Pool, 'EEG');
 
 
@@ -39,6 +41,7 @@ TimeSpent = nan(numel(Participants), numel(SB_Labels), numel(BandLabels)+1); % d
 TimeSpent_ROI = nan(numel(Participants), numel(SB_Labels), numel(ROI), numel(BandLabels));
 Laterality = nan(numel(Participants), numel(SB_Labels), 2, numel(BandLabels)); %for left and right screens, number of left and right bursts
 LateralitySum = Laterality;
+LateralityTally =  nan(numel(Participants), numel(SB_Labels), 2, 2, numel(BandLabels)); % keeps track of number of laterlaized bursts
 
 Filename = Filenames(contains(Filenames, Participants{Indx_P}) & ...
     contains(Filenames, Sessions{Indx_S}));
@@ -121,10 +124,19 @@ for Indx_P = 1:numel(Participants)
                     Indexes = Freqs>= Band(1) & Freqs <Band(2) & ...
                         BurstHemifield == Hemifields(Indx_H);
 
+                    Lat = Bursts(Indexes).Laterality;
+
                     Laterality(Indx_P, Indx_SB, Indx_H, Indx_B) = ...
-                        Add(Laterality(Indx_P, Indx_SB, Indx_H, Indx_B), Bursts(Indexes).Laterality);
+                        Add(Laterality(Indx_P, Indx_SB, Indx_H, Indx_B), Lat);
                     LateralitySum(Indx_P, Indx_SB, Indx_H, Indx_B) = ...
                         Add(LateralitySum(Indx_P, Indx_SB, Indx_H, Indx_B), nnz(Indexes));
+
+                    Sign = [-1 1];
+                    for Indx_L = 1:2
+                        LateralityTally(Indx_P, Indx_SB, Indx_H, Indx_L, Indx_B) = ...
+                        Add(LateralityTally(Indx_P, Indx_SB, Indx_H, Indx_L, Indx_B), ...
+                        nnz(Lat > Sign(Indx_L)*LateralityThreshold));
+                    end
                 end
             end
         end
@@ -152,7 +164,7 @@ end
 
 
 %%% save to pool
-save(fullfile(Pool, 'BurstDurations.mat'), 'TimeSpent', 'TimeSpent_ROI', 'LateralitySum', 'Laterality')
+save(fullfile(Pool, 'BurstDurations.mat'), 'TimeSpent', 'TimeSpent_ROI', 'LateralitySum', 'Laterality', 'LateralityTally')
 
 function z = Add(x, y)
 % little function to handle default nan values that get added on

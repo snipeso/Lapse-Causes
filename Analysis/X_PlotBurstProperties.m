@@ -28,7 +28,7 @@ ROI = fieldnames(Channels.preROI);
 Pool = fullfile(Paths.Pool, 'EEG');
 
 
-load(fullfile(Pool, 'BurstDurations.mat'), 'TimeSpent', 'TimeSpent_ROI', 'LateralitySum', 'Laterality')
+load(fullfile(Pool, 'BurstDurations.mat'), 'TimeSpent', 'TimeSpent_ROI', 'Laterality', 'LateralityTally')
 
 
 
@@ -73,29 +73,32 @@ title('Alpha SD')
 %%% laterality
 % TODO once I know the laterality distribution
 SB = 2;
-% 
-% % number of bursts
-% ThetaBursts = squeeze(mean(LateralitySum(:, SB, :, ), 1, 'omitnan'))
-% 
-% 
-% subfigure([], Grid, [3 3], [2 1], false, PlotProps.Indexes.Letters{4}, PlotProps)
-% B = bar([.8 1.2 1.8 2.2], Data, 'stacked');
-% 
-%     legend(Legend)
-% 
-% for Indx_B =1:numel(B)
-%     B(Indx_B).EdgeColor = 'none';
-%     B(Indx_B).FaceColor = Colors(Indx_B, :);
-% end
-% box off
-% 
-% 
-% if ~isempty(YLim)
-%     ylim(YLim)
-% end
-% 
-% setAxisProperties(PlotProps)
-% 
+
+% number of bursts
+zLateralityTally = zscoreData(LateralityTally, 'last');
+LeftHemi = squeeze(mean(zLateralityTally(:, SB, 1, :, :), 1, 'omitnan'));
+RightHemi = squeeze(mean(zLateralityTally(:, SB, 2, :, :), 1, 'omitnan')); % L x B
+
+Data = cat(1, LeftHemi, RightHemi);
+
+subfigure([], Grid, [3 3], [2 1], false, PlotProps.Indexes.Letters{4}, PlotProps)
+B = bar([.8 1.2 1.8 2.2], Data, 'stacked');
+
+    legend(Legend)
+
+for Indx_B =1:numel(B)
+    B(Indx_B).EdgeColor = 'none';
+    B(Indx_B).FaceColor = Colors(Indx_B, :);
+end
+box off
+
+
+if ~isempty(YLim)
+    ylim(YLim)
+end
+
+setAxisProperties(PlotProps)
+
 
 % laterality values
 
