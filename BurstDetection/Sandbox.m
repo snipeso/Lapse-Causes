@@ -15,7 +15,7 @@ BandLabels = fieldnames(Bands);
 
 Task = 'LAT'; % Game or Standing
 Session = 'BaselineBeam';
-Participant = 'P01';
+Participant = 'P10';
 
 Filename_Source = strjoin({Participant, Task, Session, 'Clean.mat'}, '_');
 
@@ -107,9 +107,9 @@ Min_Peaks = 6;
 
 %%% single channel
 
-Ch = 11;
+Ch = 72;
 Indx_B = 4;
-Sign = -1;
+Sign = 1;
 
 Ch = labels2indexes(Ch, EEG.chanlocs);
 
