@@ -105,8 +105,12 @@ for Indx_P = 1:numel(Participants)
         AllTrials_EC = cat(1, AllTrials_EC, Trials_EC);
 
         % save table info
-        AllTrials_Table = cat(1, AllTrials_Table, CurrentTrials);
+        AllTrials_Table = cat(1, AllTrials_Table, Trials(CurrentTrials, :));
 
+    end
+
+    if isempty(AllTrials_Table)
+        continue
     end
 
 
@@ -141,7 +145,7 @@ for Indx_P = 1:numel(Participants)
 
     EyeStatus = [0 1]; % eyes open, then closed
     for Indx_E = 1:2
-        Prcnt = nnz(AllTrials_EC(:, StimWindow)==EyeStatus(Indx_E))/numel(StimWindow); % percent of stimulus window with eyes either open or closed
+        Prcnt = sum(AllTrials_EC(:, StimWindow)==EyeStatus(Indx_E), 3)/numel(StimWindow); % percent of stimulus window with eyes either open or closed
         Tots = nnz(Prcnt(AllTrials_Table.Radius < Q)>MinEC); % total trials to consider with eyes in that configuration
 
         for Indx_T = 1:3 % loop through trial outcomes

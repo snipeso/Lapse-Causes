@@ -35,11 +35,13 @@ load(fullfile(Pool, 'BurstDurations.mat'), 'TimeSpent', 'TimeSpent_ROI', 'Latera
 %% plot time spent with bursts
 
 PlotProps = P.Manuscript;
+PlotProps.Axes.yPadding = 25;
+PlotProps.Axes.xPadding = 25;
 Grid = [5, 3];
 
 figure('Units','centimeters', 'Position',[0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
 
-Legend = {BandLabels, 'Both'};
+Legend = [BandLabels, 'Both'];
 YLim = [0 1];
 
 ThetaColor = getColors(1, '', 'red');
@@ -50,12 +52,13 @@ Colors = [ThetaColor; AlphaColor; getColors(1, '', 'orange')];
 Data  = squeeze(mean(TimeSpent, 1, 'omitnan'));
 
 subfigure([], Grid, [1 1], [1 3], false, PlotProps.Indexes.Letters{1}, PlotProps)
-plotStackedBars(Data, SB_Labels, YLim, Legend, Colors, PlotProps)
-view([0 90])
+plotStackedBars(Data(:, [1 3 2]), SB_Labels, YLim, Legend([1 3 2]), Colors([1 3 2], :), PlotProps)
+view([90 90])
 
 
 %%% scatter plot for time spent by ROI
 % theta
+YLim = [0 .5];
 Data = squeeze(TimeSpent_ROI(:, 2, :, 1));
 
 subfigure([], Grid, [5 1], [4 1], false, PlotProps.Indexes.Letters{2}, PlotProps)
@@ -75,27 +78,28 @@ title('Alpha SD')
 SB = 2;
 
 % number of bursts
-zLateralityTally = zscoreData(LateralityTally, 'last');
+% zLateralityTally = zScoreData(LateralityTally, 'last');
+zLateralityTally = LateralityTally;
 LeftHemi = squeeze(mean(zLateralityTally(:, SB, 1, :, :), 1, 'omitnan'));
 RightHemi = squeeze(mean(zLateralityTally(:, SB, 2, :, :), 1, 'omitnan')); % L x B
 
 Data = cat(1, LeftHemi, RightHemi);
+Data(:, 1) = -Data(:, 1);
 
 subfigure([], Grid, [3 3], [2 1], false, PlotProps.Indexes.Letters{4}, PlotProps)
 B = bar([.8 1.2 1.8 2.2], Data, 'stacked');
 
-    legend(Legend)
+Colors = [getColors([1 2], '', 'red'); getColors([1 2], '', 'yellow')];
+Colors = Colors([1 3 2 4], :);
+    legend({'Theta LVF', 'Alpha LFV', 'Theta RVF', 'Alpha RVF'})
 
 for Indx_B =1:numel(B)
     B(Indx_B).EdgeColor = 'none';
     B(Indx_B).FaceColor = Colors(Indx_B, :);
 end
 box off
+view([90 90])
 
-
-if ~isempty(YLim)
-    ylim(YLim)
-end
 
 setAxisProperties(PlotProps)
 
@@ -103,7 +107,7 @@ setAxisProperties(PlotProps)
 % laterality values
 
 Data = squeeze(median(Laterality(:, SB, :, :), 1, 'omitnan'))';
-CI = quantile(squeeze(Laterality(:, SB, :, :)), [.25 .75], 1)';
+CI = quantile(squeeze(Laterality(:, SB, :, :)), [.25 .75], 1);
 
 subfigure([], Grid, [5 3], [2 1], false, PlotProps.Indexes.Letters{5}, PlotProps)
 plotUFO(Data, CI, {'Left VF', 'Right VF'}, BandLabels, [ThetaColor; AlphaColor], 'horizontal', PlotProps)

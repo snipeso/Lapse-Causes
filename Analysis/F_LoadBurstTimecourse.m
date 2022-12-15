@@ -23,7 +23,7 @@ RefreshTrials = false;
 
 StartTime = -2;
 EndTime = 2;
-fs = 1000;
+fs = 250;
 WelchWindow = 2;
 
 StartStim = 0;
@@ -100,7 +100,7 @@ for Indx_P = 1:numel(Participants)
         %             Freqs = 1./[Bursts.Mean_period];
         %         end
 
-        Trials_EC = nan(nTrials, numel(BandLabels), numel(t));
+        Trials_EC = nan(nTrials, numel(BandLabels), numel(t_window));
 
 
         for Indx_B = 1:numel(BandLabels)
@@ -109,9 +109,10 @@ for Indx_P = 1:numel(Participants)
 
             for Indx_T = 1:nTrials
                 % trial info
-                StimT = Trials.StimTime(CurrentTrials(Indx_T));
-                Start = round(fs*(StimT+StartTime));
-                End = round(fs*(StimT+EndTime))-1;
+                StimT = fs*Trials.StimTime(CurrentTrials(Indx_T));
+                Start = round(StimT+fs*StartTime);
+
+                End = Start + fs*(EndTime-StartTime) -1;
 
                 Trials_EC(Indx_T, Indx_B, :) = BurstTime(Start:End);
 
@@ -122,7 +123,7 @@ for Indx_P = 1:numel(Participants)
         AllTrials_EC = cat(1, AllTrials_EC, Trials_EC);
 
         % save table info
-        AllTrials_Table = cat(1, AllTrials_Table, CurrentTrials);
+        AllTrials_Table = cat(1, AllTrials_Table, Trials(CurrentTrials, :));
     end
 
 
@@ -155,8 +156,8 @@ for Indx_P = 1:numel(Participants)
 
     BurstStatus = [0 1]; % not burst and burst
     for Indx_E = 1:numel(BurstStatus)
-        Prcnt = nnz(AllTrials_EC(:, StimWindow, :)==BurstStatus(Indx_E))./numel(StimWindow); % percent of stimulus window with eyes either open or closed
-        Tots = sum(Prcnt(AllTrials_Table.Radius<Q, :)>MinEC, 'omitnan'); % total trials to consider with eyes in that configuration
+        Prcnt = sum(AllTrials_EC(:, :, StimWindow)==BurstStatus(Indx_E), 3)./numel(StimWindow); % percent of stimulus window with eyes either open or closed
+        Tots = sum(Prcnt(AllTrials_Table.Radius<Q, :)>MinBurst, 'omitnan'); % total trials to consider with eyes in that configuration
 
          % check if there's enough data       
         if  Tots < minTrials*2
@@ -167,7 +168,7 @@ for Indx_P = 1:numel(Participants)
             Trial_Indexes = AllTrials_Table.Type==Indx_T & ...
                 AllTrials_Table.Radius<Q;
 
-            ProbType(Indx_P, Indx_T, :, Indx_E) = sum(Prcnt(Trial_Indexes, :)>MinEC, 'omitnan')/Tots;
+            ProbType(Indx_P, Indx_T, :, Indx_E) = sum(Prcnt(Trial_Indexes, :)>MinBurst, 'omitnan')/Tots;
         end
     end
 

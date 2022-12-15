@@ -21,7 +21,7 @@ Source_Bursts = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
 SessionBlocks = P.SessionBlocks;
 SB_Labels = {'BL', 'SD'};
 Bands.Theta = [4 8];
-Bands.Alpha = [8 12];
+Bands.Alpha = [8 15];
 BandLabels = {'Theta', 'Alpha'};
 ROI = fieldnames(Channels.preROI);
 
@@ -34,7 +34,7 @@ Pool = fullfile(Paths.Pool, 'EEG');
 %%% Load data
 
 
-AllFiles_Bursts = getContent(Source_Bursts);
+Filenames = getContent(Source_Bursts);
 
 Durations = nan(numel(Participants), numel(SB_Labels));
 TimeSpent = nan(numel(Participants), numel(SB_Labels), numel(BandLabels)+1); % duration of bursts individually, and overlapping
@@ -43,8 +43,6 @@ Laterality = nan(numel(Participants), numel(SB_Labels), 2, numel(BandLabels)); %
 LateralitySum = Laterality;
 LateralityTally =  nan(numel(Participants), numel(SB_Labels), 2, 2, numel(BandLabels)); % keeps track of number of laterlaized bursts
 
-Filename = Filenames(contains(Filenames, Participants{Indx_P}) & ...
-    contains(Filenames, Sessions{Indx_S}));
 
 for Indx_P = 1:numel(Participants)
 
@@ -61,21 +59,21 @@ for Indx_P = 1:numel(Participants)
             if isempty(Filename)
                 warning(['No data in ', Participants{Indx_P},  Sessions{Indx_S} ])
                 continue
-            elseif ~exist(fullfile(BurstPath, Filename), 'file')
+            elseif ~exist(fullfile(Source_Bursts, Filename), 'file')
                 warning(['No data in ', Filename])
                 continue
             end
 
-            load(fullfile(BurstPath, Filename), 'EEG', 'Bursts')
+            load(fullfile(Source_Bursts, Filename), 'EEG', 'Bursts')
             fs = EEG.srate;
             t = EEG.times;
 
             % make a vector of task time
             TaskTime = zeros(size(t));
-            TriggerTypes = {EEG.events.type};
-            TriggerTimes = [EEG.events.latency];
-            StartTask = TriggerTimes(strcmp(TriggerTypes, Triggers.Start));
-            EndTask = TriggerTimes(strcmp(TriggerTypes, Triggers.End));
+            TriggerTypes = {EEG.event.type};
+            TriggerTimes = [EEG.event.latency];
+            StartTask = round(TriggerTimes(strcmp(TriggerTypes, Triggers.Start)));
+            EndTask = round(TriggerTimes(strcmp(TriggerTypes, Triggers.End)));
             TaskTime(StartTask:EndTask) = 1;
 
             % get task duration
@@ -87,7 +85,7 @@ for Indx_P = 1:numel(Participants)
             AllBurstTime = [];
             for Indx_B = 1:numel(BandLabels)
                 Band = Bands.(BandLabels{Indx_B});
-                BurstTime = burst2time(Bursts(Freqs>= Band(1) & Freqs <Band(2)));
+                BurstTime = bursts2time(Bursts(Freqs>= Band(1) & Freqs <Band(2)), t);
                 BurstTime = BurstTime & TaskTime; % only consider bursts during task
                 AllBurstTime = cat(1, AllBurstTime, BurstTime);
 
@@ -105,8 +103,8 @@ for Indx_P = 1:numel(Participants)
 
                 Band = Bands.(BandLabels{Indx_B});
                 for Indx_Ch = 1:numel(ROI)
-                    BurstTime = burst2time(Bursts(Freqs>= Band(1) & Freqs <Band(2) & ...
-                        strcmp(Groups, ROI{Indx_Ch})));
+                    BurstTime = bursts2time(Bursts(Freqs>= Band(1) & Freqs <Band(2) & ...
+                        strcmp(Groups, ROI{Indx_Ch})), t);
                     BurstTime = BurstTime & TaskTime; % only consider bursts during task
 
                     TimeSpent_ROI(Indx_P, Indx_SB, Indx_Ch, Indx_B) = ...
@@ -147,7 +145,9 @@ for Indx_P = 1:numel(Participants)
             TimeSpent(Indx_P, Indx_SB, Indx_B) = (TimeSpent(Indx_P, Indx_SB, Indx_B)-...
                 TimeSpent(Indx_P, Indx_SB, end))/Duration;
 
+            for Indx_Ch = 1:numel(ROI)
             TimeSpent_ROI(Indx_P, Indx_SB, Indx_Ch, Indx_B) = TimeSpent_ROI(Indx_P, Indx_SB, Indx_Ch, Indx_B)/Duration;
+            end
         end
 
         TimeSpent(Indx_P, Indx_SB, end) =TimeSpent(Indx_P, Indx_SB, end)/Duration;
@@ -160,6 +160,7 @@ for Indx_P = 1:numel(Participants)
             end
         end
     end
+    disp(['Finished ', Participants{Indx_P}])
 end
 
 

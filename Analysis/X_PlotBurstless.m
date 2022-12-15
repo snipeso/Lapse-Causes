@@ -47,7 +47,7 @@ yLims = [-2.5 2.5];
 NormBand = [1 4];
 NormBand_Indx = dsearchn(Freqs, NormBand');
 
-figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
+figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.4])
 
 %%% theta
 SB = 2;
