@@ -143,6 +143,8 @@ Manuscript = getProperties({'LSM', 'Manuscript'});
 Powerpoint =  getProperties({'LSM', 'Powerpoint'});
 Poster =  getProperties({'LSM', 'Poster'});
 
+Manuscript.Color.Types = flip(getColors(3));
+
 P.Manuscript = Manuscript; % for papers
 P.Powerpoint = Powerpoint; % for presentations
 P.Poster = Poster;
