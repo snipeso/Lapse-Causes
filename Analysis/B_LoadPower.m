@@ -22,9 +22,9 @@ StartTime = -.5;
 EndTime = 1.5;
 WelchWindow = 2;
 
-StartTime = 0.5;
-EndTime = 1;
-WelchWindow = .5;
+% StartTime = 0.5;
+% EndTime = 1;
+% WelchWindow = .5;
 
 % temp
 BandLabels = fieldnames(Bands);
@@ -52,7 +52,7 @@ if RefreshTrials || ~exist(fullfile(Paths.Pool, 'Tasks', 'AllTrials.mat'), 'file
     Trials = loadBehavior(Participants, Sessions, Task, Paths, false);
 
     % get time of stim and response trigger
-    EEGPath = fullfile(Paths.Preprocessed, 'Waves', 'MAT', Task); % use Waves, since has an fs of 1000
+    EEGPath = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task); % use Waves, since has an fs of 1000
     Trials = getTrialLatencies(Trials, EEGPath, P.Triggers);
 
     % get eyes-closed info
@@ -79,7 +79,7 @@ SessionBlocks = P.SessionBlocks;
 SB_Labels = {'BL', 'SD'};
 
 
-Pool = fullfile(Paths.Pool, 'Power'); % place to save matrices so they can be plotted in next script
+Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plotted in next script
 
 %%% lapse vs correct
 

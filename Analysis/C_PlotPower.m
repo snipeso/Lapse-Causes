@@ -15,6 +15,9 @@ Paths = P.Paths;
 Task = P.Labels.Task;
 Bands = P.Bands;
 
+StartTime = -0.5;
+EndTime = 1.5;
+WelchWindow = 2;
 
 BandLabels = fieldnames(Bands);
 
@@ -24,6 +27,7 @@ PlotProps = P.Manuscript;
 Tag =  ['s', num2str(StartTime), '_e', num2str(EndTime), '_w', num2str(WelchWindow)];
 TitleTag = strjoin({'LapseCauses', 'LAT', 'Power', Tag}, '_');
 
+Pool = fullfile(Paths.Pool, 'EEG');
 
 %% plot late vs correct and lapse vs correct
 
@@ -70,7 +74,7 @@ for Indx_S = 1:2
         subfigure([], Grid, [Indx_S, Indx_B], [], false, '', PlotProps);
         Stats = topoDiff(BL, Tr, Chanlocs, CLims_Diff, StatsP, PlotProps);
         colorbar off
-        colormap(gca, Format.Color.Maps.Divergent)
+%         colormap(gca, PlotProps.Color.Maps.Divergent)
 
         title([BandLabels{Indx_B}, ' ', SessionLabels{Indx_S}, ' (n=', num2str(Stats.df(1)+1) ')'], 'FontSize', PlotProps.Text.TitleSize)
     end

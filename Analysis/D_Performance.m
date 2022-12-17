@@ -91,7 +91,7 @@ plotStackedBars(Data, SB_Labels, [0 100], AllTallyLabels, Colors, PlotProps)
 Q = quantile(Trials.Radius, 0.5);
 
 [Closest, Things] = tabulateTable(Trials(Trials.Radius<Q, :), 'Type', 'tabulate', Participants, Sessions, SessionGroups);
-[Furthest, ~] = tabulateTable(Trials(Trials.Radius<Q, :), 'Type', 'tabulate', Participants, Sessions, SessionGroups);
+[Furthest, ~] = tabulateTable(Trials(Trials.Radius>Q, :), 'Type', 'tabulate', Participants, Sessions, SessionGroups);
 
 ClosestProb = Closest./sum(Closest, 3, 'omitnan');
 FurthestProb = Furthest./sum(Furthest, 3, 'omitnan');

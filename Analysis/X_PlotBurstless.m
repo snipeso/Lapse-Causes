@@ -32,7 +32,7 @@ BandLabels = {'Theta', 'Alpha'};
 Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plotted in next script
 
 
-load(fullfile(Pool, strjoin({TitleTag, 'ChData.mat'}, '_')), 'bChData', 'AllFields', 'Chanlocs', 'Freqs')
+load(fullfile(Pool, strjoin({TitleTag, 'ChData.mat'}, '_')), 'ChData', 'AllFields', 'Chanlocs', 'Freqs')
 
 
 %% plot EEG with and without bursts
