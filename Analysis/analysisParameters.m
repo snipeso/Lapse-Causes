@@ -117,7 +117,7 @@ addpath(fullfile(Paths.Analysis, 'functions','eeg'))
 addpath(fullfile(Paths.Analysis, 'functions','plots'))
 addpath(fullfile(Paths.Analysis, 'functions','tasks'))
 addpath(fullfile(Paths.Analysis, 'functions','eyes'))
-% addpath(fullfile(Paths.Analysis, 'functions','stats'))
+addpath(fullfile(Paths.Analysis, 'functions','stats'))
 % addpath(fullfile(Paths.Analysis, 'functions','pupils'))
 addpath(fullfile(Paths.Analysis, 'functions','external'))
 addExternalFunctions

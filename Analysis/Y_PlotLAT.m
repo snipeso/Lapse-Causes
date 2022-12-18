@@ -12,6 +12,7 @@ P = analysisParameters();
 Participants = P.Participants;
 Paths = P.Paths;
 PlotProps = P.Manuscript;
+StatsP = P.StatsP;
 
 SessionBlocks = P.SessionBlocks;
 SB_Labels = {'BL', 'SD'};
@@ -42,12 +43,17 @@ Lapses = Trials.Type == 1;
 
 %%% assemble reaction times into structure for flame plot
 FlameStruct = struct();
+MEANS = nan(numel(Participants), 2);
+Q99 = MEANS;
 for Indx_SB = 1:2
     for Indx_P = 1:numel(Participants)
         RTs = Trials.RT(strcmp(Trials.Participant, Participants{Indx_P}) &...
             contains(Trials.Session, SessionBlocks.(SB_Labels{Indx_SB})));
         RTs(isnan(RTs)) = [];
         FlameStruct.(SB_Labels{Indx_SB}).(Participants{Indx_P}) = RTs;
+        
+        MEANS(Indx_P, Indx_SB) = mean(RTs);
+        Q99(Indx_P, Indx_SB) = quantile(RTs, .99);
     end
 end
 
@@ -157,6 +163,26 @@ xlabel('Distance from center (quantiles)')
 set(legend, 'Location','northwest')
 
 % saveFig('LAT', Paths.PaperResults, PlotProps)
+
+
+%% reaction time descriptions
+
+clc
+
+%%% RTs
+% change in mean RTs from BL to SD
+Stats = pairedttest(MEANS(:, 1), MEANS(:, 2), StatsP);
+dispStat(Stats, [1 1], 'SD effect on RTs:');
+
+% distribution of RTs to show that they don't go over 1s
+SB_Indx = 2;
+disp(['RT for 99% of SD data (MEAN [Min Max]): ', num2str(mean(Q99(:, SB_Indx), 'omitnan'), '%.2f'), ...
+    ' [', num2str(min(Q99(:, SB_Indx)), '%.2f'), ', ' num2str(max(Q99(:, SB_Indx)), '%.2f'), ']'])
+
+
+%%% lapses
+
+
 
 
 
