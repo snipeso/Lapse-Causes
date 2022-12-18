@@ -63,11 +63,12 @@ parfor Indx_F = 1:numel(Content)
     end
      Eyes.DQ = DQ_P;
 
-    parsave(fullfile(Destination_Eyes, Filename_Eyes), Eyes)
+     EEG.data = [];
+    parsave(fullfile(Destination_Eyes, Filename_Eyes), Eyes, EEG)
 end
 
 
-function parsave(Path, Eyes)
+function parsave(Path, Eyes, EEG)
 save(Path, 'Eyes')
 end
 
