@@ -25,6 +25,7 @@ StatsP = P.StatsP;
 PlotProps = P.Manuscript;
 
 Tag =  ['s', num2str(StartTime), '_e', num2str(EndTime), '_w', num2str(WelchWindow)];
+Tag = replace(Tag, '.', '-');
 TitleTag = strjoin({'LapseCauses', 'LAT', 'Power', Tag}, '_');
 
 Pool = fullfile(Paths.Pool, 'EEG');
@@ -100,8 +101,7 @@ for Indx_S = 1:2
         subfigure([], Grid, [Indx_S, Indx_B], [], false, '', PlotProps);
         Stats = topoDiff(BL, Tr, Chanlocs, CLims_Diff, StatsP, PlotProps);
         colorbar off
-        colormap(gca, Format.Color.Maps.Divergent)
-
+        
         title([BandLabels{Indx_B}, ' ', SessionLabels{Indx_S}, ' (n=', num2str(Stats.df(1)+1) ')'], 'FontSize', PlotProps.Text.TitleSize)
     end
 end
