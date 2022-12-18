@@ -14,8 +14,8 @@ StartWindow = 0;
 EndWindow = 0.5;
 
 ConfidenceThreshold = 0.5;
-MinEO = 0.5;
-MinNaN = 0.5;
+MinEO = 0.5; % faction of trial that needs to be EO to be considered EO
+MinNaN = 0.5; % fraction of trial time to consider whether NAN
 
 Filenames = getContent(MicrosleepPath);
 
@@ -30,6 +30,7 @@ for Indx_P = 1:numel(Participants)
         % load in eye data
         Filename = Filenames(contains(Filenames, Participants{Indx_P}) & ...
             contains(Filenames, Sessions{Indx_S}));
+        
         if isempty(Filename)
             warning(['No data in ', Participants{Indx_P},  Sessions{Indx_S} ])
             continue
@@ -37,6 +38,7 @@ for Indx_P = 1:numel(Participants)
             warning(['No data in ', Filename])
             continue
         end
+
         load(fullfile(MicrosleepPath, Filename), 'Eyes')
 
         if isnan(Eyes.DQ) || Eyes.DQ == 0 || Eyes.DQ < 1

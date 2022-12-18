@@ -14,6 +14,8 @@ Paths = P.Paths;
 PlotProps = P.Manuscript;
 StatsP = P.StatsP;
 
+MinTots = 50; %
+
 SessionBlocks = P.SessionBlocks;
 SB_Labels = {'BL', 'SD'};
 
@@ -208,7 +210,8 @@ disp(['# participants with at least 10 EO lapses: ', num2str(nnz(EO_Lapses(:, 2)
 
 disp('*')
 % change in number of lapses from BL to SD EO
-Tots = sum(EO_Matrix, 3, 'omitnan')+sum(EC_Matrix, 3, 'omitnan');
+% Tots = sum(EO_Matrix, 3, 'omitnan')+sum(EC_Matrix, 3, 'omitnan');
+Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
 
 EO_Lapses = EO_Lapses./Tots;
 
