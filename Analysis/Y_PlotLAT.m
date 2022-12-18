@@ -40,6 +40,7 @@ EC = Trials.EC == 1;
 
 Lapses = Trials.Type == 1;
 
+CheckEyes = true;
 
 %%% assemble reaction times into structure for flame plot
 FlameStruct = struct();
@@ -61,10 +62,10 @@ end
 %%% stats & QC plot for lapses in closest or furthest 50% for script: TODO
 
 % get number of trials by each type for the subset of trials that are closest
-[ClosestTally, ~] = tabulateTable(Trials(Closest & EO, :), 'Type', 'tabulate', ...
-    Participants, Sessions, SessionGroups); % P x SB x TT
-[FurthestTally, ~] = tabulateTable(Trials(Furthest & EO, :), 'Type', 'tabulate', ...
-    Participants, Sessions, SessionGroups);
+[ClosestTally, ~] = tabulateTable(Trials, Closest & EO, 'Type', 'tabulate', ...
+    Participants, Sessions, SessionGroups, CheckEyes); % P x SB x TT
+[FurthestTally, ~] = tabulateTable(Trials, Furthest & EO, 'Type', 'tabulate', ...
+    Participants, Sessions, SessionGroups, CheckEyes);
 
 % make relative to total trials
 ClosestProb = ClosestTally./sum(ClosestTally, 3, 'omitnan');
@@ -99,15 +100,15 @@ legend off
 %%% B: Proportion of trials
 
 % assemble data
-% [EO_Matrix, ~] = tabulateTable(Trials(EO & Closest, :), 'Type', 'tabulate', ...
-%     Participants, Sessions, SessionGroups); % P x SB x TT
-% [EC_Matrix, ~] = tabulateTable(Trials(EC & Closest, :), 'Type', 'tabulate', ...
-%     Participants, Sessions, SessionGroups);
+% [EO_Matrix, ~] = tabulateTable(Trials, EO & Closest, 'Type', 'tabulate', ...
+%     Participants, Sessions, SessionGroups, CheckEyes); % P x SB x TT
+% [EC_Matrix, ~] = tabulateTable(Trials, EC & Closest, 'Type', 'tabulate', ...
+%     Participants, Sessions, SessionGroups, CheckEyes);
 
-[EO_Matrix, ~] = tabulateTable(Trials(EO, :), 'Type', 'tabulate', ...
-    Participants, Sessions, SessionGroups); % P x SB x TT
-[EC_Matrix, ~] = tabulateTable(Trials(EC, :), 'Type', 'tabulate', ...
-    Participants, Sessions, SessionGroups);
+[EO_Matrix, ~] = tabulateTable(Trials, EO, 'Type', 'tabulate', ...
+    Participants, Sessions, SessionGroups, CheckEyes); % P x SB x TT
+[EC_Matrix, ~] = tabulateTable(Trials, EC, 'Type', 'tabulate', ...
+    Participants, Sessions, SessionGroups, CheckEyes);
 
 Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
 Matrix = cat(3, EO_Matrix, EC_Matrix(:, :, 1));
@@ -147,13 +148,13 @@ Bins = discretize(Radius, Edges);
 Trials.Radius_Bins = Bins;
 
 % get number of lapses for each distance quantile
-[EOLapsesTally, ~] = tabulateTable(Trials(EO & Lapses, :), 'Radius_Bins', 'tabulate', ...
-    Participants, Sessions, SessionGroups);
+[EOLapsesTally, ~] = tabulateTable(Trials, EO & Lapses, 'Radius_Bins', 'tabulate', ...
+    Participants, Sessions, SessionGroups, CheckEyes);
 
-[ECLapsesTally, ~] = tabulateTable(Trials(EC & Lapses, :), 'Radius_Bins', 'tabulate', ...
-    Participants, Sessions, SessionGroups);
+[ECLapsesTally, ~] = tabulateTable(Trials, EC & Lapses, 'Radius_Bins', 'tabulate', ...
+    Participants, Sessions, SessionGroups, CheckEyes);
 
-[Tots, ~] = tabulateTable(Trials, 'Radius_Bins', 'tabulate', ...
+[Tots, ~] = tabulateTable(Trials, [], 'Radius_Bins', 'tabulate', ...
     Participants, Sessions, SessionGroups);
 
 LapseTally = cat(2, EOLapsesTally, ECLapsesTally);
@@ -207,7 +208,7 @@ disp(['# participants with at least 10 EO lapses: ', num2str(nnz(EO_Lapses(:, 2)
 
 disp('*')
 % change in number of lapses from BL to SD EO
-Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
+Tots = sum(EO_Matrix, 3, 'omitnan')+sum(EC_Matrix, 3, 'omitnan');
 
 EO_Lapses = EO_Lapses./Tots;
 

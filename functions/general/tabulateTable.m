@@ -1,6 +1,15 @@
-function [Matrix, Things] = tabulateTable(Trials, Column, Aggregator, Participants, Sessions, SessionGroups)
+function [Matrix, Things] = tabulateTable(Trials, TrialIndexes, Column, Aggregator, Participants, Sessions, SessionGroups, CheckEyes)
+% Trials is a table. Trial Indexes is 1s and 0s indicating which trials to
+% use. Column is the label of the column on which to do the Aggregator
+% operation. SessionGroups is optional, to pool multiple sessions.
+% CheckEyes is optional, and it checks whether the eye-tracking data even
+% exists for that trial
 % puts data from table into a matrix
 % in Lapse-Causes
+
+if isempty(TrialIndexes)
+    TrialIndexes = ones(size(Trials, 1), 1);
+end
 
 if exist('SessionGroups', 'var') && ~isempty(SessionGroups)
     nSessions = numel(SessionGroups);
@@ -27,8 +36,26 @@ end
 
 for Indx_P = 1:numel(Participants)
     for Indx_S = 1:nSessions
+
+        % get all trials for that session+participant
         CurrentTrials = strcmp(Trials.Participant, Participants{Indx_P}) & ...
             ismember(Trials.Session, Sessions(SessionGroups{Indx_S}));
+        Data = Trials.(Column)(CurrentTrials);
+
+        % check if the dataset was missing, so should output NaN
+        if isempty(Data)
+            continue
+        end
+
+        if exist('CheckEyes', 'var') && CheckEyes && all(isnan(Trials.EC(CurrentTrials)))
+            continue
+        end
+
+        % now get all trials, selecting based on trial indices
+        CurrentTrials = strcmp(Trials.Participant, Participants{Indx_P}) & ...
+            ismember(Trials.Session, Sessions(SessionGroups{Indx_S})) & ...
+            TrialIndexes;
+
         Data = Trials.(Column)(CurrentTrials);
 
         if isnumeric(Data)
@@ -53,20 +80,16 @@ for Indx_P = 1:numel(Participants)
             case 'std'
                 Matrix(Indx_P, Indx_S) = std(Data, 'omitnan');
             case 'tabulate'
+
                 if numel(Things) > 1
                     Table = tabulate(Data);
 
                     if isempty(Table)
-                        continue
-                        %                     elseif iscell(Table)
-                        %                         Tots(ismember(Things, Table(:, 1))) = [Table{:, 2}];
-                        %                         Matrix(Indx_P, Indx_S, :) = Tots;
-                        %
+                        Matrix(Indx_P, Indx_S, :) = 0;
                     else
                         Tots = zeros(numel(Things), 1);
                         Tots(ismember(Things, Table(:, 1))) = Table(:, 2);
                         Matrix(Indx_P, Indx_S, :) = Tots;
-
                     end
                 else
                     Matrix(Indx_P, Indx_S) = numel(Data);
