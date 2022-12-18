@@ -107,8 +107,14 @@ ylabel('Recording duration (%)')
 
 
 
+%% provide descriptives
 
+clc
 
+for Indx_B = 1:numel(BandLabels)
+disp(['Time spent in ', BandLabels{Indx_B} ' EO:'])
+disp(['Time spent in ', BandLabels{Indx_B} ' EC:'])
+end
 
 
 
