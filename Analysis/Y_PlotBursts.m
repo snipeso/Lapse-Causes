@@ -116,9 +116,9 @@ clc
 
 for Indx_B = 1:numel(BandLabels)
     for Indx_E = 1:numel(EyeLabels)
-        Data = squeeze(TimeSpent_Eyes(:, SB_Indx, Indx_B, Indx_E));
-        MEAN = num2str(mean(Data, 'omitnan'), '%.2f');
-        STD = num2str(std(Data, 'omitnan'), '%.2f');
+        Data = 100*squeeze(TimeSpent_Eyes(:, SB_Indx, Indx_B, Indx_E));
+        MEAN = num2str(mean(Data, 'omitnan'), '%.1f');
+        STD = num2str(std(Data, 'omitnan'), '%.1f');
         disp(['Time spent in ', BandLabels{Indx_B} ' ', EyeLabels{Indx_E}, ': ', MEAN, ', ', STD])
     end
 end

@@ -43,6 +43,8 @@ Filenames = getContent(Source_Bursts);
 
 Durations = nan(numel(Participants), numel(SB_Labels));
 TimeSpent = nan(numel(Participants), numel(SB_Labels), numel(BandLabels)+1); % duration of bursts individually, and overlapping
+
+Durations_Eyes = nan(numel(Participants), numel(SB_Labels), 2);
 TimeSpent_Eyes =  nan(numel(Participants), numel(SB_Labels), numel(BandLabels), 2);
 
 for Indx_P = 1:numel(Participants)
@@ -115,6 +117,12 @@ for Indx_P = 1:numel(Participants)
                     TimeSpent_Eyes(Indx_P, Indx_SB, Indx_B, Indx_E) = ...
                         Add(TimeSpent_Eyes(Indx_P, Indx_SB, Indx_B, Indx_E), ...
                         nnz(BurstTime_Eyes)/fs);
+
+                    if Indx_B ==1 % only do it once HACK
+                        Durations_Eyes(Indx_P, Indx_SB, Indx_E) = ...
+                            Add(Durations_Eyes(Indx_P, Indx_SB, Indx_E), ...
+                            nnz(EyeOpen==EyeType(Indx_E) & ValidTime)/fs);
+                    end
                 end
             end
 
@@ -131,10 +139,13 @@ for Indx_P = 1:numel(Participants)
                 TimeSpent(Indx_P, Indx_SB, end))/Duration;
         end
 
-        TimeSpent(Indx_P, Indx_SB, end) =TimeSpent(Indx_P, Indx_SB, end)/Duration;
+        TimeSpent(Indx_P, Indx_SB, end) = TimeSpent(Indx_P, Indx_SB, end)/Duration;
 
-        % normlize by duration also data split by eye status
-        TimeSpent_Eyes(Indx_P, Indx_SB, :, :) = TimeSpent_Eyes(Indx_P, Indx_SB, :, :)./Duration;
+        % same for eye status
+        for Indx_E = 1:2
+            Duration = Durations_Eyes(Indx_P, Indx_SB, Indx_E);
+            TimeSpent_Eyes(Indx_P, Indx_SB, :, Indx_E) = TimeSpent_Eyes(Indx_P, Indx_SB, :, Indx_E)./Duration;
+        end
     end
 
     disp(['Finished ', Participants{Indx_P}])
@@ -142,7 +153,7 @@ end
 
 
 %%% save to pool
-save(fullfile(Pool, 'BurstDurations.mat'), 'TimeSpent', 'TimeSpent_Eyes')
+save(fullfile(Pool, 'BurstDurations.mat'), 'TimeSpent', 'TimeSpent_Eyes', 'Duration_Eyes')
 
 function z = Add(x, y)
 % little function to handle default nan values that get added on
