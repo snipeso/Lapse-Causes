@@ -33,7 +33,7 @@ EEGPath = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task);
 Trials = getTrialLatencies(Trials, EEGPath, Triggers);
 
 % get eyes-closed info
-MicrosleepPath = fullfile(Paths.Data, 'Pupils_1000', Task); % also 1000 fs
+MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task); % also 1000 fs
 Trials = getECtrials(Trials, MicrosleepPath, fs);
 
 % set to nan all trials that are beyond 50% radius and with eyes closed
