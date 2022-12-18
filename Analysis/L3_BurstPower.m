@@ -13,7 +13,6 @@ P = analysisParameters();
 
 Participants = P.Participants;
 Sessions = P.Sessions;
-TallyLabels = P.Labels.Tally;
 Paths = P.Paths;
 Task = P.Labels.Task;
 Bands = P.Bands;
@@ -22,7 +21,7 @@ Channels = P.Channels;
 WelchWindow = 8; % duration of window to do FFT
 Overlap = .75; % overlap of hanning windows for FFT
 
-MinDur = 60; % if there's less than X of data, don't save
+MinDur = 60; % if there's less than X seconds of data, don't save
 
 TitleTag = strjoin({'LapseCauses', 'LAT', 'Power', 'Burstless'}, '_');
 
@@ -34,17 +33,16 @@ Source_EEG = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task);
 Source_Bursts = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
 
 SessionBlocks = P.SessionBlocks;
-SB_Labels = {'BL', 'SD'};
-Bands.Theta = [4 8];
-Bands.Alpha = [8 15];
-BandLabels = {'Theta', 'Alpha'};
+SB_Labels = fieldnames(SessionBlocks);
+BandLabels = fieldnames(Bands);
 
 Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plotted in next script
+
 
 %%% Load EEG information, splitting by session blocks
 AllFiles_EEG = getContent(Source_EEG);
 AllFiles_Bursts = getContent(Source_Bursts);
-AllData = nan(numel(Participants), numel(SB_Labels), numel(BandLabels)+1, 123, 1025); % TODO, get right number of channels and freqs
+AllData = nan(numel(Participants), numel(SB_Labels), numel(BandLabels)+1, 123, 1025);
 
 for Indx_P = 1:numel(Participants)
     for Indx_SB = 1:numel(SB_Labels)
@@ -93,7 +91,7 @@ for Indx_P = 1:numel(Participants)
 
             %%% get EEG with and without bursts
 
-            BurstFreqs = 1./[Bursts.Mean_period];
+            BurstFreqs = [Bursts.Frequency];
 
             for Indx_B = 1:numel(BandLabels)
 
@@ -124,6 +122,8 @@ for Indx_P = 1:numel(Participants)
             AllData(Indx_P, Indx_SB, Indx_F, :, :) = Power;
         end
     end
+    clc
+    disp(['Finished ', Participants{Indx_P}])
 end
 
 sData = smoothFreqs(AllData, Freqs, 'last', 2);

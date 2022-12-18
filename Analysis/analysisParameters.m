@@ -24,8 +24,8 @@ P.Nights = {'Baseline', 'NightPre', 'NightPost'};
 Labels.Sessions.IDs = {'BaselineBeam', 'MainPre', 'Session1Beam', 'Session2Beam1', 'Session2Beam2', 'Session2Beam3', 'MainPost'};
 Labels.Sessions.Labels = {'BL', 'Pre', 'SD1', 'SD2.1', 'SD2.2', 'SD2.3', 'Post'};
 
-SessionBlocks.SD = { 'Session2Beam1', 'Session2Beam2', 'Session2Beam3'};
 SessionBlocks.BL = {'BaselineBeam',  'MainPre', 'MainPost'};
+SessionBlocks.SD = { 'Session2Beam1', 'Session2Beam2', 'Session2Beam3'};
 
 P.Sessions = [SessionBlocks.BL, SessionBlocks.SD];
 
@@ -160,11 +160,14 @@ P.Format = Format; % plots just to view data
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Power/EEG information
 
-Bands.Delta = [1 4];
+AllBands.Delta = [1 4];
+AllBands.Theta = [4 8];
+AllBands.Alpha = [8 12];
+AllBands.Beta = [15 25];
+AllBands.Gamma = [25 35];
+
 Bands.Theta = [4 8];
-Bands.Alpha = [8 12];
-Bands.Beta = [15 25];
-Bands.Gamma = [25 35];
+Bands.Alpha = [8 15];
 
 %%% Channels and Regions of Interest (ROI)
 Channels = struct();
@@ -187,7 +190,9 @@ Format.Colors.preROI = getColors(numel(fieldnames(Channels.preROI)));
 
 
 P.Channels = Channels;
+P.AllBands = AllBands;
 P.Bands = Bands;
+
 
 
 
