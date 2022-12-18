@@ -99,9 +99,14 @@ legend off
 %%% B: Proportion of trials
 
 % assemble data
-[EO_Matrix, ~] = tabulateTable(Trials(EO & Closest, :), 'Type', 'tabulate', ...
+% [EO_Matrix, ~] = tabulateTable(Trials(EO & Closest, :), 'Type', 'tabulate', ...
+%     Participants, Sessions, SessionGroups); % P x SB x TT
+% [EC_Matrix, ~] = tabulateTable(Trials(EC & Closest, :), 'Type', 'tabulate', ...
+%     Participants, Sessions, SessionGroups);
+
+[EO_Matrix, ~] = tabulateTable(Trials(EO, :), 'Type', 'tabulate', ...
     Participants, Sessions, SessionGroups); % P x SB x TT
-[EC_Matrix, ~] = tabulateTable(Trials(EC & Closest, :), 'Type', 'tabulate', ...
+[EC_Matrix, ~] = tabulateTable(Trials(EC, :), 'Type', 'tabulate', ...
     Participants, Sessions, SessionGroups);
 
 Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
@@ -142,21 +147,29 @@ Bins = discretize(Radius, Edges);
 Trials.Radius_Bins = Bins;
 
 % get number of lapses for each distance quantile
-[LapsesTally, ~] = tabulateTable(Trials(EO & Lapses, :), 'Radius_Bins', 'tabulate', ...
-    Participants, Sessions, SessionGroups);
-[Tots, ~] = tabulateTable(Trials(EO, :), 'Radius_Bins', 'tabulate', ...
+[EOLapsesTally, ~] = tabulateTable(Trials(EO & Lapses, :), 'Radius_Bins', 'tabulate', ...
     Participants, Sessions, SessionGroups);
 
-LapsesTally = 100*LapsesTally./Tots; % P x SB x RB
-LapsesTally = permute(LapsesTally, [1 3 2]); % P x RB x SB
+[ECLapsesTally, ~] = tabulateTable(Trials(EC & Lapses, :), 'Radius_Bins', 'tabulate', ...
+    Participants, Sessions, SessionGroups);
+
+[Tots, ~] = tabulateTable(Trials, 'Radius_Bins', 'tabulate', ...
+    Participants, Sessions, SessionGroups);
+
+LapseTally = cat(2, EOLapsesTally, ECLapsesTally);
+Tots = cat(2, Tots, Tots);
+LapseTally = 100*LapseTally./Tots; % P x SB x RB
+
+LapseTally = LapseTally(:, [1 3 2 4], :); % EO BL, EC Bl, EO SD, EC SD
+LapseTally = permute(LapseTally, [1 3 2]); % P x RB x SB
 
 % plot parameters
-Colors = [PlotProps.Color.Generic; PlotProps.Color.Types(1, :)]; % generic for BL, lapse color for SD
+Colors = [flip(getColors([1 2], '', 'gray')); PlotProps.Color.Types(1, :); Red(1, :)]; % generic for BL, lapse color for SD
 YLim = [0 80];
 
 % plot
 subfigure([], Grid, [1 3], [1 1], true, PlotProps.Indexes.Letters{3}, PlotProps);
-plotSpikeBalls(LapsesTally, [], {'BL', 'SD'}, Colors, PlotProps)
+plotSpikeBalls(LapseTally, [], {'BL (EO)', 'BL (EC)', 'SD (EO)', 'SD (EC)'}, Colors, PlotProps)
 ylabel('Lapses (% trials)')
 ylim(YLim)
 xlabel('Distance from center (quantiles)')
@@ -179,8 +192,36 @@ SB_Indx = 2;
 disp(['RT for 99% of SD data (MEAN [Min Max]): ', num2str(mean(Q99(:, SB_Indx), 'omitnan'), '%.2f'), ...
     ' [', num2str(min(Q99(:, SB_Indx)), '%.2f'), ', ' num2str(max(Q99(:, SB_Indx)), '%.2f'), ']'])
 
+disp('***********')
 
 %%% lapses
+EO_Lapses = squeeze(EO_Matrix(:, :, 1));
+EC_Lapses = squeeze(EC_Matrix(:, :, 1));
+
+% total lapses EO SD
+disp(['Total SD EO lapses (Mean, STD): ', num2str(mean(EO_Lapses(:, 2), 'omitnan'), '%.2f'), ...
+    ', ',  num2str(std(EO_Lapses(:, 2), 'omitnan'), '%.2f')])
+
+MinLapses = 10;
+disp(['# participants with at least 10 EO lapses: ', num2str(nnz(EO_Lapses(:, 2)>MinLapses))])
+
+disp('*')
+% change in number of lapses from BL to SD EO
+Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
+
+EO_Lapses = EO_Lapses./Tots;
+
+Stats = pairedttest(EO_Lapses(:, 1), EO_Lapses(:, 2), StatsP);
+dispStat(Stats, [1 1], 'SD effect on EO lapses:');
+
+% EC
+EC_Lapses = EC_Lapses./Tots;
+
+Stats = pairedttest(EC_Lapses(:, 1), EC_Lapses(:, 2), StatsP);
+dispStat(Stats, [1 1], 'SD effect on EC lapses:');
+
+
+
 
 
 
