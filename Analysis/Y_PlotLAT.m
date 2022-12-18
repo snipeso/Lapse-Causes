@@ -14,7 +14,7 @@ Paths = P.Paths;
 PlotProps = P.Manuscript;
 StatsP = P.StatsP;
 
-MinTots = 50; %
+MinTots = P.Parameters.MinTots; % minimum total of trials for that participant to be considered
 
 SessionBlocks = P.SessionBlocks;
 SB_Labels = {'BL', 'SD'};
@@ -30,7 +30,7 @@ TitleTag = strjoin({'LapseCauses', 'Behavior'}, '_');
 
 %%% get trial data
 Pool = fullfile(Paths.Pool, 'Tasks');
-load(fullfile(Pool, 'AllTrials.mat'), 'Trials') % from script: TODO
+load(fullfile(Pool, 'AllTrials.mat'), 'Trials') % from script Load_Trials
 
 % get trial subsets
 Q = quantile(Trials.Radius, 0.5);
@@ -42,7 +42,7 @@ EC = Trials.EC == 1;
 
 Lapses = Trials.Type == 1;
 
-CheckEyes = true;
+CheckEyes = false;
 
 %%% assemble reaction times into structure for flame plot
 FlameStruct = struct();
@@ -64,17 +64,26 @@ end
 %%% stats & QC plot for lapses in closest or furthest 50% for script: TODO
 
 % get number of trials by each type for the subset of trials that are closest
-[ClosestTally, ~] = tabulateTable(Trials, Closest & EO, 'Type', 'tabulate', ...
+[ClosestTally, ~] = tabulateTable(Trials, Closest, 'Type', 'tabulate', ...
     Participants, Sessions, SessionGroups, CheckEyes); % P x SB x TT
-[FurthestTally, ~] = tabulateTable(Trials, Furthest & EO, 'Type', 'tabulate', ...
+[FurthestTally, ~] = tabulateTable(Trials, Furthest, 'Type', 'tabulate', ...
     Participants, Sessions, SessionGroups, CheckEyes);
 
 % make relative to total trials
-ClosestProb = ClosestTally./sum(ClosestTally, 3, 'omitnan');
-FurthestProb = FurthestTally./sum(FurthestTally, 3, 'omitnan');
+ClosestTots = sum(ClosestTally, 3, 'omitnan');
+ClosestProb = ClosestTally./ClosestTots;
+
+FurthestTots = sum(FurthestTally, 3, 'omitnan');
+FurthestProb = FurthestTally./FurthestTots;
 
 % use only SD data
-ProbType = cat(3, squeeze(ClosestProb(:, 2, :)), squeeze(FurthestProb(:, 2, :))); % P x TT x D
+SB_Indx = 2;
+ProbType = cat(3, squeeze(ClosestProb(:, SB_Indx, :)), squeeze(FurthestProb(:, SB_Indx, :))); % P x TT x D
+
+% remove data that has too few trials
+MinTotsSplit = MinTots/2; % half, since splitting trials by distance
+BadParticipants = ClosestTots(:, SB_Indx) < MinTotsSplit | FurthestTots(:, SB_Indx) < MinTotsSplit;
+ProbType(BadParticipants, :, :) = nan;
 save(fullfile(Pool, 'ProbType_Radius.mat'), 'ProbType')
 
 
@@ -84,6 +93,7 @@ save(fullfile(Pool, 'ProbType_Radius.mat'), 'ProbType')
 %% Plot all behavior information
 
 Grid = [1 3];
+CheckEyes = true;
 
 figure('Units','centimeters', 'Position',[0 0  PlotProps.Figure.Width, PlotProps.Figure.Height*.3])
 
@@ -113,6 +123,11 @@ legend off
     Participants, Sessions, SessionGroups, CheckEyes);
 
 Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
+
+% remove participants who dont have enough trials
+BadParticipants = Tots<MinTots;
+Tots(BadParticipants) = nan;
+
 Matrix = cat(3, EO_Matrix, EC_Matrix(:, :, 1));
 Data = squeeze(mean(100*Matrix./Tots, 1, 'omitnan')); % average, normalizing totals
 
@@ -157,7 +172,11 @@ Trials.Radius_Bins = Bins;
     Participants, Sessions, SessionGroups, CheckEyes);
 
 [Tots, ~] = tabulateTable(Trials, [], 'Radius_Bins', 'tabulate', ...
-    Participants, Sessions, SessionGroups);
+    Participants, Sessions, SessionGroups, CheckEyes);
+
+% remove participants with too few trials
+MinTotsSplit = MinTots/numel(unique(Bins));
+Tots(Tots<MinTotsSplit) = nan;
 
 LapseTally = cat(2, EOLapsesTally, ECLapsesTally);
 Tots = cat(2, Tots, Tots);
@@ -205,13 +224,15 @@ EC_Lapses = squeeze(EC_Matrix(:, :, 1));
 disp(['Total SD EO lapses (Mean, STD): ', num2str(mean(EO_Lapses(:, 2), 'omitnan'), '%.2f'), ...
     ', ',  num2str(std(EO_Lapses(:, 2), 'omitnan'), '%.2f')])
 
-MinLapses = 10;
-disp(['# participants with at least 10 EO lapses: ', num2str(nnz(EO_Lapses(:, 2)>MinLapses))])
+MinLapses = P.Parameters.MinTypes;
+disp(['# participants with at least ', num2str(MinLapses), ' EO lapses: ', num2str(nnz(EO_Lapses(:, 2)>MinLapses))])
 
 disp('*')
 % change in number of lapses from BL to SD EO
 % Tots = sum(EO_Matrix, 3, 'omitnan')+sum(EC_Matrix, 3, 'omitnan');
 Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
+
+Tots(Tots<MinTots) = nan;
 
 EO_Lapses = EO_Lapses./Tots;
 

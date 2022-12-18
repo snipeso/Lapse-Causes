@@ -7,7 +7,8 @@ function P = analysisParameters()
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
 
-
+P.Parameters.MinTots = 50;
+P.Parameters.MinTypes = 10; % minimum number of trials for a given type for some sub-analyses
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Labels
