@@ -19,7 +19,6 @@ P.Participants = {'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', ...
 P.AllTasks = {'Match2Sample', 'LAT', 'PVT', 'SpFT', 'Game', 'Music'};
 P.TaskLabels = {'STM', 'LAT', 'PVT', 'Speech', 'Game', 'Music'};
 
-
 P.Nights = {'Baseline', 'NightPre', 'NightPost'};
 
 Labels.Sessions.IDs = {'BaselineBeam', 'MainPre', 'Session1Beam', 'Session2Beam1', 'Session2Beam2', 'Session2Beam3', 'MainPost'};
@@ -33,6 +32,7 @@ P.Sessions = [SessionBlocks.BL, SessionBlocks.SD];
 P.SessionBlocks = SessionBlocks;
 
 Labels.Tally = {'Lapses', 'Late', 'Correct'};
+Labels.EyeType = [0 1];
 
 Labels.Task = 'LAT';
 Labels.logBands = [1 2 4 8 16 32]; % x markers for plot on log scale

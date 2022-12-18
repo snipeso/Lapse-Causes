@@ -34,9 +34,6 @@ for Indx_P = 1:numel(Participants)
         if isempty(Filename)
             warning(['No data in ', Participants{Indx_P},  Sessions{Indx_S} ])
             continue
-        elseif ~exist(fullfile(MicrosleepPath, Filename), 'file')
-            warning(['No data in ', Filename])
-            continue
         end
 
         load(fullfile(MicrosleepPath, Filename), 'Eyes')

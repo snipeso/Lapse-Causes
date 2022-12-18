@@ -14,6 +14,10 @@ Task = P.Labels.Task;
 Bands = P.Bands;
 Triggers = P.Triggers;
 Channels = P.Channels;
+fs = 250;
+
+EyeType = P.Labels.EyeType;
+ConfidenceThreshold = 0.5; % for classifying eyes closed/open TODO: also in getECtrials, make it analysisParameters thing
 
 Source_Bursts = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
 
@@ -32,6 +36,9 @@ Pool = fullfile(Paths.Pool, 'EEG');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Load data
 
+MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
+
+
 Filenames = getContent(Source_Bursts);
 
 Durations = nan(numel(Participants), numel(SB_Labels));
@@ -40,31 +47,48 @@ TimeSpent_Eyes =  nan(numel(Participants), numel(SB_Labels), numel(BandLabels), 
 
 for Indx_P = 1:numel(Participants)
     for Indx_SB = 1:numel(SB_Labels)
-              
+
         Sessions = SessionBlocks.(SB_Labels{Indx_SB});
         for Indx_S = 1:numel(Sessions)  % gather information for all the sessions in the block
 
 
             %%% load burst data
-            Filename = Filenames(contains(Filenames, Participants{Indx_P}) & ...
+            Filename_Bursts = Filenames(contains(Filenames, Participants{Indx_P}) & ...
                 contains(Filenames, Sessions{Indx_S}));
 
-            if isempty(Filename)
+            if isempty(Filename_Bursts)
                 warning(['No data in ', Participants{Indx_P},  Sessions{Indx_S} ])
                 continue
-            elseif ~exist(fullfile(Source_Bursts, Filename), 'file')
-                warning(['No data in ', Filename])
+            elseif ~exist(fullfile(Source_Bursts, Filename_Bursts), 'file')
+                warning(['No data in ', Filename_Bursts])
                 continue
             end
 
-            load(fullfile(Source_Bursts, Filename), 'EEG', 'Bursts')
+            load(fullfile(Source_Bursts, Filename_Bursts), 'EEG', 'Bursts')
             fs = EEG.srate;
-            Pnts = size(EEG.data, 2);
+            Pnts = EEG.pnts;
             ValidTime = EEG.valid_t; % vector of 1s of all the time in which the task was active, and there wasn't noise
 
             % get task duration
             Durations(Indx_P, Indx_SB) = ...
                 Add(Durations(Indx_P, Indx_SB), nnz(ValidTime)/fs);
+
+            %%% load eye-data
+            Filename_Microsleeps = replace(Filename_Bursts, 'Bursts', 'Pupils');
+            if ~exist(fullfile(MicrosleepPath, Filename_Microsleeps), 'file')
+                warning(['No data in ', Filename_Microsleeps])
+                continue
+            end
+
+            load(fullfile(MicrosleepPath, Filename_Microsleeps), 'Eyes')
+
+            Eye = round(Eyes.DQ); % which eye
+
+            if isnan(Eyes.DQ) || Eyes.DQ == 0 || Eyes.DQ < 1 % skip if bad data
+                EyeOpen = nan(1, Pnts);
+            else
+                [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold); % not using internal microsleep identifier so that I'm flexible
+            end
 
 
             %%% get time spent with each burst band
@@ -76,8 +100,22 @@ for Indx_P = 1:numel(Participants)
                 BurstTime = BurstTime & ValidTime; % only consider bursts during task
                 AllBurstTime = cat(1, AllBurstTime, BurstTime);
 
+                % overall time
                 TimeSpent(Indx_P, Indx_SB, Indx_B) = ...
                     Add(TimeSpent(Indx_P, Indx_SB, Indx_B), nnz(BurstTime)/fs);
+
+                % time with EC/EO
+
+                if isnan(Eyes.DQ) || Eyes.DQ == 0 || Eyes.DQ < 1 % skip if bad data
+                    continue
+                end
+
+                for Indx_E = 1:numel(EyeType)
+                    BurstTime_Eyes = BurstTime & EyeOpen==EyeType(Indx_E);
+                    TimeSpent_Eyes(Indx_P, Indx_SB, Indx_B, Indx_E) = ...
+                        Add(TimeSpent_Eyes(Indx_P, Indx_SB, Indx_B, Indx_E), ...
+                        nnz(BurstTime_Eyes)/fs);
+                end
             end
 
             % get overlap
@@ -101,7 +139,7 @@ end
 
 
 %%% save to pool
-save(fullfile(Pool, 'BurstDurations.mat'), 'TimeSpent')
+save(fullfile(Pool, 'BurstDurations.mat'), 'TimeSpent', 'TimeSpent_Eyes')
 
 function z = Add(x, y)
 % little function to handle default nan values that get added on
