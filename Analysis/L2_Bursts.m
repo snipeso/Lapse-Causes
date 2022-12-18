@@ -16,7 +16,7 @@ Triggers = P.Triggers;
 Channels = P.Channels;
 fs = 250;
 
-EyeType = P.Labels.EyeType;
+EyeType = [1 0]; % open, closed (later, its the other way around)
 ConfidenceThreshold = 0.5; % for classifying eyes closed/open TODO: also in getECtrials, make it analysisParameters thing
 
 Source_Bursts = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
@@ -132,6 +132,9 @@ for Indx_P = 1:numel(Participants)
         end
 
         TimeSpent(Indx_P, Indx_SB, end) =TimeSpent(Indx_P, Indx_SB, end)/Duration;
+
+        % normlize by duration also data split by eye status
+        TimeSpent_Eyes(Indx_P, Indx_SB, :, :) = TimeSpent_Eyes(Indx_P, Indx_SB, :, :)./Duration;
     end
 
     disp(['Finished ', Participants{Indx_P}])

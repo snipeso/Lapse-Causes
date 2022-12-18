@@ -30,7 +30,7 @@ Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plot
 
 
 load(fullfile(Pool, strjoin({TitleTag, 'ChData.mat'}, '_')), 'ChData', 'AllFields', 'Chanlocs', 'Freqs')
-load(fullfile(Pool, 'BurstDurations.mat'), 'TimeSpent')
+load(fullfile(Pool, 'BurstDurations.mat'), 'TimeSpent', 'TimeSpent_Eyes')
 
 
 %% plot EEG with and without bursts
@@ -57,11 +57,11 @@ Ch_Indx = 1;
 Data = log(squeeze(ChData(:, SB, [B_Indx, 3], Ch_Indx, :)));
 
 Delta = squeeze(mean(Data(:, 1, NormBand_Indx(1):NormBand_Indx(2)), 3, 'omitnan'));
-Shift = Delta - mean(Delta, 'omitnan'); 
+Shift = Delta - mean(Delta, 'omitnan');
 Data = Data - Shift;
 
 subfigure([], Grid, [3 1], [3 1], true, PlotProps.Indexes.Letters{1}, PlotProps);
- plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
+plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
 ylim(yLims)
 legend({ 'Theta burst power'}, 'location', 'southwest')
 set(legend, 'ItemTokenSize', [5 5])
@@ -77,13 +77,13 @@ Ch_Indx = 3;
 Data = log(squeeze(ChData(:, SB, [B_Indx, 3], Ch_Indx, :)));
 
 Delta = squeeze(mean(Data(:, 1, NormBand_Indx(1):NormBand_Indx(2)), 3, 'omitnan'));
-Shift = Delta - mean(Delta, 'omitnan'); 
+Shift = Delta - mean(Delta, 'omitnan');
 Data = Data - Shift;
 
 subfigure([], Grid, [3 2], [3 1], true, PlotProps.Indexes.Letters{2}, PlotProps);
- plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
- legend({'Alpha burst power'}, 'location', 'southwest')
- set(legend, 'ItemTokenSize', [5 5])
+plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
+legend({'Alpha burst power'}, 'location', 'southwest')
+set(legend, 'ItemTokenSize', [5 5])
 ylim(yLims)
 title('Back, baseline')
 
@@ -109,11 +109,18 @@ ylabel('Recording duration (%)')
 
 %% provide descriptives
 
+SB_Indx = 2;
+EyeLabels = {'EO', 'EC'};
+
 clc
 
 for Indx_B = 1:numel(BandLabels)
-disp(['Time spent in ', BandLabels{Indx_B} ' EO:'])
-disp(['Time spent in ', BandLabels{Indx_B} ' EC:'])
+    for Indx_E = 1:numel(EyeLabels)
+        Data = squeeze(TimeSpent_Eyes(:, SB_Indx, Indx_B, Indx_E));
+        MEAN = num2str(mean(Data, 'omitnan'), '%.2f');
+        STD = num2str(std(Data, 'omitnan'), '%.2f');
+        disp(['Time spent in ', BandLabels{Indx_B} ' ', EyeLabels{Indx_E}, ': ', MEAN, ', ', STD])
+    end
 end
 
 
