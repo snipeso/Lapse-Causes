@@ -14,7 +14,6 @@ Sessions = P.Sessions;
 TallyLabels = P.Labels.Tally;
 Paths = P.Paths;
 Task = P.Labels.Task;
-Bands = P.Bands;
 Channels = P.Channels;
 
 TitleTag = strjoin({'LapseCauses', 'LAT', 'Power', 'Burstless'}, '_');
@@ -25,8 +24,6 @@ Source_Bursts = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
 
 SessionBlocks = P.SessionBlocks;
 SB_Labels = {'BL', 'SD'};
-Bands.Theta = [4 8];
-Bands.Alpha = [8 12];
 BandLabels = {'Theta', 'Alpha'};
 
 Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plotted in next script
@@ -43,7 +40,6 @@ PlotProps = P.Manuscript;
 PlotProps.Axes.yPadding = 18;
 PlotProps.Axes.xPadding = 18;
 xLog = true;
-% xLims = [3 25];
 xLims = [2 30];
 yLims = [-2.5 2.5];
 
@@ -106,9 +102,6 @@ subfigure([], Grid, [4 1], [1 2], true, PlotProps.Indexes.Letters{3}, PlotProps)
 plotStackedBars(Data(:, [1 3 2]), SB_Labels, YLim, Legend([1 3 2]), Colors([1 3 2], :), PlotProps);
 view([90 90])
 ylabel('Recording duration (%)')
-
-
-
 
 % saveFig('Bursts', Paths.PaperResults, PlotProps)
 
