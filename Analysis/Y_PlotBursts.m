@@ -38,7 +38,7 @@ load(fullfile(Pool, 'BurstDurations.mat'), 'TimeSpent')
 
 %% plot EEG with and without bursts
 
-Grid = [5 2];
+Grid = [4 2];
 PlotProps = P.Manuscript;
 PlotProps.Axes.yPadding = 18;
 PlotProps.Axes.xPadding = 18;
@@ -50,7 +50,7 @@ yLims = [-2.5 2.5];
 NormBand = [1 4];
 NormBand_Indx = dsearchn(Freqs, NormBand');
 
-figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
+figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*.8, PlotProps.Figure.Height*.42])
 
 %%% theta
 SB = 2;
@@ -64,10 +64,10 @@ Delta = squeeze(mean(Data(:, 1, NormBand_Indx(1):NormBand_Indx(2)), 3, 'omitnan'
 Shift = Delta - mean(Delta, 'omitnan'); 
 Data = Data - Shift;
 
-subfigure([], Grid, [4 1], [4 1], true, PlotProps.Indexes.Letters{1}, PlotProps);
+subfigure([], Grid, [3 1], [3 1], true, PlotProps.Indexes.Letters{1}, PlotProps);
  plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
 ylim(yLims)
-legend({ 'Theta burst power'})
+legend({ 'Theta burst power'}, 'location', 'southwest')
 set(legend, 'ItemTokenSize', [5 5])
 title('Front, sleep deprivation')
 ylabel('Log PSD amplitude (\muV^2/Hz)')
@@ -84,9 +84,9 @@ Delta = squeeze(mean(Data(:, 1, NormBand_Indx(1):NormBand_Indx(2)), 3, 'omitnan'
 Shift = Delta - mean(Delta, 'omitnan'); 
 Data = Data - Shift;
 
-subfigure([], Grid, [4 2], [4 1], true, PlotProps.Indexes.Letters{2}, PlotProps);
+subfigure([], Grid, [3 2], [3 1], true, PlotProps.Indexes.Letters{2}, PlotProps);
  plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
- legend({'Alpha burst power'})
+ legend({'Alpha burst power'}, 'location', 'southwest')
  set(legend, 'ItemTokenSize', [5 5])
 ylim(yLims)
 title('Back, baseline')
@@ -102,7 +102,7 @@ Colors = [ThetaColor; AlphaColor; getColors(1, '', 'orange')];
 %%% stacked bar plot for time spent
 Data  = 100*squeeze(mean(TimeSpent, 1, 'omitnan'));
 
-subfigure([], Grid, [5 1], [1 2], true, PlotProps.Indexes.Letters{3}, PlotProps);
+subfigure([], Grid, [4 1], [1 2], true, PlotProps.Indexes.Letters{3}, PlotProps);
 plotStackedBars(Data(:, [1 3 2]), SB_Labels, YLim, Legend([1 3 2]), Colors([1 3 2], :), PlotProps);
 view([90 90])
 ylabel('Recording duration (%)')
