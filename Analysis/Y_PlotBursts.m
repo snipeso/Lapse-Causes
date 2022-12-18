@@ -109,6 +109,9 @@ ylabel('Recording duration (%)')
 
 %% provide descriptives
 
+% NB: its a little suspicious that its identical (this would happen if not
+% synchronized), so at somepoint double check
+
 SB_Indx = 2;
 EyeLabels = {'EO', 'EC'};
 
@@ -122,6 +125,4 @@ for Indx_B = 1:numel(BandLabels)
         disp(['Time spent in ', BandLabels{Indx_B} ' ', EyeLabels{Indx_E}, ': ', MEAN, ', ', STD])
     end
 end
-
-
 
