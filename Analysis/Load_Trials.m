@@ -36,6 +36,10 @@ Trials = getTrialLatencies(Trials, EEGPath, Triggers);
 MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task); % also 1000 fs
 Trials = getECtrials(Trials, MicrosleepPath, fs);
 
+% get burst info
+BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
+Trials = getBurstTrials(Trials, BurstPath, Bands, fs);
+
 % set to nan all trials that are beyond 50% radius and with eyes closed
 Trials.FinalType = Trials.Type;
 
@@ -61,15 +65,12 @@ SessionBlocks = P.SessionBlocks;
 Sessions = [SessionBlocks.BL, SessionBlocks.SD]; % different representation for the tabulateTable function
 SessionGroups = {1:3, 4:6};
 
-Q = quantile(Trials.Radius, 0.5);
-Closest = Trials.Radius<=Q;
-Furthest = Trials.Radius>Q;
-
-EO = Trials.EC == 0;
-EC = Trials.EC == 1;
 
 %%% stats & QC plot for lapses in closest or furthest 50% for script: TODO
 
+Q = quantile(Trials.Radius, 0.5);
+Closest = Trials.Radius<=Q;
+Furthest = Trials.Radius>Q;
 CheckEyes = false;
 
 % get number of trials by each type for the subset of trials that are closest
@@ -103,6 +104,9 @@ save(fullfile(Pool, 'ProbType_Radius.mat'), 'ProbType')
 %%% proportion of lapses based on eye status
 
 SB_Indx = 2;
+EO = Trials.EC == 0;
+EC = Trials.EC == 1;
+CheckEyes = true;
 
 % load tally split by EO and EC trials
 [EO_Matrix, ~] = tabulateTable(Trials, EO, 'Type', 'tabulate', ...
@@ -124,5 +128,42 @@ BadParticipants = Tot_EC(:, SB_Indx)<MinTots | Tot_EO(:, SB_Indx)<MinTots;
 
 ProbType(BadParticipants, :, :) = nan;
 
-Pool = fullfile(Paths.Pool, 'Combo'); % place to save matrices so they can be plotted in next script
+Pool = fullfile(Paths.Pool, 'Eyes'); % place to save matrices so they can be plotted in next script
 save(fullfile(Pool, 'ProbType_EC.mat'), 'ProbType')
+
+
+%%% Proportion of lapses based on burst status
+% TODO: try first without excluding eyes, then excluding eyes
+BandLabels = fieldnames(Bands);
+Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plotted in next script
+
+SB_Indx = 2;
+
+EO = Trials.EC == 0;
+EC = Trials.EC == 1;
+CheckEyes = false;
+
+for Indx_B = 1:numel(BandLabels)
+    % load tally split by EO and EC trials
+    [NoBurst_Matrix, ~] = tabulateTable(Trials, EO & Trials.(BandLabels{Indx_B})==0, 'Type', 'tabulate', ...
+        Participants, Sessions, SessionGroups, CheckEyes); % P x SB x TT
+    [Burst_Matrix, ~] = tabulateTable(Trials, EO & Trials.(BandLabels{Indx_B})==1, 'Type', 'tabulate', ...
+        Participants, Sessions, SessionGroups, CheckEyes);
+
+    Tot_noBurst = sum(NoBurst_Matrix, 3);
+    Tot_Burst = sum(Burst_Matrix, 3);
+
+    % normalize by total trials per each eye condition
+    NoBurst_Matrix = NoBurst_Matrix./Tot_noBurst;
+    Burst_Matrix = Burst_Matrix./Tot_Burst;
+
+    ProbType = cat(3, squeeze(NoBurst_Matrix(:, SB_Indx, :)), squeeze(Burst_Matrix(:, SB_Indx, :))); % P x TT x E
+
+    % remove participants who dont have enough trials
+    BadParticipants = Tot_Burst(:, SB_Indx)<MinTots | Tot_noBurst(:, SB_Indx)<MinTots;
+
+    ProbType(BadParticipants, :, :) = nan;
+
+    save(fullfile(Pool, ['ProbType_', BandLabels{Indx_B}, '.mat']), 'ProbType')
+
+end

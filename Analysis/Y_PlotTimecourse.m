@@ -88,7 +88,7 @@ Range = [0 .8];
 
 Grid = [1 3];
 
-figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.3])
+figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.4])
 
 subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
 plotTimecourse(t_microsleep, flip(sProbMicrosleep, 2), GenProbMicrosleep, Range, flip(TallyLabels), getColors(3), StatsP, PlotProps)

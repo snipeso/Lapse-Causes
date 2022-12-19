@@ -1,6 +1,6 @@
 function plotTimecourse(t, Data, Baseline, YLims, LineLabels, Colors, StatsP, PlotProps)
 % plots the timecourse locked to stimulus onset.
-% Data is a P x T x t matrix
+% Data is a P x TT x t matrix
 
 %%% Get stats
 if ~isempty(StatsP)
@@ -11,7 +11,7 @@ if ~isempty(StatsP)
     Stats.lines = LineLabels;
     Dims = size(Data1);
 
-    Sig = Stats.p_fdr < StatsP.Alpha;
+    Sig = Stats.p_fdr <= StatsP.Alpha;
 else
     Dims = size(Data);
     Sig = zeros(Dims(2), Dims(3));

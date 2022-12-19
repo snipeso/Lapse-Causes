@@ -11,7 +11,7 @@ Trials.EC = nan(size(Trials, 1), 1);
 
 % timewindow relative to stim onset to see if eyes were open or closed
 StartWindow = 0;
-EndWindow = 0.5;
+EndWindow = 1;
 
 ConfidenceThreshold = 0.5;
 MinEO = 0.5; % faction of trial that needs to be EO to be considered EO
@@ -28,18 +28,11 @@ for Indx_P = 1:numel(Participants)
         nTrials = nnz(CurrentTrials);
 
         % load in eye data
-        Filename = Filenames(contains(Filenames, Participants{Indx_P}) & ...
-            contains(Filenames, Sessions{Indx_S}));
-        
-        if isempty(Filename)
-            warning(['No data in ', Participants{Indx_P},  Sessions{Indx_S} ])
-            continue
-        end
-
-        load(fullfile(MicrosleepPath, Filename), 'Eyes')
+        Eyes = loadMATFile(MicrosleepPath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
+        if isempty(Eyes); continue; end
 
         if isnan(Eyes.DQ) || Eyes.DQ == 0 || Eyes.DQ < 1
-            warning(['Bad data in ', char(Filename)])
+            warning(['Bad data in ',  Participants{Indx_P}, Sessions{Indx_S}])
             continue
         end
 
@@ -59,8 +52,8 @@ for Indx_P = 1:numel(Participants)
                 Trials.EC(CurrentTrials(Indx_T)) = 1;
             else
                 Trials.EC(CurrentTrials(Indx_T)) = 0;
-%                 Trials.EC(CurrentTrials(Indx_T))
-%                 =nnz(EyeOpen(Start:End))/numel(Start:End); % debug
+                %                 Trials.EC(CurrentTrials(Indx_T))
+                %                 =nnz(EyeOpen(Start:End))/numel(Start:End); % debug
             end
         end
     end

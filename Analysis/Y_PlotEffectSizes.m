@@ -14,8 +14,7 @@ close all
 P = analysisParameters();
 StatsP = P.StatsP;
 Paths  = P.Paths;
-Bands.Theta = [4 8];
-Bands.Alpha = [8 12];
+Bands = P.Bands;
 BandLabels = {'Theta', 'Alpha'};
 
 %%
@@ -52,13 +51,16 @@ HedgesGCI(:, 2+Indx_B) = Stats.hedgesgCI;
 end
 
 
-figure
-Order = [2 1 3 4];
+figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*1, PlotProps.Figure.Height*.2])
+Grid = [1 1];
+
+Order = [2 1 4 3];
 xLabels = ['Radius', 'EC', BandLabels'];
 Legend = {};
 Colors = getColors(4);
 Orientation = 'vertical';
 PlotProps = P.Manuscript;
+subfigure([], Grid, [1 1], [], true, '', PlotProps)
  plotUFO(HedgesG(Order)', HedgesGCI(:, Order)', xLabels(Order), Legend, ...
         Colors(Order, :), Orientation, PlotProps)
-ylabel("Hedge's G")
+ylabel("Hedge's g effect on lapse probability")
