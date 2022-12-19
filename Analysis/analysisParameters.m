@@ -7,7 +7,7 @@ function P = analysisParameters()
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
 
-P.Parameters.MinTots = 50;
+P.Parameters.MinTots = 10;
 P.Parameters.MinTypes = 10; % minimum number of trials for a given type for some sub-analyses
 
 P.Parameters.Timecourse.Start = -2;

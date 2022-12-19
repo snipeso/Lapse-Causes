@@ -42,12 +42,10 @@ EC = Trials.EC == 1;
 
 Lapses = Trials.Type == 1;
 
-CheckEyes = false;
-
 %%% assemble reaction times into structure for flame plot
 FlameStruct = struct();
 MEANS = nan(numel(Participants), 2);
-Q99 = MEANS;
+Q99 = MEANS; % keep track of distribution for description of RTs
 for Indx_SB = 1:2
     for Indx_P = 1:numel(Participants)
         RTs = Trials.RT(strcmp(Trials.Participant, Participants{Indx_P}) &...
@@ -59,32 +57,6 @@ for Indx_SB = 1:2
         Q99(Indx_P, Indx_SB) = quantile(RTs, .99);
     end
 end
-
-
-%%% stats & QC plot for lapses in closest or furthest 50% for script: TODO
-
-% get number of trials by each type for the subset of trials that are closest
-[ClosestTally, ~] = tabulateTable(Trials, Closest, 'Type', 'tabulate', ...
-    Participants, Sessions, SessionGroups, CheckEyes); % P x SB x TT
-[FurthestTally, ~] = tabulateTable(Trials, Furthest, 'Type', 'tabulate', ...
-    Participants, Sessions, SessionGroups, CheckEyes);
-
-% make relative to total trials
-ClosestTots = sum(ClosestTally, 3, 'omitnan');
-ClosestProb = ClosestTally./ClosestTots;
-
-FurthestTots = sum(FurthestTally, 3, 'omitnan');
-FurthestProb = FurthestTally./FurthestTots;
-
-% use only SD data
-SB_Indx = 2;
-ProbType = cat(3, squeeze(ClosestProb(:, SB_Indx, :)), squeeze(FurthestProb(:, SB_Indx, :))); % P x TT x D
-
-% remove data that has too few trials
-MinTotsSplit = MinTots/2; % half, since splitting trials by distance
-BadParticipants = ClosestTots(:, SB_Indx) < MinTotsSplit | FurthestTots(:, SB_Indx) < MinTotsSplit;
-ProbType(BadParticipants, :, :) = nan;
-save(fullfile(Pool, 'ProbType_Radius.mat'), 'ProbType')
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
