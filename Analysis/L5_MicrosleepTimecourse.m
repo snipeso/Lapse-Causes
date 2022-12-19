@@ -102,7 +102,7 @@ for Indx_P = 1:numel(Participants)
     for Indx_TT = 1:3
 
         % choose trials
-        Trial_Indexes = AllTrials_Table.Type==Indx_TT & Closest;
+        Trial_Indexes = AllTrials_Table.Type==Indx_TT; % & Closest;
         nTrials = nnz(Trial_Indexes);
         TypeTrials = AllTrials(Trial_Indexes, :);
 

@@ -110,7 +110,7 @@ for Indx_P = 1:numel(Participants)
         for Indx_TT = 1:3
 
             % choose trials
-            Trial_Indexes = AllTrials_Table.Type==Indx_TT & Closest; % & AllTrials_Table.EC==0;
+            Trial_Indexes = AllTrials_Table.Type==Indx_TT; %% & Closest; % & AllTrials_Table.EC==0;
             nTrials = nnz(Trial_Indexes);
             TypeTrials = squeeze(AllTrials(Trial_Indexes, Indx_B, :));
 
