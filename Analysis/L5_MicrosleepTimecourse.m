@@ -113,7 +113,8 @@ for Indx_P = 1:numel(Participants)
         end
 
         % average trials
-        ProbMicrosleep(Indx_P, Indx_TT, :)  = sum(TypeTrials, 1, 'omitnan')/nTrials;
+        nTrialsPoints = sum(TypeTrials==1)+sum(TypeTrials==0); % for each timepoint
+        ProbMicrosleep(Indx_P, Indx_TT, :)  = sum(TypeTrials, 1, 'omitnan')./nTrialsPoints;
         nTrials_All(Indx_P, Indx_TT) = nTrials;
     end
 

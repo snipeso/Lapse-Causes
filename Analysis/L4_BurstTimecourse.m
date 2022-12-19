@@ -23,6 +23,7 @@ fs = Parameters.fs;
 
 ConfidenceThreshold = Parameters.EC_ConfidenceThreshold;
 minTrials = Parameters.MinTypes;
+minNanProportion = 0.3; % any more nans than this in a given trial is grounds to exclude the trial
 
 Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plotted in next script
 BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
@@ -103,15 +104,18 @@ for Indx_P = 1:numel(Participants)
     %%% get probability of microsleep (in time) for each trial type
 
     Closest =  AllTrials_Table.Radius <= Q;
-    nTrials_Nans  = 0;
+    nTrials_Nans = 0;
 
     for Indx_B = 1:numel(BandLabels)
         for Indx_TT = 1:3
 
             % choose trials
-            Trial_Indexes = AllTrials_Table.Type==Indx_TT & Closest;
+            Trial_Indexes = AllTrials_Table.Type==Indx_TT & Closest; % & AllTrials_Table.EC==0;
             nTrials = nnz(Trial_Indexes);
             TypeTrials = squeeze(AllTrials(Trial_Indexes, Indx_B, :));
+
+            NanProportion = sum(isnan(TypeTrials), 2)/numel(t_window);
+
 
             % check if there's enough data
             Nans = sum(isnan(TypeTrials), 1);
@@ -120,7 +124,8 @@ for Indx_P = 1:numel(Participants)
             end
 
             % average trials
-            ProbBurst(Indx_P, Indx_TT, Indx_B, :)  = sum(TypeTrials, 1, 'omitnan')/nTrials;
+            nTrialsPoints = sum(TypeTrials==1)+sum(TypeTrials==0); % for each timepoint
+            ProbBurst(Indx_P, Indx_TT, Indx_B, :)  = sum(TypeTrials, 1, 'omitnan')./nTrialsPoints;
         end
     end
 
@@ -139,4 +144,5 @@ end
 GenProbBurst = GenProbBurst(:, :, 1)./GenProbBurst(:, :, 2);
 
 %%% save
-save(fullfile(Pool, 'ProbMicrosleep.mat'), 'ProbBurst', 't_window', 'GenProbBurst')
+t = t_window;
+save(fullfile(Pool, 'ProbBurst.mat'), 'ProbBurst', 't', 'GenProbBurst')

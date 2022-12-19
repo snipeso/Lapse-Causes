@@ -16,7 +16,6 @@ Paths = P.Paths;
 Task = P.Labels.Task;
 Channels = P.Channels;
 StatsP = P.StatsP;
-PlotProps = P.Manuscript;
 
 TitleTag = strjoin({'Timecourse'}, '_');
 

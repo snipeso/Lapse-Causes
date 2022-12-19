@@ -23,7 +23,7 @@ Overlap = .75; % overlap of hanning windows for FFT
 
 MinDur = 60; % if there's less than X seconds of data, don't save
 
-TitleTag = strjoin({'LapseCauses', 'LAT', 'Power', 'Burstless'}, '_');
+TitleTag = strjoin({'Power', 'Burstless'}, '_');
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
