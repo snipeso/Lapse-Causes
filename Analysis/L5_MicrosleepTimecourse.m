@@ -41,6 +41,7 @@ t = linspace(StartTime, EndTime, fs*(EndTime-StartTime));
 
 ProbMicrosleep = nan(numel(Participants), numel(TrialTypeLabels), numel(t));
 GenProbMicrosleep = nan(numel(Participants), 1);
+nTrials_All = nan(numel(Participants), 3);
 
 for Indx_P = 1:numel(Participants)
 
@@ -113,6 +114,7 @@ for Indx_P = 1:numel(Participants)
 
         % average trials
         ProbMicrosleep(Indx_P, Indx_TT, :)  = sum(TypeTrials, 1, 'omitnan')/nTrials;
+        nTrials_All(Indx_P, Indx_TT) = nTrials;
     end
 
     % get general probability of eyes closed
@@ -129,4 +131,4 @@ for Indx_P = 1:numel(Participants)
 end
 
 %%% save
-save(fullfile(Pool, 'ProbMicrosleep.mat'), 'ProbMicrosleep', 't', 'GenProbMicrosleep')
+save(fullfile(Pool, 'ProbMicrosleep.mat'), 'ProbMicrosleep', 't', 'GenProbMicrosleep', 'nTrials_All')
