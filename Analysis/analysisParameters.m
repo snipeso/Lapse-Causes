@@ -10,6 +10,9 @@ function P = analysisParameters()
 P.Parameters.MinTots = 50;
 P.Parameters.MinTypes = 10; % minimum number of trials for a given type for some sub-analyses
 
+P.Parameters.Timecourse.Start = -2;
+P.Parameters.Timecourse.End = 2;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Labels
 

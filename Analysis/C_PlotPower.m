@@ -13,7 +13,7 @@ Sessions = P.Sessions;
 TallyLabels = P.Labels.Tally;
 Paths = P.Paths;
 Task = P.Labels.Task;
-Bands = P.Bands;
+Bands = P.AllBands;
 
 StartTime = -0.5;
 EndTime = 1.5;

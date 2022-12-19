@@ -16,7 +16,7 @@ Paths = P.Paths;
 Task = P.Labels.Task;
 Channels = P.Channels;
 
-TitleTag = strjoin({'LapseCauses', 'LAT', 'Power', 'Burstless'}, '_');
+TitleTag = strjoin({'Power', 'Burstless'}, '_');
 
 
 Source_EEG = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task);
