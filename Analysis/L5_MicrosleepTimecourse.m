@@ -21,9 +21,8 @@ EndTime = Parameters.Timecourse.End;
 fs = 250;
 WelchWindow = 2;
 
-ConfidenceThreshold = 0.5;
+ConfidenceThreshold = Parameters.EC_ConfidenceThreshold;
 minTrials = Parameters.MinTypes;
-MinNaN = 0.5;
 
 Pool = fullfile(Paths.Pool, 'Eyes'); % place to save matrices so they can be plotted in next script
 
@@ -43,11 +42,10 @@ t = linspace(StartTime, EndTime, fs*(EndTime-StartTime));
 
 ProbMicrosleep = nan(numel(Participants), numel(TrialTypeLabels), numel(t));
 GenProbMicrosleep = nan(numel(Participants), 1);
-ProbType = nan(numel(Participants), 3, 2); % proportion of trials resulting in lapse, split by whether there was eyes closed or not
 
 for Indx_P = 1:numel(Participants)
 
-    AllTrials_EC = [];
+    AllTrials = [];
     AllTrials_Table = table();
 
     for Indx_S = 1:numel(Sessions)
@@ -58,20 +56,11 @@ for Indx_P = 1:numel(Participants)
         nTrials = nnz(CurrentTrials);
 
         % load in eye data
-        Filename = Filenames(contains(Filenames, Participants{Indx_P}) & ...
-            contains(Filenames, Sessions{Indx_S}));
-
-        if isempty(Filename)
-            warning(['No data in ', Participants{Indx_P},  Sessions{Indx_S} ])
-            continue
-        elseif ~exist(fullfile(MicrosleepPath, Filename), 'file')
-            warning(['No data in ', Filename])
-            continue
-        end
-        load(fullfile(MicrosleepPath, Filename), 'Eyes')
+        Eyes = loadMATFile(MicrosleepPath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
+        if isempty(Eyes); continue; end
 
         if isnan(Eyes.DQ) || Eyes.DQ == 0 || Eyes.DQ < 1
-            warning(['Bad data in ', char(Filename)])
+            warning(['Bad data in ', Participants{Indx_P}, Sessions{Indx_S}])
             continue
         end
 
@@ -79,20 +68,22 @@ for Indx_P = 1:numel(Participants)
 
         % get 1s and 0s of whether eyes were open
         [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold); % not using internal microsleep identifier so that I'm flexible
+        EyeClosed = double(EyeOpen == 0); % just keep track of eyes closed
+        EyeClosed(isnan(EyeOpen)) = nan;
 
-        % get each trial, save to field of trial type
+        % cut put each trial, pool together
         Trials_EC = nan(nTrials, numel(t));
         for Indx_T = 1:nTrials
-            StimT = Trials.StimTime(CurrentTrials(Indx_T));
-            Start = round(fs*(StimT+StartTime));
-            End = round(fs*(StimT+EndTime))-1;
+            StimT = round(fs*Trials.StimTime(CurrentTrials(Indx_T)));
+            Start = StimT+StartTime*fs;
+            End = StimT+EndTime*fs-1;
 
-            Trial = EyeOpen(Start:End)==0; % just keep track of eyes closed
+            Trial = EyeClosed(Start:End); % just keep track of eyes closed
             Trials_EC(Indx_T, :) = Trial;
         end
 
-        %%% pool sessions
-        AllTrials_EC = cat(1, AllTrials_EC, Trials_EC);
+        % pool sessions
+        AllTrials = cat(1, AllTrials, Trials_EC);
 
         % save table info
         AllTrials_Table = cat(1, AllTrials_Table, Trials(CurrentTrials, :));
@@ -100,45 +91,33 @@ for Indx_P = 1:numel(Participants)
     end
 
     if isempty(AllTrials_Table)
+        warning('empty table')
         continue
     end
 
-
     %%% get probability of microsleep (in time) for each trial type
-    for Indx_T = 1:3
+
+    Closest =  AllTrials_Table.Radius <= Q;
+    nTrials_Nans  = 0;
+    for Indx_TT = 1:3
 
         % choose trials
-        Trial_Indexes = AllTrials_Table.Type==Indx_T & ...
-            AllTrials_Table.Radius < Q;
+        Trial_Indexes = AllTrials_Table.Type==Indx_TT & Closest;
         nTrials = nnz(Trial_Indexes);
-        AllTrials = AllTrials_EC(Trial_Indexes, :, :);
+        TypeTrials = AllTrials(Trial_Indexes, :, :);
 
         % check if there's enough data
-        Nans = sum(isnan(AllTrials), 1);
-        if isempty(AllTrials) || nTrials < minTrials || any(Nans > MinNaN) % makes sure every timepoint had at least 10 trials
+        Nans = sum(isnan(TypeTrials), 1);
+        if isempty(TypeTrials) || nTrials < minTrials || any(Nans > minTrials) % makes sure every timepoint had at least 10 trials
             continue
         end
 
         % average trials
-        ProbMicrosleep(Indx_P, Indx_T, :)  = sum(AllTrials, 1, 'omitnan')/nTrials;
+        ProbMicrosleep(Indx_P, Indx_TT, :)  = sum(TypeTrials, 1, 'omitnan')/nTrials;
     end
 
     % get general probability of eyes closed
-    nTrials = size(AllTrials_EC, 1);
-    GenProbMicrosleep(Indx_P) = mean(sum(AllTrials_EC, 1, 'omitnan')/nTrials, 'omitnan');
-
-
-    %%% get probability of a lapse for every eyeclosure
-    StimEdges = dsearchn(t', [0; .5]);
-    StimWindow = StimEdges(1):StimEdges(2);
-
-
-    EyeStatus = [0 1]; % eyes open, then closed
-    for Indx_E = 1:2
-        Prcnt = sum(AllTrials_EC(:, StimWindow)==EyeStatus(Indx_E), 3)/numel(StimWindow); % percent of stimulus window with eyes either open or closed
-        Tots = nnz(Prcnt(AllTrials_Table.Radius < Q)>MinEC); % total trials to consider with eyes in that configuration
-    end
-
+    GenProbMicrosleep(Indx_P) =nnz(EyeClosed==1)/nnz(EyeClosed==0);
 
     disp(['Finished ', Participants{Indx_P}])
 end

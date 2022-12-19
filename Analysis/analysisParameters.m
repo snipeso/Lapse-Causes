@@ -13,6 +13,8 @@ P.Parameters.MinTypes = 10; % minimum number of trials for a given type for some
 P.Parameters.Timecourse.Start = -2;
 P.Parameters.Timecourse.End = 2;
 
+P.Parameters.EC_ConfidenceThreshold = 0.5;
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Labels
 
