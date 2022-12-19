@@ -19,7 +19,6 @@ Parameters = P.Parameters;
 StartTime = Parameters.Timecourse.Start;
 EndTime = Parameters.Timecourse.End;
 fs = 250;
-WelchWindow = 2;
 
 ConfidenceThreshold = Parameters.EC_ConfidenceThreshold;
 minTrials = Parameters.MinTypes;
