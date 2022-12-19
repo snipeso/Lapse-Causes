@@ -32,7 +32,7 @@ HedgesGCI(:, 1) = Stats.hedgesgCI;
 
 
 %%% load microsleep lapses
-Pool = fullfile(Paths.Pool, 'Eyes');
+Pool = fullfile(Paths.Pool, 'Combo');
 load(fullfile(Pool, 'ProbType_EC.mat'), 'ProbType')
 
 Stats = pairedttest(squeeze(ProbType(:, 1, 1)), squeeze(ProbType(:, 1, 2)), StatsP);
@@ -52,7 +52,7 @@ end
 
 %%
 figure
-Order = 1:4;
+Order = [2 1 3 4];
 xLabels = ['Radius', 'EC', BandLabels];
 Legend = {};
 Colors = getColors(4);
