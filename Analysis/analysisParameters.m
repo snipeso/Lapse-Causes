@@ -14,6 +14,7 @@ P.Parameters.Timecourse.Start = -2;
 P.Parameters.Timecourse.End = 2;
 
 P.Parameters.EC_ConfidenceThreshold = 0.5;
+P.Parameters.fs = 250;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Labels

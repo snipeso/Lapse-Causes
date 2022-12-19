@@ -18,7 +18,7 @@ Parameters = P.Parameters;
 
 StartTime = Parameters.Timecourse.Start;
 EndTime = Parameters.Timecourse.End;
-fs = 250;
+fs = Parameters.fs;
 
 ConfidenceThreshold = Parameters.EC_ConfidenceThreshold;
 minTrials = Parameters.MinTypes;
@@ -35,12 +35,10 @@ MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
 load(fullfile(Paths.Pool, 'Tasks', 'AllTrials.mat'), 'Trials')
 Q = quantile(Trials.Radius, 0.5);
 
-TrialTypeLabels = [1 2 3];
-Filenames = getContent(MicrosleepPath);
 t = linspace(StartTime, EndTime, fs*(EndTime-StartTime));
 
-ProbMicrosleep = nan(numel(Participants), numel(TrialTypeLabels), numel(t));
-GenProbMicrosleep = nan(numel(Participants), 1);
+ProbMicrosleep = nan(numel(Participants), 3, numel(t));
+GenProbMicrosleep = zeros(numel(Participants), 2); % point with EC, and total points
 nTrials_All = nan(numel(Participants), 3);
 
 for Indx_P = 1:numel(Participants)
@@ -85,8 +83,10 @@ for Indx_P = 1:numel(Participants)
         % pool sessions
         AllTrials = cat(1, AllTrials, Trials_EC);
 
-        % save table info
+        % save info
         AllTrials_Table = cat(1, AllTrials_Table, Trials(CurrentTrials, :));
+        GenProbMicrosleep(Indx_P, 1) =  GenProbMicrosleep(Indx_P, 1) + nnz(EyeClosed==1);
+        GenProbMicrosleep(Indx_P, 2) =  GenProbMicrosleep(Indx_P, 2) + nnz(EyeClosed==1 | EyeClosed==0);
 
     end
 
@@ -104,11 +104,11 @@ for Indx_P = 1:numel(Participants)
         % choose trials
         Trial_Indexes = AllTrials_Table.Type==Indx_TT & Closest;
         nTrials = nnz(Trial_Indexes);
-        TypeTrials = AllTrials(Trial_Indexes, :, :);
+        TypeTrials = AllTrials(Trial_Indexes, :);
 
         % check if there's enough data
         Nans = sum(isnan(TypeTrials), 1);
-        if isempty(TypeTrials) || nTrials < minTrials || any(Nans > minTrials) % makes sure every timepoint had at least 10 trials
+        if isempty(TypeTrials) || nTrials < minTrials || any(nTrials - Nans < minTrials) % makes sure every timepoint had at least 10 trials
             continue
         end
 
@@ -116,9 +116,6 @@ for Indx_P = 1:numel(Participants)
         ProbMicrosleep(Indx_P, Indx_TT, :)  = sum(TypeTrials, 1, 'omitnan')/nTrials;
         nTrials_All(Indx_P, Indx_TT) = nTrials;
     end
-
-    % get general probability of eyes closed
-    GenProbMicrosleep(Indx_P) =nnz(EyeClosed==1)/nnz(EyeClosed==0);
 
     disp(['Finished ', Participants{Indx_P}])
 end
@@ -129,6 +126,9 @@ for Indx_P = 1:numel(Participants)
         ProbMicrosleep(Indx_P, :, :) = nan;
     end
 end
+
+% get general probability as fraction
+GenProbMicrosleep = GenProbMicrosleep(:, 1)./GenProbMicrosleep(:, 2);
 
 %%% save
 save(fullfile(Pool, 'ProbMicrosleep.mat'), 'ProbMicrosleep', 't', 'GenProbMicrosleep', 'nTrials_All')
