@@ -104,7 +104,7 @@ plotStackedBars(Data(:, [1 3 2]), SB_Labels, YLim, Legend([1 3 2]), Colors([1 3 
 view([90 90])
 ylabel('Recording duration (%)')
 
-% saveFig('Bursts', Paths.PaperResults, PlotProps)
+saveFig('Bursts', Paths.PaperResults, PlotProps)
 
 
 

@@ -7,7 +7,7 @@
 
 % P x T x 2 % T is already normalized to the number of total trials
 
-% clear
+clear
 clc
 close all
 
@@ -15,52 +15,58 @@ P = analysisParameters();
 StatsP = P.StatsP;
 Paths  = P.Paths;
 Bands = P.Bands;
-BandLabels = {'Theta', 'Alpha'};
+BandLabels = fieldnames(Bands)';
+PlotProps = P.Manuscript;
+TitleTag = 'ES';
 
 %%
 
-HedgesG = nan(1, 4);
-HedgesGCI = nan(2, 4);
+%%% load in data
 
-%%% Load distance lapses
-Pool = fullfile(Paths.Pool, 'Tasks');
-load(fullfile(Pool, 'ProbType_Radius.mat'), 'ProbType')
+HedgesG = nan(1, 5);
+HedgesGCI = nan(2, 5);
+xLabels = {};
 
-Stats = pairedttest(squeeze(ProbType(:, 1, 1)), squeeze(ProbType(:, 1, 2)), StatsP); % P x T x EovsEc
-HedgesG(1) = Stats.hedgesg;
-HedgesGCI(:, 1) = Stats.hedgesgCI;
+% eyes closed lapses
+[HedgesG, HedgesGCI, xLabels] = loadG(1, HedgesG, HedgesGCI, xLabels, 'EC', ...
+    fullfile(Paths.Pool, 'Eyes', 'ProbType_EC.mat'), StatsP);
 
+% Sleep deprivation
+[HedgesG, HedgesGCI, xLabels] = loadG(2, HedgesG, HedgesGCI, xLabels, 'SD (EO)', ...
+    fullfile(Paths.Pool, 'Tasks', 'ProbType_SD.mat'), StatsP);
 
-%%% load microsleep lapses
-Pool = fullfile(Paths.Pool, 'Eyes');
-load(fullfile(Pool, 'ProbType_EC.mat'), 'ProbType')
+% Load distance lapses
+[HedgesG, HedgesGCI, xLabels] = loadG(3, HedgesG,HedgesGCI, xLabels, 'Distance (EO)', ...
+    fullfile(Paths.Pool, 'Tasks', 'ProbType_Radius.mat'), StatsP);
 
-Stats = pairedttest(squeeze(ProbType(:, 1, 1)), squeeze(ProbType(:, 1, 2)), StatsP);
-HedgesG(2) = Stats.hedgesg;
-HedgesGCI(:, 2) = Stats.hedgesgCI;
-
-%%% load bursts
-Pool = fullfile(Paths.Pool, 'EEG');
-
-for Indx_B = 1:numel(BandLabels)
-    load(fullfile(Pool, ['ProbType_', BandLabels{Indx_B}, '.mat']), 'ProbType')
-
-    Stats = pairedttest(squeeze(ProbType(:, 1, 1)), squeeze(ProbType(:, 1, 2)), StatsP);
-    HedgesG(2+Indx_B) = Stats.hedgesg;
-HedgesGCI(:, 2+Indx_B) = Stats.hedgesgCI;
-end
+% Bursts
+[HedgesG, HedgesGCI, xLabels] = loadG(4, HedgesG, HedgesGCI, xLabels, 'Alpha (EO)', fullfile(Paths.Pool, 'EEG', 'ProbType_Alpha.mat'), StatsP);
+[HedgesG, HedgesGCI, xLabels] = loadG(5, HedgesG, HedgesGCI, xLabels, 'Theta (EO)', fullfile(Paths.Pool, 'EEG', 'ProbType_Theta.mat'), StatsP);
 
 
 figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*1, PlotProps.Figure.Height*.2])
 Grid = [1 1];
 
-Order = [2 1 4 3];
-xLabels = ['Radius', 'EC', BandLabels'];
 Legend = {};
-Colors = getColors(4);
+Colors = getColors(5);
 Orientation = 'vertical';
 PlotProps = P.Manuscript;
-subfigure([], Grid, [1 1], [], true, '', PlotProps)
- plotUFO(HedgesG(Order)', HedgesGCI(:, Order)', xLabels(Order), Legend, ...
-        Colors(Order, :), Orientation, PlotProps)
+PlotProps.Axes.xPadding = 50;
+subfigure([], Grid, [1 1], [], true, '', PlotProps);
+plotUFO(HedgesG', HedgesGCI', xLabels, Legend, Colors, Orientation, PlotProps)
 ylabel("Hedge's g effect on lapse probability")
+
+saveFig(TitleTag, Paths.PaperResults, PlotProps)
+
+
+function [HedgesG, HedgesGCI, Labels] = loadG(Indx, HedgesG, HedgesGCI, Labels, Label, Location, StatsP)
+
+load(Location, 'ProbType')
+
+Stats = pairedttest(squeeze(ProbType(:, 1, 1)), squeeze(ProbType(:, 1, 2)), StatsP); % P x T x EovsEc
+HedgesG(Indx) = Stats.hedgesg;
+HedgesGCI(:, Indx) = Stats.hedgesgCI;
+
+Labels{Indx} = Label;
+
+end

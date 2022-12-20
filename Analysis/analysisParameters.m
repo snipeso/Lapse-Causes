@@ -107,8 +107,8 @@ Paths.Core = Core;
 
 Paths.Datasets = 'G:\LSM\Data\Raw';
 Paths.Data  = fullfile(Core, 'Final'); % where data gets saved once its been turned into something else
-Paths.PaperResults = fullfile(Core, 'Results', 'Lapse-Causes'); % where figures and tables end up
-% Paths.Paper = 'C:\Users\colas\Dropbox\Research\Publications and Presentations\Sleep\Paper2\Figures';
+Paths.PaperResults = 'C:\Users\colas\Dropbox\Research\Publications and Presentations\Sleep\Paper3\Figures'; % where figures and tables end up
+Paths.Paper = 'C:\Users\colas\Dropbox\Research\Publications and Presentations\Sleep\Paper3\Figures';
 % Paths.Poster = 'C:\Users\colas\Dropbox\Research\Publications and Presentations\Sleep\SSSSC2022\Figures';
 % Paths.Powerpoint = 'C:\Users\colas\Dropbox\Research\Projects\HuberSleepLab\LSM\Repeat Figures\MatlabFigures';
 % Paths.PaperStats =  'C:\Users\colas\Dropbox\Research\Publications and Presentations\Sleep\Paper2\Stats';

@@ -23,9 +23,7 @@ Source_Bursts = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
 
 SessionBlocks = P.SessionBlocks;
 SB_Labels = {'BL', 'SD'};
-Bands.Theta = [4 8];
-Bands.Alpha = [8 15];
-BandLabels = {'Theta', 'Alpha'};
+BandLabels = fieldnames(Bands);
 ROI = fieldnames(Channels.preROI);
 
 % LateralityThreshold = .25;

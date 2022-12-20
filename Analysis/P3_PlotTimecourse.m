@@ -77,7 +77,7 @@ ylim(Range)
 ylabel('Probability of Alpha (z-scored)')
 legend off
 
-% saveFig([TitleTag, '_Probof_zscored'], Paths.PaperResults, PlotProps)
+saveFig([TitleTag, '_Probof_zscored'], Paths.PaperResults, PlotProps)
 
 
 %% raw timecoure
@@ -109,4 +109,4 @@ ylim(Range)
 ylabel('Probability of alpha')
 legend off
 
-% saveFig([TitleTag, '_Probof_raw'], Paths.PaperResults, PlotProps)
+saveFig([TitleTag, '_Probof_raw'], Paths.PaperResults, PlotProps)

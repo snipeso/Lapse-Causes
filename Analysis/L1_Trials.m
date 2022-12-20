@@ -71,12 +71,14 @@ SessionGroups = {1:3, 4:6};
 Q = quantile(Trials.Radius, 0.5);
 Closest = Trials.Radius<=Q;
 Furthest = Trials.Radius>Q;
-CheckEyes = false;
+EO = Trials.EC == 0;
+EC = Trials.EC == 1;
+CheckEyes = true;
 
 % get number of trials by each type for the subset of trials that are closest
-[ClosestTally, ~] = tabulateTable(Trials, Closest, 'Type', 'tabulate', ...
+[ClosestTally, ~] = tabulateTable(Trials, EO&Closest, 'Type', 'tabulate', ...
     Participants, Sessions, SessionGroups, CheckEyes); % P x SB x TT
-[FurthestTally, ~] = tabulateTable(Trials, Furthest, 'Type', 'tabulate', ...
+[FurthestTally, ~] = tabulateTable(Trials, EO&Furthest, 'Type', 'tabulate', ...
     Participants, Sessions, SessionGroups, CheckEyes);
 
 % make relative to total trials
@@ -104,9 +106,6 @@ save(fullfile(Pool, 'ProbType_Radius.mat'), 'ProbType')
 %%% proportion of lapses based on eye status
 
 SB_Indx = 2;
-EO = Trials.EC == 0;
-EC = Trials.EC == 1;
-CheckEyes = true;
 
 % load tally split by EO and EC trials
 [EO_Matrix, ~] = tabulateTable(Trials, EO, 'Type', 'tabulate', ...
@@ -141,7 +140,7 @@ SB_Indx = 2;
 
 EO = Trials.EC == 0;
 EC = Trials.EC == 1;
-CheckEyes = false;
+CheckEyes = true;
 
 for Indx_B = 1:numel(BandLabels)
     % load tally split by EO and EC trials
@@ -165,5 +164,25 @@ for Indx_B = 1:numel(BandLabels)
     ProbType(BadParticipants, :, :) = nan;
 
     save(fullfile(Pool, ['ProbType_', BandLabels{Indx_B}, '.mat']), 'ProbType')
-
 end
+
+
+%%% effect of sleep deprivation on eyes-open lapses
+[EO_Matrix, ~] = tabulateTable(Trials, EO, 'Type', 'tabulate', ...
+    Participants, Sessions, SessionGroups, CheckEyes); % P x SB x TT
+
+Tot_EO = sum(EO_Matrix, 3);
+
+% normalize by total trials per each eye condition
+EO_Matrix = EO_Matrix./Tot_EO;
+
+ProbType = cat(3, permute((EO_Matrix), [1 3 2])); % P x TT x SB
+
+% remove participants who dont have enough trials
+BadParticipants = any(Tot_EO<MinTots, 2);
+
+ProbType(BadParticipants, :, :) = nan;
+
+Pool = fullfile(Paths.Pool, 'Tasks'); % place to save matrices so they can be plotted in next script
+save(fullfile(Pool, 'ProbType_SD.mat'), 'ProbType')
+
