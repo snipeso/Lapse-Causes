@@ -28,7 +28,13 @@ hold on
 rectangle('position', [0 Range(1) 0.5, diff(Range)], 'EdgeColor','none', 'FaceColor', [PlotProps.Color.Generic, .15])
 
 plot([min(t), max(t)], [mean(Baseline, 'omitnan'), mean(Baseline, 'omitnan')], ':', 'Color', PlotProps.Color.Generic, 'LineWidth', PlotProps.Line.Width/2, 'HandleVisibility', 'off')
-plotGloWorms(squeeze(mean(Data, 1, 'omitnan')), t, logical(Sig), Colors, PlotProps)
+
+% Data_Means = squeeze(mean(Data, 1, 'omitnan'));
+Data_Means = squeeze(median(Data, 1, 'omitnan'));
+CI = quantile(Data, [.25 .75], 1);
+plotFuzzyCaterpillars(Data_Means, CI, t, 15, logical(Sig), Colors, PlotProps)
+
+
 plot([min(t), max(t)], mean(Baseline), ':', 'LineWidth', 1, 'Color', PlotProps.Color.Generic)
 
 if ~isempty(LineLabels)

@@ -52,7 +52,7 @@ zProbBurst(:, :, :, end) = [];
 
 PlotProps = P.Manuscript;
 PlotProps.Axes.xPadding = 25;
-Range = [-1.5 2];
+Range = [-3.5 4.1];
 
 Grid = [1 3];
 
@@ -84,7 +84,7 @@ saveFig([TitleTag, '_Probof_zscored'], Paths.PaperResults, PlotProps)
 
 PlotProps = P.Manuscript;
 PlotProps.Axes.xPadding = 25;
-Range = [0 .8];
+Range = [0 1];
 
 Grid = [1 3];
 
