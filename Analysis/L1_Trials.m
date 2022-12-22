@@ -192,3 +192,41 @@ ProbType(BadParticipants, :, :) = nan;
 Pool = fullfile(Paths.Pool, 'Tasks'); % place to save matrices so they can be plotted in next script
 save(fullfile(Pool, 'ProbType_SD.mat'), 'ProbType')
 
+
+
+%% get change in RT with bursts
+
+CheckEyes = true;
+
+RTs = nan(numel(Participants), numel(SessionGroups), numel(BandLabels), 2); % P x SB x B x N/Y
+for Indx_B = 1:numel(BandLabels)
+    % load tally split by EO and EC trials
+    
+    % no burst
+    [RTs(:, :, Indx_B, 1), ~] = tabulateTable(Trials, EO & Trials.(BandLabels{Indx_B})==0, ...
+        'RT', 'mean', Participants, Sessions, SessionGroups, CheckEyes); % P x SB
+
+    % burst
+    [RTs(:, :, Indx_B, 2), ~] = tabulateTable(Trials, EO & Trials.(BandLabels{Indx_B})==1, ...
+        'RT', 'mean', Participants, Sessions, SessionGroups, CheckEyes); % P x SB
+end
+
+save(fullfile(Pool, 'Burst_RTs.mat'), 'RTs')
+
+
+
+%%
+PlotProps = P.Manuscript;
+StatsP = P.StatsP;
+SB_Indx = 2;
+figure
+
+for Indx_B = 1:numel(BandLabels)
+
+    Data = squeeze(RTs(:, SB_Indx, Indx_B, :));
+
+subplot(1, 2, Indx_B)
+data2D('line', Data, {'No Burst', 'Burst'}, [], [], PlotProps.Color.Participants, StatsP, PlotProps)
+
+end
+

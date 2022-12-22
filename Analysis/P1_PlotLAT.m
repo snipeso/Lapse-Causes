@@ -218,10 +218,21 @@ Stats = pairedttest(EC_Lapses(:, 1), EC_Lapses(:, 2), StatsP);
 dispStat(Stats, [1 1], 'SD effect on EC lapses:');
 
 
+disp('___________________________________________')
+%% effect of bursts on RTs
 
+Bands = P.Bands;
+BandLabels = fieldnames(Bands);
+SB_Indx = 2;
 
+load(fullfile(Pool, 'Burst_RTs.mat'), 'RTs')
 
+for Indx_B = 1:numel(BandLabels)
+    Stats = pairedttest(squeeze(RTs(:, SB_Indx, Indx_B, 1)), ...
+        squeeze(RTs(:, SB_Indx, Indx_B, 2)), StatsP);
+dispStat(Stats, [1 1], [BandLabels{Indx_B}, ' effect on RTs:']);
 
+end
 
 
 
