@@ -164,9 +164,9 @@ for Indx_Ch = 1:3
     sdTheta_Burstless = squeeze(mean((ChData(:, 2, 1, Indx_Ch, Theta(1):Theta(2))), ...
         5, 'omitnan'));
 
-%     PrcntIntact = 100*(sdTheta_Intact-sdTheta_Burstless)./sdTheta_Intact;
+    %     PrcntIntact = 100*(sdTheta_Intact-sdTheta_Burstless)./sdTheta_Intact;
 
-PrcntIntact = 100*mean(sdTheta_Intact-sdTheta_Burstless, 'omitnan')/mean(sdTheta_Intact-blTheta_Intact);
+    PrcntIntact = 100*mean(sdTheta_Intact-sdTheta_Burstless, 'omitnan')/mean(sdTheta_Intact-blTheta_Intact);
 
     disp(['Prcnt removed SD: ' num2str(mean(PrcntIntact, 'omitnan'), '%.1f')])
 
