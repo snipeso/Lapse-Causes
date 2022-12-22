@@ -1,4 +1,4 @@
-function plotTimecourse(t, Data, Baseline, YLims, LineLabels, Colors, StatsP, PlotProps)
+function plotTimecourse(t, Data, Baseline, YLims, LineLabels, Text, Colors, StatsP, PlotProps)
 % plots the timecourse locked to stimulus onset.
 % Data is a P x TT x t matrix
 
@@ -25,8 +25,14 @@ else
 end
 
 hold on
-rectangle('position', [0 Range(1) 0.5, diff(Range)], 'EdgeColor','none', ...
-    'FaceColor', [PlotProps.Color.Generic, .15],'HandleVisibility','off')
+ plot([0 0], Range, 'Color', 'k', 'LineWidth',PlotProps.Line.Width/2, 'HandleVisibility', 'off')
+if ~all(isnan(Data(:, end, :))) % plot stim patch
+    rectangle('position', [0 Range(1) 0.5, diff(Range)], 'EdgeColor','none', ...
+        'FaceColor', [PlotProps.Color.Generic, .15],'HandleVisibility','off')
+end
+if ~isempty(Text)
+text(.1, Range(2)-.05*diff(Range), Text, 'FontName', PlotProps.Text.FontName, 'FontSize', PlotProps.Text.LegendSize)
+end
 
 plot([min(t), max(t)], [mean(Baseline, 'omitnan'), mean(Baseline, 'omitnan')], ...
     ':', 'Color', PlotProps.Color.Generic, 'LineWidth', PlotProps.Line.Width/2, 'HandleVisibility', 'off')
