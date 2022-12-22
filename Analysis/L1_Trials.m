@@ -18,6 +18,7 @@ Bands = P.Bands;
 Channels = P.Channels;
 Triggers = P.Triggers;
 fs = 250; % sampling rate of data
+Refresh = false;
 
 Pool = fullfile(Paths.Pool, 'Tasks'); % place to save matrices so they can be plotted in next script
 
@@ -25,32 +26,37 @@ Pool = fullfile(Paths.Pool, 'Tasks'); % place to save matrices so they can be pl
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Load trials
 
-%%% get trial information
-Trials = loadBehavior(Participants, Sessions, Task, Paths, false);
+if Refresh || ~exist(fullfile(Pool, 'AllTrials.mat'))
+    %%% get trial information
+    Trials = loadBehavior(Participants, Sessions, Task, Paths, false);
 
-% get time of stim and response trigger
-EEGPath = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task);
-Trials = getTrialLatencies(Trials, EEGPath, Triggers);
+    % get time of stim and response trigger
+    EEGPath = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task);
+    Trials = getTrialLatencies(Trials, EEGPath, Triggers);
 
-% get eyes-closed info
-MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task); % also 1000 fs
-Trials = getECtrials(Trials, MicrosleepPath, fs);
+    % get eyes-closed info
+    MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task); % also 1000 fs
+    Trials = getECtrials(Trials, MicrosleepPath, fs);
 
-% get burst info
-BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
-Trials = getBurstTrials(Trials, BurstPath, Bands, fs);
+    % get burst info
+    BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
+    Trials = getBurstTrials(Trials, BurstPath, Bands, fs);
 
-% set to nan all trials that are beyond 50% radius and with eyes closed
-Trials.FinalType = Trials.Type;
+    % set to nan all trials that are beyond 50% radius and with eyes closed
+    Trials.FinalType = Trials.Type;
 
-Q = quantile(Trials.Radius, 0.5);
-Trials.FinalType(Trials.Radius>Q) = nan;
+    Q = quantile(Trials.Radius, 0.5);
+    Trials.FinalType(Trials.Radius>Q) = nan;
 
-Trials.FinalType(isnan(Trials.EC)|Trials.EC==1) = nan;
+    Trials.FinalType(isnan(Trials.EC)|Trials.EC==1) = nan;
 
-Trials.isRight = double(Trials.isRight);
+    Trials.isRight = double(Trials.isRight);
 
-save(fullfile(Pool, 'AllTrials.mat'), 'Trials')
+    save(fullfile(Pool, 'AllTrials.mat'), 'Trials')
+
+else
+    load(fullfile(Pool, 'AllTrials.mat'), 'Trials')
+end
 
 
 %%
