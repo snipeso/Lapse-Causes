@@ -25,17 +25,19 @@ else
 end
 
 hold on
-rectangle('position', [0 Range(1) 0.5, diff(Range)], 'EdgeColor','none', 'FaceColor', [PlotProps.Color.Generic, .15])
+rectangle('position', [0 Range(1) 0.5, diff(Range)], 'EdgeColor','none', ...
+    'FaceColor', [PlotProps.Color.Generic, .15],'HandleVisibility','off')
 
-plot([min(t), max(t)], [mean(Baseline, 'omitnan'), mean(Baseline, 'omitnan')], ':', 'Color', PlotProps.Color.Generic, 'LineWidth', PlotProps.Line.Width/2, 'HandleVisibility', 'off')
+plot([min(t), max(t)], [mean(Baseline, 'omitnan'), mean(Baseline, 'omitnan')], ...
+    ':', 'Color', PlotProps.Color.Generic, 'LineWidth', PlotProps.Line.Width/2, 'HandleVisibility', 'off')
 
-% Data_Means = squeeze(mean(Data, 1, 'omitnan'));
-Data_Means = squeeze(median(Data, 1, 'omitnan'));
-CI = quantile(Data, [.25 .75], 1);
+Data_Means = squeeze(mean(Data, 1, 'omitnan'));
+CI = nan(2, size(Data, 2), size(Data, 3));
+
+PlotProps.HandleVisibility = 'off';
+plotAngelHair(t, Data, Colors, [], PlotProps)
 plotFuzzyCaterpillars(Data_Means, CI, t, 15, logical(Sig), Colors, PlotProps)
 
-
-plot([min(t), max(t)], mean(Baseline), ':', 'LineWidth', 1, 'Color', PlotProps.Color.Generic)
 
 if ~isempty(LineLabels)
     legend([LineLabels, 'p<.05'])

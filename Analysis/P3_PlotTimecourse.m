@@ -52,7 +52,7 @@ zProbBurst(:, :, :, end) = [];
 
 PlotProps = P.Manuscript;
 PlotProps.Axes.xPadding = 25;
-Range = [-3.5 4.1];
+Range = [-3.5 5];
 
 Grid = [1 3];
 
