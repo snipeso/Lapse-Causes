@@ -66,8 +66,9 @@ subfigure([], Grid, [3 1], [3 1], true, PlotProps.Indexes.Letters{1}, PlotProps)
 plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
 
 % plot also BL theta, with all bursts
+BL = squeeze(mean(log(ChData(:, 1, 3, Ch_Indx, :))-Shift, 1, 'omitnan'));
 hold on
-plot(log(Freqs), squeeze(mean(log(ChData(:, 1, 3, Ch_Indx, :)), 1, 'omitnan')), ...
+plot(log(Freqs), BL, ...
     'Color', PlotProps.Color.Generic, 'LineStyle','--', 'LineWidth', 1)
 
 ylim(yLims)
@@ -90,7 +91,7 @@ Data = Data - Shift;
 
 subfigure([], Grid, [3 2], [3 1], true, PlotProps.Indexes.Letters{2}, PlotProps);
 plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
-legend({'', 'Alpha burst power'}, 'location', 'southwest')
+legend({'', 'BL alpha burst power'}, 'location', 'southwest')
 set(legend, 'ItemTokenSize', [15 15])
 ylim(yLims)
 title('Back, baseline')
@@ -166,7 +167,7 @@ for Indx_Ch = 1:3
 
     %     PrcntIntact = 100*(sdTheta_Intact-sdTheta_Burstless)./sdTheta_Intact;
 
-    PrcntIntact = 100*mean(sdTheta_Intact-sdTheta_Burstless, 'omitnan')/mean(sdTheta_Intact-blTheta_Intact);
+%     PrcntIntact = 100*mean(sdTheta_Intact-sdTheta_Burstless, 'omitnan')/mean(sdTheta_Intact-blTheta_Intact);
 
     disp(['Prcnt removed SD: ' num2str(mean(PrcntIntact, 'omitnan'), '%.1f')])
 
