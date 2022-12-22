@@ -138,7 +138,8 @@ end
 disp('_______________________________')
 %% Percent SD theta removed
 
-% clc
+clc
+StatsP = P.StatsP;
 
 Bands = P.Bands;
 ChLabels = fieldnames(Channels.preROI);
@@ -146,14 +147,15 @@ ChLabels = fieldnames(Channels.preROI);
 Theta = dsearchn(Freqs, Bands.Theta');
 
 
-for Indx_Ch = 2%1:3
+for Indx_Ch = 1:3
 
-%     sdTheta_Intact = squeeze(mean(log(ChData(:, 2, 3, Indx_Ch, Theta(1):Theta(2))), ...
-%         5, 'omitnan'));
-%     blTheta_Intact = squeeze(mean(log(ChData(:, 1, 3, Indx_Ch, Theta(1):Theta(2))), ...
-%         5, 'omitnan'));
-%     sdTheta_Burstless = squeeze(mean(log(ChData(:, 2, 1, Indx_Ch, Theta(1):Theta(2))), ...
-%         5, 'omitnan'));
+    disp([ChLabels{Indx_Ch}])
+    %     sdTheta_Intact = squeeze(mean(log(ChData(:, 2, 3, Indx_Ch, Theta(1):Theta(2))), ...
+    %         5, 'omitnan'));
+    %     blTheta_Intact = squeeze(mean(log(ChData(:, 1, 3, Indx_Ch, Theta(1):Theta(2))), ...
+    %         5, 'omitnan'));
+    %     sdTheta_Burstless = squeeze(mean(log(ChData(:, 2, 1, Indx_Ch, Theta(1):Theta(2))), ...
+    %         5, 'omitnan'));
 
     sdTheta_Intact = squeeze(mean((ChData(:, 2, 3, Indx_Ch, Theta(1):Theta(2))), ...
         5, 'omitnan'));
@@ -162,11 +164,17 @@ for Indx_Ch = 2%1:3
     sdTheta_Burstless = squeeze(mean((ChData(:, 2, 1, Indx_Ch, Theta(1):Theta(2))), ...
         5, 'omitnan'));
 
-    PrcntSD = 100*(sdTheta_Intact-sdTheta_Burstless)./(sdTheta_Intact-blTheta_Intact);
+    PrcntIntact = 100*(sdTheta_Intact-sdTheta_Burstless)./sdTheta_Intact;
 
-    disp([ChLabels{Indx_Ch}, ' percent of sdTheta removed: ', ...
-        num2str(mean(PrcntSD, 'omitnan'), '%.1f'), ', ', ...
-        num2str(std(PrcntSD, 'omitnan'), '%.1f')])
+    disp(['Prcnt removed SD: ' num2str(mean(PrcntIntact, 'omitnan'), '%.1f')])
+
+    Stats = pairedttest(blTheta_Intact, sdTheta_Intact, StatsP);
+    dispStat(Stats, [1 1], 'Intact change from BL:');
+
+    Stats = pairedttest(blTheta_Intact, sdTheta_Burstless, StatsP);
+    dispStat(Stats, [1 1], 'Burstless change from BL:');
+
+    disp('****')
 
 end
 
