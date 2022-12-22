@@ -22,6 +22,7 @@ fs = Parameters.fs;
 
 ConfidenceThreshold = Parameters.EC_ConfidenceThreshold;
 minTrials = Parameters.MinTypes;
+minNanProportion = Parameters.MinNanProportion; % any more nans than this in a given trial is grounds to exclude the trial
 
 Pool = fullfile(Paths.Pool, 'Eyes'); % place to save matrices so they can be plotted in next script
 
@@ -37,13 +38,15 @@ Q = quantile(Trials.Radius, 0.5);
 
 t = linspace(StartTime, EndTime, fs*(EndTime-StartTime));
 
-ProbMicrosleep = nan(numel(Participants), 3, numel(t));
+ProbMicrosleep_Stim = nan(numel(Participants), 3, numel(t));
+ProbMicrosleep_Resp = ProbMicrosleep_Stim;
 GenProbMicrosleep = zeros(numel(Participants), 2); % point with EC, and total points
 nTrials_All = nan(numel(Participants), 3);
 
 for Indx_P = 1:numel(Participants)
 
-    AllTrials = [];
+    AllTrials_Stim = [];
+    AllTrials_Resp = [];
     AllTrials_Table = table();
 
     for Indx_S = 1:numel(Sessions)
@@ -70,18 +73,36 @@ for Indx_P = 1:numel(Participants)
         EyeClosed(isnan(EyeOpen)) = nan;
 
         % cut put each trial, pool together
-        Trials_EC = nan(nTrials, numel(t));
+        Trials_EC_Stim = nan(nTrials, numel(t));
+        Trials_EC_Resp = Trials_EC_Stim;
         for Indx_T = 1:nTrials
+
+            % stimulus locked
             StimT = round(fs*Trials.StimTime(CurrentTrials(Indx_T)));
             Start = StimT+StartTime*fs;
             End = StimT+EndTime*fs-1;
 
             Trial = EyeClosed(Start:End); % just keep track of eyes closed
-            Trials_EC(Indx_T, :) = Trial;
+            Trials_EC_Stim(Indx_T, :) = Trial;
+
+
+            % response locked
+            RespT = round(fs*Trials.RespTime(CurrentTrials(Indx_T)));
+            if isnan(RespT)
+                continue
+            end
+
+            Start = RespT+StartTime*fs;
+            End = RespT+EndTime*fs-1;
+
+            Trial = EyeClosed(:, Start:End); % just keep track of eyes closed
+            Trials_EC_Resp(Indx_T, :) = Trial;
+
         end
 
         % pool sessions
-        AllTrials = cat(1, AllTrials, Trials_EC);
+        AllTrials_Stim = cat(1, AllTrials_Stim, Trials_EC_Stim);
+        AllTrials_Resp = cat(1, AllTrials_Resp, Trials_EC_Resp);
 
         % save info
         AllTrials_Table = cat(1, AllTrials_Table, Trials(CurrentTrials, :));
@@ -96,26 +117,23 @@ for Indx_P = 1:numel(Participants)
     end
 
     %%% get probability of microsleep (in time) for each trial type
-
-    Closest =  AllTrials_Table.Radius <= Q;
-    nTrials_Nans  = 0;
     for Indx_TT = 1:3
 
         % choose trials
         Trial_Indexes = AllTrials_Table.Type==Indx_TT; % & Closest;
         nTrials = nnz(Trial_Indexes);
-        TypeTrials = AllTrials(Trial_Indexes, :);
+        TypeTrials_Stim = AllTrials_Stim(Trial_Indexes, :);
 
-        % check if there's enough data
-        Nans = sum(isnan(TypeTrials), 1);
-        if isempty(TypeTrials) || nTrials < minTrials || any(nTrials - Nans < minTrials) % makes sure every timepoint had at least 10 trials
-            continue
+        ProbMicrosleep_Stim(Indx_P, Indx_TT, :) = ...
+            probEvent(TypeTrials_Stim, minNanProportion, minTrials);
+
+
+        % response trials
+        if Indx_TT > 1
+            TypeTrials_Resp = AllTrials_Resp(Trial_Indexes, :);
+            ProbMicrosleep_Resp(Indx_P, Indx_TT, :) = ...
+                probEvent(TypeTrials_Resp, minNanProportion, minTrials);
         end
-
-        % average trials
-        nTrialsPoints = sum(TypeTrials==1)+sum(TypeTrials==0); % for each timepoint
-        ProbMicrosleep(Indx_P, Indx_TT, :)  = sum(TypeTrials, 1, 'omitnan')./nTrialsPoints;
-        nTrials_All(Indx_P, Indx_TT) = nTrials;
     end
 
     disp(['Finished ', Participants{Indx_P}])
@@ -123,8 +141,12 @@ end
 
 % remove all data from participants missing any of the trial types
 for Indx_P = 1:numel(Participants)
-    if any(isnan(ProbMicrosleep(Indx_P, :, :)), 'all')
-        ProbMicrosleep(Indx_P, :, :) = nan;
+    if any(isnan(ProbMicrosleep_Stim(Indx_P, :, :)), 'all')
+        ProbMicrosleep_Stim(Indx_P, :, :) = nan;
+    end
+
+    if any(isnan(ProbMicrosleep_Resp(Indx_P, 2:3, :)), 'all')
+        ProbMicrosleep_Resp(Indx_P, :, :) = nan;
     end
 end
 
@@ -132,4 +154,4 @@ end
 GenProbMicrosleep = GenProbMicrosleep(:, 1)./GenProbMicrosleep(:, 2);
 
 %%% save
-save(fullfile(Pool, 'ProbMicrosleep.mat'), 'ProbMicrosleep', 't', 'GenProbMicrosleep', 'nTrials_All')
+save(fullfile(Pool, 'ProbMicrosleep.mat'), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't', 'GenProbMicrosleep')

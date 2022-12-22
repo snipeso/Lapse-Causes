@@ -91,7 +91,7 @@ for Indx_P = 1:numel(Participants)
 
 
             % response locked
-            RespT =  round(fs*Trials.RespTime(CurrentTrials(Indx_T)));
+            RespT = round(fs*Trials.RespTime(CurrentTrials(Indx_T)));
 
             if isnan(RespT)
                 continue

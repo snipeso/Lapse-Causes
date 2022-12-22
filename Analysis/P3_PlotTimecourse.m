@@ -26,12 +26,19 @@ TitleTag = strjoin({'Timecourse'}, '_');
 
 
 
-load(fullfile(Paths.Pool, 'Eyes', 'ProbMicrosleep.mat'), 'ProbMicrosleep', 't', 'GenProbMicrosleep')
+load(fullfile(Paths.Pool, 'Eyes', 'ProbMicrosleep.mat'), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't', 'GenProbMicrosleep')
 t_microsleep = t;
-sProbMicrosleep =  smoothFreqs(ProbMicrosleep, t_microsleep, 'last', .5);
-zProbMicrosleep = zScoreData(cat(3, sProbMicrosleep, repmat(GenProbMicrosleep, 1, 3)), 'first');
-zGenProbMicrosleep = squeeze(zProbMicrosleep(:, 1, end));
-zProbMicrosleep(:, :, end) = [];
+sProbMicrosleep_Stim =  smoothFreqs(ProbMicrosleep_Stim, t_microsleep, 'last', .5);
+zProbMicrosleep_Stim = zScoreData(cat(3, sProbMicrosleep_Stim, repmat(GenProbMicrosleep, 1, 3)), 'first');
+zGenProbMicrosleep_Stim = squeeze(zProbMicrosleep_Stim(:, 1, end));
+zProbMicrosleep_Stim(:, :, end) = [];
+
+sProbMicrosleep_Resp =  smoothFreqs(ProbMicrosleep_Resp, t_microsleep, 'last', .5);
+zProbMicrosleep_Resp = zScoreData(cat(3, sProbMicrosleep_Resp, repmat(GenProbMicrosleep, 1, 3)), 'first');
+zGenProbMicrosleep_Resp = squeeze(zProbMicrosleep_Resp(:, 1, end));
+zProbMicrosleep_Resp(:, :, end) = [];
+
+
 
 load(fullfile(Paths.Pool, 'EEG', 'ProbBurst.mat'), 'ProbBurst_Stim', 'ProbBurst_Resp', 't',  'GenProbBurst')
 t_burst = t;
@@ -69,7 +76,7 @@ Grid = [1 3];
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.3])
 
 subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
-plotTimecourse(t_microsleep, flip(zProbMicrosleep, 2), zGenProbMicrosleep, ...
+plotTimecourse(t_microsleep, flip(zProbMicrosleep_Stim, 2), zGenProbMicrosleep_Stim, ...
     Range, flip(TallyLabels), 'Stimulus', getColors(3), StatsP, PlotProps)
 ylim(Range)
 ylabel('Probability of EC (z-scored)')
@@ -104,7 +111,7 @@ Grid = [1 3];
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.4])
 
 subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
-plotTimecourse(t_microsleep, flip(sProbMicrosleep, 2), GenProbMicrosleep, ...
+plotTimecourse(t_microsleep, flip(sProbMicrosleep_Stim, 2), GenProbMicrosleep, ...
     Range, flip(TallyLabels), 'Stimulus', getColors(3), StatsP, PlotProps)
 ylim(Range)
 ylabel('Probability of eyes closed')
@@ -139,7 +146,7 @@ Grid = [1 3];
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.3])
 
 subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
-plotTimecourse(t_microsleep, flip(zProbMicrosleep, 2), zGenProbMicrosleep, ...
+plotTimecourse(t_microsleep, flip(zProbMicrosleep_Resp, 2), zGenProbMicrosleep_Stim, ...
     Range, flip(TallyLabels), 'Response', getColors(3), StatsP, PlotProps)
 ylim(Range)
 ylabel('Probability of EC (z-scored)')
@@ -176,7 +183,7 @@ Grid = [1 3];
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.4])
 
 subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
-plotTimecourse(t_microsleep, flip(sProbMicrosleep, 2), GenProbMicrosleep, ...
+plotTimecourse(t_microsleep, flip(sProbMicrosleep_Resp, 2), GenProbMicrosleep, ...
     Range, flip(TallyLabels), 'Response', getColors(3), StatsP, PlotProps)
 ylim(Range)
 ylabel('Probability of eyes closed')
