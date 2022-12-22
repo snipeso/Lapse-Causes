@@ -40,6 +40,7 @@ Grid = [4 2];
 PlotProps = P.Manuscript;
 PlotProps.Axes.yPadding = 18;
 PlotProps.Axes.xPadding = 18;
+PlotProps.HandleVisibility = 'on';
 xLog = true;
 xLims = [2 30];
 yLims = [-2.5 2.5];
@@ -63,9 +64,15 @@ Data = Data - Shift;
 
 subfigure([], Grid, [3 1], [3 1], true, PlotProps.Indexes.Letters{1}, PlotProps);
 plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
+
+% plot also BL theta, with all bursts
+hold on
+plot(log(Freqs), squeeze(mean(log(ChData(:, 1, 3, Ch_Indx, :)), 1, 'omitnan')), ...
+    'Color', PlotProps.Color.Generic, 'LineStyle','--', 'LineWidth', 1)
+
 ylim(yLims)
-legend({ 'Theta burst power'}, 'location', 'southwest')
-set(legend, 'ItemTokenSize', [5 5])
+legend({'', 'SD theta burst power', 'BL power'}, 'location', 'southwest')
+set(legend, 'ItemTokenSize', [15 15])
 title('Front, sleep deprivation')
 ylabel('Log PSD amplitude (\muV^2/Hz)')
 
@@ -83,8 +90,8 @@ Data = Data - Shift;
 
 subfigure([], Grid, [3 2], [3 1], true, PlotProps.Indexes.Letters{2}, PlotProps);
 plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
-legend({'Alpha burst power'}, 'location', 'southwest')
-set(legend, 'ItemTokenSize', [5 5])
+legend({'', 'Alpha burst power'}, 'location', 'southwest')
+set(legend, 'ItemTokenSize', [15 15])
 ylim(yLims)
 title('Back, baseline')
 
@@ -126,4 +133,44 @@ for Indx_B = 1:numel(BandLabels)
         disp(['Time spent in ', BandLabels{Indx_B} ' ', EyeLabels{Indx_E}, ': ', MEAN, ', ', STD])
     end
 end
+
+
+disp('_______________________________')
+%% Percent SD theta removed
+
+% clc
+
+Bands = P.Bands;
+ChLabels = fieldnames(Channels.preROI);
+
+Theta = dsearchn(Freqs, Bands.Theta');
+
+
+for Indx_Ch = 2%1:3
+
+%     sdTheta_Intact = squeeze(mean(log(ChData(:, 2, 3, Indx_Ch, Theta(1):Theta(2))), ...
+%         5, 'omitnan'));
+%     blTheta_Intact = squeeze(mean(log(ChData(:, 1, 3, Indx_Ch, Theta(1):Theta(2))), ...
+%         5, 'omitnan'));
+%     sdTheta_Burstless = squeeze(mean(log(ChData(:, 2, 1, Indx_Ch, Theta(1):Theta(2))), ...
+%         5, 'omitnan'));
+
+    sdTheta_Intact = squeeze(mean((ChData(:, 2, 3, Indx_Ch, Theta(1):Theta(2))), ...
+        5, 'omitnan'));
+    blTheta_Intact = squeeze(mean((ChData(:, 1, 3, Indx_Ch, Theta(1):Theta(2))), ...
+        5, 'omitnan'));
+    sdTheta_Burstless = squeeze(mean((ChData(:, 2, 1, Indx_Ch, Theta(1):Theta(2))), ...
+        5, 'omitnan'));
+
+    PrcntSD = 100*(sdTheta_Intact-sdTheta_Burstless)./(sdTheta_Intact-blTheta_Intact);
+
+    disp([ChLabels{Indx_Ch}, ' percent of sdTheta removed: ', ...
+        num2str(mean(PrcntSD, 'omitnan'), '%.1f'), ', ', ...
+        num2str(std(PrcntSD, 'omitnan'), '%.1f')])
+
+end
+
+
+
+
 
