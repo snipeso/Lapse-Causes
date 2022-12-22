@@ -23,7 +23,7 @@ fs = Parameters.fs;
 
 ConfidenceThreshold = Parameters.EC_ConfidenceThreshold;
 minTrials = Parameters.MinTypes;
-minNanProportion = 0.5; % any more nans than this in a given trial is grounds to exclude the trial
+minNanProportion = Parameters.MinNanProportion; % any more nans than this in a given trial is grounds to exclude the trial
 
 Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plotted in next script
 BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
@@ -127,14 +127,20 @@ for Indx_P = 1:numel(Participants)
     for Indx_B = 1:numel(BandLabels)
         for Indx_TT = 1:3
 
-            % choose trials
+            % get prob of burst in stim trial
             Trial_Indexes = AllTrials_Table.Type==Indx_TT; %% & Closest; % & AllTrials_Table.EC==0;
             nTrials = nnz(Trial_Indexes);
             TypeTrials_Stim = squeeze(AllTrials_Stim(Trial_Indexes, Indx_B, :));
-
             ProbBurst_Stim(Indx_P, Indx_TT, Indx_B, :)  = ...
                 probEvent(TypeTrials_Stim, minNanProportion, minTrials);
 
+
+            % get prob of burst in resp trial
+            if Indx_TT>1 % not lapses
+                TypeTrials_Resp = squeeze(AllTrials_Resp(Trial_Indexes, Indx_B, :));
+                ProbBurst_Resp(Indx_P, Indx_TT, Indx_B, :)  = ...
+                    probEvent(TypeTrials_Resp, minNanProportion, minTrials);
+            end
         end
     end
 
@@ -144,8 +150,14 @@ end
 
 % remove all data from participants missing any of the trial types
 for Indx_P = 1:numel(Participants)
-    if any(isnan(ProbBurst_Stim(Indx_P, :, :)), 'all')
-        ProbBurst_Stim(Indx_P, :, :) = nan;
+    for Indx_B = 1:numel(BandLabels)
+        if any(isnan(ProbBurst_Stim(Indx_P, :, Indx_B, :)), 'all')
+            ProbBurst_Stim(Indx_P, :, Indx_B, :) = nan;
+        end
+
+        if any(isnan(ProbBurst_Resp(Indx_P, :, Indx_B, :)), 'all')
+            ProbBurst_Resp(Indx_P, :, Indx_B, :) = nan;
+        end
     end
 end
 
@@ -154,4 +166,4 @@ GenProbBurst = GenProbBurst(:, :, 1)./GenProbBurst(:, :, 2);
 
 %%% save
 t = t_window;
-save(fullfile(Pool, 'ProbBurst.mat'), 'ProbBurst_Stim', 't', 'GenProbBurst')
+save(fullfile(Pool, 'ProbBurst.mat'), 'ProbBurst_Stim', 'ProbBurst_Resp', 't', 'GenProbBurst')
