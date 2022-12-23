@@ -96,8 +96,8 @@ for Indx_P = 1:numel(Participants)
                     chopTrials(BT, Trials, CurrentTrials, StartTime, EndTime, fs);
 
                 % get general probability of a burst
-                GenProbBurst(Indx_P, Indx_Ch, Indx_B, 1) = GenProbBurst(Indx_P, Indx_B, 1) + sum(BT==1); % burst
-                GenProbBurst(Indx_P, Indx_Ch, Indx_B, 2) = GenProbBurst(Indx_P, Indx_B, 2) + sum(BT==1 | BT==0); % all points
+                GenProbBurst(Indx_P, Indx_Ch, Indx_B, 1) = GenProbBurst(Indx_P, Indx_Ch, Indx_B, 1) + sum(BT==1); % burst
+                GenProbBurst(Indx_P, Indx_Ch, Indx_B, 2) = GenProbBurst(Indx_P, Indx_Ch, Indx_B, 2) + sum(BT==1 | BT==0); % all points
             end
         end
 
@@ -149,11 +149,11 @@ end
 % remove all data from participants missing any of the trial types
 for Indx_P = 1:numel(Participants)
     for Indx_B = 1:numel(BandLabels)
-        if any(isnan(ProbBurst_Stim(Indx_P, :, Indx_B, :)), 'all')
+        if any(isnan(ProbBurst_Stim(Indx_P, :, :, Indx_B, :)), 'all')
             ProbBurst_Stim(Indx_P, :, Indx_B, :) = nan;
         end
 
-        if any(isnan(ProbBurst_Resp(Indx_P, 2:3, Indx_B, :)), 'all')
+        if any(isnan(ProbBurst_Resp(Indx_P, 2:3, :, Indx_B, :)), 'all')
             ProbBurst_Resp(Indx_P, :, Indx_B, :) = nan;
         end
     end

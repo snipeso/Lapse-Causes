@@ -21,10 +21,14 @@ t_values = Stats.t;
 % G>1
 Stats.ES_top1 = nnz(ES >= 1);
 
-ES(~Sig) = nan; % only consider significant channels for rest
+ES(Sig==0) = nan; % only consider significant channels for rest
 [Stats.ES_maxG, Indx] = max(ES);
 Stats.ES_maxGch = Chanlocs(Indx).labels;
 Stats.sigtot = nnz(Sig);
+
+if all(isnan(Sig))
+    return
+end
 
 
 %%% Plot
