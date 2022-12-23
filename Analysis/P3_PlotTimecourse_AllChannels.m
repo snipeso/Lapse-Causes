@@ -34,16 +34,14 @@ nWindows = size(ProbBurst_Stim, 5);
 
 %% Plot raw topoplots
 
-PlotProps.Colorbar.Location = 'east';
-
 Grid = [3 4];
-CLims = [-7 7];
+CLims = [-8 8];
 
 Types = [3 2 1];
 WindowTitles = {'Pre', 'Stimulus', 'Response', 'Post'};
 
 for Indx_B = 1:2
-    figure('Units','centimeters', 'Position',[0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
+    figure('Units','centimeters', 'Position',[0 0 PlotProps.Figure.Width*.8, PlotProps.Figure.Height*.45])
     for Indx_TT = 1:3
 
         % stim windows
@@ -74,6 +72,9 @@ for Indx_B = 1:2
         Data = squeeze(ProbBurst_Resp(:,  Types(Indx_TT), :, Indx_B, 2));
         Baseline = squeeze(GenProbBurst(:, :, Indx_B));
 
+        if all(isnan(Data))
+            continue
+        end
         subfigure([], Grid, [Indx_TT, Indx_W], [], false, '', PlotProps);
         topoDiff(Baseline, Data, Chanlocs, CLims, StatsP, PlotProps);
         colorbar off
@@ -83,8 +84,9 @@ for Indx_B = 1:2
         end
 
     end
+    
     subfigure([], Grid, [Indx_TT, Indx_W], [], false, '', PlotProps);
     plotColorbar('Divergent', CLims, 't-values', PlotProps)
-    %     saveFig([TitleTag, '_Probof_raw_', BandLabels{Indx_B}], Paths.PaperResults, PlotProps)
+        saveFig([TitleTag, '_Probof_raw_', BandLabels{Indx_B}], Paths.PaperResults, PlotProps)
 end
 
