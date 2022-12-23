@@ -21,7 +21,6 @@ StartTime = Parameters.Timecourse.Start;
 EndTime = Parameters.Timecourse.End;
 fs = Parameters.fs;
 
-ConfidenceThreshold = Parameters.EC_ConfidenceThreshold;
 minTrials = Parameters.MinTypes;
 minNanProportion = Parameters.MinNanProportion; % any more nans than this in a given trial is grounds to exclude the trial
 
@@ -64,16 +63,17 @@ for Indx_P = 1:numel(Participants)
         t_valid = EEG.valid_t;
 
         Freqs = [Bursts.Frequency];
+        Globality = [Bursts.globality_bursts];
 
         Trials_B_Stim = nan(nTrials, numel(BandLabels), numel(t_window));
         Trials_B_Resp = nan(nTrials, numel(BandLabels), numel(t_window));
 
-        BurstTime = nan(numel(BandLabels), Pnts);
         for Indx_B = 1:numel(BandLabels)
 
             % 0s and 1s of whether there is a burst or not, nans for noise
             Band = Bands.(BandLabels{Indx_B});
-            BT = bursts2time(Bursts(Freqs>=Band(1) & Freqs<Band(2)), Pnts);
+%             BT = bursts2time(Bursts(Freqs>=Band(1) & Freqs<Band(2)), Pnts);
+BT = bursts2time(Bursts(Freqs>=Band(1) & Freqs<Band(2) & Globality>.5), Pnts);
             BT(not(t_valid)) = nan;
 
             % get trial info
