@@ -65,55 +65,32 @@ for Indx_P = 1:numel(Participants)
 
         Freqs = [Bursts.Frequency];
 
-        % get timepoints for each burst
-        BurstTime = nan(numel(BandLabels), Pnts);
-        for Indx_B = 1:numel(BandLabels)
-            Band = Bands.(BandLabels{Indx_B});
-            BT = bursts2time(Bursts(Freqs>=Band(1) & Freqs<Band(2)), Pnts);
-            BurstTime(Indx_B, :) = BT;
-        end
-
-        BurstTime(:, not(t_valid)) = nan;
-
-        % cut put each trial, pool together
         Trials_B_Stim = nan(nTrials, numel(BandLabels), numel(t_window));
         Trials_B_Resp = nan(nTrials, numel(BandLabels), numel(t_window));
 
-        for Indx_T = 1:nTrials
+        BurstTime = nan(numel(BandLabels), Pnts);
+        for Indx_B = 1:numel(BandLabels)
 
-            % stimulus locked
-            StimT = round(fs*Trials.StimTime(CurrentTrials(Indx_T)));
-            Start = StimT+StartTime*fs;
-            End = StimT+EndTime*fs-1;
+            % 0s and 1s of whether there is a burst or not, nans for noise
+            Band = Bands.(BandLabels{Indx_B});
+            BT = bursts2time(Bursts(Freqs>=Band(1) & Freqs<Band(2)), Pnts);
+            BT(not(t_valid)) = nan;
 
-            Trial = BurstTime(:, Start:End); % just keep track of eyes closed
-            Trials_B_Stim(Indx_T, :, :) = Trial;
+            % get trial info
+            [Trials_B_Stim(:, Indx_B, :), Trials_B_Resp(:, Indx_B, :)] = ...
+                chopTrials(BT, Trials, CurrentTrials, StartTime, EndTime, fs);
 
-
-            % response locked
-            RespT = round(fs*Trials.RespTime(CurrentTrials(Indx_T)));
-
-            if isnan(RespT)
-                continue
-            end
-
-            Start = RespT+StartTime*fs;
-            End = RespT+EndTime*fs-1;
-
-            Trial = BurstTime(:, Start:End); % just keep track of eyes closed
-            Trials_B_Resp(Indx_T, :, :) = Trial;
+            % get general probability of a burst
+            GenProbBurst(Indx_P, Indx_B, 1) = GenProbBurst(Indx_P, Indx_B, 1) + sum(BT==1); % burst
+            GenProbBurst(Indx_P, Indx_B, 2) = GenProbBurst(Indx_P, Indx_B, 2) + sum(BT==1 | BT==0); % all points
         end
-
 
         % pool sessions
         AllTrials_Stim = cat(1, AllTrials_Stim, Trials_B_Stim);
         AllTrials_Resp = cat(1, AllTrials_Resp, Trials_B_Resp);
 
-        % save info
+        % save trial info
         AllTrials_Table = cat(1, AllTrials_Table, Trials(CurrentTrials, :));
-        GenProbBurst(Indx_P, :, 1) =  GenProbBurst(Indx_P, :, 1)' + sum(BurstTime==1, 2);
-        GenProbBurst(Indx_P, :, 2) =  GenProbBurst(Indx_P, :, 2)' + sum(BurstTime==1 | BurstTime==0, 2);
-
     end
 
     if isempty(AllTrials_Table)
@@ -122,22 +99,22 @@ for Indx_P = 1:numel(Participants)
     end
 
     %%% get probability of microsleep (in time) for each trial type
-    nTrials_Nans = 0;
-
     for Indx_B = 1:numel(BandLabels)
         for Indx_TT = 1:3
 
             % get prob of burst in stim trial
-            Trial_Indexes = AllTrials_Table.Type==Indx_TT; %% & Closest; % & AllTrials_Table.EC==0;
-            nTrials = nnz(Trial_Indexes);
-            TypeTrials_Stim = squeeze(AllTrials_Stim(Trial_Indexes, Indx_B, :));
-            ProbBurst_Stim(Indx_P, Indx_TT, Indx_B, :)  = ...
+            TT_Indexes = AllTrials_Table.Type==Indx_TT;
+            nTrials = nnz(TT_Indexes);
+            TypeTrials_Stim = squeeze(AllTrials_Stim(TT_Indexes, Indx_B, :));
+            
+            ProbBurst_Stim(Indx_P, Indx_TT, Indx_B, :) = ...
                 probEvent(TypeTrials_Stim, minNanProportion, minTrials);
 
 
             % get prob of burst in resp trial
             if Indx_TT>1 % not lapses
-                TypeTrials_Resp = squeeze(AllTrials_Resp(Trial_Indexes, Indx_B, :));
+                TypeTrials_Resp = squeeze(AllTrials_Resp(TT_Indexes, Indx_B, :));
+                
                 ProbBurst_Resp(Indx_P, Indx_TT, Indx_B, :)  = ...
                     probEvent(TypeTrials_Resp, minNanProportion, minTrials);
             end
