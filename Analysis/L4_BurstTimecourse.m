@@ -63,7 +63,6 @@ for Indx_P = 1:numel(Participants)
         t_valid = EEG.valid_t;
 
         Freqs = [Bursts.Frequency];
-        Globality = [Bursts.globality_bursts];
 
         Trials_B_Stim = nan(nTrials, numel(BandLabels), numel(t_window));
         Trials_B_Resp = nan(nTrials, numel(BandLabels), numel(t_window));
@@ -72,8 +71,7 @@ for Indx_P = 1:numel(Participants)
 
             % 0s and 1s of whether there is a burst or not, nans for noise
             Band = Bands.(BandLabels{Indx_B});
-%             BT = bursts2time(Bursts(Freqs>=Band(1) & Freqs<Band(2)), Pnts);
-BT = bursts2time(Bursts(Freqs>=Band(1) & Freqs<Band(2) & Globality>.5), Pnts);
+            BT = bursts2time(Bursts(Freqs>=Band(1) & Freqs<Band(2)), Pnts);
             BT(not(t_valid)) = nan;
 
             % get trial info
