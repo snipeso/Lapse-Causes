@@ -43,7 +43,7 @@ PlotProps.Axes.xPadding = 18;
 PlotProps.HandleVisibility = 'on';
 xLog = true;
 xLims = [2 30];
-yLims = [-2.5 2.5];
+yLims = [-2.4 2.4];
 
 NormBand = [1 4];
 NormBand_Indx = dsearchn(Freqs, NormBand');
@@ -74,8 +74,7 @@ plot(log(Freqs), BL, ...
 ylim(yLims)
 legend({'', 'SD theta burst power', 'BL power'}, 'location', 'southwest')
 set(legend, 'ItemTokenSize', [15 15])
-title('Front, sleep deprivation')
-ylabel('Log PSD amplitude (\muV^2/Hz)')
+ylabel('Front log PSD amplitude (\muV^2/Hz)')
 
 
 %%% alpha
@@ -94,8 +93,7 @@ plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
 legend({'', 'BL alpha burst power'}, 'location', 'southwest')
 set(legend, 'ItemTokenSize', [15 15])
 ylim(yLims)
-title('Back, baseline')
-
+ylabel('Back')
 
 Legend = [append(BandLabels, ' bursts'), 'Both'];
 YLim = [0 100];
