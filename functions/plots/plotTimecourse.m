@@ -3,7 +3,7 @@ function plotTimecourse(t, Data, Baseline, YLims, LineLabels, Text, Colors, Stat
 % Data is a P x TT x t matrix
 
 %%% Get stats
-if ~isempty(StatsP)
+if ~isempty(StatsP) && ~isempty(Baseline)
     Data1 = repmat(Baseline, 1, size(Data, 3)); % baseline
     Data2 = Data;
     Stats = pairedttest(Data1, Data2, StatsP);
