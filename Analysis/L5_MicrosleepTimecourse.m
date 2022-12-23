@@ -73,36 +73,12 @@ for Indx_P = 1:numel(Participants)
         EyeClosed(isnan(EyeOpen)) = nan;
 
         % cut put each trial, pool together
-        Trials_EC_Stim = nan(nTrials, numel(t));
-        Trials_EC_Resp = Trials_EC_Stim;
-        for Indx_T = 1:nTrials
-
-            % stimulus locked
-            StimT = round(fs*Trials.StimTime(CurrentTrials(Indx_T)));
-            Start = StimT+StartTime*fs;
-            End = StimT+EndTime*fs-1;
-
-            Trial = EyeClosed(Start:End); % just keep track of eyes closed
-            Trials_EC_Stim(Indx_T, :) = Trial;
-
-
-            % response locked
-            RespT = round(fs*Trials.RespTime(CurrentTrials(Indx_T)));
-            if isnan(RespT)
-                continue
-            end
-
-            Start = RespT+StartTime*fs;
-            End = RespT+EndTime*fs-1;
-
-            Trial = EyeClosed(:, Start:End); % just keep track of eyes closed
-            Trials_EC_Resp(Indx_T, :) = Trial;
-
-        end
+        [Trials_Stim, Trials_Resp] = ...
+            chopTrials(EyeClosed, Trials, CurrentTrials, StartTime, EndTime, fs);
 
         % pool sessions
-        AllTrials_Stim = cat(1, AllTrials_Stim, Trials_EC_Stim);
-        AllTrials_Resp = cat(1, AllTrials_Resp, Trials_EC_Resp);
+        AllTrials_Stim = cat(1, AllTrials_Stim, Trials_Stim);
+        AllTrials_Resp = cat(1, AllTrials_Resp, Trials_Resp);
 
         % save info
         AllTrials_Table = cat(1, AllTrials_Table, Trials(CurrentTrials, :));
