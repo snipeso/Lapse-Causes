@@ -36,7 +36,8 @@ load(fullfile(Pool, strjoin({TitleTag, 'ChData.mat'}, '_')), 'ChData', 'AllField
 
 %% plot EEG with and without bursts
 
-Grid = [4 2];
+% Grid = [4 2];
+Grid = [1 5];
 PlotProps = P.Manuscript;
 PlotProps.Axes.yPadding = 18;
 PlotProps.Axes.xPadding = 18;
@@ -48,7 +49,7 @@ yLims = [-2.4 2.4];
 NormBand = [1 4];
 NormBand_Indx = dsearchn(Freqs, NormBand');
 
-figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*.8, PlotProps.Figure.Height*.42])
+figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.35])
 
 %%% theta
 SB = 2;
@@ -62,7 +63,8 @@ Delta = squeeze(mean(Data(:, 1, NormBand_Indx(1):NormBand_Indx(2)), 3, 'omitnan'
 Shift = Delta - mean(Delta, 'omitnan');
 Data = Data - Shift;
 
-subfigure([], Grid, [3 1], [3 1], true, PlotProps.Indexes.Letters{1}, PlotProps);
+subfigure([], Grid, [1 1], [1 2], true, PlotProps.Indexes.Letters{1}, PlotProps);
+% subfigure([], Grid, [3 1], [3 1], true, PlotProps.Indexes.Letters{1}, PlotProps);
 plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
 
 % plot also BL theta, with all bursts
@@ -72,9 +74,9 @@ plot(log(Freqs), BL, ...
     'Color', PlotProps.Color.Generic, 'LineStyle','--', 'LineWidth', 1)
 
 ylim(yLims)
-legend({'', 'SD theta burst power', 'BL power'}, 'location', 'southwest')
+legend({'', 'Front SD theta burst power', 'Front BL power'}, 'location', 'southwest')
 set(legend, 'ItemTokenSize', [15 15])
-ylabel('Front log PSD amplitude (\muV^2/Hz)')
+ylabel('Log PSD amplitude (\muV^2/Hz)')
 
 
 %%% alpha
@@ -88,12 +90,12 @@ Delta = squeeze(mean(Data(:, 1, NormBand_Indx(1):NormBand_Indx(2)), 3, 'omitnan'
 Shift = Delta - mean(Delta, 'omitnan');
 Data = Data - Shift;
 
-subfigure([], Grid, [3 2], [3 1], true, PlotProps.Indexes.Letters{2}, PlotProps);
+subfigure([], Grid, [1 3], [1 2], true, PlotProps.Indexes.Letters{2}, PlotProps);
+% subfigure([], Grid, [3 2], [3 1], true, PlotProps.Indexes.Letters{2}, PlotProps);
 plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
-legend({'', 'BL alpha burst power'}, 'location', 'southwest')
+legend({'', 'Back BL alpha burst power'}, 'location', 'southwest')
 set(legend, 'ItemTokenSize', [15 15])
 ylim(yLims)
-ylabel('Back')
 
 Legend = [append(BandLabels, ' bursts'), 'Both'];
 YLim = [0 100];
@@ -105,12 +107,13 @@ Colors = [ThetaColor; AlphaColor; getColors(1, '', 'orange')];
 %%% stacked bar plot for time spent
 Data  = 100*squeeze(mean(TimeSpent, 1, 'omitnan'));
 
-subfigure([], Grid, [4 1], [1 2], true, PlotProps.Indexes.Letters{3}, PlotProps);
+subfigure([], Grid, [1 5], [], true, PlotProps.Indexes.Letters{3}, PlotProps);
+% subfigure([], Grid, [4 1], [1 2], true, PlotProps.Indexes.Letters{3}, PlotProps);
 plotStackedBars(Data(:, [1 3 2]), SB_Labels, YLim, Legend([1 3 2]), Colors([1 3 2], :), PlotProps);
-view([90 90])
+% view([90 90])
 ylabel('Recording duration (%)')
 
-saveFig('Bursts', Paths.PaperResults, PlotProps)
+saveFig('Figure_2', Paths.PaperResults, PlotProps)
 
 
 

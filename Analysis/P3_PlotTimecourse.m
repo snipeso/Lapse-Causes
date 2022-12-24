@@ -65,6 +65,80 @@ zProbBurst_Resp(:, :, :, end) = [];
 %%% Plots and stats
 
 
+%% Figure 1
+
+
+PlotProps = P.Manuscript;
+PlotProps.Axes.xPadding = 25;
+Range = [-3.5 5];
+
+Grid = [2 3];
+
+figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
+
+subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
+plotTimecourse(t_microsleep, flip(zProbMicrosleep_Stim, 2), zGenProbMicrosleep_Stim, ...
+    Range, flip(TallyLabels), 'Stimulus', getColors(3), StatsP, PlotProps)
+ylim(Range)
+ylabel('Probability of EC (z-scored)')
+
+
+subfigure([], Grid, [1 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
+plotTimecourse(t_burst, flip(squeeze(zProbBurst_Stim(:, :, 1, :)), 2), ...
+    zGenProbBurst_Stim(:, 1), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
+ylim(Range)
+ylabel('Probability of theta (z-scored)')
+legend off
+
+
+subfigure([], Grid, [1 3], [], true, PlotProps.Indexes.Letters{3}, PlotProps);
+plotTimecourse(t_burst, flip(squeeze(zProbBurst_Stim(:, :, 2, :)), 2),  ...
+    zGenProbBurst_Stim(:, 2), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
+ylim(Range)
+ylabel('Probability of alpha (z-scored)')
+legend off
+
+
+%%% response locked
+
+
+subfigure([], Grid, [2 1], [], true, PlotProps.Indexes.Letters{4}, PlotProps);
+plotTimecourse(t_microsleep, flip(zProbMicrosleep_Resp, 2), zGenProbMicrosleep_Stim, ...
+    Range, flip(TallyLabels), 'Response', getColors(3), StatsP, PlotProps)
+ylim(Range)
+ylabel('Probability of EC (z-scored)')
+
+
+subfigure([], Grid, [2 2], [], true, PlotProps.Indexes.Letters{5}, PlotProps);
+plotTimecourse(t_burst, flip(squeeze(zProbBurst_Resp(:, :, 1, :)), 2), ...
+    zGenProbBurst_Resp(:, 1), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
+ylim(Range)
+ylabel('Probability of theta (z-scored)')
+legend off
+
+
+subfigure([], Grid, [2 3], [], true, PlotProps.Indexes.Letters{6}, PlotProps);
+plotTimecourse(t_burst, flip(squeeze(zProbBurst_Resp(:, :, 2, :)), 2),  ...
+    zGenProbBurst_Resp(:, 2), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
+ylim(Range)
+ylabel('Probability of alpha (z-scored)')
+legend off
+
+
+
+
+saveFig('Figure_3', Paths.PaperResults, PlotProps)
+
+
+
+
+
+
+
+
+
+
+
 %% z-scored timecourse
 
 PlotProps = P.Manuscript;

@@ -159,6 +159,7 @@ Poster =  getProperties({'LSM', 'Poster'});
 Manuscript.Color.Types = flip(getColors(3));
 
 P.Manuscript = Manuscript; % for papers
+P.Manuscript.Figure.Width = 22;
 P.Powerpoint = Powerpoint; % for presentations
 P.Poster = Poster;
 P.Format = Format; % plots just to view data

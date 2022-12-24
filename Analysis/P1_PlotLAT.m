@@ -169,7 +169,7 @@ ylim(YLim)
 xlabel('Distance from center (quantiles)')
 set(legend, 'Location','northwest')
 
-saveFig('LAT', Paths.PaperResults, PlotProps)
+saveFig('Figure_1', Paths.PaperResults, PlotProps)
 
 
 %% reaction time descriptions
