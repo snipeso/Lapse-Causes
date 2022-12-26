@@ -8,7 +8,8 @@ Fieldnames = fieldnames(Stats);
 if any(strcmp(Fieldnames, 't')) % paired t-test
 
     disp(Label)
-    String = ['t(', num2str(Stats.df(P(1), P(2))), ') = ', num2str(Stats.t(P(1), P(2)), '%.2f'), ...
+    String = ['N = ', num2str(Stats.N), ...
+        't(', num2str(Stats.df(P(1), P(2))), ') = ', num2str(Stats.t(P(1), P(2)), '%.2f'), ...
         ', p = ', num2str(Stats.p(P(1), P(2)), '%.3f'), ', g = ', num2str(Stats.hedgesg(P(1), P(2)), '%.2f')];
 
 elseif any(strcmp(Fieldnames, 'ranovatbl')) % 2 way rmANOVA

@@ -15,12 +15,14 @@ function Stats = pairedttest(Data1, Data2, StatsP)
 Dims1 = size(Data1);
 Dims2 = size(Data2);
 
+
 if isempty(Data2) && numel(Dims1) == 2 % A
 
     pValues = nan(Dims1(2));
     tValues = nan(Dims1(2));
     CI = nan(Dims1(2), Dims1(2), 2);
     df = nan(Dims1(2));
+    N = df;
 
     for Indx1 = 1:Dims1(2)-1
         for Indx2 = Indx1+1:Dims1(2)
@@ -29,6 +31,7 @@ if isempty(Data2) && numel(Dims1) == 2 % A
             tValues(Indx1, Indx2) = stats.tstat;
             df(Indx1, Indx2) = stats.df;
             CI(Indx1, Indx2, :) = ci;
+            N(Indx1, Indx2) = totN(Data1(:, Indx1), Data2(:, Indx2));
         end
     end
 
@@ -46,6 +49,7 @@ if isempty(Data2) && numel(Dims1) == 2 % A
 
     h = nan(Dims1(2));
     h(Indexes_long) = sig;
+    Stats.N = N;
     Stats.sig = h;
     Stats.t = tValues;
     Stats.p = pValues;
@@ -76,15 +80,16 @@ elseif numel(Dims1) == 2 && numel(Dims2) == 2 % C
     Stats.crit_p = crit_p;
     Stats.sig = Sig(:);
     Stats.df = stats.df(:);
+    Stats.N = totN(Data1, Data2);
     Stats.CI = CI';
     Diff = Data2-Data1;
-    Stats.mean_diff = nanmean(Diff, 1)';
-    Stats.std_diff = nanstd(Diff, 0, 1)';
+    Stats.mean_diff = mean(Diff, 1, 'omitnan')';
+    Stats.std_diff = std(Diff, 0, 1, 'omitnan')';
 
-    Stats.mean1 = nanmean(Data1, 1)';
-    Stats.std1 = nanstd(Data1, 0, 1)';
-    Stats.mean2 = nanmean(Data2, 1)';
-    Stats.std2 = nanstd(Data2, 0, 1)';
+    Stats.mean1 = mean(Data1, 1, 'omitnan')';
+    Stats.std1 = std(Data1, 0, 1, 'omitnan')';
+    Stats.mean2 = mean(Data2, 1, 'omitnan')';
+    Stats.std2 = std(Data2, 0, 1, 'omitnan')';
 
     stats =  hedgesG(Data1, Data2, StatsP);
     Stats.(StatsP.Paired.ES) = stats.(StatsP.Paired.ES);
@@ -97,6 +102,7 @@ elseif numel(Dims1) == 2 && numel(Dims2) == 3 % D
     p = nan(Dims2(2), Dims2(3));
     t_values = p;
     df = p;
+    N = p;
     CI = nan(Dims2(2), Dims2(3), 2);
 
     for Indx_S = 1:Dims2(2)
@@ -105,6 +111,7 @@ elseif numel(Dims1) == 2 && numel(Dims2) == 3 % D
             BL = squeeze(Data1(:, Indx_T));
             [~, p(Indx_S, Indx_T), CI(Indx_S, Indx_T, :), stats] = ttest(D(:)-BL(:));
             df(Indx_S, Indx_T) = stats.df;
+            N(Indx_S, Indx_T) = totN(D(:), BL(:));
             t_values(Indx_S, Indx_T) = stats.tstat;
         end
     end
@@ -119,4 +126,12 @@ elseif numel(Dims1) == 2 && numel(Dims2) == 3 % D
     Stats.sig = Sig;
     Stats.t = t_values;
     Stats.df = df;
+    Stats.N = N;
+end
+end
+
+function N = totN(Data1, Data2)
+
+N = nnz(~(isnan(Data1) | isnan(Data2)));
+
 end

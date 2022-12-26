@@ -84,11 +84,6 @@ legend off
 %%% B: Proportion of trials
 
 % assemble data
-% [EO_Matrix, ~] = tabulateTable(Trials, EO & Closest, 'Type', 'tabulate', ...
-%     Participants, Sessions, SessionGroups, CheckEyes); % P x SB x TT
-% [EC_Matrix, ~] = tabulateTable(Trials, EC & Closest, 'Type', 'tabulate', ...
-%     Participants, Sessions, SessionGroups, CheckEyes);
-
 [EO_Matrix, ~] = tabulateTable(Trials, EO, 'Type', 'tabulate', ...
     Participants, Sessions, SessionGroups, CheckEyes); % P x SB x TT
 [EC_Matrix, ~] = tabulateTable(Trials, EC, 'Type', 'tabulate', ...
@@ -159,11 +154,12 @@ LapseTally = permute(LapseTally, [1 3 2]); % P x RB x SB
 
 % plot parameters
 Colors = [flip(getColors([1 2], '', 'gray')); PlotProps.Color.Types(1, :); Red(1, :)]; % generic for BL, lapse color for SD
-YLim = [0 80];
+YLim = [0 60];
 
 % plot
 subfigure([], Grid, [1 3], [1 1], true, PlotProps.Indexes.Letters{3}, PlotProps);
-plotSpikeBalls(LapseTally, [], {'BL (EO)', 'BL (EC)', 'SD (EO)', 'SD (EC)'}, Colors, PlotProps)
+plotSpikeBalls(LapseTally, [], {'BL (EO)', 'BL (EC)', 'SD (EO)', 'SD (EC)'}, ...
+     Colors, 'IQ', PlotProps)
 ylabel('Lapses (% trials)')
 ylim(YLim)
 xlabel('Distance from center (quantiles)')
@@ -178,6 +174,12 @@ clc
 
 %%% RTs
 % change in mean RTs from BL to SD
+IQ = 1000*quantile(MEANS, [.25 .75]);
+disp(['BL RT (MEAN, Q1, Q3): ', num2str(mean(1000*MEANS(:, 1)), '%.0f'), ', ', ...
+    num2str(IQ(1, 1), '%.0f'), ', ',  num2str(IQ(2, 1), '%.0f')])
+disp(['SD RT (MEAN, Q1, Q3): ', num2str(mean(1000*MEANS(:, 2)), '%.0f'), ', ', ...
+    num2str(IQ(1, 2), '%.0f'), ', ',  num2str(IQ(2, 2), '%.0f')])
+
 Stats = pairedttest(MEANS(:, 1), MEANS(:, 2), StatsP);
 dispStat(Stats, [1 1], 'SD effect on RTs:');
 
