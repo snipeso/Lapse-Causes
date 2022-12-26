@@ -107,7 +107,7 @@ plotTimecourse(t_microsleep, flip(zProbMicrosleep_Resp, 2), zGenProbMicrosleep_S
     Range, flip(TallyLabels), 'Response', getColors(3), StatsP, PlotProps)
 ylim(Range)
 ylabel('Probability of EC (z-scored)')
-
+legend off
 
 subfigure([], Grid, [2 2], [], true, PlotProps.Indexes.Letters{5}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(zProbBurst_Resp(:, :, 1, :)), 2), ...

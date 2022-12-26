@@ -257,7 +257,7 @@ dispStat(Stats, [1 1], 'SD effect on EC lapses:');
 
 
 %% calculate
-Stats_Radius = anova2way(LapseTally(:, :, [1 3]), {'Distance', 'Time'}, string(1:5), ...
+Stats_Radius = anova2way(LapseTally(:, :, [1 3]), {'Distance', 'Time'}, string(1:numel(unique(Bins))), ...
     {'BL', 'SD'}, StatsP);
 
 %% lapses by quantile
