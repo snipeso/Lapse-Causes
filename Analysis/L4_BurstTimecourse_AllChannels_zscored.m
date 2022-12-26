@@ -120,21 +120,22 @@ for Indx_P = 1:numel(Participants)
     end
 
     %%% get probability of microsleep (in time) for each trial type
+
     for Indx_B = 1:numel(BandLabels)
-        for Indx_Ch = 1:TotChannels
-            for Indx_TT = 1:3
+        for Indx_TT = 1:3
 
-                % get prob of burst in stim trial
-                TT_Indexes = AllTrials_Table.Type==Indx_TT & AllTrials_Table.Radius <= Q;
-%                 TT_Indexes = AllTrials_Table.Type==Indx_TT & AllTrials_Table.Radius < Q & AllTrials_Table.EC==0;
+            % get prob of burst in stim trial
+            TT_Indexes = AllTrials_Table.Type==Indx_TT & AllTrials_Table.Radius <= Q;
+            %                 TT_Indexes = AllTrials_Table.Type==Indx_TT & AllTrials_Table.Radius < Q & AllTrials_Table.EC==0;
 
-                nTrials = nnz(TT_Indexes);
+            nTrials = nnz(TT_Indexes);
+
+            for Indx_Ch = 1:TotChannels
                 TypeTrials_Stim = squeeze(AllTrials_Stim(TT_Indexes, Indx_Ch, Indx_B, :));
 
                 Prob = probEvent(TypeTrials_Stim, minNanProportion, minTrials);
 
                 ProbBurst_Stim(Indx_P, Indx_TT, Indx_Ch, Indx_B, :) =  Prob; %...
-                %                     reduxProbEvent(Prob, t_window, Windows_Stim);
 
 
                 % get prob of burst in resp trial
@@ -144,7 +145,6 @@ for Indx_P = 1:numel(Participants)
                     Prob = probEvent(TypeTrials_Resp, minNanProportion, minTrials);
 
                     ProbBurst_Resp(Indx_P, Indx_TT, Indx_Ch, Indx_B, :) = Prob; %...
-                    %                          reduxProbEvent(Prob, t_window, Windows_Resp);
                 end
             end
         end
@@ -157,7 +157,8 @@ for Indx_P = 1:numel(Participants)
 
         for Indx_TT = 1:3
             for Indx_Ch = 1:TotChannels
-                zProbBurst_Stim(Indx_P, Indx_TT, Indx_Ch, Indx_B, :) = reduxProbEvent(zProb(:, Indx_TT, Indx_Ch, :, :), t_window, Windows_Stim);
+                zProbBurst_Stim(Indx_P, Indx_TT, Indx_Ch, Indx_B, :) = ...
+                    reduxProbEvent(zProb(:, Indx_TT, Indx_Ch, :, :), t_window, Windows_Stim);
             end
         end
 
