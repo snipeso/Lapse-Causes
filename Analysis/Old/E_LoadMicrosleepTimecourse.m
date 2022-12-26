@@ -20,6 +20,7 @@ Task = P.Labels.Task;
 Bands = P.Bands;
 Channels = P.Channels;
 RefreshTrials = false;
+Parameters = P.Parameters;
 
 StartTime = -2;
 EndTime = 2;
@@ -45,7 +46,7 @@ MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
 
 % load trial information
 load(fullfile(Paths.Pool, 'Tasks', 'AllTrials.mat'), 'Trials')
-Q = quantile(Trials.Radius, 0.5);
+Q = quantile(Trials.Radius, Parameters.Radius);
 
 TrialTypeLabels = [1 2 3];
 Filenames = getContent(MicrosleepPath);

@@ -33,7 +33,7 @@ BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
 
 % load trial information
 load(fullfile(Paths.Pool, 'Tasks', 'AllTrials.mat'), 'Trials')
-Q = quantile(Trials.Radius, 0.5);
+Q = quantile(Trials.Radius, Parameters.Radius);
 
 t_window = linspace(StartTime, EndTime, fs*(EndTime-StartTime));
 
@@ -103,7 +103,7 @@ for Indx_P = 1:numel(Participants)
         for Indx_TT = 1:3
 
             % get prob of burst in stim trial
-            TT_Indexes = AllTrials_Table.Type==Indx_TT;
+            TT_Indexes = AllTrials_Table.Type==Indx_TT & AllTrials_Table.Radius < Q;
             nTrials = nnz(TT_Indexes);
             TypeTrials_Stim = squeeze(AllTrials_Stim(TT_Indexes, Indx_B, :));
             

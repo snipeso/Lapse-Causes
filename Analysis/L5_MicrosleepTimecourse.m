@@ -34,7 +34,7 @@ MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
 
 % load trial information
 load(fullfile(Paths.Pool, 'Tasks', 'AllTrials.mat'), 'Trials')
-Q = quantile(Trials.Radius, 0.5);
+Q = quantile(Trials.Radius, Parameters.Radius);
 
 t = linspace(StartTime, EndTime, fs*(EndTime-StartTime));
 
@@ -96,7 +96,7 @@ for Indx_P = 1:numel(Participants)
     for Indx_TT = 1:3
 
         % choose trials
-        Trial_Indexes = AllTrials_Table.Type==Indx_TT; % & Closest;
+        Trial_Indexes = AllTrials_Table.Type==Indx_TT & AllTrials_Table.Radius < Q; % & Closest;
         nTrials = nnz(Trial_Indexes);
         TypeTrials_Stim = AllTrials_Stim(Trial_Indexes, :);
 
