@@ -168,35 +168,70 @@ set(legend, 'Location','northwest')
 saveFig('Figure_1', Paths.PaperResults, PlotProps)
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Stats
+
 %% reaction time descriptions
 
 clc
 
 %%% RTs
 % change in mean RTs from BL to SD
-IQ = 1000*quantile(MEANS, [.25 .75]);
-disp(['BL RT (MEAN, Q1, Q3): ', num2str(mean(1000*MEANS(:, 1)), '%.0f'), ', ', ...
-    num2str(IQ(1, 1), '%.0f'), ', ',  num2str(IQ(2, 1), '%.0f')])
-disp(['SD RT (MEAN, Q1, Q3): ', num2str(mean(1000*MEANS(:, 2)), '%.0f'), ', ', ...
-    num2str(IQ(1, 2), '%.0f'), ', ',  num2str(IQ(2, 2), '%.0f')])
+dispDescriptive(1000*MEANS(:, 1),'BL RT', ' ms', '%.0f');
+dispDescriptive(1000*MEANS(:, 2),'SD RT', ' ms', '%.0f');
 
 Stats = pairedttest(MEANS(:, 1), MEANS(:, 2), StatsP);
 dispStat(Stats, [1 1], 'SD effect on RTs:');
 
 % distribution of RTs to show that they don't go over 1s
 SB_Indx = 2;
-disp(['RT for 99% of SD data (MEAN [Min Max]): ', num2str(mean(Q99(:, SB_Indx), 'omitnan'), '%.2f'), ...
-    ' [', num2str(min(Q99(:, SB_Indx)), '%.2f'), ', ' num2str(max(Q99(:, SB_Indx)), '%.2f'), ']'])
+IQ = 1000*quantile(Q99(:, SB_Indx), [.25 .75]);
+disp(['RT for 99% of SD data (MEAN [Min Max]): ', num2str(mean(1000*Q99(:, SB_Indx), 'omitnan'), '%.0f'), ...
+    ' ms (IQ: ', num2str(IQ(1), '%.0f'), ', ' num2str(IQ(2), '%.0f'), ')'])
 
-disp('***********')
+
+%% lapses
+
+
+%%% total lapses
+[All_Matrix, ~] = tabulateTable(Trials, [], 'Type', 'tabulate', ...
+    Participants, Sessions, SessionGroups, false); % P x SB x TT
+
+All_Matrix = 100*All_Matrix./sum(All_Matrix, 3, 'omitnan');
+
+%%% EO/EC lapses
+Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
+ECvAll_Matrix = 100*EC_Matrix(:, :, 1)./Tots; % Matrix is EO lapses, late, correct, EC lapses
+
+% just lapses
+Tots = EO_Matrix(:, :, 1) + EC_Matrix(:, :, 1);
+ECvEO_Lapses = 100*EC_Matrix(:, :, 1)./Tots;
+
+%%
+clc
+
+% overall proportion of lapses
+dispDescriptive(squeeze(All_Matrix(:, 1, 1)), 'BL Lapses', '%', '%.0f');
+dispDescriptive(squeeze(All_Matrix(:, 2, 1)), 'SD Lapses', '%', '%.0f');
+disp('*')
+
+% proportion of EC lapses out of overall lapses
+dispDescriptive(squeeze(ECvEO_Lapses(:, 1)), 'BL EC vs All Lapses', '%', '%.1f');
+dispDescriptive(squeeze(ECvEO_Lapses(:, 2)), 'SD EC vs All Lapses', '%', '%.1f');
+disp('*')
+
+% proportion of EC lapses on overall trials
+dispDescriptive(squeeze(ECvAll_Matrix(:, 1)), 'BL EC vs All Trials', '%', '%.1f');
+dispDescriptive(squeeze(ECvAll_Matrix(:, 2)), 'SD EC vs All Trials', '%', '%.1f');
+disp('*')
 
 %%% lapses
 EO_Lapses = squeeze(EO_Matrix(:, :, 1));
 EC_Lapses = squeeze(EC_Matrix(:, :, 1));
 
 % total lapses EO SD
-disp(['Total SD EO lapses (Mean, STD): ', num2str(mean(EO_Lapses(:, 2), 'omitnan'), '%.2f'), ...
-    ', ',  num2str(std(EO_Lapses(:, 2), 'omitnan'), '%.2f')])
+dispDescriptive(EO_Lapses(:, 2), 'SD tot lapses', ' lapses', '%.0f');
+
 
 MinLapses = P.Parameters.MinTypes;
 disp(['# participants with at least ', num2str(MinLapses), ' EO lapses: ', num2str(nnz(EO_Lapses(:, 2)>MinLapses))])
@@ -220,8 +255,39 @@ Stats = pairedttest(EC_Lapses(:, 1), EC_Lapses(:, 2), StatsP);
 dispStat(Stats, [1 1], 'SD effect on EC lapses:');
 
 
-disp('___________________________________________')
+
+%% calculate
+Stats_Radius = anova2way(LapseTally(:, :, [1 3]), {'Distance', 'Time'}, string(1:5), ...
+    {'BL', 'SD'}, StatsP);
+
+%% lapses by quantile
+clc
+
+%{'BL (EO)', 'BL (EC)', 'SD (EO)', 'SD (EC)'}
+
+% close lapses
+dispDescriptive(squeeze(LapseTally(:, 1, 1)), 'BL EO close lapses', '%', '%.1f');
+
+% far lapses
+dispDescriptive(squeeze(LapseTally(:, 5, 1)), 'BL EO far lapses', '%', '%.1f');
+disp('*')
+
+% each distance
+for Indx_Q = 1:size(LapseTally, 2)
+dispDescriptive(squeeze(LapseTally(:, Indx_Q, 3)-LapseTally(:, Indx_Q, 1)), ... ...
+    ['BL v SD EO lapses Q', num2str(Indx_Q)], '%', '%.1f');
+end
+disp('*')
+
+
+% all distance
+dispStat(Stats_Radius, {'Distance', 'Time', 'Interaction'}, 'Distance vs Time:');
+
+
+
 %% effect of bursts on RTs
+
+clc
 
 Bands = P.Bands;
 BandLabels = fieldnames(Bands);

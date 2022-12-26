@@ -19,16 +19,20 @@ elseif any(strcmp(Fieldnames, 'ranovatbl')) % 2 way rmANOVA
     disp('*')
     disp(Label)
     for Indx = 1:3
-        p = Stats.ranovatbl.pValueGG(Positions(Indx));
+        p = num2str(Stats.ranovatbl.pValueGG(Positions(Indx)),  '%.3f');
         DF1 = Stats.ranovatbl.DF(Positions(Indx));
         DF2 = Stats.ranovatbl.DF(Positions(Indx)+1);
         F = Stats.ranovatbl.F(Positions(Indx));
-        eta = Stats.effects.eta2(Indx);
+        eta = num2str(Stats.effects.eta2(Indx), '%.3f');
 
-        String = ['F(', num2str(DF1), ', ', num2str(DF2), ') = ', num2str(F, '%.2f'), ...
-            ', p = ', num2str(p, '%.3f'), ', eta2 = ', num2str(eta, '%.3f'), ')'];
+
+        String = [P{Indx}, ': ' ...
+            '(F(', num2str(DF1), ', ', num2str(DF2), ') = ', num2str(F, '%.2f'), ...
+            ', p = .', extractAfter(p, '.'), ', eta2 = .', extractAfter(eta, '.'), ')'];
+        disp(String)
+        disp('*')
     end
+
 end
 
-disp(String)
-disp('*')
+
