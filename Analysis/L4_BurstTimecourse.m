@@ -104,6 +104,7 @@ for Indx_P = 1:numel(Participants)
 
             % get prob of burst in stim trial
             TT_Indexes = AllTrials_Table.Type==Indx_TT & AllTrials_Table.Radius < Q;
+% TT_Indexes = AllTrials_Table.Type==Indx_TT & AllTrials_Table.Radius < Q & AllTrials_Table.EC==0;
             nTrials = nnz(TT_Indexes);
             TypeTrials_Stim = squeeze(AllTrials_Stim(TT_Indexes, Indx_B, :));
             
