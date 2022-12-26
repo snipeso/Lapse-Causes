@@ -150,11 +150,11 @@ end
 for Indx_P = 1:numel(Participants)
     for Indx_B = 1:numel(BandLabels)
         if any(isnan(ProbBurst_Stim(Indx_P, :, :, Indx_B, :)), 'all')
-            ProbBurst_Stim(Indx_P, :, Indx_B, :) = nan;
+            ProbBurst_Stim(Indx_P, :, :, Indx_B, :) = nan;
         end
 
         if any(isnan(ProbBurst_Resp(Indx_P, 2:3, :, Indx_B, :)), 'all')
-            ProbBurst_Resp(Indx_P, :, Indx_B, :) = nan;
+            ProbBurst_Resp(Indx_P, :, :, Indx_B, :) = nan;
         end
     end
 end

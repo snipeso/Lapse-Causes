@@ -12,7 +12,6 @@ P = analysisParameters();
 Participants = P.Participants;
 Sessions = P.Sessions;
 TallyLabels = P.Labels.Tally;
-PlotProps = P.Manuscript;
 Paths = P.Paths;
 Task = P.Labels.Task;
 Channels = P.Channels;
