@@ -16,6 +16,9 @@ Task = P.Labels.Task;
 Parameters = P.Parameters;
 Bands = P.Bands;
 BandLabels = fieldnames(Bands);
+ChannelLabels = P.Channels.preROI;
+ROI = fieldnames(ChannelLabels);
+TotChannels = numel(ROI);
 
 StartTime = Parameters.Timecourse.Start;
 EndTime = Parameters.Timecourse.End;
@@ -42,13 +45,10 @@ Q = quantile(Trials.Radius, Parameters.Radius);
 
 t_window = linspace(StartTime, EndTime, fs*(EndTime-StartTime));
 
-ProbBurst_Stim = nan(numel(Participants), 3, 123, 2, numel(t_window));
-ProbBurst_Resp = nan(numel(Participants), 3, 123, 2,  numel(t_window));
-zProbBurst_Stim = nan(numel(Participants), 3, 123, 2, size(Windows_Stim, 1));
-zProbBurst_Resp = nan(numel(Participants), 3, 123, 2,  size(Windows_Resp, 1));
+ProbBurst_Stim = nan(numel(Participants), 3, TotChannels, 2, numel(t_window));
+ProbBurst_Resp = nan(numel(Participants), 3, TotChannels, 2,  numel(t_window));
 
-GenProbBurst = zeros(numel(Participants), 123, numel(BandLabels), 2);
-zGenProbBurst =  zeros(numel(Participants), 123, numel(BandLabels));
+GenProbBurst = zeros(numel(Participants), TotChannels, numel(BandLabels), 2);
 
 for Indx_P = 1:numel(Participants)
 
@@ -71,8 +71,6 @@ for Indx_P = 1:numel(Participants)
         Pnts = EEG.pnts;
         t_valid = EEG.valid_t;
         Chanlocs = EEG.chanlocs;
-        TotChannels = numel(Chanlocs);
-
 
         % remove bursts that were chopped
         Bursts = removeChopped(Bursts);
@@ -92,7 +90,7 @@ for Indx_P = 1:numel(Participants)
                 % 0s and 1s of whether there is a burst or not, nans for noise
                 Band = Bands.(BandLabels{Indx_B});
                 BT = bursts2time(Bursts(Freqs>=Band(1) & Freqs<Band(2) & ...
-                    Channels==Indx_Ch), Pnts);
+                    ismember(Channels, labels2indexes(ChannelLabels.(ROI{Indx_Ch}), Chanlocs))), Pnts);
                 % BT = bursts2time(Bursts(Freqs>=Band(1) & Freqs<Band(2) & Globality>.25), Pnts);
                 BT(not(t_valid)) = nan;
 
@@ -148,23 +146,6 @@ for Indx_P = 1:numel(Participants)
                 end
             end
         end
-
-        % z-score everything
-        Prob = ProbBurst_Stim(Indx_P, :, :, Indx_B, :);
-        MEAN = mean(Prob, 'all', 'omitnan');
-        STD = std(Prob, 0, 'all', 'omitnan');
-        zProb = (Prob-MEAN)./STD;
-
-        for Indx_TT = 1:3
-            for Indx_Ch = 1:TotChannels
-                zProbBurst_Stim(Indx_P, Indx_TT, Indx_Ch, Indx_B, :) = ...
-                    reduxProbEvent(zProb(:, Indx_TT, Indx_Ch, :, :), t_window, Windows_Stim);
-            end
-        end
-
-        GP = squeeze(GenProbBurst(Indx_P, :, Indx_B, 1)./GenProbBurst(Indx_P, :, Indx_B, 2));
-        zGenProbBurst(Indx_P, :, Indx_B)  = (GP-MEAN)/STD;
-
     end
 
     disp(['Finished ', Participants{Indx_P}])
@@ -173,12 +154,14 @@ end
 % remove all data from participants missing any of the trial types
 for Indx_P = 1:numel(Participants)
     for Indx_B = 1:numel(BandLabels)
-        if any(isnan(zProbBurst_Stim(Indx_P, :, :, Indx_B, :)), 'all')
-            zProbBurst_Stim(Indx_P, :, :, Indx_B, :) = nan;
+        for Indx_Ch = 1:TotChannels
+        if any(isnan(ProbBurst_Stim(Indx_P, :, Indx_Ch, Indx_B, :)), 'all')
+            ProbBurst_Stim(Indx_P, :, Indx_Ch, Indx_B, :) = nan;
         end
 
-        if any(isnan(ProbBurst_Resp(Indx_P, 2:3, :, Indx_B, :)), 'all')
-            ProbBurst_Resp(Indx_P, :, :, Indx_B, :) = nan;
+        if any(isnan(ProbBurst_Resp(Indx_P, 2:3, Indx_Ch, Indx_B, :)), 'all')
+            ProbBurst_Resp(Indx_P, :, Indx_Ch, Indx_B, :) = nan;
+        end
         end
     end
 end
@@ -188,4 +171,4 @@ GenProbBurst = GenProbBurst(:, :, :, 1)./GenProbBurst(:, :, :, 2);
 
 %%% save
 t = t_window;
-save(fullfile(Pool, 'ProbBurst_Channels_zscored.mat'), 'zProbBurst_Stim',  't', 'zGenProbBurst', 'Chanlocs')
+save(fullfile(Pool, 'ProbBurst_ROI.mat'), 'ProbBurst_Stim', 'ProbBurst_Resp',  't', 'GenProbBurst', 'Chanlocs')
