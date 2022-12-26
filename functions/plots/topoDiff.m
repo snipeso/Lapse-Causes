@@ -9,6 +9,7 @@ function Stats = topoDiff(Data1, Data2, Chanlocs, CLims, StatsP, PlotProps)
 % min/max is used, centered on 0.
 % StatsP is a structure with statistics info (see analysisParameters).
 % PlotProps is a structure with plotting info (see chART).
+% Lapse-causes
 
 %%% Statistics
 Stats = pairedttest(Data1, Data2, StatsP);
@@ -40,5 +41,6 @@ if isempty(CLims)
 end
 
 plotTopoplot(Stats.t, Stats, Chanlocs, CLims, 't-values', 'Divergent', PlotProps);
+text(.5, .5, ['n=', num2str(Stats.N)], 'FontName', PlotProps.Text.FontName, 'FontSize', PlotProps.Text.LegendSize)
 
 

@@ -131,7 +131,15 @@ end
 end
 
 function N = totN(Data1, Data2)
+Dims = size(Data1);
 
+if any(Dims==1)
 N = nnz(~(isnan(Data1) | isnan(Data2)));
+else
+D1 = mean(Data1, 2);
+D2 = mean(Data2, 2);
+N = nnz(~(isnan(D1) | isnan(D2)));
+
+end
 
 end
