@@ -6,11 +6,11 @@ function String = dispStat(Stats, P, Label)
 Fieldnames = fieldnames(Stats);
 
 if any(strcmp(Fieldnames, 't')) % paired t-test
-
+    pValue = num2str(Stats.p(P(1), P(2)), '%.3f');
     disp(Label)
     String = ['N = ', num2str(Stats.N), ...
-        't(', num2str(Stats.df(P(1), P(2))), ') = ', num2str(Stats.t(P(1), P(2)), '%.2f'), ...
-        ', p = ', num2str(Stats.p(P(1), P(2)), '%.3f'), ', g = ', num2str(Stats.hedgesg(P(1), P(2)), '%.2f')];
+        ', t = ', num2str(Stats.t(P(1), P(2)), '%.2f'), ...
+        ', p = .', extractAfter(pValue, '.'), ', g = ', num2str(Stats.hedgesg(P(1), P(2)), '%.2f')];
 
 elseif any(strcmp(Fieldnames, 'ranovatbl')) % 2 way rmANOVA
     Positions = [3, 5, 7]; % Session, Task, Interaction
