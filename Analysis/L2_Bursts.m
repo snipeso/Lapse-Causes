@@ -36,7 +36,6 @@ Pool = fullfile(Paths.Pool, 'EEG');
 
 MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
 
-
 Filenames = getContent(Source_Bursts);
 
 Durations = nan(numel(Participants), numel(SB_Labels));
@@ -50,7 +49,6 @@ for Indx_P = 1:numel(Participants)
 
         Sessions = SessionBlocks.(SB_Labels{Indx_SB});
         for Indx_S = 1:numel(Sessions)  % gather information for all the sessions in the block
-
 
             %%% load burst data
             Filename_Bursts = Filenames(contains(Filenames, Participants{Indx_P}) & ...

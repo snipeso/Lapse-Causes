@@ -129,6 +129,6 @@ end
 sData = smoothFreqs(AllData, Freqs, 'last', 2);
 ChData =  meanChData(sData, Chanlocs, Channels.preROI, 4);
 
-save(fullfile(Pool, strjoin({TitleTag, 'bChData.mat'}, '_')), 'ChData', 'AllFields', 'Chanlocs', 'Freqs')
+save(fullfile(Pool, strjoin({TitleTag, 'bChData.mat'}, '_')), 'ChData', 'sData', 'AllFields', 'Chanlocs', 'Freqs')
 
 

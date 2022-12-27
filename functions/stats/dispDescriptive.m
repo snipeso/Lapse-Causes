@@ -2,6 +2,10 @@ function String = dispDescriptive(Data, String, Unit, Roundedness)
 % Roundedness is precision of numbers ('%.0f')
 % Data is P x 1 matrix.
 
+if isnumeric(Roundedness)
+    Roundedness = ['%.', num2str(Roundedness), 'f'];
+end
+
 IQ = quantile(Data, [.25 .75]);
 
 String = [String, ' (MEAN, [Q1, Q3]): ',  ...

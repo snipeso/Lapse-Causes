@@ -15,6 +15,7 @@ TallyLabels = P.Labels.Tally;
 Paths = P.Paths;
 Task = P.Labels.Task;
 Channels = P.Channels;
+Bands = P.Bands;
 
 TitleTag = strjoin({'Power', 'Burstless'}, '_');
 
@@ -30,7 +31,7 @@ Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plot
 
 
 load(fullfile(Pool, 'BurstDurations.mat'), 'TimeSpent', 'TimeSpent_Eyes')
-load(fullfile(Pool, strjoin({TitleTag, 'ChData.mat'}, '_')), 'ChData', 'AllFields', 'Chanlocs', 'Freqs')
+load(fullfile(Pool, strjoin({TitleTag, 'bChData.mat'}, '_')), 'ChData', 'sData', 'AllFields', 'Chanlocs', 'Freqs')
 
 
 
@@ -91,7 +92,6 @@ Shift = Delta - mean(Delta, 'omitnan');
 Data = Data - Shift;
 
 subfigure([], Grid, [1 3], [1 2], true, PlotProps.Indexes.Letters{2}, PlotProps);
-% subfigure([], Grid, [3 2], [3 1], true, PlotProps.Indexes.Letters{2}, PlotProps);
 plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
 legend({'', 'Back BL alpha burst power'}, 'location', 'southwest')
 set(legend, 'ItemTokenSize', [15 15])
@@ -105,12 +105,11 @@ AlphaColor = getColors(1, '', 'yellow');
 Colors = [ThetaColor; AlphaColor; getColors(1, '', 'orange')];
 
 %%% stacked bar plot for time spent
-Data  = 100*squeeze(mean(TimeSpent, 1, 'omitnan'));
+Data = 100*squeeze(mean(TimeSpent, 1, 'omitnan'));
 
 subfigure([], Grid, [1 5], [], true, PlotProps.Indexes.Letters{3}, PlotProps);
-% subfigure([], Grid, [4 1], [1 2], true, PlotProps.Indexes.Letters{3}, PlotProps);
 plotStackedBars(Data(:, [1 3 2]), SB_Labels, YLim, Legend([1 3 2]), Colors([1 3 2], :), PlotProps);
-% view([90 90])
+
 ylabel('Recording duration (%)')
 
 saveFig('Figure_2', Paths.PaperResults, PlotProps)
@@ -140,47 +139,61 @@ end
 disp('_______________________________')
 %% Percent SD theta removed
 
+%%% reduce whole-brain data
+lData = zScoreData(sData, 'last');
+lchData = mean(lData, 4, 'omitnan'); % average all channels together
+lchbData = squeeze(bandData(lchData, Freqs', Bands, 'last')); % P x SB x B (T, A, N) x F
+
+lchData = squeeze(lchData);
+
+
+yLims  = [-1 1.5];
+figure
+Data = squeeze(lchData(:, 2, [1 3], :));
+plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
+
+
+% plot also BL theta, with all bursts
+BL = mean(squeeze(lchData(:, 1, 3, :)), 1);
+hold on
+plot(log(Freqs), BL, ...
+    'Color', PlotProps.Color.Generic, 'LineStyle','--', 'LineWidth', 1)
+
+% ylim(yLims)
+legend({'', 'SD theta burst power', 'Front BL power'}, 'location', 'southwest')
+set(legend, 'ItemTokenSize', [15 15])
+ylabel('PSD amplitude (z-scored)')
+
+
+
+%%
+
 clc
 StatsP = P.StatsP;
 
-Bands = P.Bands;
-ChLabels = fieldnames(Channels.preROI);
-
 Theta = dsearchn(Freqs, Bands.Theta');
 
+sdTheta_Intact = squeeze(lchbData(:, 2, 3, 1)); % P x S x B (T, A, I) x F
+blTheta_Intact = squeeze(lchbData(:, 1, 3, 1));
+% blTheta_Intact = squeeze(lchbData(:, 1, 1, 1));
+sdTheta_Burstless = squeeze(lchbData(:, 2, 1, 1));
 
-for Indx_Ch = 1:3
+%     PrcntIntact = 100*(sdTheta_Intact-sdTheta_Burstless)./sdTheta_Intact;
 
-    disp([ChLabels{Indx_Ch}])
-    %     sdTheta_Intact = squeeze(mean(log(ChData(:, 2, 3, Indx_Ch, Theta(1):Theta(2))), ...
-    %         5, 'omitnan'));
-    %     blTheta_Intact = squeeze(mean(log(ChData(:, 1, 3, Indx_Ch, Theta(1):Theta(2))), ...
-    %         5, 'omitnan'));
-    %     sdTheta_Burstless = squeeze(mean(log(ChData(:, 2, 1, Indx_Ch, Theta(1):Theta(2))), ...
-    %         5, 'omitnan'));
+Intact = sdTheta_Intact-blTheta_Intact;
+Burstless = sdTheta_Burstless-blTheta_Intact;
+PrcntSDTheta = 100*(Intact-Burstless)./Intact;
 
-    sdTheta_Intact = squeeze(mean((ChData(:, 2, 3, Indx_Ch, Theta(1):Theta(2))), ...
-        5, 'omitnan'));
-    blTheta_Intact = squeeze(mean((ChData(:, 1, 3, Indx_Ch, Theta(1):Theta(2))), ...
-        5, 'omitnan'));
-    sdTheta_Burstless = squeeze(mean((ChData(:, 2, 1, Indx_Ch, Theta(1):Theta(2))), ...
-        5, 'omitnan'));
+dispDescriptive(PrcntSDTheta, 'Theta removed:', '%', 0);
 
-    %     PrcntIntact = 100*(sdTheta_Intact-sdTheta_Burstless)./sdTheta_Intact;
+Stats = pairedttest(blTheta_Intact, sdTheta_Intact, StatsP);
+dispStat(Stats, [1 1], 'Intact change from BL:');
 
-%     PrcntIntact = 100*mean(sdTheta_Intact-sdTheta_Burstless, 'omitnan')/mean(sdTheta_Intact-blTheta_Intact);
+Stats = pairedttest(blTheta_Intact, sdTheta_Burstless, StatsP);
+dispStat(Stats, [1 1], 'Burstless change from BL:');
 
-    disp(['Prcnt removed SD: ' num2str(mean(PrcntIntact, 'omitnan'), '%.1f')])
+disp('****')
 
-    Stats = pairedttest(blTheta_Intact, sdTheta_Intact, StatsP);
-    dispStat(Stats, [1 1], 'Intact change from BL:');
-
-    Stats = pairedttest(blTheta_Intact, sdTheta_Burstless, StatsP);
-    dispStat(Stats, [1 1], 'Burstless change from BL:');
-
-    disp('****')
-
-end
 
 
 

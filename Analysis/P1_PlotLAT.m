@@ -288,22 +288,22 @@ dispStat(Stats_Radius_Redux, {'Distance', 'Time', 'Interaction'}, 'Distance vs T
 
 
 
-%% effect of bursts on RTs
-
-clc
-
-Bands = P.Bands;
-BandLabels = fieldnames(Bands);
-SB_Indx = 2;
-
-load(fullfile(Pool, 'Burst_RTs.mat'), 'RTs')
-
-for Indx_B = 1:numel(BandLabels)
-    Stats = pairedttest(squeeze(RTs(:, SB_Indx, Indx_B, 1)), ...
-        squeeze(RTs(:, SB_Indx, Indx_B, 2)), StatsP);
-dispStat(Stats, [1 1], [BandLabels{Indx_B}, ' effect on RTs:']);
-
-end
+% %% effect of bursts on RTs
+% 
+% clc
+% 
+% Bands = P.Bands;
+% BandLabels = fieldnames(Bands);
+% SB_Indx = 2;
+% 
+% load(fullfile(Pool, 'Burst_RTs.mat'), 'RTs')
+% 
+% for Indx_B = 1:numel(BandLabels)
+%     Stats = pairedttest(squeeze(RTs(:, SB_Indx, Indx_B, 1)), ...
+%         squeeze(RTs(:, SB_Indx, Indx_B, 2)), StatsP);
+% dispStat(Stats, [1 1], [BandLabels{Indx_B}, ' effect on RTs:']);
+% 
+% end
 
 
 
