@@ -37,8 +37,8 @@ WholeBurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
 
 % load trial information
 load(fullfile(Paths.Pool, 'Tasks', 'AllTrials.mat'), 'Trials')
-Q = quantile(Trials.Radius, Parameters.Radius);
-
+% Q = quantile(Trials.Radius, Parameters.Radius);
+Q = quantile(Trials.Radius, 1);
 
 t_window = linspace(StartTime, EndTime, fs*(EndTime-StartTime));
 
@@ -93,7 +93,6 @@ for Indx_P = 1:numel(Participants)
                 Band = Bands.(BandLabels{Indx_B});
                 BT = bursts2time(Bursts(Freqs>=Band(1) & Freqs<Band(2) & ...
                     Channels==Indx_Ch), Pnts);
-                % BT = bursts2time(Bursts(Freqs>=Band(1) & Freqs<Band(2) & Globality>.25), Pnts);
                 BT(not(t_valid)) = nan;
 
                 % get trial info

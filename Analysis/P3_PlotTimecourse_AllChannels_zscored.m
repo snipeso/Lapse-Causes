@@ -26,7 +26,7 @@ Pool = fullfile(Paths.Pool, 'EEG');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% load data
 
-load(fullfile(Pool, 'ProbBurst_Channels_zscored_EO.mat'), 'zProbBurst_Stim', ...
+load(fullfile(Pool, 'ProbBurst_Channels_zscored.mat'), 'zProbBurst_Stim', ...
     'zGenProbBurst', 'Chanlocs')
 
 nWindows = size(zProbBurst_Stim, 5);
