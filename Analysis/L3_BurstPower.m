@@ -17,6 +17,10 @@ Paths = P.Paths;
 Task = P.Labels.Task;
 Bands = P.Bands;
 Channels = P.Channels;
+Parameters = P.Parameters;  
+
+fs = Parameters.fs;
+ConfidenceThreshold = Parameters.EC_ConfidenceThreshold; % for classifying eyes closed/open
 
 WelchWindow = 8; % duration of window to do FFT
 Overlap = .75; % overlap of hanning windows for FFT
@@ -29,8 +33,11 @@ TitleTag = strjoin({'Power', 'Burstless'}, '_');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Load data
 
-Source_EEG = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task);
-Source_Bursts = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
+EEGPath = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task);
+% Source_Bursts = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
+
+MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
+BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
 
 SessionBlocks = P.SessionBlocks;
 SB_Labels = fieldnames(SessionBlocks);
@@ -40,8 +47,6 @@ Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plot
 
 
 %%% Load EEG information, splitting by session blocks
-AllFiles_EEG = getContent(Source_EEG);
-AllFiles_Bursts = getContent(Source_Bursts);
 AllData = nan(numel(Participants), numel(SB_Labels), numel(BandLabels)+1, 123, 1025);
 
 for Indx_P = 1:numel(Participants)
@@ -59,38 +64,45 @@ for Indx_P = 1:numel(Participants)
 
             %%% load data
 
-            % load EEG
-            Filename_EEG = AllFiles_EEG(contains(AllFiles_EEG, Participants{Indx_P})& ...
-                contains(AllFiles_EEG, Sessions{Indx_S}));
-
-            if isempty(Filename_EEG)
-                warning(['Missing ', Participants{Indx_P} Sessions{Indx_S}])
-                continue
-            end
-
-            load(fullfile(Source_EEG, Filename_EEG), 'EEG')
+            % load EEG data
+            EEG = loadMATFile(EEGPath, Participants{Indx_P}, Sessions{Indx_S}, 'EEG');
             Data = EEG.data;
-            fs = EEG.srate;
 
             % load bursts
-            Filename_Bursts = AllFiles_Bursts(contains(AllFiles_Bursts, Participants{Indx_P})& ...
-                contains(AllFiles_Bursts, Sessions{Indx_S}));
+            Bursts = loadMATFile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'Bursts');
+            if isempty(Bursts); continue; end
 
-            if isempty(Filename_Bursts)
-                warning(['Missing bursts ', Participants{Indx_P} Sessions{Indx_S}])
+            % load in EEG metadata
+            EEG = loadMATFile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'EEG');
+
+            Pnts = EEG.pnts;
+            ValidTime = EEG.valid_t; % vector of 1s of all the time in which the task was active, and there wasn't noise
+
+
+            % load eye-data
+            Eyes = loadMATFile(MicrosleepPath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
+            if isempty(Eyes); continue; end
+
+            if isnan(Eyes.DQ) || Eyes.DQ == 0 || Eyes.DQ < 1 % skip if bad data
+                EyeOpen = nan(1, Pnts);
+                warning('Bad eye data')
                 continue
             end
 
-            load(fullfile(Source_Bursts, Filename_Bursts), 'Bursts', 'EEG')
+            Eye = round(Eyes.DQ); % which eye
+            [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold); % not using internal microsleep identifier so that I'm flexible
+
+            ValidTime = ValidTime & EyeOpen == 1;
+
+            %%% remove bad time points
             EEG.data = Data;
-            EEG.data(:, ~EEG.valid_t) = nan;
+            EEG.data(:, ~ValidTime) = nan;
 
             ALLEEG.Whole = catStruct(ALLEEG.Whole,  rmNaN(EEG));
             Chanlocs = EEG.chanlocs;
 
 
             %%% get EEG with and without bursts
-
             BurstFreqs = [Bursts.Frequency];
 
             for Indx_B = 1:numel(BandLabels)

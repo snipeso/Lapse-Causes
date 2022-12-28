@@ -19,7 +19,6 @@ Parameters = P.Parameters;
 StartTime = Parameters.Timecourse.Start;
 EndTime = Parameters.Timecourse.End;
 fs = Parameters.fs;
-
 ConfidenceThreshold = Parameters.EC_ConfidenceThreshold;
 minTrials = Parameters.MinTypes;
 minNanProportion = Parameters.MinNanProportion; % any more nans than this in a given trial is grounds to exclude the trial

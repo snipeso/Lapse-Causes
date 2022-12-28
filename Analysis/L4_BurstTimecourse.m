@@ -54,16 +54,16 @@ for Indx_P = 1:numel(Participants)
             strcmp(Trials.Session, Sessions{Indx_S}));
         nTrials = nnz(CurrentTrials);
 
-        % load in eye data
+        % load in burst data
         Bursts = loadMATFile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'Bursts');
         if isempty(Bursts); continue; end
 
+        % load in EEG data
         EEG = loadMATFile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'EEG');
         Pnts = EEG.pnts;
         t_valid = EEG.valid_t;
 
         Freqs = [Bursts.Frequency];
-        Globality = [Bursts.globality_bursts];
 
         Trials_B_Stim = nan(nTrials, numel(BandLabels), numel(t_window));
         Trials_B_Resp = nan(nTrials, numel(BandLabels), numel(t_window));
@@ -73,7 +73,7 @@ for Indx_P = 1:numel(Participants)
             % 0s and 1s of whether there is a burst or not, nans for noise
             Band = Bands.(BandLabels{Indx_B});
             BT = bursts2time(Bursts(Freqs>=Band(1) & Freqs<Band(2)), Pnts);
-% BT = bursts2time(Bursts(Freqs>=Band(1) & Freqs<Band(2) & Globality>.25), Pnts);
+            % BT = bursts2time(Bursts(Freqs>=Band(1) & Freqs<Band(2) & Globality>.25), Pnts);
             BT(not(t_valid)) = nan;
 
             % get trial info
@@ -104,10 +104,10 @@ for Indx_P = 1:numel(Participants)
 
             % get prob of burst in stim trial
             TT_Indexes = AllTrials_Table.Type==Indx_TT & AllTrials_Table.Radius < Q;
-% TT_Indexes = AllTrials_Table.Type==Indx_TT & AllTrials_Table.Radius < Q & AllTrials_Table.EC==0;
+            % TT_Indexes = AllTrials_Table.Type==Indx_TT & AllTrials_Table.Radius < Q & AllTrials_Table.EC==0;
             nTrials = nnz(TT_Indexes);
             TypeTrials_Stim = squeeze(AllTrials_Stim(TT_Indexes, Indx_B, :));
-            
+
             ProbBurst_Stim(Indx_P, Indx_TT, Indx_B, :) = ...
                 probEvent(TypeTrials_Stim, minNanProportion, minTrials);
 
@@ -115,7 +115,7 @@ for Indx_P = 1:numel(Participants)
             % get prob of burst in resp trial
             if Indx_TT>1 % not lapses
                 TypeTrials_Resp = squeeze(AllTrials_Resp(TT_Indexes, Indx_B, :));
-                
+
                 ProbBurst_Resp(Indx_P, Indx_TT, Indx_B, :)  = ...
                     probEvent(TypeTrials_Resp, minNanProportion, minTrials);
             end
