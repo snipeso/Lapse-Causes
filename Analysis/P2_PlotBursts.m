@@ -16,6 +16,7 @@ Paths = P.Paths;
 Task = P.Labels.Task;
 Channels = P.Channels;
 Bands = P.Bands;
+StatsP = P.StatsP;
 
 TitleTag = strjoin({'Power', 'Burstless'}, '_');
 
@@ -69,7 +70,7 @@ subfigure([], Grid, [1 1], [1 2], true, PlotProps.Indexes.Letters{1}, PlotProps)
 plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
 
 % plot also BL theta, with all bursts
-BL = squeeze(mean(log(ChData(:, 1, 3, Ch_Indx, :))-Shift, 1, 'omitnan'));
+BL = squeeze(mean(log(ChData(:, 1, 1, Ch_Indx, :))-Shift, 1, 'omitnan'));
 hold on
 plot(log(Freqs), BL, ...
     'Color', PlotProps.Color.Generic, 'LineStyle','--', 'LineWidth', 1)
@@ -128,10 +129,11 @@ clc
 
 for Indx_B = 1:numel(BandLabels)
     for Indx_E = 1:numel(EyeLabels)
+        String = ['Time spent in ', BandLabels{Indx_B} ' ', EyeLabels{Indx_E}];
         Data = 100*squeeze(TimeSpent_Eyes(:, SB_Indx, Indx_B, Indx_E));
-        MEAN = num2str(mean(Data, 'omitnan'), '%.1f');
-        STD = num2str(std(Data, 'omitnan'), '%.1f');
-        disp(['Time spent in ', BandLabels{Indx_B} ' ', EyeLabels{Indx_E}, ': ', MEAN, ', ', STD])
+%          Data = 100*squeeze(TimeSpent_Eyes(:, SB_Indx, Indx_B, Indx_E));
+
+        dispDescriptive(Data, String, '%', 1);
     end
 end
 
@@ -140,7 +142,8 @@ disp('_______________________________')
 %% Percent SD theta removed
 
 %%% reduce whole-brain data
-lData = zScoreData(sData, 'last');
+% lData = zScoreData(sData, 'last');
+lData = sData;
 lchData = mean(lData, 4, 'omitnan'); % average all channels together
 lchbData = squeeze(bandData(lchData, Freqs', Bands, 'last')); % P x SB x B (T, A, N) x F
 
@@ -169,33 +172,68 @@ ylabel('PSD amplitude (z-scored)')
 %%
 
 clc
-StatsP = P.StatsP;
-
-Theta = dsearchn(Freqs, Bands.Theta');
 
 sdTheta_Intact = squeeze(lchbData(:, 2, 3, 1)); % P x S x B (T, A, I) x F
 blTheta_Intact = squeeze(lchbData(:, 1, 3, 1));
 % blTheta_Intact = squeeze(lchbData(:, 1, 1, 1));
+blTheta_Burstless = squeeze(lchbData(:, 1, 1, 1));
 sdTheta_Burstless = squeeze(lchbData(:, 2, 1, 1));
 
-%     PrcntIntact = 100*(sdTheta_Intact-sdTheta_Burstless)./sdTheta_Intact;
-
-Intact = sdTheta_Intact-blTheta_Intact;
-Burstless = sdTheta_Burstless-blTheta_Intact;
-PrcntSDTheta = 100*(Intact-Burstless)./Intact;
-
+sdBurst = sdTheta_Intact-sdTheta_Burstless;
+blBurst = blTheta_Intact-blTheta_Burstless;
+sdTheta = sdTheta_Intact-blTheta_Intact;
+PrcntSDTheta = 100*(sdBurst-blBurst)./sdTheta;
+PrcntSDTheta(sdTheta<.01) = nan;
+% % PrcntSDTheta(PrcntSDTheta<0) = nan;
 dispDescriptive(PrcntSDTheta, 'Theta removed:', '%', 0);
 
 Stats = pairedttest(blTheta_Intact, sdTheta_Intact, StatsP);
 dispStat(Stats, [1 1], 'Intact change from BL:');
 
-Stats = pairedttest(blTheta_Intact, sdTheta_Burstless, StatsP);
+Stats = pairedttest(blTheta_Burstless, sdTheta_Burstless, StatsP);
 dispStat(Stats, [1 1], 'Burstless change from BL:');
 
 disp('****')
 
 
 
+%% identify participants that don't show an increase in theta bursts with SD
+
+ThetaSD = squeeze(sum(TimeSpent(:, 2, [1 3]), 3)); % add both "pure" theta, and overlapping with alpha
+ThetaBL = squeeze(sum(TimeSpent(:, 1, [1 3]), 3));
+
+Data = [ThetaBL, ThetaSD];
+Increase = 100*(ThetaSD-ThetaBL)./ThetaBL;
+
+Remove = Increase<=50;
+clc
+disp(['Removing ', num2str(nnz(Remove)), ' participants: '])
+disp(Participants(Remove))
+
+%%
+
+clc
+
+sdTheta_Intact = squeeze(lchbData(:, 2, 3, 1)); % P x S x B (T, A, I) x F
+blTheta_Intact = squeeze(lchbData(:, 1, 3, 1));
+blTheta_Burstless = squeeze(lchbData(:, 1, 1, 1));
+sdTheta_Burstless = squeeze(lchbData(:, 2, 1, 1));
+
+sdBurst = sdTheta_Intact-sdTheta_Burstless;
+blBurst = blTheta_Intact-blTheta_Burstless;
+sdTheta = sdTheta_Intact-blTheta_Intact;
+PrcntSDTheta = 100*(sdBurst-blBurst)./sdTheta;
+PrcntSDTheta(sdTheta<.01) = nan;
+PrcntSDTheta(Remove) = nan;
+dispDescriptive(PrcntSDTheta, 'Theta removed:', '%', 0);
+
+Stats = pairedttest(blTheta_Intact, sdTheta_Intact, StatsP);
+dispStat(Stats, [1 1], 'Intact change from BL:');
+
+Stats = pairedttest(blTheta_Burstless, sdTheta_Burstless, StatsP);
+dispStat(Stats, [1 1], 'Burstless change from BL:');
+
+disp('****')
 
 
 

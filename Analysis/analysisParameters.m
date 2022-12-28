@@ -24,6 +24,8 @@ P.Parameters.Radius = 2/3;
 
 P.Participants = {'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', ...
     'P09', 'P10', 'P11', 'P12', 'P13', 'P14', 'P15', 'P16', 'P17', 'P19'};
+P.Participants_sdTheta = { 'P02', 'P03', 'P06', 'P07', 'P08', ...
+    'P09', 'P10', 'P11', 'P13', 'P14', 'P15', 'P16', 'P17', 'P19'};
 
 P.AllTasks = {'Match2Sample', 'LAT', 'PVT', 'SpFT', 'Game', 'Music'};
 P.TaskLabels = {'STM', 'LAT', 'PVT', 'Speech', 'Game', 'Music'};

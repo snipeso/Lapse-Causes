@@ -31,7 +31,7 @@ if isempty(Data2) && numel(Dims1) == 2 % A
             tValues(Indx1, Indx2) = stats.tstat;
             df(Indx1, Indx2) = stats.df;
             CI(Indx1, Indx2, :) = ci;
-            N(Indx1, Indx2) = totN(Data1(:, Indx1), Data2(:, Indx2));
+            N(Indx1, Indx2) = totN(Data1(:, Indx1), Data1(:, Indx2));
         end
     end
 

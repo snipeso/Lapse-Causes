@@ -76,10 +76,10 @@ for Indx_P = 1:numel(Participants)
             Filename_Bursts = AllFiles_Bursts(contains(AllFiles_Bursts, Participants{Indx_P})& ...
                 contains(AllFiles_Bursts, Sessions{Indx_S}));
 
-                        if isempty(Filename_Bursts)
+            if isempty(Filename_Bursts)
                 warning(['Missing bursts ', Participants{Indx_P} Sessions{Indx_S}])
                 continue
-                        end
+            end
 
             load(fullfile(Source_Bursts, Filename_Bursts), 'Bursts', 'EEG')
             EEG.data = Data;
