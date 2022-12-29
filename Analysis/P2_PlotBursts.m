@@ -117,28 +117,6 @@ saveFig('Figure_2', Paths.PaperResults, PlotProps)
 
 
 
-%% provide descriptives
-
-% NB: its a little suspicious that its identical (this would happen if not
-% synchronized), so at somepoint double check
-
-SB_Indx = 2;
-EyeLabels = {'EO', 'EC'};
-
-clc
-
-for Indx_B = 1:numel(BandLabels)
-    for Indx_E = 1:numel(EyeLabels)
-        String = ['Time spent in ', BandLabels{Indx_B} ' ', EyeLabels{Indx_E}];
-        Data = 100*squeeze(TimeSpent_Eyes(:, SB_Indx, Indx_B, Indx_E));
-%          Data = 100*squeeze(TimeSpent_Eyes(:, SB_Indx, Indx_B, Indx_E));
-
-        dispDescriptive(Data, String, '%', 1);
-    end
-end
-
-
-disp('_______________________________')
 %% Percent SD theta removed
 
 %%% reduce whole-brain data
@@ -184,7 +162,6 @@ blBurst = blTheta_Intact-blTheta_Burstless;
 sdTheta = sdTheta_Intact-blTheta_Intact;
 PrcntSDTheta = 100*(sdBurst-blBurst)./sdTheta;
 PrcntSDTheta(sdTheta<.01) = nan;
-% % PrcntSDTheta(PrcntSDTheta<0) = nan;
 dispDescriptive(PrcntSDTheta, 'Theta removed:', '%', 0);
 
 Stats = pairedttest(blTheta_Intact, sdTheta_Intact, StatsP);
@@ -194,6 +171,33 @@ Stats = pairedttest(blTheta_Burstless, sdTheta_Burstless, StatsP);
 dispStat(Stats, [1 1], 'Burstless change from BL:');
 
 disp('****')
+
+
+%% percentages of bands and comparison
+clc
+
+
+% theta
+Data_BL = 100*squeeze(sum(TimeSpent(:, 1, [1 3]), 3));
+dispDescriptive(Data_BL, 'BL Theta', '%', 0);
+
+Data_SD = 100*squeeze(sum(TimeSpent(:, 2, [1 3]), 3));
+dispDescriptive(Data_SD, 'SD Theta', '%', 0);
+
+Stats = pairedttest(Data_BL, Data_SD, StatsP);
+dispStat(Stats, [1 1], 'Theta BLvsSD:');
+disp('   ')
+
+% alpha
+Data_BL = 100*squeeze(sum(TimeSpent(:, 1, [2 3]), 3));
+dispDescriptive(Data_BL, 'BL alpha', '%', 0);
+
+Data_SD = 100*squeeze(sum(TimeSpent(:, 2, [2 3]), 3));
+dispDescriptive(Data_SD, 'SD alpha', '%', 0);
+
+Stats = pairedttest(Data_BL, Data_SD, StatsP);
+dispStat(Stats, [1 1], 'alpha BLvsSD:');
+
 
 
 
@@ -210,6 +214,12 @@ clc
 disp(['Removing ', num2str(nnz(Remove)), ' participants: '])
 disp(Participants(Remove))
 
+
+Data_BL = 100*squeeze(sum(TimeSpent(:, 1, [1 3]), 3));
+Data_SD = 100*squeeze(sum(TimeSpent(:, 2, [1 3]), 3));
+Stats = pairedttest(Data_BL(~Remove), Data_SD(~Remove), StatsP);
+dispStat(Stats, [1 1], 'Theta BLvsSD (redux):');
+
 %%
 
 clc
@@ -224,7 +234,7 @@ blBurst = blTheta_Intact-blTheta_Burstless;
 sdTheta = sdTheta_Intact-blTheta_Intact;
 PrcntSDTheta = 100*(sdBurst-blBurst)./sdTheta;
 PrcntSDTheta(sdTheta<.01) = nan;
-PrcntSDTheta(Remove) = nan;
+% PrcntSDTheta(Remove) = nan;
 dispDescriptive(PrcntSDTheta, 'Theta removed:', '%', 0);
 
 Stats = pairedttest(blTheta_Intact, sdTheta_Intact, StatsP);
