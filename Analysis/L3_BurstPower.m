@@ -66,6 +66,7 @@ for Indx_P = 1:numel(Participants)
 
             % load EEG data
             EEG = loadMATFile(EEGPath, Participants{Indx_P}, Sessions{Indx_S}, 'EEG');
+            if isempty(EEG); continue; end
             Data = EEG.data;
 
             % load bursts
@@ -120,7 +121,11 @@ for Indx_P = 1:numel(Participants)
         %%% get power for each type of EEG
         AllFields = fieldnames(ALLEEG);
 
+
         for Indx_F = 1:numel(AllFields)
+            if isempty(fieldnames(ALLEEG.(AllFields{Indx_F})))
+                continue
+            end
 
             CatEEG = pop_mergeset(ALLEEG.(AllFields{Indx_F}), 1:numel(ALLEEG.(AllFields{Indx_F})));
 
