@@ -209,9 +209,93 @@ Stats = pairedttest(zGenProbMicrosleep_Stim, Prob(:, 1), StatsP);
 dispStat(Stats, [1 1], 'Pre Lapse probability:');
 
 
+% during stim
+Window = [0 0.5];
+Window = dsearchn(t_microsleep', Window');
+
+Prob = squeeze(mean(zProbMicrosleep_Stim(:, :, Window(1):Window(2)), 3, 'omitnan')); % P x TT
+
+Stats = pairedttest(zGenProbMicrosleep_Stim, Prob(:, 1), StatsP);
+dispStat(Stats, [1 1], 'Stim lapse probability:');
+
+disp('*')
+
+% mean values
+Prob = squeeze(mean(ProbMicrosleep_Stim(:, :, Window(1):Window(2)), 3, 'omitnan')); % P x TT
+dispDescriptive(100*Prob(:, 3), 'Correct EC probability', '%', 0);
+dispDescriptive(100*Prob(:, 2), 'late EC probability', '%', 0);
+dispDescriptive(100*Prob(:, 1), 'lapse EC probability', '%', 0);
+
+disp('*')
+
+% late v correct
+Point = 0;
+Point = dsearchn(t_microsleep', Point);
+
+Prob = squeeze(mean(zProbMicrosleep_Stim(:, [2 3], Point), 3, 'omitnan')); % P x TT
+
+Stats = pairedttest(Prob(:, 2), Prob(:, 1), StatsP);
+dispStat(Stats, [1 1], 'Stim late vs correct probability:');
 
 
+%% burst  burst probability
+clc
+BandLabels = {'Theta', 'Alpha'};
+
+for Indx_B = 1:2
+
+    disp(BandLabels{Indx_B})
+
+    % prob before stim
+Window = [-2 0];
+Window = dsearchn(t_burst', Window');
+
+Prob = squeeze(mean(zProbBurst_Stim(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
+
+Stats = pairedttest(zGenProbBurst_Stim(:, Indx_B), Prob(:, 1), StatsP);
+dispStat(Stats, [1 1], 'Pre Lapse probability:');
 
 
+    % during stim
+    Window = [0 0.5];
+Window = dsearchn(t_burst', Window');
+
+Prob = squeeze(mean(zProbBurst_Stim(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
+
+Stats = pairedttest(zGenProbBurst_Stim(:, Indx_B), Prob(:, 1), StatsP);
+dispStat(Stats, [1 1], 'Stim Lapse probability:');
+
+
+    % diff with correct
+        Window = [.5 1.5];
+Window = dsearchn(t_burst', Window');
+
+Prob = squeeze(mean(zProbBurst_Stim(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
+
+Stats = pairedttest(Prob(:, 3), Prob(:, 1), StatsP);
+dispStat(Stats, [1 1], 'Post resp probability lapse v correct:');
+
+    % correct after response
+            Window = [0 1.5];
+Window = dsearchn(t_burst', Window');
+
+    Prob = squeeze(mean(zProbBurst_Resp(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
+
+Stats = pairedttest(GenProbBurst(:,Indx_B), Prob(:, 3), StatsP);
+dispStat(Stats, [1 1], 'Post resp:');
+
+
+disp('____________')
+end
+
+
+%%% theta point
+Point = -1;
+Point = dsearchn(t_burst', Point);
+
+Prob = squeeze(mean(zProbBurst_Stim(:, [1 3], 1, Point), 4, 'omitnan')); % P x TT
+
+Stats = pairedttest(Prob(:, 2), Prob(:, 1), StatsP);
+dispStat(Stats, [1 1], 'Stim late vs correct probability:');
 
 
