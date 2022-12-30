@@ -41,6 +41,6 @@ if isempty(CLims)
 end
 
 plotTopoplot(Stats.t, Stats, Chanlocs, CLims, 't-values', 'Divergent', PlotProps);
-text(.5, .5, ['n=', num2str(Stats.N)], 'FontName', PlotProps.Text.FontName, 'FontSize', PlotProps.Text.LegendSize)
+% text(.5, .5, ['n=', num2str(Stats.N)], 'FontName', PlotProps.Text.FontName, 'FontSize', PlotProps.Text.LegendSize)
 
 

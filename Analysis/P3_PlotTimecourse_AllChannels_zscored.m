@@ -35,11 +35,13 @@ nWindows = size(zProbBurst_Stim, 5);
 
 %% plot theta and alpha
 
+clc
+
 PlotProps = P.Manuscript;
 PlotProps.Colorbar.Location = 'north';
 Grid = [5 2];
 miniGrid = [3 3];
-CLims = [-8 8];
+CLims = [-10 10];
 
 Types = [3 2 1];
 WindowTitles = {["Pre", "[-1.5, 0]"], ["Stimulus", "[0, 0.4]"], ["Response", "[.25 1]"]};
@@ -57,8 +59,12 @@ for Indx_B = 1:2
             Baseline = squeeze(zGenProbBurst(:, :, Indx_B));
 
             subfigure(Space, miniGrid, [Indx_TT, Indx_W], [], false, '', PlotProps);
-            topoDiff(Baseline, Data, Chanlocs, CLims, StatsP, PlotProps);
+            Stats = topoDiff(Baseline, Data, Chanlocs, CLims, StatsP, PlotProps);
             colorbar off
+
+            W= WindowTitles{Indx_W};
+            String = strjoin({BandLabels{Indx_B}, TallyLabels{Types(Indx_TT)}, char(W(1))}, ' ');
+            dispMaxTChanlocs(Stats, Chanlocs, String);
 
             if Indx_TT ==1
                 title(WindowTitles{Indx_W})
@@ -74,16 +80,16 @@ for Indx_B = 1:2
             end
         end
 
-       
+
         if Indx_TT ==1
             title(WindowTitles{Indx_W})
         end
 
     end
-    
+
     A = subfigure([], Grid, [5, Indx_B], [], false, '', PlotProps);
     A.Position(4) = A.Position(4)*2;
     A.Position(2) = A.Position(2)-.1;
     plotColorbar('Divergent', CLims, [BandLabels{Indx_B}, ' t-values'], PlotProps)
 end
-        saveFig('Figure_4', Paths.PaperResults, PlotProps)
+saveFig('Figure_4', Paths.PaperResults, PlotProps)
