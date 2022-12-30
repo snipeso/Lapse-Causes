@@ -17,11 +17,18 @@ Task = P.Labels.Task;
 Bands = P.Bands;
 Channels = P.Channels;
 Triggers = P.Triggers;
-fs = 250; % sampling rate of data
-Refresh = false;
+Parameters = P.Parameters;
+
+Radius = 2/3;
+fs = Parameters.fs; % sampling rate of data
+Refresh = true;
 
 Pool = fullfile(Paths.Pool, 'Tasks'); % place to save matrices so they can be plotted in next script
 
+% Window = [0 .5];
+% MinWindow = .8;
+Window = [0 1];
+MinWindow = .5;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Load trials
@@ -35,12 +42,12 @@ if Refresh || ~exist(fullfile(Pool, 'AllTrials.mat'))
     Trials = getTrialLatencies(Trials, EEGPath, Triggers);
 
     % get eyes-closed info
-    MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task); % also 1000 fs
-    Trials = getECtrials(Trials, MicrosleepPath, fs);
+    MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
+    Trials = getECtrials(Trials, MicrosleepPath, fs, Window, MinWindow);
 
     % get burst info
     BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
-    Trials = getBurstTrials(Trials, BurstPath, Bands, fs);
+    Trials = getBurstTrials(Trials, BurstPath, Bands, fs, Window, MinWindow);
 
     % set to nan all trials that are beyond 50% radius and with eyes closed
     Trials.FinalType = Trials.Type;
@@ -72,11 +79,11 @@ Sessions = [SessionBlocks.BL, SessionBlocks.SD]; % different representation for 
 SessionGroups = {1:3, 4:6};
 
 
-%%% stats & QC plot for lapses in closest or furthest 50% for script: TODO
+%%% stats & QC plot for lapses in closest or furthest 50% for script
 
-Q = quantile(Trials.Radius, 0.5);
-Closest = Trials.Radius<=Q;
-Furthest = Trials.Radius>Q;
+Q = quantile(Trials.Radius, [1/3 2/3]);
+Closest = Trials.Radius<=Q(1);
+Furthest = Trials.Radius>=Q(2);
 EO = Trials.EC == 0;
 EC = Trials.EC == 1;
 CheckEyes = true;

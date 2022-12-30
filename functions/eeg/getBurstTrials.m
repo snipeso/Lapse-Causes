@@ -1,4 +1,4 @@
-function Trials = getBurstTrials(Trials, BurstPath, Bands, fs)
+function Trials = getBurstTrials(Trials, BurstPath, Bands, fs, Window, MinWindow)
 % using EEG and burst data with same sampling rate, identifies which
 % trials had more than 50% eyes closed
 
@@ -12,16 +12,6 @@ Sessions = unique(Trials.Session);
 for Indx_B = 1:numel(BandLabels)
     Trials.(BandLabels{Indx_B}) = nan(size(Trials, 1), 1);
 end
-
-% timewindow relative to stim onset to see if eyes were open or closed
-StartWindow = 0;
-EndWindow = 1;
-
-ConfidenceThreshold = 0.5;
-MinBurst = 0.5; % faction of trial that needs to be EO to be considered EO
-MinNaN = 0.5; % fraction of trial time to consider whether NAN
-
-Filenames = getContent(BurstPath);
 
 for Indx_P = 1:numel(Participants)
     for Indx_S = 1:numel(Sessions)
@@ -54,15 +44,15 @@ for Indx_P = 1:numel(Participants)
         % determine based on amount of eyes closed time, whether classify
         % trial as EC
         for Indx_T = 1:nTrials
-                StimT = round(fs*Trials.StimTime(CurrentTrials(Indx_T)));
-                Start = StimT+StartWindow*fs;
-                End = StimT+EndWindow*fs;
+            StimT = round(fs*Trials.StimTime(CurrentTrials(Indx_T)));
+            Start = StimT+Window(1)*fs;
+            End = StimT+Window(2)*fs;
 
             for Indx_B = 1:numel(BandLabels)
 
-                if nnz(isnan(BurstTime(Indx_B, Start:End)))/numel(Start:End) > MinNaN
+                if nnz(isnan(BurstTime(Indx_B, Start:End)))/numel(Start:End) > MinWindow
                     Trials.(BandLabels{Indx_B})(CurrentTrials(Indx_T)) = nan;
-                elseif nnz(BurstTime(Indx_B, Start:End))/numel(Start:End) >= MinBurst
+                elseif nnz(BurstTime(Indx_B, Start:End))/numel(Start:End) >= MinWindow
                     Trials.(BandLabels{Indx_B})(CurrentTrials(Indx_T)) = 1;
                 else
                     Trials.(BandLabels{Indx_B})(CurrentTrials(Indx_T)) = 0;

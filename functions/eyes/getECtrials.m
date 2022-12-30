@@ -1,4 +1,4 @@
-function Trials = getECtrials(Trials, MicrosleepPath, fs)
+function Trials = getECtrials(Trials, MicrosleepPath, fs, Window, MinWindow)
 % using EEG and microsleep data with same sampling rate, identifies which
 % trials had more than 50% eyes closed
 
@@ -9,15 +9,7 @@ Sessions = unique(Trials.Session);
 
 Trials.EC = nan(size(Trials, 1), 1);
 
-% timewindow relative to stim onset to see if eyes were open or closed
-StartWindow = 0;
-EndWindow = 1;
-
 ConfidenceThreshold = 0.5;
-MinEO = 0.5; % faction of trial that needs to be EO to be considered EO
-MinNaN = 0.5; % fraction of trial time to consider whether NAN
-
-Filenames = getContent(MicrosleepPath);
 
 for Indx_P = 1:numel(Participants)
     for Indx_S = 1:numel(Sessions)
@@ -43,12 +35,13 @@ for Indx_P = 1:numel(Participants)
         % determine based on amount of eyes closed time, whether classify
         % trial as EC
         for Indx_T = 1:nTrials
-            StimT = Trials.StimTime(CurrentTrials(Indx_T));
-            Start = round(fs*(StimT+StartWindow));
-            End = round(fs*(StimT+EndWindow));
-            if nnz(isnan(EyeOpen(Start:End)))/numel(Start:End) > MinNaN
+            StimT = round(fs*Trials.StimTime(CurrentTrials(Indx_T)));
+            Start = StimT+Window(1)*fs;
+            End = StimT+Window(2)*fs;
+
+            if nnz(isnan(EyeOpen(Start:End)))/numel(Start:End) > MinWindow
                 Trials.EC(CurrentTrials(Indx_T)) = nan;
-            elseif nnz(EyeOpen(Start:End))/numel(Start:End) < MinEO
+            elseif nnz(EyeOpen(Start:End))/numel(Start:End) < MinWindow
                 Trials.EC(CurrentTrials(Indx_T)) = 1;
             else
                 Trials.EC(CurrentTrials(Indx_T)) = 0;

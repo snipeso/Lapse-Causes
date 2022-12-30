@@ -1,4 +1,5 @@
-function [Matrix, Things] = tabulateTable(Trials, TrialIndexes, Column, Aggregator, Participants, Sessions, SessionGroups, CheckEyes)
+function [Matrix, Things] = tabulateTable(Trials, TrialIndexes, Column, ...
+    Aggregator, Participants, Sessions, SessionGroups, CheckEyes)
 % Trials is a table. Trial Indexes is 1s and 0s indicating which trials to
 % use. Column is the label of the column on which to do the Aggregator
 % operation. SessionGroups is optional, to pool multiple sessions.
