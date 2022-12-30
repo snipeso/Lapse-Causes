@@ -167,19 +167,19 @@ for Indx_P = 1:numel(Participants)
 
     disp(['Finished ', Participants{Indx_P}])
 end
-% 
-% % remove all data from participants missing any of the trial types
-% for Indx_P = 1:numel(Participants)
-%     for Indx_B = 1:numel(BandLabels)
-%         if any(isnan(zProbBurst_Stim(Indx_P, :, :, Indx_B, :)), 'all')
-%             zProbBurst_Stim(Indx_P, :, :, Indx_B, :) = nan;
-%         end
-% 
-%         if any(isnan(ProbBurst_Resp(Indx_P, 2:3, :, Indx_B, :)), 'all')
-%             ProbBurst_Resp(Indx_P, :, :, Indx_B, :) = nan;
-%         end
-%     end
-% end
+
+% remove all data from participants missing any of the trial types
+for Indx_P = 1:numel(Participants)
+    for Indx_B = 1:numel(BandLabels)
+        if any(isnan(zProbBurst_Stim(Indx_P, :, :, Indx_B, :)), 'all')
+            zProbBurst_Stim(Indx_P, :, :, Indx_B, :) = nan;
+        end
+
+        if any(isnan(ProbBurst_Resp(Indx_P, 2:3, :, Indx_B, :)), 'all')
+            ProbBurst_Resp(Indx_P, :, :, Indx_B, :) = nan;
+        end
+    end
+end
 
 % get general probability as fraction
 GenProbBurst = GenProbBurst(:, :, :, 1)./GenProbBurst(:, :, :, 2);
