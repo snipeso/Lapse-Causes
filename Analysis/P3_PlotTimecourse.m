@@ -189,3 +189,29 @@ legend off
 
 
 saveFig('Figure_3-1', Paths.PaperResults, PlotProps)
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Stats
+
+%% EC probabilities
+
+clc
+
+% probability of EC before stim
+Window = [-2 0];
+Window = dsearchn(t_microsleep', Window');
+
+Prob = squeeze(mean(zProbMicrosleep_Stim(:, :, Window(1):Window(2)), 3, 'omitnan')); % P x TT
+
+Stats = pairedttest(zGenProbMicrosleep_Stim, Prob(:, 1), StatsP);
+dispStat(Stats, [1 1], 'Pre Lapse probability:');
+
+
+
+
+
+
+
+
