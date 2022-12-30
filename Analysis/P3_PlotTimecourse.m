@@ -9,7 +9,7 @@ close all
 
 P = analysisParameters();
 
-Participants = P.Participants;
+Participants = P.Participants_sdTheta;
 Sessions = P.Sessions;
 TallyLabels = P.Labels.Tally;
 Paths = P.Paths;
@@ -17,7 +17,7 @@ Task = P.Labels.Task;
 Channels = P.Channels;
 StatsP = P.StatsP;
 
-SmoothFactor = 0.2; % in seconds;
+SmoothFactor = 0.3; % in seconds;
 
 TitleTag = strjoin({'Timecourse'}, '_');
 
@@ -29,6 +29,9 @@ TitleTag = strjoin({'Timecourse'}, '_');
 % microsleep data
 load(fullfile(Paths.Pool, 'Eyes', 'ProbMicrosleep.mat'), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't', 'GenProbMicrosleep')
 t_microsleep = t;
+
+ProbMicrosleep_Stim(~Participants, :, :) = nan;
+ProbMicrosleep_Resp(~Participants, :, :) = nan;
 
 sProbMicrosleep_Stim = smoothFreqs(ProbMicrosleep_Stim, t_microsleep, 'last', SmoothFactor);
 [zProbMicrosleep_Stim, zGenProbMicrosleep_Stim] = ...
@@ -42,6 +45,11 @@ sProbMicrosleep_Resp = smoothFreqs(ProbMicrosleep_Resp, t_microsleep, 'last', Sm
 % burst data
 load(fullfile(Paths.Pool, 'EEG', 'ProbBurst.mat'), 'ProbBurst_Stim', 'ProbBurst_Resp', 't',  'GenProbBurst')
 t_burst = t;
+
+ProbBurst_Stim(~Participants, :, :) = nan;
+ProbBurst_Resp(~Participants, :, :) = nan;
+
+
 sProbBurst_Stim = smoothFreqs(ProbBurst_Stim, t_burst, 'last', SmoothFactor);
 [zProbBurst_Stim, zGenProbBurst_Stim] = ...
     zscoreTimecourse(sProbBurst_Stim, GenProbBurst, 3);
@@ -61,7 +69,7 @@ sProbBurst_Resp = smoothFreqs(ProbBurst_Resp, t_burst, 'last', SmoothFactor);
 
 PlotProps = P.Manuscript;
 PlotProps.Axes.xPadding = 25;
-Range = [-3.5 5];
+Range = [-3.5 5.5];
 
 Grid = [2 3];
 

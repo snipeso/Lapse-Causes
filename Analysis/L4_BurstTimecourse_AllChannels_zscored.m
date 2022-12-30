@@ -30,15 +30,14 @@ minNanProportion = Parameters.MinNanProportion; % any more nans than this in a g
 
 Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plotted in next script
 BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts_AllChannels', Task);
-WholeBurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
+WholeBurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task); % needed for valid t
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% get data
 
 % load trial information
 load(fullfile(Paths.Pool, 'Tasks', 'AllTrials.mat'), 'Trials')
-% Q = quantile(Trials.Radius, Parameters.Radius);
-Q = quantile(Trials.Radius, 1);
+Q = quantile(Trials.Radius, Parameters.Radius);
 
 t_window = linspace(StartTime, EndTime, fs*(EndTime-StartTime));
 
@@ -48,7 +47,7 @@ zProbBurst_Stim = nan(numel(Participants), 3, 123, 2, size(Windows_Stim, 1));
 zProbBurst_Resp = nan(numel(Participants), 3, 123, 2,  size(Windows_Resp, 1));
 
 GenProbBurst = zeros(numel(Participants), 123, numel(BandLabels), 2);
-zGenProbBurst =  zeros(numel(Participants), 123, numel(BandLabels));
+zGenProbBurst = zeros(numel(Participants), 123, numel(BandLabels));
 
 for Indx_P = 1:numel(Participants)
 
@@ -168,19 +167,19 @@ for Indx_P = 1:numel(Participants)
 
     disp(['Finished ', Participants{Indx_P}])
 end
-
-% remove all data from participants missing any of the trial types
-for Indx_P = 1:numel(Participants)
-    for Indx_B = 1:numel(BandLabels)
-        if any(isnan(zProbBurst_Stim(Indx_P, :, :, Indx_B, :)), 'all')
-            zProbBurst_Stim(Indx_P, :, :, Indx_B, :) = nan;
-        end
-
-        if any(isnan(ProbBurst_Resp(Indx_P, 2:3, :, Indx_B, :)), 'all')
-            ProbBurst_Resp(Indx_P, :, :, Indx_B, :) = nan;
-        end
-    end
-end
+% 
+% % remove all data from participants missing any of the trial types
+% for Indx_P = 1:numel(Participants)
+%     for Indx_B = 1:numel(BandLabels)
+%         if any(isnan(zProbBurst_Stim(Indx_P, :, :, Indx_B, :)), 'all')
+%             zProbBurst_Stim(Indx_P, :, :, Indx_B, :) = nan;
+%         end
+% 
+%         if any(isnan(ProbBurst_Resp(Indx_P, 2:3, :, Indx_B, :)), 'all')
+%             ProbBurst_Resp(Indx_P, :, :, Indx_B, :) = nan;
+%         end
+%     end
+% end
 
 % get general probability as fraction
 GenProbBurst = GenProbBurst(:, :, :, 1)./GenProbBurst(:, :, :, 2);

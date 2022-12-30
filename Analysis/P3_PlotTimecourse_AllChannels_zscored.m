@@ -9,7 +9,7 @@ clc
 
 P = analysisParameters();
 
-Participants = P.Participants;
+Participants = P.Participants_sdTheta;
 Sessions = P.Sessions;
 TallyLabels = P.Labels.Tally;
 Paths = P.Paths;
@@ -29,6 +29,7 @@ Pool = fullfile(Paths.Pool, 'EEG');
 load(fullfile(Pool, 'ProbBurst_Channels_zscored.mat'), 'zProbBurst_Stim', ...
     'zGenProbBurst', 'Chanlocs')
 
+zProbBurst_Stim(~Participants, :, :, :, :) = nan; % P x TT x Ch x B x W
 nWindows = size(zProbBurst_Stim, 5);
 
 

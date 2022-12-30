@@ -8,7 +8,7 @@ function P = analysisParameters()
 %%% Parameters
 
 P.Parameters.MinTots = 10;
-P.Parameters.MinTypes = 10; % minimum number of trials for a given type for some sub-analyses
+P.Parameters.MinTypes = 5; % minimum number of trials for a given type for some sub-analyses
 P.Parameters.MinNanProportion = 0.5;
 
 P.Parameters.Timecourse.Start = -2;
@@ -17,15 +17,17 @@ P.Parameters.Timecourse.End = 2;
 P.Parameters.EC_ConfidenceThreshold = 0.5;
 P.Parameters.fs = 250;
 
-P.Parameters.Radius = 2/3;
+P.Parameters.Radius = 1; % use all trials
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Labels
 
 P.Participants = {'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', ...
     'P09', 'P10', 'P11', 'P12', 'P13', 'P14', 'P15', 'P16', 'P17', 'P19'};
-P.Participants_sdTheta = { 'P02', 'P06', 'P07', ...
+Keep = { 'P02', 'P06', 'P07', ...
     'P09',  'P11', 'P13', 'P14', 'P15', 'P16', 'P17', 'P19'};
+
+P.Participants_sdTheta = ismember(P.Participants, Keep);
 
 P.AllTasks = {'Match2Sample', 'LAT', 'PVT', 'SpFT', 'Game', 'Music'};
 P.TaskLabels = {'STM', 'LAT', 'PVT', 'Speech', 'Game', 'Music'};
