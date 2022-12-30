@@ -21,7 +21,7 @@ StartTime = Parameters.Timecourse.Start;
 EndTime = Parameters.Timecourse.End;
 fs = Parameters.fs;
 
-Windows_Stim = [-1.5 0;  0 0.4;  0.25 1]; % time windows to aggregate info
+Windows_Stim = [-1.5 0;  0 0.25;  0.25 1]; % time windows to aggregate info
 
 Windows_Resp = [-.5 0; 0 1];
 
