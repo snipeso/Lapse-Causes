@@ -7,7 +7,7 @@ Info = blinkParameters();
 
 
 Paths = Info.Paths;
-Refresh = false;
+Refresh = true;
 Triggers = Info.Triggers;
 
 Task = 'LAT';
@@ -27,8 +27,8 @@ Content = getContent(Source_EEG);
 DataQaulity_Filepath = fullfile(Paths.Core, 'QualityCheck', 'Theta Bursts', 'DataQuality_Pupils.csv');
 DataQuality_Table = readtable(DataQaulity_Filepath);
 
-% for Indx_F = 1:numel(Content)
-parfor Indx_F = 1:numel(Content)
+for Indx_F = 1:numel(Content)
+% parfor Indx_F = 1:numel(Content)
     
     T = Triggers;
     DQ = DataQuality_Table;

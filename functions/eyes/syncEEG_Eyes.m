@@ -3,6 +3,7 @@ function EyeData = syncEEG_Eyes(EEG, Source, SyncTrigger)
 % Source is the folder and filename where to get eye info.
 % Eyes is a struct with fields EO, which is the boolean of whether eyes
 % were open, and Raw, which is the simple trace.
+% in lapse-causes
 
 ConfidenceThreshold = 0.5;
 SmoothFactor = 10; % I just picked a number that worked
