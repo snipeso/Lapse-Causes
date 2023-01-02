@@ -31,14 +31,17 @@ Paths.Datasets = 'G:\LSM\Data\Raw';
 Paths.Data  = fullfile(Core, 'Final'); % where data gets saved once its been turned into something else
 Paths.Results = fullfile(Core, 'Results', 'Lapse-Causes');
 
+Info.Participants = {'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', ...
+    'P09', 'P10', 'P11', 'P12', 'P13', 'P14', 'P15', 'P16', 'P17', 'P19'};
+
+Info.Sessions = {'BaselineBeam', 'MainPre', 'MainPost', 'Session2Beam1', 'Session2Beam2', 'Session2Beam3'};
+
 % if eeglab has not run, run it so all the subdirectories get added
 if ~exist('topoplot', 'file')
     eeglab
     close all
 end
 
-% same for matcycle scripts, saved to a different repo (https://github.com/hubersleeplab/matcycle)
-addMatcyclePaths()
 
 % get path where these scripts were saved
 CD = mfilename('fullpath');
