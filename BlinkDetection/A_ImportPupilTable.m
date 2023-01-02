@@ -69,6 +69,6 @@ for Indx_D = 1:size(Datasets,1) % loop through participants
 
         %%% save
         save(fullfile(Destination, Filename{1}), 'Pupil', 'Annotations')
+        disp(['Finished ', Path])
     end
-    disp(['Finished ', Datasets{Indx_D}])
 end
