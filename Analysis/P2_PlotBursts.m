@@ -31,7 +31,7 @@ BandLabels = {'Theta', 'Alpha'};
 Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plotted in next script
 
 
-load(fullfile(Pool, 'BurstDurations.mat'), 'TimeSpent', 'TimeSpent_Eyes')
+load(fullfile(Pool, 'BurstDurations.mat'), 'TimeSpent')
 load(fullfile(Pool, strjoin({TitleTag, 'bChData.mat'}, '_')), 'ChData', 'sData', 'AllFields', 'Chanlocs', 'Freqs')
 
 
@@ -66,7 +66,6 @@ Shift = Delta - mean(Delta, 'omitnan');
 Data = Data - Shift;
 
 subfigure([], Grid, [1 1], [1 2], true, PlotProps.Indexes.Letters{1}, PlotProps);
-% subfigure([], Grid, [3 1], [3 1], true, PlotProps.Indexes.Letters{1}, PlotProps);
 plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
 
 % plot also BL theta, with all bursts
@@ -115,6 +114,21 @@ ylabel('Recording duration (%)')
 
 saveFig('Figure_2', Paths.PaperResults, PlotProps)
 
+
+%% plot all for inspection
+
+
+%%% theta
+SB = 2;
+B_Indx = 1;
+Ch_Indx = 2;
+
+
+Data = log(squeeze(ChData(:, SB, [B_Indx, 3], Ch_Indx, :)));
+BL = log(squeeze(ChData(:, 1, [B_Indx, 3], Ch_Indx, :)));
+
+
+plotParticipantMountains(BL, Data, Freqs', xLog, xLims, PlotProps, P.Labels, Participants);
 
 
 %% Percent SD theta removed
