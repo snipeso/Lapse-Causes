@@ -13,17 +13,18 @@ Info = struct();
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Locations
 
-if exist( 'D:\Data\Raw', 'dir')
-    Core = 'D:\Data\';
-elseif exist( 'F:\Data\Raw', 'dir')
-    Core = 'F:\Data\';
-elseif  exist( 'E:\Data\Raw', 'dir')
-    Core = 'E:\Data\';
-else
-    error('no data disk!')
-    % Core = 'E:\'
-end
+% if exist( 'D:\Data\Raw', 'dir')
+%     Core = 'D:\Data\';
+% elseif exist( 'F:\Data\Raw', 'dir')
+%     Core = 'F:\Data\';
+% elseif  exist( 'E:\Data\Raw', 'dir')
+%     Core = 'E:\Data\';
+% else
+%     error('no data disk!')
+%     % Core = 'E:\'
+% end
 
+Core = 'D:\LSM\Data\';
 Paths.Preprocessed = fullfile(Core, 'Preprocessed');
 Paths.Core = Core;
 
