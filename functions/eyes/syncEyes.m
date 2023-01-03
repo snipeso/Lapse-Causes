@@ -70,3 +70,4 @@ end
 % figure;plot(Time, EEG.data(8, :))
 % hold on
 % plot(Time, Data(2, :)*100)
+% A=1;

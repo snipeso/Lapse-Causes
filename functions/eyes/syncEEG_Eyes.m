@@ -26,6 +26,9 @@ if nnz(strcmp(EventTypes, {'S  3'})) ~= nnz(strcmp(Annotations.label, 'Stim'))
 
     if abs(ITI_Eyes-ITI_EEG) < 0.1
         warning([' EEG vs annotations asynchronized length in ', EEG.filename])
+    elseif size(Annotations, 1)==1
+          warning(['Usin manual synchronization in ', EEG.filename])
+
     else
     error(['Something REALLY wrong with EEG vs annotations synchronization in ', EEG.filename])
     end
