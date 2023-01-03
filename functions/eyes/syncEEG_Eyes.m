@@ -12,8 +12,23 @@ load(Source, 'Annotations', 'Pupil')
 
 
 % check if the EEG and annotations match
+EventTypes = {EEG.event.type}; 
+EventTimes = [EEG.event.latency];
 if nnz(strcmp(EventTypes, {'S  3'})) ~= nnz(strcmp(Annotations.label, 'Stim'))
-    error(['Something wrong with EEG vs annotations in ', EEG.filename])
+    
+    % check if first 2 stimuli are the same distance for EEG and
+    % annotations (in case the eye tracking was cut short)
+    First2_Eyes = find(strcmp(Annotations.label, 'Stim'), 2);
+    ITI_Eyes = diff(Annotations.timestamp(First2_Eyes)-Annotations.timestamp(1));
+
+    First2EEG = find(strcmp(EventTypes, 'S  3'), 2);
+    ITI_EEG = diff(EventTimes(First2EEG)/EEG.srate);
+
+    if abs(ITI_Eyes-ITI_EEG) < 0.1
+        warning([' EEG vs annotations asynchronized length in ', EEG.filename])
+    else
+    error(['Something REALLY wrong with EEG vs annotations synchronization in ', EEG.filename])
+    end
 end
 
 % set up structure
