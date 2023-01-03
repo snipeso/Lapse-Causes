@@ -44,7 +44,7 @@ for Indx_D = 1:size(Datasets,1) % loop through participants
         Filename = join([deblank(Datasets{Indx_D}), Levels(:)', [Destination_Format, '.mat']], '_');
 
         if ~Refresh && exist(fullfile(Destination, Filename{1}), 'file')
-            disp(['Already did ' Filename])
+            disp(['Already did ' Filename{1}])
             continue
         end
 
@@ -69,6 +69,6 @@ for Indx_D = 1:size(Datasets,1) % loop through participants
 
         %%% save
         save(fullfile(Destination, Filename{1}), 'Pupil', 'Annotations')
-        disp(['Finished ', Path])
+        disp(['Finished ', char(Path)])
     end
 end

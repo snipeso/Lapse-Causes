@@ -14,7 +14,7 @@ Task = 'LAT';
 
 for Indx_P = 1:numel(Participants)
 
-    if mod(Indx_P, 5) == 0 || Indx_P == 1
+    if mod(Indx_P-1, 5) == 0
         figure('Units', 'normalized', 'OuterPosition', [0 0 1 1])
         Indx = 0;
     end
