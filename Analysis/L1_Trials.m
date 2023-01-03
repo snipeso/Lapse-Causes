@@ -11,6 +11,7 @@ P = analysisParameters();
 
 Participants = P.Participants;
 Sessions = P.Sessions;
+
 TallyLabels = P.Labels.Tally;
 Paths = P.Paths;
 Task = P.Labels.Task;
@@ -25,10 +26,9 @@ Refresh = true;
 
 Pool = fullfile(Paths.Pool, 'Tasks'); % place to save matrices so they can be plotted in next script
 
-% Window = [0 .5];
-% MinWindow = .8;
-Window = [0 1];
+Window = [0 .5];
 MinWindow = .5;
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Load trials

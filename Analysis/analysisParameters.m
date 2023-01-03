@@ -17,14 +17,15 @@ P.Parameters.Timecourse.End = 2;
 P.Parameters.EC_ConfidenceThreshold = 0.5;
 P.Parameters.fs = 250;
 
-P.Parameters.Radius = 1; % use all trials
+% P.Parameters.Radius = 1; % use all trials
+P.Parameters.Radius = 2/3; % use all trials
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Labels
 
 P.Participants = {'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', ...
     'P09', 'P10', 'P11', 'P12', 'P13', 'P14', 'P15', 'P16', 'P17', 'P19'};
-Keep = { 'P02', 'P06', 'P07', ...
+Keep = { 'P02', 'P06', 'P07', 'P08', ...
     'P09',  'P11', 'P13', 'P14', 'P15', 'P16', 'P17', 'P19'};
 
 P.Participants_sdTheta = ismember(P.Participants, Keep);

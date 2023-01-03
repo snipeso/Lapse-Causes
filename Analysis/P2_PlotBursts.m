@@ -121,7 +121,7 @@ saveFig('Figure_2', Paths.PaperResults, PlotProps)
 %%% theta
 SB = 2;
 B_Indx = 1;
-Ch_Indx = 2;
+Ch_Indx = 1;
 
 
 Data = log(squeeze(ChData(:, SB, [B_Indx, 3], Ch_Indx, :)));
