@@ -33,8 +33,8 @@ Content = getContent(Source_EEG);
 DataQaulity_Filepath = fullfile(Paths.Core, 'QualityCheck', 'Theta Bursts', 'DataQuality_Pupils.csv'); % file indicating manually identified eye
 DataQuality_Table = readtable(DataQaulity_Filepath);
 
-for Indx_F = 1:numel(Content) % DEBUG
-    % parfor Indx_F = 1:numel(Content)
+% for Indx_F = 1:numel(Content) % DEBUG
+parfor Indx_F = 1:numel(Content)
 
     T = Triggers; % stupid parfor thing
     DQ = DataQuality_Table;
@@ -42,8 +42,7 @@ for Indx_F = 1:numel(Content) % DEBUG
     %%% load data
 
     Filename_EEG = Content{Indx_F};
-%     Filename_Eyes = replace(Filename_EEG, 'Clean.mat', 'Pupils.mat');
-    Filename_Eyes = replace(Filename_EEG, 'Power.set', 'Pupils.mat');
+    Filename_Eyes = replace(Filename_EEG, 'Clean.mat', 'Pupils.mat');
 
     if exist(fullfile(Destination_Eyes, Filename_Eyes), 'file') && ~Refresh
         disp(['Skipping ', Filename_Eyes])
@@ -55,9 +54,8 @@ for Indx_F = 1:numel(Content) % DEBUG
     Levels = split(Filename_Eyes, '_');
 
     % EEG data
-%     M = load(fullfile(Source_EEG, Filename_EEG), 'EEG'); % TEMP
-%     EEG = M.EEG;
-EEG = pop_loadset('filename', Filename_EEG, 'filepath', Source_EEG);
+    M = load(fullfile(Source_EEG, Filename_EEG), 'EEG');
+    EEG = M.EEG;
     nPnts = size(EEG.data, 2);
 
     % eye tracking data
@@ -66,7 +64,7 @@ EEG = pop_loadset('filename', Filename_EEG, 'filepath', Source_EEG);
 
     if exist(EyePath, 'file') && DQ_P >= 0.5
         Eyes = syncEEG_Eyes(EEG, EyePath, T.SyncEyes);
-    else 
+    else
         % blanks in case there's no data
         Eyes.Raw = nan(2, nPnts);
         Eyes.EO = nan(1, nPnts);

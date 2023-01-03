@@ -5,22 +5,23 @@ function EyeData = syncEEG_Eyes(EEG, Source, SyncTrigger)
 % were open, and Raw, which is the simple trace.
 % in lapse-causes
 
-ConfidenceThreshold = 0.5;
-SmoothFactor = 10; % I just picked a number that worked
+MethodType = '2d c++';
 
+% load data
 load(Source, 'Annotations', 'Pupil')
 
+
+% check if the EEG and annotations match
+if nnz(strcmp(EventTypes, {'S  3'})) ~= nnz(strcmp(Annotations.label, 'Stim'))
+    error(['Something wrong with EEG vs annotations in ', EEG.filename])
+end
+
+% set up structure
 EyeData = struct('Raw', [], 'EO', []);
-EyeIDs = unique(Pupil.eye_id);
 
+% select only one method type
+Pupil = Pupil(strcmp(Pupil.method, MethodType), :);
 
+% sync pupil data to EEG
 [Eyes, ~] = syncEyes(EEG, SyncTrigger, Pupil, 'confidence', Annotations);
 EyeData.Raw = Eyes;
-
-for Indx_E = 1:numel(EyeIDs)
-
-    [EyeOpen, Microsleeps] = classifyEye(Eyes(Indx_E, :), EEG.srate, ConfidenceThreshold);
-
-    EyeData.EO(Indx_E, 1:EEG.pnts) = EyeOpen;
-    EyeData.Microsleeps(Indx_E, 1:EEG.pnts) = Microsleeps;
-end
