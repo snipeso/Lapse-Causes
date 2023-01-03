@@ -12,7 +12,6 @@ Sessions = Info.Sessions;
 Task = 'LAT';
 
 
-
 for Indx_P = 1:numel(Participants)
 
     if mod(Indx_P, 5) == 0 || Indx_P == 1
