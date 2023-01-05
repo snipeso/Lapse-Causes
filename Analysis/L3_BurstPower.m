@@ -34,9 +34,8 @@ TitleTag = strjoin({'Power', 'Burstless'}, '_');
 %%% Load data
 
 EEGPath = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task);
-% Source_Bursts = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
 
-MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
+EyePath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
 BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
 
 SessionBlocks = P.SessionBlocks;
@@ -81,10 +80,10 @@ for Indx_P = 1:numel(Participants)
 
 
             % load eye-data
-            Eyes = loadMATFile(MicrosleepPath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
+            Eyes = loadMATFile(EyePath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
             if isempty(Eyes); continue; end
 
-            if isnan(Eyes.DQ) || Eyes.DQ == 0 || Eyes.DQ < 1 % skip if bad data
+            if isnan(Eyes.DQ) || Eyes.DQ == 0
                 EyeOpen = nan(1, Pnts);
                 warning('Bad eye data')
                 continue

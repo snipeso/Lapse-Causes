@@ -1,3 +1,5 @@
+% script to get info on bursts occurance in time
+
 clear
 clc
 close all
@@ -12,14 +14,10 @@ Sessions = P.Sessions;
 Paths = P.Paths;
 Task = P.Labels.Task;
 Bands = P.Bands;
-Triggers = P.Triggers;
-Channels = P.Channels;
 Parameters = P.Parameters;
 
 fs = Parameters.fs;
-ConfidenceThreshold = Parameters.EC_ConfidenceThreshold; % for classifying eyes closed/open 
-
-Source_Bursts = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
+ConfidenceThreshold = Parameters.EC_ConfidenceThreshold; % for classifying eyes closed/open
 
 SessionBlocks = P.SessionBlocks;
 SB_Labels = {'BL', 'SD'};
@@ -27,18 +25,18 @@ BandLabels = fieldnames(Bands);
 
 Pool = fullfile(Paths.Pool, 'EEG');
 
+EyePath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
+BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Load data
-
-MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
-BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
 
 Durations = nan(numel(Participants), numel(SB_Labels));
 TimeSpent = nan(numel(Participants), numel(SB_Labels), numel(BandLabels)+1); % duration of bursts individually, and overlapping
 
 for Indx_P = 1:numel(Participants)
-    for Indx_SB = 1:numel(SB_Labels)
+    for Indx_SB = 1:numel(SB_Labels) % BL vs SD
 
         Sessions = SessionBlocks.(SB_Labels{Indx_SB});
         for Indx_S = 1:numel(Sessions)  % gather information for all the sessions in the block
@@ -53,17 +51,17 @@ for Indx_P = 1:numel(Participants)
             ValidTime = EEG.valid_t; % vector of 1s of all the time in which the task was active, and there wasn't noise
 
             % load eye-data
-            Eyes = loadMATFile(MicrosleepPath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
+            Eyes = loadMATFile(EyePath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
             if isempty(Eyes); continue; end
 
-            if isnan(Eyes.DQ) || Eyes.DQ == 0 || Eyes.DQ < 1 % skip if bad data
+            if isnan(Eyes.DQ) || Eyes.DQ == 0
                 EyeOpen = nan(1, Pnts);
                 warning('Bad data eye data')
                 continue
             end
 
             Eye = round(Eyes.DQ); % which eye
-            [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold); % not using internal microsleep identifier so that I'm flexible
+            [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold);
 
             % look only at eye-open clean data
             ValidTime = ValidTime & EyeOpen == 1;
@@ -88,7 +86,7 @@ for Indx_P = 1:numel(Participants)
             end
 
             % get overlap
-            BothBurstTime = all(AllBurstTime, 1);
+            BothBurstTime = all(AllBurstTime, 1); % when there is both theta and alpha (it gets subtracted later)
             TimeSpent(Indx_P, Indx_SB, end) = ...
                 Add(TimeSpent(Indx_P, Indx_SB, end), nnz(BothBurstTime)/fs);
         end

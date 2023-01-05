@@ -115,20 +115,20 @@ ylabel('Recording duration (%)')
 saveFig('Figure_2', Paths.PaperResults, PlotProps)
 
 
-%% plot all for inspection
-
-
-%%% theta
-SB = 2;
-B_Indx = 1;
-Ch_Indx = 1;
-
-
-Data = log(squeeze(ChData(:, SB, [B_Indx, 3], Ch_Indx, :)));
-BL = log(squeeze(ChData(:, 1, [B_Indx, 3], Ch_Indx, :)));
-
-
-plotParticipantMountains(BL, Data, Freqs', xLog, xLims, PlotProps, P.Labels, Participants);
+% %% plot all for inspection % DEBUG
+% 
+% 
+% %%% theta
+% SB = 2;
+% B_Indx = 1;
+% Ch_Indx = 1;
+% 
+% 
+% Data = log(squeeze(ChData(:, SB, [B_Indx, 3], Ch_Indx, :)));
+% BL = log(squeeze(ChData(:, 1, [B_Indx, 3], Ch_Indx, :)));
+% 
+% 
+% plotParticipantMountains(BL, Data, Freqs', xLog, xLims, PlotProps, P.Labels, Participants);
 
 
 %% Percent SD theta removed
