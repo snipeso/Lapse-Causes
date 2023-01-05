@@ -270,16 +270,19 @@ dispStat(Stats, [1 1], 'SD effect on EC lapses:');
 
 
 
-%% calculate
+%% calculate ANOVA for radius vs sleep deprivation
+
+% all radii
 Stats_Radius = anova2way(LapseTally(:, :, [1 3]), {'Distance', 'Time'}, string(1:numel(unique(Bins))), ...
     {'BL', 'SD'}, StatsP);
+
+% exluding last two radii
 Stats_Radius_Redux = anova2way(LapseTally(:, 1:3, [1 3]), {'Distance', 'Time'}, string(1:numel(unique(Bins))), ...
     {'BL', 'SD'}, StatsP);
 
+
 %% lapses by quantile
 clc
-
-%{'BL (EO)', 'BL (EC)', 'SD (EO)', 'SD (EC)'}
 
 % close lapses
 dispDescriptive(squeeze(LapseTally(:, 1, 1)), 'BL EO close lapses', '%', '%.1f');
