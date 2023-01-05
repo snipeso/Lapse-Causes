@@ -47,18 +47,17 @@ for Indx_P = 1:numel(Participants)
         Trials.StimTime(CurrentTrials) = StimLatencies;
 
          % get response latencies
-        RespLatencies = StimLatencies+fs*1; % window between stim and answer, if no answer given
+        RespLatencies = nan(size(StimLatencies)); % window between stim and answer, if no answer given
         for Indx_T = 1:nTrials
             NextIndx = StimLatencyIndexes(Indx_T)+1; % next trigger
             if strcmp(Types(NextIndx), Triggers.Resp) % check if it's a response trigger
                 RespLatencies(Indx_T) = Latencies(NextIndx); % save that latency
-            else
-                RespLatencies(Indx_T) = nan;
             end
         end
 
         Trials.RespTime(CurrentTrials) = RespLatencies;
         Trials.RT_Triggers(CurrentTrials) = RespLatencies - StimLatencies;
     end
+
     disp(['Finished ', Participants{Indx_P}])
 end
