@@ -22,8 +22,6 @@ SB_Labels = {'BL', 'SD'};
 Sessions = [SessionBlocks.BL, SessionBlocks.SD]; % different representation for the tabulateTable function
 SessionGroups = {1:3, 4:6};
 
-TitleTag = strjoin({'LapseCauses', 'Behavior'}, '_');
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Load trial data
@@ -33,10 +31,6 @@ Pool = fullfile(Paths.Pool, 'Tasks');
 load(fullfile(Pool, 'AllTrials.mat'), 'Trials') % from script Load_Trials
 
 % get trial subsets
-Q = quantile(Trials.Radius, 0.5);
-Closest = Trials.Radius<=Q;
-Furthest = Trials.Radius>Q;
-
 EO = Trials.EC == 0;
 EC = Trials.EC == 1;
 
@@ -52,7 +46,7 @@ for Indx_SB = 1:2
             contains(Trials.Session, SessionBlocks.(SB_Labels{Indx_SB})));
         RTs(isnan(RTs)) = [];
         FlameStruct.(SB_Labels{Indx_SB}).(Participants{Indx_P}) = RTs;
-        
+
         MEANS(Indx_P, Indx_SB) = mean(RTs);
         Q99(Indx_P, Indx_SB) = quantile(RTs, .99);
     end
@@ -64,6 +58,8 @@ end
 
 %% Plot all behavior information
 
+clc
+
 Grid = [1 3];
 CheckEyes = true;
 
@@ -74,11 +70,13 @@ XLim = [.5 2.5];
 
 subfigure([], Grid, [1 1], [1 1], true, PlotProps.Indexes.Letters{1}, PlotProps);
 hold on
-plot([0 3], [.5 .5], 'Color', PlotProps.Color.Generic, 'LineStyle', ':', 'LineWidth', .5) % demarkation of when answer is late
+plot([0 3], [.5 .5], 'Color', PlotProps.Color.Generic, 'LineStyle', ':', 'LineWidth', 1) % demarkation of when answer is late
 plotFlames(FlameStruct, PlotProps.Color.Participants, .15, PlotProps)
 ylabel('Reaction times (s)')
 xlim(XLim)
 legend off
+
+disp('A: N=18')
 
 
 %%% B: Proportion of trials
@@ -96,7 +94,12 @@ BadParticipants = Tots<MinTots;
 Tots(BadParticipants) = nan;
 
 Matrix = cat(3, EO_Matrix, EC_Matrix(:, :, 1));
+
+BadParticipants = any(any(isnan(Matrix), 3), 2); % remove anyone missing any data at any point
+Matrix(BadParticipants, :, :) = nan;
+
 Data = squeeze(mean(100*Matrix./Tots, 1, 'omitnan')); % average, normalizing totals
+
 
 % assemble plot parameters
 Order = [4 1 2 3]; % order in which to have trial types
@@ -120,6 +123,14 @@ plotStackedBars(Data, SB_Labels, YLim, AllTallyLabels, Colors, PlotProps)
 ylabel('% trials')
 set(legend, 'location', 'northwest')
 xlim(XLim)
+
+% display how much data is in not-plotted task types
+NotPlotted = 100*mean(sum(EC_Matrix(:, :, 2:3), 3)./Tots, 'omitnan');
+
+% info on figure
+disp(['B: N=', num2str(numel(BadParticipants) - nnz(BadParticipants))])
+disp(['Not plotted data in B: ', num2str(NotPlotted(2), '%.2f'), '%'])
+
 
 
 %%% C: plot change in lapses with distance
@@ -152,6 +163,10 @@ LapseTally = 100*LapseTally./Tots; % P x SB x RB
 LapseTally = LapseTally(:, [1 3 2 4], :); % EO BL, EC Bl, EO SD, EC SD
 LapseTally = permute(LapseTally, [1 3 2]); % P x RB x SB
 
+% remove participants with any NaNs
+BadParticipants = any(any(isnan(LapseTally), 3), 2);
+LapseTally(BadParticipants, :, :) = nan;
+
 % plot parameters
 Colors = [flip(getColors([1 2], '', 'gray')); PlotProps.Color.Types(1, :); Red(1, :)]; % generic for BL, lapse color for SD
 YLim = [0 60];
@@ -159,11 +174,13 @@ YLim = [0 60];
 % plot
 subfigure([], Grid, [1 3], [1 1], true, PlotProps.Indexes.Letters{3}, PlotProps);
 plotSpikeBalls(LapseTally, [], {'BL (EO)', 'BL (EC)', 'SD (EO)', 'SD (EC)'}, ...
-     Colors, 'IQ', PlotProps)
+    Colors, 'IQ', PlotProps)
 ylabel('Lapses (% trials)')
 ylim(YLim)
 xlabel('Distance from center (quantiles)')
 set(legend, 'Location','northwest')
+
+disp(['C: N=' num2str(nnz(~BadParticipants))])
 
 saveFig('Figure_1', Paths.PaperResults, PlotProps)
 
@@ -276,8 +293,8 @@ disp('*')
 
 % each distance
 for Indx_Q = 1:size(LapseTally, 2)
-dispDescriptive(squeeze(LapseTally(:, Indx_Q, 3)-LapseTally(:, Indx_Q, 1)), ... ...
-    ['BL v SD EO lapses Q', num2str(Indx_Q)], '%', '%.1f');
+    dispDescriptive(squeeze(LapseTally(:, Indx_Q, 3)-LapseTally(:, Indx_Q, 1)), ... ...
+        ['BL v SD EO lapses Q', num2str(Indx_Q)], '%', '%.1f');
 end
 disp('*')
 
@@ -289,20 +306,20 @@ dispStat(Stats_Radius_Redux, {'Distance', 'Time', 'Interaction'}, 'Distance vs T
 
 
 % %% effect of bursts on RTs
-% 
+%
 % clc
-% 
+%
 % Bands = P.Bands;
 % BandLabels = fieldnames(Bands);
 % SB_Indx = 2;
-% 
+%
 % load(fullfile(Pool, 'Burst_RTs.mat'), 'RTs')
-% 
+%
 % for Indx_B = 1:numel(BandLabels)
 %     Stats = pairedttest(squeeze(RTs(:, SB_Indx, Indx_B, 1)), ...
 %         squeeze(RTs(:, SB_Indx, Indx_B, 2)), StatsP);
 % dispStat(Stats, [1 1], [BandLabels{Indx_B}, ' effect on RTs:']);
-% 
+%
 % end
 
 
