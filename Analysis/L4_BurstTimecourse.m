@@ -26,7 +26,7 @@ minNanProportion = Parameters.MinNanProportion; % any more nans than this in a g
 
 Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plotted in next script
 BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
-MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
+EyePath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -67,11 +67,11 @@ for Indx_P = 1:numel(Participants)
         Pnts = EEG.pnts;
         t_valid = EEG.valid_t;
 
-                % load in eye data
-        Eyes = loadMATFile(MicrosleepPath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
+        % load in eye data
+        Eyes = loadMATFile(EyePath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
         if isempty(Eyes); continue; end
 
-        if isnan(Eyes.DQ) || Eyes.DQ == 0 || Eyes.DQ < 1
+        if isnan(Eyes.DQ) || Eyes.DQ == 0
             warning(['Bad data in ', Participants{Indx_P}, Sessions{Indx_S}])
             continue
         end
@@ -79,11 +79,11 @@ for Indx_P = 1:numel(Participants)
         Eye = round(Eyes.DQ); % which eye
 
         % get 1s and 0s of whether eyes were open
-        [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold); 
+        [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold);
 
 
         %%% select data
-        
+
         % exclude EC timepoints
         t_valid = t_valid & EyeOpen==1;
 

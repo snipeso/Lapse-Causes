@@ -20,6 +20,7 @@ BandLabels = fieldnames(Bands);
 StartTime = Parameters.Timecourse.Start;
 EndTime = Parameters.Timecourse.End;
 fs = Parameters.fs;
+ConfidenceThreshold = Parameters.EC_ConfidenceThreshold;
 
 Windows_Stim = [-1.5 0;  0 0.25;  0.25 1]; % time windows to aggregate info
 
@@ -31,6 +32,7 @@ minNanProportion = Parameters.MinNanProportion; % any more nans than this in a g
 Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plotted in next script
 BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts_AllChannels', Task);
 WholeBurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task); % needed for valid t
+EyePath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% get data
@@ -57,12 +59,14 @@ for Indx_P = 1:numel(Participants)
 
     for Indx_S = 1:numel(Sessions)
 
+        %%% Load in data
+
         % trial info for current recording
         CurrentTrials = find(strcmp(Trials.Participant, Participants{Indx_P}) & ...
             strcmp(Trials.Session, Sessions{Indx_S}));
         nTrials = nnz(CurrentTrials);
 
-        % load in eye data
+        % load in burst data
         Bursts = loadMATFile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'AllBursts');
         if isempty(Bursts); continue; end
 
@@ -81,6 +85,26 @@ for Indx_P = 1:numel(Participants)
 
         Freqs = [Bursts.Frequency];
         Channels = [Bursts.Channel];
+
+        % load in eye data
+        Eyes = loadMATFile(EyePath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
+        if isempty(Eyes); continue; end
+
+        if isnan(Eyes.DQ) || Eyes.DQ == 0
+            warning(['Bad data in ', Participants{Indx_P}, Sessions{Indx_S}])
+            continue
+        end
+
+        Eye = round(Eyes.DQ); % which eye
+
+        % get 1s and 0s of whether eyes were open
+        [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold);
+
+
+        %%% select trials
+
+        % exclude EC timepoints
+        t_valid = t_valid & EyeOpen==1;
 
         Trials_B_Stim = nan(nTrials, TotChannels, numel(BandLabels), numel(t_window));
         Trials_B_Resp = Trials_B_Stim;
@@ -117,14 +141,13 @@ for Indx_P = 1:numel(Participants)
         continue
     end
 
-    %%% get probability of microsleep (in time) for each trial type
+    %%% get probability of event for each trial type
 
     for Indx_B = 1:numel(BandLabels)
         for Indx_TT = 1:3
 
             % get prob of burst in stim trial
             TT_Indexes = AllTrials_Table.Type==Indx_TT & AllTrials_Table.Radius <= Q;
-            %                 TT_Indexes = AllTrials_Table.Type==Indx_TT & AllTrials_Table.Radius < Q & AllTrials_Table.EC==0;
 
             nTrials = nnz(TT_Indexes);
 
@@ -133,7 +156,7 @@ for Indx_P = 1:numel(Participants)
 
                 Prob = probEvent(TypeTrials_Stim, minNanProportion, minTrials);
 
-                ProbBurst_Stim(Indx_P, Indx_TT, Indx_Ch, Indx_B, :) =  Prob; %...
+                ProbBurst_Stim(Indx_P, Indx_TT, Indx_Ch, Indx_B, :) =  Prob;
 
 
                 % get prob of burst in resp trial
@@ -142,7 +165,7 @@ for Indx_P = 1:numel(Participants)
 
                     Prob = probEvent(TypeTrials_Resp, minNanProportion, minTrials);
 
-                    ProbBurst_Resp(Indx_P, Indx_TT, Indx_Ch, Indx_B, :) = Prob; %...
+                    ProbBurst_Resp(Indx_P, Indx_TT, Indx_Ch, Indx_B, :) = Prob;
                 end
             end
         end

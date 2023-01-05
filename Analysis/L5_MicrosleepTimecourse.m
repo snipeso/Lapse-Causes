@@ -59,7 +59,7 @@ for Indx_P = 1:numel(Participants)
         Eyes = loadMATFile(MicrosleepPath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
         if isempty(Eyes); continue; end
 
-        if isnan(Eyes.DQ) || Eyes.DQ == 0 || Eyes.DQ < 1
+        if isnan(Eyes.DQ) || Eyes.DQ == 0
             warning(['Bad data in ', Participants{Indx_P}, Sessions{Indx_S}])
             continue
         end

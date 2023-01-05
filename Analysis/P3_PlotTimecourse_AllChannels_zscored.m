@@ -10,11 +10,8 @@ close all
 P = analysisParameters();
 
 Participants = P.Participants_sdTheta;
-Sessions = P.Sessions;
 TallyLabels = P.Labels.Tally;
 Paths = P.Paths;
-Task = P.Labels.Task;
-Channels = P.Channels;
 StatsP = P.StatsP;
 Bands = P.Bands;
 BandLabels = fieldnames(Bands);
@@ -41,10 +38,10 @@ PlotProps = P.Manuscript;
 PlotProps.Colorbar.Location = 'north';
 Grid = [5 2];
 miniGrid = [3 3];
-CLims = [-10 10];
+CLims = [-8 8];
 
 Types = [3 2 1];
-WindowTitles = {["Pre", "[-1.5, 0]"], ["Stimulus", "[0, 0.4]"], ["Response", "[.25 1]"]};
+WindowTitles = {["Pre", "[-1.5, 0]"], ["Stimulus", "[0, 0.25]"], ["Response", "[.25 1]"]};
 
 figure('Units','centimeters', 'Position',[0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.45])
 for Indx_B = 1:2
@@ -79,7 +76,6 @@ for Indx_B = 1:2
                     'FontWeight', 'Bold', 'HorizontalAlignment', 'Center', 'Rotation', 90);
             end
         end
-
 
         if Indx_TT ==1
             title(WindowTitles{Indx_W})
