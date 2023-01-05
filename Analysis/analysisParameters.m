@@ -182,7 +182,7 @@ AllBands.Beta = [15 25];
 AllBands.Gamma = [25 35];
 
 Bands.Theta = [4 8];
-Bands.Alpha = [8 15];
+Bands.Alpha = [8 12];
 
 %%% Channels and Regions of Interest (ROI)
 Channels = struct();
