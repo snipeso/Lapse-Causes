@@ -1,4 +1,4 @@
-% associates eye info to trials
+% associates eye /eeg info to trials
 
 clear
 clc
@@ -12,37 +12,34 @@ P = analysisParameters();
 Participants = P.Participants;
 Sessions = P.Sessions;
 
-TallyLabels = P.Labels.Tally;
 Paths = P.Paths;
 Task = P.Labels.Task;
 Bands = P.Bands;
-Channels = P.Channels;
 Triggers = P.Triggers;
 Parameters = P.Parameters;
 
-Radius = 2/3;
 fs = Parameters.fs; % sampling rate of data
-Refresh = true;
+Refresh = true; % going through eeg and eye data is slow
 
 Pool = fullfile(Paths.Pool, 'Tasks'); % place to save matrices so they can be plotted in next script
 
-Window = [0 .5];
-MinWindow = .5;
+Window = [0 .5]; % window in which to see if there is an event or not
+MinWindow = 1/3; % minimum proportion of window needed to have event to count
 
+% locations
+    MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Load trials
 
-if Refresh || ~exist(fullfile(Pool, 'AllTrials.mat'))
+if Refresh || ~exist(fullfile(Pool, 'AllTrials.mat'), 'file')
     %%% get trial information
     Trials = loadBehavior(Participants, Sessions, Task, Paths, false);
 
     % get time of stim and response trigger
-    EEGPath = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task);
-    Trials = getTrialLatencies(Trials, EEGPath, Triggers);
+    Trials = getTrialLatencies(Trials, MicrosleepPath, Triggers);
 
     % get eyes-closed info
-    MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
     Trials = getECtrials(Trials, MicrosleepPath, fs, Window, MinWindow);
 
     % get burst info
