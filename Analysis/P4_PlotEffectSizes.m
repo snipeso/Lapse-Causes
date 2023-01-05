@@ -59,8 +59,10 @@ xLabels = {};
 clc
 
 % eye status
-ProbType = splitTally(Trials, EO & ~Furthest & SD, EC & ~Furthest & SD, Participants, ...
+[ProbType, ProbEvent(:, :, 1)] = splitTally(Trials, EO & ~Furthest & SD, EC & ~Furthest & SD, Participants, ...
     Sessions, SessionGroups, MinTots, BadParticipants);
+
+LapseProb(:, 1) = squeeze(ProbType(:, 1, 2));
 
 [HedgesG, HedgesGCI, xLabels, Stats] = ...
     loadG(ProbType, 1, HedgesG, HedgesGCI, xLabels, 'EC', StatsP);
@@ -87,8 +89,9 @@ dispStat(Stats, [1 1], 'SD:');
 
 
 % Theta
-ProbType = splitTally(Trials, EO & ~Furthest & SD & NotTheta, EO & ~Furthest & SD & Theta, Participants, ...
+[ProbType, ProbEvent(:, :, 2)] = splitTally(Trials, EO & ~Furthest & SD & NotTheta, EO & ~Furthest & SD & Theta, Participants, ...
     Sessions, SessionGroups, MinTots, BadParticipants);
+LapseProb(:, 2) = squeeze(ProbType(:, 1, 2));
 
 [HedgesG, HedgesGCI, xLabels, Stats] = ...
     loadG(ProbType, 4, HedgesG, HedgesGCI, xLabels, 'Theta', StatsP);
@@ -96,8 +99,9 @@ dispStat(Stats, [1 1], 'Theta:');
 
 
 % alpha
-ProbType = splitTally(Trials, EO & ~Furthest & SD & NotAlpha, EO & ~Furthest & SD &Alpha, Participants, ...
+[ProbType, ProbEvent(:, :, 3)] = splitTally(Trials, EO & ~Furthest & SD & NotAlpha, EO & ~Furthest & SD &Alpha, Participants, ...
     Sessions, SessionGroups, MinTots, BadParticipants);
+LapseProb(:, 3) = squeeze(ProbType(:, 1, 2));
 
 [HedgesG, HedgesGCI, xLabels, Stats] = ...
     loadG(ProbType, 5, HedgesG, HedgesGCI, xLabels, 'Alpha', StatsP);
@@ -123,6 +127,54 @@ ylabel("Hedge's g effect on lapse probability")
 
 saveFig(TitleTag, Paths.PaperResults, PlotProps)
 
+
+
+%% plot models
+
+
+% calculate stats without discarding data
+ProbEvent = nan(numel(Participants), 2, 3); % EC, theta, alpha
+LapseProb = nan(numel(Participants), 3);
+
+[ProbType, ProbEvent(:, :, 1)] = splitTally(Trials, ~Furthest & EO & SD, ~Furthest & EC & SD, Participants, ...
+    Sessions, SessionGroups, MinTots, BadParticipants);
+LapseProb(:, 1) = squeeze(ProbType(:, 1, 2));
+
+[ProbType, ProbEvent(:, :, 2)] = splitTally(Trials, ~Furthest & SD & EO & NotTheta, ~Furthest & SD & EO & Theta, Participants, ...
+    Sessions, SessionGroups, MinTots, BadParticipants);
+LapseProb(:, 2) = squeeze(ProbType(:, 1, 2));
+
+[ProbType, ProbEvent(:, :, 3)] = splitTally(Trials, ~Furthest & SD & EO & NotAlpha, ~Furthest & SD & EO & Alpha, Participants, ...
+    Sessions, SessionGroups, MinTots, BadParticipants);
+LapseProb(:, 3) = squeeze(ProbType(:, 1, 2));
+
+ProbEvent = squeeze(ProbEvent(:, 2, :));
+
+[Tally1, ~] = tabulateTable(Trials, ~Furthest & SD, 'Type', 'tabulate', ...
+    Participants, Sessions, SessionGroups, true); % P x SB x TT
+GenLapseProb = squeeze(Tally1(:, 1, 1))./sum(squeeze(Tally1),2, 'omitnan');
+
+[Tally2, ~] = tabulateTable(Trials, ~Furthest & SD & EO, 'Type', 'tabulate', ...
+    Participants, Sessions, SessionGroups, true); % P x SB x TT
+
+GenLapseProb(:, 2:3) = repmat(squeeze(Tally2(:, 1, 1))./sum(squeeze(Tally2),2, 'omitnan'), 1, 2);
+
+GenLapseProb(BadParticipants, :) = nan;
+ProbEvent(BadParticipants, :) = nan;
+LapseProb(BadParticipants, :) = nan;
+
+%%
+
+
+Legend = {'EC', 'Theta', 'Alpha'};
+Colors = [getColors(1, '', 'blue');
+      getColors(1, '', 'red');
+    getColors(1, '', 'yellow');
+];
+Grid = [1, 2];
+
+figure
+plotChangeProb(ProbEvent, LapseProb, GenLapseProb, Legend, Colors, PlotProps)
 
 
 

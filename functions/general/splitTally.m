@@ -1,8 +1,8 @@
-function ProbType = splitTally(Trials, TrialIndexes1, TrialIndexes2, Participants, ...
+function [ProbType, ProbEvent] = splitTally(Trials, TrialIndexes1, TrialIndexes2, Participants, ...
     Sessions, SessionGroups, MinTots, BadParticipants)
 % ProbType is a P x TT x 2
+% ProbEvent is a P x 2 matrix
 
-SB_Indx = 2;
 CheckEyes = true;
 
 % get number of trials by each type for the subset of trials that are closest
@@ -26,5 +26,6 @@ BadParticipants = Tots1 < MinTots | Tots2 < MinTots | BadParticipants;
 ProbType(BadParticipants, :, :) = nan;
 
 
-
+ProbEvent = [Tots1, Tots2]./(Tots1+Tots2);
+ProbEvent(BadParticipants, :) = nan;
 
