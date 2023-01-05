@@ -108,6 +108,8 @@ LapseProb(:, 3) = squeeze(ProbType(:, 1, 2));
 dispStat(Stats, [1 1], 'Alpha:');
 
 
+
+
 figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*1, PlotProps.Figure.Height*.2])
 Grid = [1 1];
 
