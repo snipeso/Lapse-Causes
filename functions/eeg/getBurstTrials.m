@@ -58,16 +58,17 @@ for Indx_P = 1:numel(Participants)
             Start = StimT+Window(1)*fs;
             End = StimT+Window(2)*fs;
             wPnts = numel(Start:End); % window points
-            BT = BurstTime(Indx_B, Start:End);
 
             for Indx_B = 1:numel(BandLabels)
 
+                BT = BurstTime(Indx_B, Start:End);
+
                 if nnz(isnan(BT))/wPnts > MinWindow
                     Trials.(BandLabels{Indx_B})(CurrentTrials(Indx_T)) = nan;
-                
+
                 elseif nnz(BT==1)/wPnts >= MinWindow
                     Trials.(BandLabels{Indx_B})(CurrentTrials(Indx_T)) = 1;
-                
+
                 else
                     Trials.(BandLabels{Indx_B})(CurrentTrials(Indx_T)) = 0;
                 end
