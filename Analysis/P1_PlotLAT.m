@@ -202,13 +202,10 @@ dispStat(Stats, [1 1], 'SD effect on RTs:');
 
 % distribution of RTs to show that they don't go over 1s
 SB_Indx = 2;
-IQ = 1000*quantile(Q99(:, SB_Indx), [.25 .75]);
-disp(['RT for 99% of SD data (MEAN [Min Max]): ', num2str(mean(1000*Q99(:, SB_Indx), 'omitnan'), '%.0f'), ...
-    ' ms (IQ: ', num2str(IQ(1), '%.0f'), ', ' num2str(IQ(2), '%.0f'), ')'])
+dispDescriptive(1000*Q99(:, SB_Indx), 'RT for 99% of SD data:', ' ms', 0);
 
 
 %% lapses
-
 
 %%% total lapses
 [All_Matrix, ~] = tabulateTable(Trials, [], 'Type', 'tabulate', ...
@@ -224,7 +221,7 @@ ECvAll_Matrix = 100*EC_Matrix(:, :, 1)./Tots; % Matrix is EO lapses, late, corre
 Tots = EO_Matrix(:, :, 1) + EC_Matrix(:, :, 1);
 ECvEO_Lapses = 100*EC_Matrix(:, :, 1)./Tots;
 
-%%
+
 clc
 
 % overall proportion of lapses
@@ -302,26 +299,4 @@ disp('*')
 % all distance
 dispStat(Stats_Radius, {'Distance', 'Time', 'Interaction'}, 'Distance vs Time:');
 dispStat(Stats_Radius_Redux, {'Distance', 'Time', 'Interaction'}, 'Distance vs Time, first 3 quantiles:');
-
-
-
-% %% effect of bursts on RTs
-%
-% clc
-%
-% Bands = P.Bands;
-% BandLabels = fieldnames(Bands);
-% SB_Indx = 2;
-%
-% load(fullfile(Pool, 'Burst_RTs.mat'), 'RTs')
-%
-% for Indx_B = 1:numel(BandLabels)
-%     Stats = pairedttest(squeeze(RTs(:, SB_Indx, Indx_B, 1)), ...
-%         squeeze(RTs(:, SB_Indx, Indx_B, 2)), StatsP);
-% dispStat(Stats, [1 1], [BandLabels{Indx_B}, ' effect on RTs:']);
-%
-% end
-
-
-
 
