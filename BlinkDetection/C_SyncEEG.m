@@ -28,7 +28,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Sync EEG
 
-Content = getContent(Source_EEG);
+Content = getContent(Source_Eyes);
 
 % get data quality table to know which eye to use
 DataQaulity_Filepath = fullfile(Paths.Core, 'QualityCheck', 'Theta Bursts', 'DataQuality_Pupils.csv'); % file indicating manually identified eye
@@ -42,9 +42,14 @@ for Indx_P = 1:numel(Participants)
 
         %%% load data
 
-        Filename_EEG = char(Content(contains(Content, Participants{Indx_P}) ...
+        Filename_Eyes = char(Content(contains(Content, Participants{Indx_P}) ...
             & contains(Content, Sessions{Indx_S})));
-        Filename_Eyes = replace(Filename_EEG, 'Power.set', 'Pupils.mat');
+        if isempty(Filename_Eyes)
+            warning(['no eye data for ', Participants{Indx_P}, Sessions{Indx_S}])
+            continue
+        end
+
+        Filename_EEG = replace(Filename_Eyes, 'Pupils.mat', 'Power.set');
 
         if exist(fullfile(Destination_Eyes, Filename_Eyes), 'file') && ~Refresh
             disp(['Skipping ', Filename_Eyes])
