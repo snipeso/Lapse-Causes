@@ -9,7 +9,7 @@ close all
 
 P = analysisParameters();
 
-Participants = P.Participants_sdTheta;
+Participants = P.Participants_sdTheta; % only look at participants with substantial sdTheta
 Sessions = P.Sessions;
 TallyLabels = P.Labels.Tally;
 Paths = P.Paths;
@@ -17,22 +17,23 @@ Task = P.Labels.Task;
 Channels = P.Channels;
 StatsP = P.StatsP;
 
-SmoothFactor = 0.3; % in seconds;
+SmoothFactor = 0.3; % in seconds, smooth signal to be visually pleasing
 
 TitleTag = strjoin({'Timecourse'}, '_');
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% load data
 
-% microsleep data
+%%% microsleep data
 load(fullfile(Paths.Pool, 'Eyes', 'ProbMicrosleep.mat'), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't', 'GenProbMicrosleep')
 t_microsleep = t;
 
+% remove low sdTheta participants for fairness of comparison
 ProbMicrosleep_Stim(~Participants, :, :) = nan;
 ProbMicrosleep_Resp(~Participants, :, :) = nan;
 
+% smooth and z-score data
 sProbMicrosleep_Stim = smoothFreqs(ProbMicrosleep_Stim, t_microsleep, 'last', SmoothFactor);
 [zProbMicrosleep_Stim, zGenProbMicrosleep_Stim] = ...
     zscoreTimecourse(sProbMicrosleep_Stim, GenProbMicrosleep, []);
@@ -42,18 +43,18 @@ sProbMicrosleep_Resp = smoothFreqs(ProbMicrosleep_Resp, t_microsleep, 'last', Sm
     zscoreTimecourse(sProbMicrosleep_Resp, GenProbMicrosleep, []);
 
 
-% burst data
+%%% burst data
 load(fullfile(Paths.Pool, 'EEG', 'ProbBurst.mat'), 'ProbBurst_Stim', 'ProbBurst_Resp', 't',  'GenProbBurst')
 t_burst = t;
 
+% remove low sdTheta participants for obvious reasons
 ProbBurst_Stim(~Participants, :, :) = nan;
 ProbBurst_Resp(~Participants, :, :) = nan;
 
-
+% smooth and z-score
 sProbBurst_Stim = smoothFreqs(ProbBurst_Stim, t_burst, 'last', SmoothFactor);
 [zProbBurst_Stim, zGenProbBurst_Stim] = ...
     zscoreTimecourse(sProbBurst_Stim, GenProbBurst, 3);
-
 
 sProbBurst_Resp = smoothFreqs(ProbBurst_Resp, t_burst, 'last', SmoothFactor);
 [zProbBurst_Resp, zGenProbBurst_Resp] = ...
@@ -66,7 +67,6 @@ sProbBurst_Resp = smoothFreqs(ProbBurst_Resp, t_burst, 'last', SmoothFactor);
 
 %% Figure 1
 
-
 PlotProps = P.Manuscript;
 PlotProps.Axes.xPadding = 25;
 Range = [-3.5 5.5];
@@ -75,13 +75,16 @@ Grid = [2 3];
 
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
 
+%%% stimulus locked
+
+% eyeclosure
 subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
 plotTimecourse(t_microsleep, flip(zProbMicrosleep_Stim, 2), zGenProbMicrosleep_Stim, ...
     Range, flip(TallyLabels), 'Stimulus', getColors(3), StatsP, PlotProps)
 ylim(Range)
 ylabel('Probability of EC (z-scored)')
 
-
+% theta
 subfigure([], Grid, [1 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(zProbBurst_Stim(:, :, 1, :)), 2), ...
     zGenProbBurst_Stim(:, 1), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
@@ -89,7 +92,7 @@ ylim(Range)
 ylabel('Probability of theta (z-scored)')
 legend off
 
-
+% alpha
 subfigure([], Grid, [1 3], [], true, PlotProps.Indexes.Letters{3}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(zProbBurst_Stim(:, :, 2, :)), 2),  ...
     zGenProbBurst_Stim(:, 2), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
@@ -100,7 +103,7 @@ legend off
 
 %%% response locked
 
-
+% eyeclosure
 subfigure([], Grid, [2 1], [], true, PlotProps.Indexes.Letters{4}, PlotProps);
 plotTimecourse(t_microsleep, flip(zProbMicrosleep_Resp, 2), zGenProbMicrosleep_Stim, ...
     Range, flip(TallyLabels), 'Response', getColors(3), StatsP, PlotProps)
@@ -108,6 +111,7 @@ ylim(Range)
 ylabel('Probability of EC (z-scored)')
 legend off
 
+% theta
 subfigure([], Grid, [2 2], [], true, PlotProps.Indexes.Letters{5}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(zProbBurst_Resp(:, :, 1, :)), 2), ...
     zGenProbBurst_Resp(:, 1), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
@@ -115,7 +119,7 @@ ylim(Range)
 ylabel('Probability of theta (z-scored)')
 legend off
 
-
+% alpha
 subfigure([], Grid, [2 3], [], true, PlotProps.Indexes.Letters{6}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(zProbBurst_Resp(:, :, 2, :)), 2),  ...
     zGenProbBurst_Resp(:, 2), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
@@ -139,6 +143,7 @@ Grid = [2 3];
 
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
 
+%%% stimulus locked
 subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
 plotTimecourse(t_microsleep, flip(sProbMicrosleep_Stim, 2), GenProbMicrosleep, ...
     Range, flip(TallyLabels), 'Stimulus', getColors(3), StatsP, PlotProps)
@@ -195,7 +200,7 @@ saveFig('Figure_3-1', Paths.PaperResults, PlotProps)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Stats
 
-%% EC probabilities
+%% EC probabilities in little windows
 
 clc
 
@@ -238,7 +243,7 @@ Stats = pairedttest(Prob(:, 2), Prob(:, 1), StatsP);
 dispStat(Stats, [1 1], 'Stim late vs correct probability:');
 
 
-%% burst  burst probability
+%% burst probability
 clc
 BandLabels = {'Theta', 'Alpha'};
 
@@ -247,55 +252,45 @@ for Indx_B = 1:2
     disp(BandLabels{Indx_B})
 
     % prob before stim
-Window = [-2 0];
-Window = dsearchn(t_burst', Window');
+    Window = [-2 0];
+    Window = dsearchn(t_burst', Window');
 
-Prob = squeeze(mean(zProbBurst_Stim(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
+    Prob = squeeze(mean(zProbBurst_Stim(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
 
-Stats = pairedttest(zGenProbBurst_Stim(:, Indx_B), Prob(:, 1), StatsP);
-dispStat(Stats, [1 1], 'Pre Lapse probability:');
+    Stats = pairedttest(zGenProbBurst_Stim(:, Indx_B), Prob(:, 1), StatsP);
+    dispStat(Stats, [1 1], 'Pre Lapse probability:');
 
 
     % during stim
     Window = [0 0.5];
-Window = dsearchn(t_burst', Window');
+    Window = dsearchn(t_burst', Window');
 
-Prob = squeeze(mean(zProbBurst_Stim(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
+    Prob = squeeze(mean(zProbBurst_Stim(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
 
-Stats = pairedttest(zGenProbBurst_Stim(:, Indx_B), Prob(:, 1), StatsP);
-dispStat(Stats, [1 1], 'Stim Lapse probability:');
+    Stats = pairedttest(zGenProbBurst_Stim(:, Indx_B), Prob(:, 1), StatsP);
+    dispStat(Stats, [1 1], 'Stim Lapse probability:');
 
 
     % diff with correct
-        Window = [.5 1.5];
-Window = dsearchn(t_burst', Window');
+    Window = [.5 1.5];
+    Window = dsearchn(t_burst', Window');
 
-Prob = squeeze(mean(zProbBurst_Stim(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
+    Prob = squeeze(mean(zProbBurst_Stim(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
 
-Stats = pairedttest(Prob(:, 3), Prob(:, 1), StatsP);
-dispStat(Stats, [1 1], 'Post resp probability lapse v correct:');
+    Stats = pairedttest(Prob(:, 3), Prob(:, 1), StatsP);
+    dispStat(Stats, [1 1], 'Post resp probability lapse v correct:');
 
     % correct after response
-            Window = [0 1.5];
-Window = dsearchn(t_burst', Window');
+    Window = [0 1.5];
+    Window = dsearchn(t_burst', Window');
 
     Prob = squeeze(mean(zProbBurst_Resp(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
 
-Stats = pairedttest(GenProbBurst(:,Indx_B), Prob(:, 3), StatsP);
-dispStat(Stats, [1 1], 'Post resp:');
+    Stats = pairedttest(GenProbBurst(:,Indx_B), Prob(:, 3), StatsP);
+    dispStat(Stats, [1 1], 'Post resp:');
 
 
-disp('____________')
+    disp('____________')
 end
-
-
-%%% theta point
-Point = -1;
-Point = dsearchn(t_burst', Point);
-
-Prob = squeeze(mean(zProbBurst_Stim(:, [1 3], 1, Point), 4, 'omitnan')); % P x TT
-
-Stats = pairedttest(Prob(:, 2), Prob(:, 1), StatsP);
-dispStat(Stats, [1 1], 'Stim late vs correct probability:');
 
 

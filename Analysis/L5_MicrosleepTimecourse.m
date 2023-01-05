@@ -114,16 +114,16 @@ for Indx_P = 1:numel(Participants)
     disp(['Finished ', Participants{Indx_P}])
 end
 
-% % remove all data from participants missing any of the trial types
-% for Indx_P = 1:numel(Participants)
-%     if any(isnan(ProbMicrosleep_Stim(Indx_P, :, :)), 'all')
-%         ProbMicrosleep_Stim(Indx_P, :, :) = nan;
-%     end
-% 
-%     if any(isnan(ProbMicrosleep_Resp(Indx_P, 2:3, :)), 'all')
-%         ProbMicrosleep_Resp(Indx_P, :, :) = nan;
-%     end
-% end
+% remove all data from participants missing any of the trial types
+for Indx_P = 1:numel(Participants)
+    if any(isnan(ProbMicrosleep_Stim(Indx_P, :, :)), 'all')
+        ProbMicrosleep_Stim(Indx_P, :, :) = nan;
+    end
+
+    if any(isnan(ProbMicrosleep_Resp(Indx_P, 2:3, :)), 'all')
+        ProbMicrosleep_Resp(Indx_P, :, :) = nan;
+    end
+end
 
 % get general probability as fraction
 GenProbMicrosleep = GenProbMicrosleep(:, 1)./GenProbMicrosleep(:, 2);
