@@ -115,68 +115,44 @@ ylabel('Recording duration (%)')
 saveFig('Figure_2', Paths.PaperResults, PlotProps)
 
 
-% %% plot all for inspection % DEBUG
-% 
-% 
-% %%% theta
-% SB = 2;
-% B_Indx = 1;
-% Ch_Indx = 1;
-% 
-% 
-% Data = log(squeeze(ChData(:, SB, [B_Indx, 3], Ch_Indx, :)));
-% BL = log(squeeze(ChData(:, 1, [B_Indx, 3], Ch_Indx, :)));
-% 
-% 
-% plotParticipantMountains(BL, Data, Freqs', xLog, xLims, PlotProps, P.Labels, Participants);
+%% plot all for inspection % DEBUG
 
 
-%% Percent SD theta removed
-
-%%% reduce whole-brain data
-% lData = zScoreData(sData, 'last');
-lData = sData;
-lchData = mean(lData, 4, 'omitnan'); % average all channels together
-lchbData = squeeze(bandData(lchData, Freqs', Bands, 'last')); % P x SB x B (T, A, N) x F
-
-lchData = squeeze(lchData);
+%%% theta
+SB = 2;
+B_Indx = 1;
+Ch_Indx = 1;
 
 
-yLims  = [-1 1.5];
-figure
-Data = squeeze(lchData(:, 2, [1 3], :));
-plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
+Data = log(squeeze(ChData(:, SB, [B_Indx, 3], Ch_Indx, :)));
+BL = log(squeeze(ChData(:, 1, [B_Indx, 3], Ch_Indx, :)));
 
 
-% plot also BL theta, with all bursts
-BL = mean(squeeze(lchData(:, 1, 3, :)), 1);
-hold on
-plot(log(Freqs), BL, ...
-    'Color', PlotProps.Color.Generic, 'LineStyle','--', 'LineWidth', 1)
-
-% ylim(yLims)
-legend({'', 'SD theta burst power', 'Front BL power'}, 'location', 'southwest')
-set(legend, 'ItemTokenSize', [15 15])
-ylabel('PSD amplitude (z-scored)')
+plotParticipantMountains(BL, Data, Freqs', xLog, xLims, PlotProps, P.Labels, Participants);
 
 
-
-%%
+%% Percent SD theta removed with bursts
 
 clc
 
+% power with bursts
 sdTheta_Intact = squeeze(lchbData(:, 2, 3, 1)); % P x S x B (T, A, I) x F
 blTheta_Intact = squeeze(lchbData(:, 1, 3, 1));
-% blTheta_Intact = squeeze(lchbData(:, 1, 1, 1));
-blTheta_Burstless = squeeze(lchbData(:, 1, 1, 1));
-sdTheta_Burstless = squeeze(lchbData(:, 2, 1, 1));
 
+% power without bursts
+sdTheta_Burstless = squeeze(lchbData(:, 2, 1, 1));
+blTheta_Burstless = squeeze(lchbData(:, 1, 1, 1));
+
+% percentage of sdTheta that got gobbled up by bursts
 sdBurst = sdTheta_Intact-sdTheta_Burstless;
 blBurst = blTheta_Intact-blTheta_Burstless;
 sdTheta = sdTheta_Intact-blTheta_Intact;
 PrcntSDTheta = 100*(sdBurst-blBurst)./sdTheta;
+
+% remove participants for which there's not enough of a theta increase
+% (if sdTheta is too small, the percent change baloons)
 PrcntSDTheta(sdTheta<.01) = nan;
-dispDescriptive(PrcntSDTheta, 'Theta removed:', '%', 0);
+dispDescriptive(PrcntSDTheta, 'Theta power removed:', '%', 0);
 
 Stats = pairedttest(blTheta_Intact, sdTheta_Intact, StatsP);
 dispStat(Stats, [1 1], 'Intact change from BL:');
@@ -187,9 +163,9 @@ dispStat(Stats, [1 1], 'Burstless change from BL:');
 disp('****')
 
 
-%% percentages of bands and comparison
-clc
+%% percentages of bursts change BL vs SD
 
+clc
 
 % theta
 Data_BL = 100*squeeze(sum(TimeSpent(:, 1, [1 3]), 3));
@@ -199,8 +175,9 @@ Data_SD = 100*squeeze(sum(TimeSpent(:, 2, [1 3]), 3));
 dispDescriptive(Data_SD, 'SD Theta', '%', 0);
 
 Stats = pairedttest(Data_BL, Data_SD, StatsP);
-dispStat(Stats, [1 1], 'Theta BLvsSD:');
+dispStat(Stats, [1 1], 'Theta bursts BLvsSD:');
 disp('   ')
+
 
 % alpha
 Data_BL = 100*squeeze(sum(TimeSpent(:, 1, [2 3]), 3));
@@ -214,50 +191,46 @@ dispStat(Stats, [1 1], 'alpha BLvsSD:');
 
 
 
-
 %% identify participants that don't show an increase in theta bursts with SD
 
+clc
+
+% get data
 ThetaSD = squeeze(sum(TimeSpent(:, 2, [1 3]), 3)); % add both "pure" theta, and overlapping with alpha
 ThetaBL = squeeze(sum(TimeSpent(:, 1, [1 3]), 3));
 
 Data = [ThetaBL, ThetaSD];
-Increase = 100*(ThetaSD-ThetaBL)./ThetaBL;
 
+% identify participants that don't show enough increase
+Increase = 100*(ThetaSD-ThetaBL)./ThetaBL;
 Remove = Increase<=50;
-clc
+
 disp(['Removing ', num2str(nnz(Remove)), ' participants: '])
 disp(Participants(Remove))
 
-
+% re-calculate change from BL to SD
 Data_BL = 100*squeeze(sum(TimeSpent(:, 1, [1 3]), 3));
 Data_SD = 100*squeeze(sum(TimeSpent(:, 2, [1 3]), 3));
 Stats = pairedttest(Data_BL(~Remove), Data_SD(~Remove), StatsP);
-dispStat(Stats, [1 1], 'Theta BLvsSD (redux):');
+dispStat(Stats, [1 1], 'Theta bursts BLvsSD (redux):');
 
-%%
+% make sure there's enough power
+STD1 = std(Data_BL,0, 'omitnan');
+STD2 = std(Data_SD,0, 'omitnan');
+pooledSTD = sqrt((STD1^2+STD2^2)/2);
 
-clc
+PWR = sampsizepwr('t', [mean(Data_BL, 'omitnan'), pooledSTD], ...
+    mean(Data_SD, 'omitnan'), [], nnz(~isnan(Data_BL+Data_SD)));
+disp(['Power for theta increase (before redux): ', num2str(PWR, '%.2f')])
 
-sdTheta_Intact = squeeze(lchbData(:, 2, 3, 1)); % P x S x B (T, A, I) x F
-blTheta_Intact = squeeze(lchbData(:, 1, 3, 1));
-blTheta_Burstless = squeeze(lchbData(:, 1, 1, 1));
-sdTheta_Burstless = squeeze(lchbData(:, 2, 1, 1));
 
-sdBurst = sdTheta_Intact-sdTheta_Burstless;
-blBurst = blTheta_Intact-blTheta_Burstless;
-sdTheta = sdTheta_Intact-blTheta_Intact;
-PrcntSDTheta = 100*(sdBurst-blBurst)./sdTheta;
-PrcntSDTheta(sdTheta<.01) = nan;
-% PrcntSDTheta(Remove) = nan;
-dispDescriptive(PrcntSDTheta, 'Theta removed:', '%', 0);
+% make sure there's enough power
+STD1 = std(Data_BL(~Remove),0, 'omitnan');
+STD2 = std(Data_SD(~Remove),0, 'omitnan');
+pooledSTD = sqrt((STD1^2+STD2^2)/2);
 
-Stats = pairedttest(blTheta_Intact, sdTheta_Intact, StatsP);
-dispStat(Stats, [1 1], 'Intact change from BL:');
-
-Stats = pairedttest(blTheta_Burstless, sdTheta_Burstless, StatsP);
-dispStat(Stats, [1 1], 'Burstless change from BL:');
-
-disp('****')
-
+PWR = sampsizepwr('t', [mean(Data_BL(~Remove), 'omitnan'), pooledSTD], ...
+    mean(Data_SD(~Remove), 'omitnan'), [], nnz(~Remove));
+disp(['Power for theta increase (after redux): ', num2str(PWR, '%.2f')])
 
 
