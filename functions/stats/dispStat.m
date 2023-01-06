@@ -7,10 +7,20 @@ Fieldnames = fieldnames(Stats);
 
 if any(strcmp(Fieldnames, 't')) % paired t-test
     pValue = num2str(Stats.p(P(1), P(2)), '%.3f');
+
+    pValue = extractAfter(pValue, '.');
+
+    if Stats.p(P(1), P(2)) < .001
+        pString = ', p < .001';
+    else
+        pString = [', p = .', pValue];
+    end
+    
+
     disp(Label)
     String = ['N = ', num2str(Stats.N), ...
         ', t = ', num2str(Stats.t(P(1), P(2)), '%.2f'), ...
-        ', p = .', extractAfter(pValue, '.'), ', g = ', num2str(Stats.hedgesg(P(1), P(2)), '%.2f')];
+        pString , ', g = ', num2str(Stats.hedgesg(P(1), P(2)), '%.2f')];
 
     disp(String)
     

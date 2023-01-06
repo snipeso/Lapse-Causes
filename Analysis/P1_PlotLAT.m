@@ -252,7 +252,6 @@ disp(['# participants with at least ', num2str(MinLapses), ' EO lapses: ', num2s
 
 disp('*')
 % change in number of lapses from BL to SD EO
-% Tots = sum(EO_Matrix, 3, 'omitnan')+sum(EC_Matrix, 3, 'omitnan');
 Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
 
 Tots(Tots<MinTots) = nan;
