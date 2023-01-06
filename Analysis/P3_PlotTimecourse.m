@@ -220,8 +220,8 @@ saveFig('Figure_3-1', Paths.PaperResults, PlotProps)
 clc
 
 % probability of EC before stim
-Window = [-2 0];
-Window = dsearchn(t_microsleep', Window');
+preWindow = [-2 0];
+Window = dsearchn(t_microsleep', preWindow');
 
 Prob = squeeze(mean(zProbMicrosleep_Stim(:, :, Window(1):Window(2)), 3, 'omitnan')); % P x TT
 
@@ -230,8 +230,8 @@ dispStat(Stats, [1 1], 'Pre Lapse probability:');
 
 
 % during stim
-Window = [0 0.5];
-Window = dsearchn(t_microsleep', Window');
+stimWindow = [0 0.25];
+Window = dsearchn(t_microsleep', stimWindow');
 
 Prob = squeeze(mean(zProbMicrosleep_Stim(:, :, Window(1):Window(2)), 3, 'omitnan')); % P x TT
 
@@ -267,18 +267,19 @@ for Indx_B = 1:2
     disp(BandLabels{Indx_B})
 
     % prob before stim
-    Window = [-2 0];
-    Window = dsearchn(t_burst', Window');
+    Window = dsearchn(t_burst', preWindow');
 
     Prob = squeeze(mean(zProbBurst_Stim(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
 
     Stats = pairedttest(zGenProbBurst_Stim(:, Indx_B), Prob(:, 1), StatsP);
     dispStat(Stats, [1 1], 'Pre Lapse probability:');
 
+    Stats = pairedttest(zGenProbBurst_Stim(:, Indx_B), Prob(:, 3), StatsP);
+    dispStat(Stats, [1 1], 'Pre Correct probability:');
+
 
     % during stim
-    Window = [0 0.5];
-    Window = dsearchn(t_burst', Window');
+    Window = dsearchn(t_burst', stimWindow');
 
     Prob = squeeze(mean(zProbBurst_Stim(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
 
@@ -286,17 +287,17 @@ for Indx_B = 1:2
     dispStat(Stats, [1 1], 'Stim Lapse probability:');
 
 
-    % diff with correct
+        % diff with correct
     Window = [.5 1.5];
     Window = dsearchn(t_burst', Window');
 
     Prob = squeeze(mean(zProbBurst_Stim(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
 
     Stats = pairedttest(Prob(:, 3), Prob(:, 1), StatsP);
-    dispStat(Stats, [1 1], 'Post resp probability lapse v correct:');
+    dispStat(Stats, [1 1], 'Post resp probability lapse v correct stim locked:');
 
     % correct after response
-    Window = [0 1.5];
+    Window = [0 1];
     Window = dsearchn(t_burst', Window');
 
     Prob = squeeze(mean(zProbBurst_Resp(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
