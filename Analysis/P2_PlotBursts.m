@@ -145,6 +145,9 @@ saveFig('Figure_2', Paths.PaperResults, PlotProps)
 
 clc
 
+% process data
+bData = bandData(sData, Freqs', Bands, 'last'); % average into theta and alpha power
+lchbData = squeeze(mean(bData, 4, 'omitnan')); % average all channels
 
 
 % power with bursts
