@@ -1,4 +1,5 @@
 function String = dispDescriptive(Data, String, Unit, Roundedness)
+% String = dispDescriptive(Data, String, Unit, Roundedness)
 % Roundedness is precision of numbers ('%.0f')
 % Data is P x 1 matrix.
 

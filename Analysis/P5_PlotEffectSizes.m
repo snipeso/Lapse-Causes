@@ -105,22 +105,25 @@ dispStat(Stats, [1 1], 'Alpha:');
 %%% get info for model of how many lapses theoretically possible
 
 % calculate stats without discarding data
-ProbEvent = nan(numel(Participants), 2, 3); % EC, theta, alpha
-LapseProb = nan(numel(Participants), 3);
+EventProb = nan(numel(Participants), 2, 3); % EC, theta, alpha
+LapseProb = nan(numel(Participants), 3, 2);
 
-[ProbType, ProbEvent(:, :, 1)] = splitTally(Trials, ~Furthest & EO & SD, ~Furthest & EC & SD, Participants, ...
+[ProbType, EventProb(:, :, 1)] = splitTally(Trials, ~Furthest & EO & SD, ~Furthest & EC & SD, Participants, ...
+    Sessions, SessionGroups, MinTots, zeros(numel(Participants), 1));
+LapseProb(:, 1, :) = squeeze(ProbType(:, 1, :));
+
+[ProbType, EventProb(:, :, 2)] = splitTally(Trials, ~Furthest & SD & EO & NotTheta, ~Furthest & SD & EO & Theta, Participants, ...
     Sessions, SessionGroups, MinTots, BadParticipants);
-LapseProb(:, 1) = squeeze(ProbType(:, 1, 2));
+LapseProb(:, 2, :) = squeeze(ProbType(:, 1, :));
 
-[ProbType, ProbEvent(:, :, 2)] = splitTally(Trials, ~Furthest & SD & EO & NotTheta, ~Furthest & SD & EO & Theta, Participants, ...
+[ProbType, EventProb(:, :, 3)] = splitTally(Trials, ~Furthest & SD & EO & NotAlpha, ~Furthest & SD & EO & Alpha, Participants, ...
     Sessions, SessionGroups, MinTots, BadParticipants);
-LapseProb(:, 2) = squeeze(ProbType(:, 1, 2));
+LapseProb(:, 3, :) = squeeze(ProbType(:, 1, :));
 
-[ProbType, ProbEvent(:, :, 3)] = splitTally(Trials, ~Furthest & SD & EO & NotAlpha, ~Furthest & SD & EO & Alpha, Participants, ...
-    Sessions, SessionGroups, MinTots, BadParticipants);
-LapseProb(:, 3) = squeeze(ProbType(:, 1, 2));
+LapseProbNot = squeeze(LapseProb(:, :, 1));
+LapseProb = squeeze(LapseProb(:, :, 2));
 
-ProbEvent = squeeze(ProbEvent(:, 2, :));
+EventProb = squeeze(EventProb(:, 2, :));
 
 [Tally1, ~] = tabulateTable(Trials, ~Furthest & SD, 'Type', 'tabulate', ...
     Participants, Sessions, SessionGroups, true); % P x SB x TT
@@ -131,9 +134,10 @@ GenLapseProb = squeeze(Tally1(:, 1, 1))./sum(squeeze(Tally1),2, 'omitnan');
 
 GenLapseProb(:, 2:3) = repmat(squeeze(Tally2(:, 1, 1))./sum(squeeze(Tally2),2, 'omitnan'), 1, 2);
 
-GenLapseProb(BadParticipants, :) = nan;
-ProbEvent(BadParticipants, :) = nan;
-LapseProb(BadParticipants, :) = nan;
+GenLapseProb(BadParticipants, [2 3]) = nan;
+EventProb(BadParticipants, [2 3]) = nan;
+LapseProb(BadParticipants, [ 2 3]) = nan;
+LapseProbNot(BadParticipants, [ 2 3]) = nan;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -173,10 +177,43 @@ Colors = [getColors(1, '', 'blue');
 Grid = [1, 2];
 
 figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*.5, PlotProps.Figure.Height*.3])
-plotChangeProb(ProbEvent, LapseProb, GenLapseProb, Legend, Colors, PlotProps)
+plotChangeProb(EventProb, LapseProb, GenLapseProb, Legend, Colors, PlotProps)
 
 saveFig('Figure_6', Paths.PaperResults, PlotProps)
 
+
+
+%% proportions of data
+
+clc
+
+%%% general probabilities
+for Indx = 1:numel(Legend)
+    dispDescriptive(100*EventProb(:, Indx), ['SD lapse probability during ' Legend{Indx}], '%', 0);
+end
+
+disp('*')
+
+%%% max % trials resulting in lapse during X
+for Indx = 1:numel(Legend)
+NewX = GenLapseProb(:, Indx)./EventProb(:, Indx);
+
+Mean1 = mean(LapseProbNot(:, Indx), 'omitnan');
+Mean2 = mean(NewX, 'omitnan'); 
+
+STD1 = std(LapseProbNot(:, Indx),0, 'omitnan');
+STD2 = std(NewX,0, 'omitnan');
+pooledSTD = sqrt((STD1^2+STD2^2)/2);
+
+% N needed to find that difference from "non event" data
+N  = sampsizepwr('t', [Mean1, pooledSTD], Mean2, .8, []);
+disp([Legend{Indx}, ' sample needed to find max lapse chance: N=', num2str(N, '%.0f')])
+
+
+end
+
+
+%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
 
