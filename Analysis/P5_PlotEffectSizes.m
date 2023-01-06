@@ -58,7 +58,7 @@ clc
 
 % eye status
 ProbType = splitTally(Trials, EO & ~Furthest & SD, EC & ~Furthest & SD, Participants, ...
-    Sessions, SessionGroups, MinTots, BadParticipants);
+    Sessions, SessionGroups, MinTots, zeros(numel(Participants), 1));
 
 [HedgesG, HedgesGCI, xLabels, Stats] = ...
     loadG(ProbType, 1, HedgesG, HedgesGCI, xLabels, 'EC', StatsP);
@@ -67,11 +67,11 @@ dispStat(Stats, [1 1], 'Eyes:');
 
 % radius
 ProbType = splitTally(Trials, EO & Closest & SD, EO & Furthest & SD, Participants, ...
-    Sessions, SessionGroups, MinTots, BadParticipants);
+    Sessions, SessionGroups, MinTots, zeros(numel(Participants), 1));
 
 [HedgesG, HedgesGCI, xLabels, Stats] = ...
     loadG(ProbType, 2, HedgesG, HedgesGCI, xLabels, 'Distance', StatsP);
-dispStat(Stats, [1 1], 'SD distance:');
+dispStat(Stats, [1 1], 'Distance:');
 
 
 % sleep deprivation
@@ -153,12 +153,13 @@ Colors = [getColors(1, '', 'blue');
     ];
 Orientation = 'vertical';
 PlotProps = P.Manuscript;
-PlotProps.Axes.xPadding = 50;
+PlotProps.Axes.xPadding = 60;
 subfigure([], Grid, [1 1], [], true, '', PlotProps);
 plotUFO(HedgesG', HedgesGCI', xLabels, Legend, Colors, Orientation, PlotProps)
 ylabel("Hedge's g effect on lapse probability")
 
-saveFig(TitleTag, Paths.PaperResults, PlotProps)
+saveFig('Figure_5', Paths.PaperResults, PlotProps)
+
 
 
 
@@ -171,10 +172,10 @@ Colors = [getColors(1, '', 'blue');
     ];
 Grid = [1, 2];
 
-figure
+figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*.5, PlotProps.Figure.Height*.3])
 plotChangeProb(ProbEvent, LapseProb, GenLapseProb, Legend, Colors, PlotProps)
 
-
+saveFig('Figure_6', Paths.PaperResults, PlotProps)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
@@ -188,6 +189,6 @@ Stats = pairedttest(squeeze(ProbType(:, 1, 1)), squeeze(ProbType(:, 1, 2)), Stat
 HedgesG(Indx) = Stats.hedgesg;
 HedgesGCI(:, Indx) = Stats.hedgesgCI;
 
-Labels{Indx} = Label;
+Labels{Indx} = [Label, ' (N=',num2str(Stats.N), ')'];
 
 end
