@@ -67,6 +67,8 @@ sProbBurst_Resp = smoothFreqs(ProbBurst_Resp, t_burst, 'last', SmoothFactor);
 
 %% Figure 1
 
+clc
+
 PlotProps = P.Manuscript;
 PlotProps.Axes.xPadding = 25;
 Range = [-3.5 5.5];
@@ -84,6 +86,8 @@ plotTimecourse(t_microsleep, flip(zProbMicrosleep_Stim, 2), zGenProbMicrosleep_S
 ylim(Range)
 ylabel('Probability of EC (z-scored)')
 
+disp(['A: N=', num2str(nnz(~any(any(isnan(zProbMicrosleep_Stim), 3),2)))])
+
 % theta
 subfigure([], Grid, [1 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(zProbBurst_Stim(:, :, 1, :)), 2), ...
@@ -92,6 +96,8 @@ ylim(Range)
 ylabel('Probability of theta (z-scored)')
 legend off
 
+disp(['B: N=',  num2str(nnz(~any(any(isnan(squeeze(zProbBurst_Stim(:, :, 1, :))), 3),2)))])
+
 % alpha
 subfigure([], Grid, [1 3], [], true, PlotProps.Indexes.Letters{3}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(zProbBurst_Stim(:, :, 2, :)), 2),  ...
@@ -99,6 +105,8 @@ plotTimecourse(t_burst, flip(squeeze(zProbBurst_Stim(:, :, 2, :)), 2),  ...
 ylim(Range)
 ylabel('Probability of alpha (z-scored)')
 legend off
+
+disp(['C: N=', num2str(nnz(~any(any(isnan(squeeze(zProbBurst_Stim(:, :, 2, :))), 3),2)))])
 
 
 %%% response locked
@@ -111,6 +119,8 @@ ylim(Range)
 ylabel('Probability of EC (z-scored)')
 legend off
 
+disp(['D: N=', num2str(nnz(~any(any(isnan(zProbMicrosleep_Resp(:, [2, 3], :)), 3),2)))])
+
 % theta
 subfigure([], Grid, [2 2], [], true, PlotProps.Indexes.Letters{5}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(zProbBurst_Resp(:, :, 1, :)), 2), ...
@@ -119,6 +129,9 @@ ylim(Range)
 ylabel('Probability of theta (z-scored)')
 legend off
 
+disp(['E: N=', num2str(nnz(~any(any(isnan(squeeze(zProbBurst_Resp(:, [2 3], 1, :))), 3),2)))])
+
+
 % alpha
 subfigure([], Grid, [2 3], [], true, PlotProps.Indexes.Letters{6}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(zProbBurst_Resp(:, :, 2, :)), 2),  ...
@@ -126,6 +139,8 @@ plotTimecourse(t_burst, flip(squeeze(zProbBurst_Resp(:, :, 2, :)), 2),  ...
 ylim(Range)
 ylabel('Probability of alpha (z-scored)')
 legend off
+
+disp(['F: N=', num2str(nnz(~any(any(isnan(squeeze(zProbBurst_Resp(:, [2 3], 2, :))), 3),2)))])
 
 
 saveFig('Figure_3', Paths.PaperResults, PlotProps)
