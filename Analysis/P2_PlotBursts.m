@@ -38,7 +38,8 @@ load(fullfile(Pool, strjoin({TitleTag, 'bChData.mat'}, '_')), 'ChData', 'sData',
 
 %% plot EEG with and without bursts
 
-% Grid = [4 2];
+clc
+
 Grid = [1 5];
 PlotProps = P.Manuscript;
 PlotProps.Axes.yPadding = 18;
@@ -53,7 +54,7 @@ NormBand_Indx = dsearchn(Freqs, NormBand');
 
 figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.35])
 
-%%% theta
+%%% A: theta
 SB = 2;
 B_Indx = 1;
 Ch_Indx = 1;
@@ -79,8 +80,9 @@ legend({'', 'Front SD theta burst power', 'Front BL power'}, 'location', 'southw
 set(legend, 'ItemTokenSize', [15 15])
 ylabel('Log PSD amplitude (\muV^2/Hz)')
 
+disp(['A: N = ', num2str(nnz(~any(any(isnan(Data), 3), 2)))])
 
-%%% alpha
+%%% B: alpha
 SB = 1;
 B_Indx = 2;
 Ch_Indx = 3;
@@ -104,7 +106,10 @@ ThetaColor = getColors(1, '', 'red');
 AlphaColor = getColors(1, '', 'yellow');
 Colors = [ThetaColor; AlphaColor; getColors(1, '', 'orange')];
 
-%%% stacked bar plot for time spent
+disp(['B: N = ', num2str(nnz(~any(any(isnan(Data), 3), 2)))])
+
+
+%%% C: stacked bar plot for time spent
 Data = 100*squeeze(mean(TimeSpent, 1, 'omitnan'));
 
 subfigure([], Grid, [1 5], [], true, PlotProps.Indexes.Letters{3}, PlotProps);
@@ -112,28 +117,35 @@ plotStackedBars(Data(:, [1 3 2]), SB_Labels, YLim, Legend([1 3 2]), Colors([1 3 
 
 ylabel('Recording duration (%)')
 
+disp(['C: N = ', num2str(nnz(~any(any(isnan(TimeSpent), 3), 2)))])
+
+
 saveFig('Figure_2', Paths.PaperResults, PlotProps)
+
+
 
 
 %% plot all for inspection % DEBUG
 
-
-%%% theta
-SB = 2;
-B_Indx = 1;
-Ch_Indx = 1;
-
-
-Data = log(squeeze(ChData(:, SB, [B_Indx, 3], Ch_Indx, :)));
-BL = log(squeeze(ChData(:, 1, [B_Indx, 3], Ch_Indx, :)));
-
-
-plotParticipantMountains(BL, Data, Freqs', xLog, xLims, PlotProps, P.Labels, Participants);
+% 
+% %%% theta
+% SB = 2;
+% B_Indx = 1;
+% Ch_Indx = 1;
+% 
+% 
+% Data = log(squeeze(ChData(:, SB, [B_Indx, 3], Ch_Indx, :)));
+% BL = log(squeeze(ChData(:, 1, [B_Indx, 3], Ch_Indx, :)));
+% 
+% 
+% plotParticipantMountains(BL, Data, Freqs', xLog, xLims, PlotProps, P.Labels, Participants);
 
 
 %% Percent SD theta removed with bursts
 
 clc
+
+
 
 % power with bursts
 sdTheta_Intact = squeeze(lchbData(:, 2, 3, 1)); % P x S x B (T, A, I) x F
