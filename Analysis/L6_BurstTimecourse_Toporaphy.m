@@ -171,7 +171,8 @@ for Indx_P = 1:numel(Participants)
         end
 
         % z-score everything
-        Prob = ProbBurst_Stim(Indx_P, :, :, Indx_B, :);
+       GP = squeeze(GenProbBurst(Indx_P, :, Indx_B, 1)./GenProbBurst(Indx_P, :, Indx_B, 2));
+       Prob = squeeze(ProbBurst_Stim(Indx_P, :, :, Indx_B, :))-repmat(GP, 3, 1, 1000);
         MEAN = mean(Prob, 'all', 'omitnan');
         STD = std(Prob, 0, 'all', 'omitnan');
         zProb = (Prob-MEAN)./STD;
@@ -179,12 +180,11 @@ for Indx_P = 1:numel(Participants)
         for Indx_TT = 1:3
             for Indx_Ch = 1:TotChannels
                 zProbBurst_Stim(Indx_P, Indx_TT, Indx_Ch, Indx_B, :) = ...
-                    reduxProbEvent(zProb(:, Indx_TT, Indx_Ch, :, :), t_window, Windows_Stim);
+                    reduxProbEvent(zProb(Indx_TT, Indx_Ch, :), t_window, Windows_Stim);
             end
         end
 
-        GP = squeeze(GenProbBurst(Indx_P, :, Indx_B, 1)./GenProbBurst(Indx_P, :, Indx_B, 2));
-        zGenProbBurst(Indx_P, :, Indx_B)  = (GP-MEAN)/STD;
+        zGenProbBurst(Indx_P, :, Indx_B)  = 0;
 
     end
 
@@ -209,4 +209,4 @@ GenProbBurst = GenProbBurst(:, :, :, 1)./GenProbBurst(:, :, :, 2);
 
 %%% save
 t = t_window;
-save(fullfile(Pool, 'ProbBurst_Channels_zscored.mat'), 'zProbBurst_Stim',  't', 'zGenProbBurst', 'Chanlocs')
+save(fullfile(Pool, 'ProbBurst_Channels_zscored.mat'), 'zProbBurst_Stim',  't', 'zGenProbBurst', 'Chanlocs', 'GenProbBurst')
