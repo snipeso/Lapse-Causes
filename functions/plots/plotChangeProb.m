@@ -1,4 +1,4 @@
-function plotChangeProb(EventProb, LapseProb, GenLapseProb, Legend, Colors, PlotProps)
+function plotChangeProb(EventProb, LapseProb, LapseProbNot, GenLapseProb, Legend, Colors, PlotProps)
 % Plots the relationship between the probability of a lapse during an event
 % with the proportion of lapses due to that event, taking into account the
 % probability of that event. Plots with a dotted line from whenever the
@@ -19,20 +19,22 @@ for Indx_E = 1:Dims(2)
 
         EndProb = EventProb(Indx_P, Indx_E);
         SwitchPoint = GenLapseProb(Indx_P, Indx_E);
+        x_probnot = LapseProbNot(Indx_P, Indx_E);
+        y_probnot = x_probnot*EndProb;
 
         if EndProb < SwitchPoint
             % plot event line
-            plot([0, 100], [0 EndProb*100], 'Color', [Color, 0.2], ...
+            plot([x_probnot*100, 100], [y_probnot*100, EndProb*100], 'Color', [Color, 0.2], ...
                 'LineWidth', PlotProps.Line.Width/2, 'HandleVisibility', 'off')
         else
-            x = SwitchPoint/EndProb;
+            x_switch = SwitchPoint/EndProb;
 
             % plot solid event line for possible values
-            plot([0, x*100], [0 SwitchPoint*100], 'Color', [Color, 0.2], ...
+            plot([x_probnot*100, x_switch*100], [y_probnot*100 SwitchPoint*100], 'Color', [Color, 0.2], ...
                 'LineWidth', PlotProps.Line.Width/2, 'HandleVisibility', 'off')
 
             % plot dotted event line for impossible values
-            plot([x*100, 100], [SwitchPoint*100, EndProb*100], '--', 'Color', [Color, 0.2], ...
+            plot([x_switch*100, 100], [SwitchPoint*100, EndProb*100], '--', 'Color', [Color, 0.2], ...
                 'LineWidth', PlotProps.Line.Width/2, 'HandleVisibility', 'off')
 
         end
@@ -51,18 +53,22 @@ for Indx_E = 1:Dims(2)
     EndProb = mean(EventProb(:, Indx_E), 'omitnan');
     SwitchPoint = mean(GenLapseProb(:, Indx_E), 'omitnan');
 
+       x_probnot = mean(LapseProbNot(:, Indx_E), 'omitnan');
+        y_probnot = x_probnot*EndProb;
+
     if EndProb < SwitchPoint
         % plot event line
-        plot([0, 100], [0 EndProb*100], ...
+        plot([100*x_probnot, 100], [100*y_probnot EndProb*100], ...
             'Color', Color, 'LineWidth', PlotProps.Line.Width, 'HandleVisibility','on')
     else
-        x = SwitchPoint/EndProb;
+        x_switch = SwitchPoint/EndProb;
+        
         % plot solid event line for possible values
-        plot([0, x*100], [0 SwitchPoint*100], 'Color', Color, ...
+        plot([100*x_probnot, x_switch*100], [100*y_probnot SwitchPoint*100], 'Color', Color, ...
             'LineWidth', PlotProps.Line.Width, 'HandleVisibility', 'on')
 
         % plot dotted event line for impossible values
-        plot([x*100, 100], [SwitchPoint*100, EndProb*100], '--', 'Color', Color, ...
+        plot([x_switch*100, 100], [SwitchPoint*100, EndProb*100], '--', 'Color', Color, ...
             'LineWidth', PlotProps.Line.Width, 'HandleVisibility', 'off')
     end
 

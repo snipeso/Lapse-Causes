@@ -177,7 +177,7 @@ Colors = [getColors(1, '', 'blue');
 Grid = [1, 2];
 
 figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*.5, PlotProps.Figure.Height*.3])
-plotChangeProb(EventProb, LapseProb, GenLapseProb, Legend, Colors, PlotProps)
+plotChangeProb(EventProb, LapseProb, LapseProbNot, GenLapseProb, Legend, Colors, PlotProps)
 
 saveFig('Figure_6', Paths.PaperResults, PlotProps)
 
@@ -198,6 +198,8 @@ disp('*')
 for Indx = 1:numel(Legend)
 NewX = GenLapseProb(:, Indx)./EventProb(:, Indx);
 
+dispDescriptive(100*NewX, [ Legend{Indx}, ' max % lapses'], '%', 0);
+dispDescriptive(100*LapseProbNot(:, Indx), ['Not ' Legend{Indx}, ' % lapses'], '%', 0);
 Mean1 = mean(LapseProbNot(:, Indx), 'omitnan');
 Mean2 = mean(NewX, 'omitnan'); 
 
@@ -209,9 +211,17 @@ pooledSTD = sqrt((STD1^2+STD2^2)/2);
 N  = sampsizepwr('t', [Mean1, pooledSTD], Mean2, .8, []);
 disp([Legend{Indx}, ' sample needed to find max lapse chance: N=', num2str(N, '%.0f')])
 
+% max proportion detectable with current sample size
+N = nnz(~isnan(LapseProbNot(:, Indx)));
+M2  = sampsizepwr('t', [Mean1, STD1], [], .8, N);
+disp([Legend{Indx}, ' max ES = ', num2str(100*M2, '%.0f'), '%; N=', num2str(N)])
 
+disp(['Min max % of trials caused by theta bursts'])
+
+disp('  ')
 end
 
+dispDescriptive(100*GenLapseProb(:, 2), 'Gen lapse prob', '%', 0);
 
 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
