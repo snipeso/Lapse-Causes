@@ -14,7 +14,7 @@ BandLabels = fieldnames(Bands);
 % Participant = 'P10';
 
 Task = 'LAT'; % Game or Standing
-Session = 'BaselineBeam';
+Session = 'Session2Beam1';
 Participant = 'P10';
 
 Filename_Source = strjoin({Participant, Task, Session, 'Clean.mat'}, '_');
@@ -80,35 +80,35 @@ end
 % BT.truePeak = 1;
 
 % long
-BT = struct();
-BT.monotonicity = .5;
-BT.periodConsistency = .5;
-BT.efficiency = .6;
-BT.truePeak = 1;
-BT.flankConsistency = .5;
-BT.ampConsistency = .5;
-BT.efficiencyAdj = .5;
-BT.Min_Peaks = 6;
-BT.periodMeanConsistency = .5;
-Min_Peaks = 6;
-
-% clean
 % BT = struct();
-% BT.monotonicity = .6;
-% BT.periodConsistency = .6;
-% BT.periodMeanConsistency = .6;
+% BT.monotonicity = .5;
+% BT.periodConsistency = .5;
 % BT.efficiency = .6;
 % BT.truePeak = 1;
 % BT.flankConsistency = .5;
 % BT.ampConsistency = .5;
-% % BT.amplitude = 10;
-% Min_Peaks = 3;
+% BT.efficiencyAdj = .5;
+% BT.Min_Peaks = 6;
+% BT.periodMeanConsistency = .5;
+% Min_Peaks = 6;
+
+% clean
+BT = struct();
+BT.monotonicity = .6;
+BT.periodConsistency = .6;
+BT.periodMeanConsistency = .6;
+BT.efficiency = .6;
+BT.truePeak = 1;
+BT.flankConsistency = .5;
+BT.ampConsistency = .5;
+% BT.amplitude = 10;
+Min_Peaks = 3;
 
 
 %%% single channel
 
-Ch = 72;
-Indx_B = 4;
+Ch = 23;
+Indx_B = 2;
 Sign = 1;
 
 Ch = labels2indexes(Ch, EEG.chanlocs);
