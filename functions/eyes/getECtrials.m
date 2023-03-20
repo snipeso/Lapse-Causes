@@ -1,4 +1,4 @@
-function Trials = getECtrials(Trials, EyePath, fs, Window, MinWindow)
+function Trials = getECtrials(Trials, EyePath, DataQuality_Table, fs, Window, MinWindow)
 % using EEG and microsleep data with same sampling rate, identifies which
 % trials had more than MinWindow eyes closed.
 % Trials is table of trials
@@ -30,21 +30,26 @@ for Indx_P = 1:numel(Participants)
         % load in eye data
         Eyes = loadMATFile(EyePath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
 
-
-        
-
         if isempty(Eyes)
             continue
         end
 
-        if isnan(Eyes.DQ) || Eyes.DQ == 0
-            warning(['Bad data in ',  Participants{Indx_P}, Sessions{Indx_S}])
+        % only consider time of task (so that it ignores bad data from
+        % around task)
+        TaskTime = zeros(1, size(Eyes.Raw, 2));
+        Start = round((Trials.StimTime(CurrentTrials(1))-1)*fs);
+        End = round((Trials.StimTime(CurrentTrials(end))+1)*fs);
+        TaskTime(Start:End) = 1;
+
+        % check if data during task is ok
+        DQ = DataQuality_Table.(Sessions{Indx_S})(strcmp(DataQuality_Table.Participant, Participants{Indx_P}));
+        Eye = checkEyes(Eyes, DQ, ConfidenceThreshold, TaskTime);
+
+        if isempty(Eye)
             continue
         end
 
-        Eye = round(Eyes.DQ); % which eye
-
-        [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold); 
+        [EyeOpen, ~] = classifyEye(Eye, fs, ConfidenceThreshold);
 
         % determine based on amount of eyes closed time, whether classify
         % trial as EC
@@ -58,10 +63,10 @@ for Indx_P = 1:numel(Participants)
 
             if nnz(isnan(EO))/Pnts > MinWindow
                 Trials.EC(CurrentTrials(Indx_T)) = nan;
-            
+
             elseif nnz(EO==0)/Pnts > MinWindow
                 Trials.EC(CurrentTrials(Indx_T)) = 1;
-            
+
             else
                 Trials.EC(CurrentTrials(Indx_T)) = 0;
             end
