@@ -68,7 +68,7 @@ for Indx_P = 1:numel(Participants)
         EyePath = fullfile(Source_Eyes, Filename_Eyes);
         DQ_P = DQ.(Levels{3})(strcmp(DQ.Participant, Levels{1}));
 
-        if exist(EyePath, 'file') && DQ_P >= 0.5
+        if exist(EyePath, 'file') && DQ_P > 0
             Eyes = syncEEG_Eyes(EEG, EyePath, T.SyncEyes);
         else
             % blanks in case there's no data

@@ -29,7 +29,13 @@ for Indx_P = 1:numel(Participants)
 
         % load in eye data
         Eyes = loadMATFile(EyePath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
-        if isempty(Eyes); continue; end
+
+
+        
+
+        if isempty(Eyes)
+            continue
+        end
 
         if isnan(Eyes.DQ) || Eyes.DQ == 0
             warning(['Bad data in ',  Participants{Indx_P}, Sessions{Indx_S}])

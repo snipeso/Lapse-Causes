@@ -22,7 +22,7 @@ fs = Parameters.fs; % sampling rate of data
 
 Pool = fullfile(Paths.Pool, 'Tasks'); % place to save matrices so they can be plotted in next script
 
-Window = [0 .5]; % window in which to see if there is an event or not
+Window = [0 .3]; % window in which to see if there is an event or not
 MinWindow = 1/3; % minimum proportion of window needed to have event to count
 
 % locations

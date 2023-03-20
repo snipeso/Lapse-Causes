@@ -1,5 +1,5 @@
 function ProbType = jointTally(Trials, TrialSubset, TrialIndexes1, TrialIndexes2, Participants, ...
-    Sessions, SessionGroups, CheckEyes)
+    Sessions, SessionGroups)
 % ProbType is a P x TT x 2
 % ProbEvent is a P x 2 matrix
 
@@ -25,7 +25,7 @@ for Indx_P = 1:numel(Participants)
 
         % get all trials for that session+participant
         CurrentTrials = strcmp(Trials.Participant, Participants{Indx_P}) & ...
-            ismember(Trials.Session, Sessions(SessionGroups{Indx_S}));
+            ismember(Trials.Session, Sessions(SessionGroups{Indx_S})) & TrialSubset;
 
         % check if the dataset was missing, so should output NaN
         if nnz(CurrentTrials)==0

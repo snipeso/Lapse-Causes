@@ -43,6 +43,8 @@ NotAlpha = Trials.Alpha == 0;
 
 Lapses = Trials.Type==1;
 
+NanEyes = isnan(Trials.EC);
+NanEEG = isnan(Trials.Theta);
 
 
 %% Gather data
@@ -52,46 +54,51 @@ AllStats = struct();
 xLabels = {};
 
 % eye status (compare furthest and closest trials with EO)
-ProbType = squeeze(jointTally(Trials, SD & ~Furthest, EC, Lapses, Participants, ...
-    Sessions, SessionGroups, true));
+ProbType = squeeze(jointTally(Trials, SD & ~Furthest & ~NanEyes, EC, Lapses, Participants, ...
+    Sessions, SessionGroups));
 AllStats = catStruct(AllStats, getProbStats(ProbType, StatsP, Plot));
 xLabels = cat(1, xLabels, 'Eyes closed');
 
 % radius
-ProbType = squeeze(jointTally(Trials, EO & (Furthest | Closest), Furthest==1, Lapses, Participants, ...
-    Sessions, SessionGroups, true));
+ProbType = squeeze(jointTally(Trials, EO & (Furthest | Closest) & ~NanEyes, Furthest==1, Lapses, Participants, ...
+    Sessions, SessionGroups));
 AllStats = catStruct(AllStats, getProbStats(ProbType, StatsP, Plot));
 xLabels = cat(1, xLabels, 'Distance');
 
 
 % sleep deprivation
-ProbType = squeeze(jointTally(Trials, ~Furthest, SD, Lapses, Participants, ...
-    Sessions, SessionGroups, true));
+ProbType = squeeze(jointTally(Trials, [], SD, Lapses, Participants, ...
+    Sessions, SessionGroups));
 AllStats = catStruct(AllStats, getProbStats(ProbType, StatsP, Plot));
 xLabels = cat(1, xLabels, 'Sleep Dep');
 
+ProbType = squeeze(jointTally(Trials, ~Furthest & EO & ~NanEyes, SD, Lapses, Participants, ...
+    Sessions, SessionGroups));
+AllStats = catStruct(AllStats, getProbStats(ProbType, StatsP, Plot));
+xLabels = cat(1, xLabels, 'Sleep Dep (EO, close)');
+
 
 % visual hemifield
-ProbType = squeeze(jointTally(Trials, SD & Furthest, Trials.isRight==1, Lapses, Participants, ...
-    Sessions, SessionGroups, true));
+ProbType = squeeze(jointTally(Trials, SD & Furthest & EO & ~NanEyes, Trials.isRight==1, Lapses, Participants, ...
+    Sessions, SessionGroups));
 AllStats = catStruct(AllStats, getProbStats(ProbType, StatsP, Plot));
-xLabels = cat(1, xLabels, 'Hemifield (r, far)');
+xLabels = cat(1, xLabels, 'R Hemifield (EO, far)');
 
-ProbType = squeeze(jointTally(Trials, SD & ~Furthest, Trials.isRight==1, Lapses, Participants, ...
-    Sessions, SessionGroups, true));
+ProbType = squeeze(jointTally(Trials, SD, Trials.isRight==1, Lapses, Participants, ...
+    Sessions, SessionGroups));
 AllStats = catStruct(AllStats, getProbStats(ProbType, StatsP, Plot));
-xLabels = cat(1, xLabels, 'Hemifield (r, close)');
+xLabels = cat(1, xLabels, 'R Hemifield');
 
 
 % theta
-ProbType = squeeze(jointTally(Trials, SD & ~Furthest & (Theta | NotTheta), Theta, Lapses, Participants, ...
-    Sessions, SessionGroups, true));
+ProbType = squeeze(jointTally(Trials, SD & ~Furthest & (Theta | NotTheta) & EO & ~NanEEG & ~NanEyes, Theta, Lapses, Participants, ...
+    Sessions, SessionGroups));
 AllStats = catStruct(AllStats, getProbStats(ProbType, StatsP, Plot));
 xLabels = cat(1, xLabels, 'Theta');
 
 % alpha
-ProbType = squeeze(jointTally(Trials, SD & ~Furthest & (Alpha | NotAlpha), Alpha, Lapses, Participants, ...
-    Sessions, SessionGroups, true));
+ProbType = squeeze(jointTally(Trials, SD & ~Furthest & (Alpha | NotAlpha) & EO & ~NanEEG & ~NanEyes, Alpha, Lapses, Participants, ...
+    Sessions, SessionGroups));
 AllStats = catStruct(AllStats, getProbStats(ProbType, StatsP, Plot));
 xLabels = cat(1, xLabels, 'Alpha');
 
@@ -110,6 +117,7 @@ Legend = {};
 Colors = [getColors(1, '', 'blue');
     getColors(1, '', 'green');
     getColors(1, '', 'purple');  
+     getColors(1, '', 'pink');  
     .4, .4, .4;
     .8 .8 .8;
     getColors(1, '', 'red');
@@ -161,7 +169,8 @@ ActualJointProb = ProbType(:, 3);
 ExpectedJointProb = Prob1.*Prob2;
 
 % statistically compare expected probability with actual probability
-Stats = pairedttest(ExpectedJointProb, ActualJointProb, StatsP);
+% Stats = pairedttest(ExpectedJointProb, ActualJointProb, StatsP);
+Stats = pairedWilcoxon(ExpectedJointProb, ActualJointProb);
 
 % quantify the difference as a percentage from the possible values, with 0%
 % being entirely the expected joint probability, and 100% being completely
