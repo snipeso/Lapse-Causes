@@ -14,14 +14,9 @@ BandLabel = '5_9';
 Task = 'LAT';
 Refresh = false;
 
-% Parameters for bursts
-BT = Info.BurstThresholds;
-Min_Peaks = [];
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% get bursts
-
+%%% get peaks
 
 % folder locations
 Source = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task); % normal data
@@ -34,12 +29,12 @@ if ~exist(Destination, 'dir')
 end
 
 Content = getContent(Source);
-for Indx_F = 1:numel(Content)
+parfor Indx_F = 1:numel(Content)
 
     % load data
     Filename_Source = Content{Indx_F};
     Filename_Filtered = replace(Filename_Source, 'Clean.mat', 'Filtered.mat');
-    Filename_Destination = replace(Filename_Source, 'Clean.mat', 'Bursts.mat');
+    Filename_Destination = replace(Filename_Source, 'Clean.mat', 'Peaks.mat');
     Filename_Cuts = replace(Filename_Source, 'Clean.mat', 'Cuts.mat');
 
     if exist(fullfile(Destination, Filename_Destination), 'file') && ~Refresh
@@ -86,7 +81,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
 
-function parsave(Destination, Filename_Destination, AllBursts, EEG)
-save(fullfile(Destination, Filename_Destination), "AllBursts", "EEG")
+function parsave(Destination, Filename_Destination, AllPeaks, EEG)
+save(fullfile(Destination, Filename_Destination), "AllPeaks", "EEG")
 end
 
