@@ -7,7 +7,7 @@ close all
 Info = peakParameters();
 Paths = Info.Paths;
 Task = 'LAT';
-Refresh = false;
+Refresh = true;
 
 HP = 2.5; % high-pass filter (Hz)
 Mastoids = [57 100]; % channels to re-reference

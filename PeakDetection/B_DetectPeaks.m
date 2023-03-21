@@ -12,7 +12,7 @@ Paths = Info.Paths;
 Band = [5 9];
 BandLabel = '5_9';
 Task = 'LAT';
-Refresh = false;
+Refresh = true;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -67,6 +67,7 @@ parfor Indx_F = 1:numel(Content)
 
 
     % keep track of how much data is being used
+    EEG = FiltEEG;
     EEG.keep_points = Keep_Points;
     EEG.clean_t = nnz(Keep_Points);
     EEG.band = Band;
