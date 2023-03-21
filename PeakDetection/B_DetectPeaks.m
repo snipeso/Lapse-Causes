@@ -9,6 +9,8 @@ close all
 Info = peakParameters();
 Paths = Info.Paths;
 
+Band = [5 9];
+BandLabel = '5_9';
 Task = 'LAT';
 Refresh = false;
 
@@ -25,7 +27,7 @@ Min_Peaks = [];
 Source = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task); % normal data
 Source_Filtered = fullfile(Paths.Preprocessed, 'Clean', 'Waves_Filtered', Task, 'HP2_5'); % extremely filtered data
 Source_Cuts = fullfile(Paths.Preprocessed, 'Cutting', 'Cuts', Task); % timepoints marked as artefacts
-Destination = fullfile(Paths.Data, 'EEG', 'Peaks_AllChannels', Task);
+Destination = fullfile(Paths.Data, 'EEG', 'Peaks_AllChannels', BandLabel, Task);
 
 if ~exist(Destination, 'dir')
     mkdir(Destination)
@@ -63,10 +65,10 @@ for Indx_F = 1:numel(Content)
 
     % need to concatenate structures
     F = load(fullfile(Source_Filtered, Filename_Filtered));
-  FiltEEG= F.FiltEEG;
-    
-   % detect negative peaks
-   Peaks = getHungPeaks(EEG, FiltEEG, Band, Keep_Points);
+    FiltEEG= F.FiltEEG;
+
+    % detect negative peaks
+    Peaks = getHungPeaks(FiltEEG, Band, Keep_Points);
 
 
     % keep track of how much data is being used

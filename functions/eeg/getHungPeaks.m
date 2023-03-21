@@ -13,7 +13,7 @@ for Indx_C = 1:nChan
 
     % find peaks
     Peaks = peakDetectionHung(Chan);
-    Peaks = peakProperties(Chan, Peaks, fs);
+    Peaks = peakPropertiesRedux(Chan, Peaks, fs);
 
     % identify their frequency
     Peaks = meanHungFreq(Peaks);
@@ -31,7 +31,6 @@ for Indx_C = 1:nChan
     end
 
     AllPeaks = catStruct(AllPeaks, Peaks);
-disp(['ch' num2str(Indx_C)])
 end
 
 
