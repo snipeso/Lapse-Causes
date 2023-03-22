@@ -2,7 +2,7 @@
 
 clear
 clc
-close all
+% close all
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
@@ -71,7 +71,8 @@ for Indx_P = 1:numel(Participants)
 
             % get time spent with theta bursts
             BurstFreqs = [Bursts.Frequency];
-            Band = Bands.Theta;
+%             Band = Bands.Theta;
+Band = [5 9];
             BurstTime = bursts2time(Bursts(BurstFreqs>=Band(1) & BurstFreqs<Band(2)), Pnts);
             BurstTime = BurstTime & ValidTime; % only consider bursts during task
 

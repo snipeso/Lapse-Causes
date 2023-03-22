@@ -6,7 +6,7 @@ Info = peakParameters();
 Paths = Info.Paths;
 
 Band = [4 7.5];
-BandLabel = '4_7';
+BandLabel = '4 7';
 Task = 'LAT';
 Refresh = false;
 
