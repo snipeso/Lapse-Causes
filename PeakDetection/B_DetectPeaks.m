@@ -9,8 +9,8 @@ close all
 Info = peakParameters();
 Paths = Info.Paths;
 
-Band = [5 9];
-BandLabel = '5_9';
+Band = [4 7.5];
+BandLabel = '4 7';
 Task = 'LAT';
 Refresh = true;
 

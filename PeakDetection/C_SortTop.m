@@ -5,12 +5,15 @@ close all
 Info = peakParameters();
 Paths = Info.Paths;
 
-Band = [5 9];
-BandLabel = '5_9';
+Band = [4 7.5];
+BandLabel = '4_7';
 Task = 'LAT';
 Refresh = false;
 
-Sessions = {'BaselineBeam', 'MainPre', 'Session1Beam', 'Session2Beam1', 'Session2Beam2', 'Session2Beam3', 'MainPost'};
+% Sessions = {'BaselineBeam', 'MainPre', 'Session1Beam', 'Session2Beam1', 'Session2Beam2', 'Session2Beam3', 'MainPost'};
+Sessions = {'BaselineBeam', 'Session2Beam1'};
+% Participants = {'P10'};
+
 Participants = {'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', ...
     'P09', 'P10', 'P11', 'P12', 'P13', 'P14', 'P15', 'P16', 'P17', 'P19'};
 
