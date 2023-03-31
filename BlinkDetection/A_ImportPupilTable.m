@@ -6,7 +6,7 @@ close all
 Info = blinkParameters();
 
 Raw = 'D:\LSM\Data\Raw\';
-Task = 'LAT';
+Task = 'PVT';
 Destination = fullfile('D:\LSM\Data\Preprocessed\Pupils\', Task);
 Refresh = false;
 

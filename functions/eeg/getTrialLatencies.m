@@ -30,6 +30,10 @@ for Indx_P = 1:numel(Participants)
         % load EEG metadata
         Filename = Filenames(contains(Filenames, Participants{Indx_P}) & ...
             contains(Filenames, Sessions{Indx_S}));
+        if isempty(Filename)
+            warning(['Missing EEG data for ', Participants{Indx_P}, Sessions{Indx_S}])
+            continue
+        end
         load(fullfile(EEGPath, Filename), 'EEG')
         EEG.data = []; % maybe eases up space?
         fs = EEG.srate;

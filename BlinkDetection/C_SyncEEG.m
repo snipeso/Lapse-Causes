@@ -14,7 +14,7 @@ Triggers = Info.Triggers;
 Participants = Info.Participants;
 Sessions = Info.Sessions;
 
-Task = 'LAT';
+Task = 'PVT';
 fs = 250;
 
 %%% paths
@@ -31,7 +31,7 @@ end
 Content = getContent(Source_Eyes);
 
 % get data quality table to know which eye to use
-DataQaulity_Filepath = fullfile(Paths.Core, 'QualityCheck', 'Theta Bursts', 'DataQuality_Pupils.csv'); % file indicating manually identified eye
+DataQaulity_Filepath = fullfile(Paths.Core, 'QualityCheck', 'Theta Bursts', ['DataQuality_', Task, '_Pupils.csv']); % file indicating manually identified eye
 DataQuality_Table = readtable(DataQaulity_Filepath);
 
 for Indx_P = 1:numel(Participants)

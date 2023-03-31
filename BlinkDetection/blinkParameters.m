@@ -19,6 +19,8 @@ elseif exist( 'F:\Data\Raw', 'dir')
     Core = 'F:\Data\';
 elseif  exist( 'E:\Data\Raw', 'dir')
     Core = 'E:\Data\';
+elseif exist( 'D:LSM\\Data\Raw', 'dir')
+    Core = 'D:\Data\';
 else
     error('no data disk!')
     % Core = 'E:\'
@@ -35,7 +37,8 @@ Paths.Results = fullfile(Core, 'Results', 'Lapse-Causes');
 Info.Participants = {'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', ...
     'P09', 'P10', 'P11', 'P12', 'P13', 'P14', 'P15', 'P16', 'P17', 'P19'};
 
-Info.Sessions = {'BaselineBeam', 'MainPre', 'MainPost', 'Session2Beam1', 'Session2Beam2', 'Session2Beam3'};
+% Info.Sessions = {'BaselineBeam', 'MainPre', 'MainPost', 'Session2Beam1', 'Session2Beam2', 'Session2Beam3'};
+Info.Sessions = {'BaselineBeam', 'Session2Beam'}; % FOR PVT
 
 % if eeglab has not run, run it so all the subdirectories get added
 if ~exist('topoplot', 'file')
