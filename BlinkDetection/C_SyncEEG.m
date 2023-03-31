@@ -9,12 +9,12 @@ close all
 Info = blinkParameters();
 
 Paths = Info.Paths;
-Refresh = false;
+Refresh = true;
 Triggers = Info.Triggers;
 Participants = Info.Participants;
 Sessions = Info.Sessions;
 
-Task = 'PVT';
+Task = 'LAT';
 fs = 250;
 
 %%% paths

@@ -51,6 +51,6 @@ Trials = getECtrials(Trials, MicrosleepPath, DataQuality_Table, fs, Window, MinW
 
 % Trials.isRight = double(Trials.isRight);
 
-save(fullfile(Pool, [Task, 'AllTrials.mat']), 'Trials')
+save(fullfile(Pool, [Task, '_AllTrials.mat']), 'Trials')
 
 disp('Done!')
