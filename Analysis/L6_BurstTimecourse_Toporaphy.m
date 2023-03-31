@@ -10,7 +10,8 @@ close all
 P = analysisParameters();
 
 Participants = P.Participants;
-Sessions = P.SessionBlocks.SD;
+SessionGroup = 'SD';
+Sessions = P.SessionBlocks.(SessionGroup);
 Paths = P.Paths;
 Task = P.Labels.Task;
 Parameters = P.Parameters;
@@ -209,4 +210,4 @@ GenProbBurst = GenProbBurst(:, :, :, 1)./GenProbBurst(:, :, :, 2);
 
 %%% save
 t = t_window;
-save(fullfile(Pool, 'ProbBurst_Channels_zscored.mat'), 'zProbBurst_Stim',  't', 'zGenProbBurst', 'Chanlocs', 'GenProbBurst')
+save(fullfile(Pool, ['ProbBurst_Channels_', SessionGroup, '_zscored.mat']), 'zProbBurst_Stim',  't', 'zGenProbBurst', 'Chanlocs', 'GenProbBurst')
