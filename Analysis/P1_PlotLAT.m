@@ -61,6 +61,7 @@ clc
 
 PlotProps = P.Manuscript;
 PlotProps.Axes.xPadding = 25;
+PlotProps.Axes.yPadding = 25;
 Grid = [2 3];
 
 figure('Units','centimeters', 'Position',[0 0  PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
@@ -123,6 +124,43 @@ set(legend, 'location', 'northwest')
 xlim(XLim)
 
 
+%%% C: proportion of trials as lapses
+
+% get trial subsets
+EO_Trials = Trials_PVT.EC == 0;
+EC_Trials = Trials_PVT.EC == 1;
+Lapses = Trials_PVT.Type == 1;
+
+% assemble data
+Thresholds = .3:.1:1;
+LapseTally = nan(numel(Participants), numel(Thresholds));
+
+for Indx_T = 1:numel(Thresholds)
+
+    Trials_PVT.Type = OldType;
+    Trials_PVT.Type(~isnan(Trials_PVT.RT)) = 1; % full lapse
+    Trials_PVT.Type(Trials_PVT.RT<Thresholds(Indx_T)) = 3; % correct
+
+    [EO_Matrix, ~] = tabulateTable(Trials_PVT, EO_Trials, 'Type', 'tabulate', ...
+        Participants, Sessions_PVT, [], CheckEyes); % P x SB x TT
+    [EC_Matrix, ~] = tabulateTable(Trials_PVT, EC_Trials, 'Type', 'tabulate', ...
+        Participants, Sessions_PVT, [], CheckEyes);
+
+
+    EO = squeeze(EO_Matrix(:, 2, 1));
+    EC = squeeze(EC_Matrix(:, 2, 1));
+    Tot = EO+EC;
+
+    LapseTally(:, Indx_T) = 100*EC./Tot;
+end
+
+% plot
+subfigure([], Grid, [1 3], [1 1], true, PlotProps.Indexes.Letters{3}, PlotProps);
+plotSpikeBalls(LapseTally, Thresholds, {}, ...
+    TallyColors(1, :), 'IQ', PlotProps)
+xlabel('Lapse threshold (s)')
+ylabel('PVT lapses with EC (% lapses)')
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %%% LAT
@@ -165,7 +203,11 @@ xlim(XLim)
 
 
 
-%%% C: plot change in lapses with distance
+%%% F: plot change in lapses with distance
+% get trial subsets
+EO = Trials.EC == 0;
+EC = Trials.EC == 1;
+Lapses = Trials.Type == 1;
 
 % assign a distance quantile for each trial
 qBin = .2; % bin size for quantiles
@@ -204,15 +246,15 @@ Colors = [flip(getColors([1 2], '', 'gray')); PlotProps.Color.Types(1, :); Red(1
 YLim = [0 60];
 
 % plot
-subfigure([], Grid, [1 3], [1 1], true, PlotProps.Indexes.Letters{3}, PlotProps);
+subfigure([], Grid, [2 3], [1 1], true, PlotProps.Indexes.Letters{6}, PlotProps);
 plotSpikeBalls(LapseTally, [], {'BL (EO)', 'BL (EC)', 'SD (EO)', 'SD (EC)'}, ...
     Colors, 'IQ', PlotProps)
-ylabel('Lapses (% trials)')
+ylabel('LAT lapses (% trials)')
 ylim(YLim)
 xlabel('Distance from center (quantiles)')
 set(legend, 'Location','northwest')
 
-disp(['C: N=' num2str(nnz(~BadParticipants))])
+disp(['F: N=' num2str(nnz(~BadParticipants))])
 
 saveFig('Figure_1', Paths.PaperResults, PlotProps)
 
