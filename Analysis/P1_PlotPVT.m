@@ -165,7 +165,7 @@ end
 
 % plot
 subfigure([], Grid, [1 3], [1 1], true, PlotProps.Indexes.Letters{3}, PlotProps);
-plotSpikeBalls(LapseTally, num2str(Thresholds'), {}, ...
+plotSpikeBalls(LapseTally, Thresholds, {}, ...
     Colors(1, :), 'IQ', PlotProps)
 xlabel('Lapse threshold')
 ylabel('% Lapses with EC')

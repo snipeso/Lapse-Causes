@@ -110,6 +110,8 @@ elseif exist( 'F:\Data\Raw', 'dir')
     Core = 'F:\Data\';
 elseif  exist( 'E:\Data\Raw', 'dir')
     Core = 'E:\Data\';
+    elseif  exist( 'G:\Data\Raw', 'dir')
+    Core = 'G:\Data\';
 else
     error('no data disk!')
 end
