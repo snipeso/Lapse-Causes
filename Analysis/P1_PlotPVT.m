@@ -150,10 +150,10 @@ for Indx_T = 1:numel(Thresholds)
     Trials.Type(~isnan(Trials.RT)) = 1; % full lapse
     Trials.Type(Trials.RT<Thresholds(Indx_T)) = 3; % correct
 
-[EO_Matrix, ~] = tabulateTable(Trials, EO_Trials, 'Type', 'tabulate', ...
-    Participants, Sessions, [], CheckEyes); % P x SB x TT
-[EC_Matrix, ~] = tabulateTable(Trials, EC_Trials, 'Type', 'tabulate', ...
-    Participants, Sessions, [], CheckEyes);
+    [EO_Matrix, ~] = tabulateTable(Trials, EO_Trials, 'Type', 'tabulate', ...
+        Participants, Sessions, [], CheckEyes); % P x SB x TT
+    [EC_Matrix, ~] = tabulateTable(Trials, EC_Trials, 'Type', 'tabulate', ...
+        Participants, Sessions, [], CheckEyes);
 
 
     EO = squeeze(EO_Matrix(:, 2, 1));

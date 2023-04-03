@@ -23,35 +23,33 @@ SB_Labels = {'BL', 'SD'};
 Sessions = [SessionBlocks.BL, SessionBlocks.SD]; % different representation for the tabulateTable function
 SessionGroups = {1:3, 4:6};
 
+Pool = fullfile(Paths.Pool, 'Tasks');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Load trial data
 
-%%% get trial data
-Pool = fullfile(Paths.Pool, 'Tasks');
+%%% Get PVT trial data
+Task = 'PVT';
+Sessions_PVT = P.Sessions_PVT; % different representation for the tabulateTable function
+load(fullfile(Pool, [Task, '_AllTrials.mat']), 'Trials') % from script Load_Trials
+Trials_PVT = Trials;
+OldType = Trials_PVT.Type;
+
+% assemble reaction times into structure for flame plot
+[FlameStruct_PVT, MEANS_PVT, Q99_PVT] = assembleRTs(Trials_PVT, Participants, Sessions_PVT, SB_Labels);
+
+
+%%% get LAT trial data
+Task = 'LAT';
+
 load(fullfile(Pool, [Task, '_AllTrials.mat']), 'Trials') % from script Load_Trials
 
 % get trial subsets
-EO = Trials.EC == 0;
-EC = Trials.EC == 1;
 
 Lapses = Trials.Type == 1;
 
-%%% assemble reaction times into structure for flame plot
-FlameStruct = struct();
-MEANS = nan(numel(Participants), 2);
-Q99 = MEANS; % keep track of distribution for description of RTs
-for Indx_SB = 1:2
-    for Indx_P = 1:numel(Participants)
-        RTs = Trials.RT(strcmp(Trials.Participant, Participants{Indx_P}) &...
-            contains(Trials.Session, SessionBlocks.(SB_Labels{Indx_SB})));
-        RTs(isnan(RTs)) = [];
-        FlameStruct.(SB_Labels{Indx_SB}).(Participants{Indx_P}) = RTs;
-
-        MEANS(Indx_P, Indx_SB) = mean(RTs);
-        Q99(Indx_P, Indx_SB) = quantile(RTs, .99);
-    end
-end
+% assemble reaction times into structure for flame plot
+[FlameStruct, MEANS, Q99] = assembleRTs(Trials, Participants, SessionBlocks);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -61,78 +59,109 @@ end
 
 clc
 
-Grid = [1 3];
-CheckEyes = true;
+PlotProps = P.Manuscript;
+PlotProps.Axes.xPadding = 25;
+Grid = [2 3];
 
-figure('Units','centimeters', 'Position',[0 0  PlotProps.Figure.Width, PlotProps.Figure.Height*.3])
+figure('Units','centimeters', 'Position',[0 0  PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% PVT
+
 
 %%% A: Reaction time distributions
 XLim = [.5 2.5];
-YLim = [ 0.2036  1.0810];
+YLim = [ 0.1  1.01];
 
-subfigure([], Grid, [1 1], [1 1], true, PlotProps.Indexes.Letters{1}, PlotProps);
+subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
 hold on
 plot([0 3], [.5 .5], 'Color', PlotProps.Color.Generic, 'LineStyle', ':', 'LineWidth', 1) % demarkation of when answer is late
-plotFlames(FlameStruct, PlotProps.Color.Participants, .15, PlotProps)
-ylabel('Reaction times (s)')
+plotFlames(FlameStruct_PVT, PlotProps.Color.Participants, .15, PlotProps)
+ylabel('PVT reaction times (s)')
 xlim(XLim)
 ylim(YLim)
 legend off
 
-disp('A: N=18')
+disp(['A: N=', num2str(numel(unique(Trials_PVT.Participant)))])
 
 
 %%% B: Proportion of trials
 
-% assemble data
-[EO_Matrix, ~] = tabulateTable(Trials, EO, 'Type', 'tabulate', ...
-    Participants, Sessions, SessionGroups, CheckEyes); % P x SB x TT
-[EC_Matrix, ~] = tabulateTable(Trials, EC, 'Type', 'tabulate', ...
-    Participants, Sessions, SessionGroups, CheckEyes);
+% split into types based on RTs
+Trials_PVT.Type = OldType;
+Trials_PVT.Type(~isnan(Trials_PVT.RT)) = 1; % full lapse
+Trials_PVT.Type(Trials_PVT.RT<.5) = 3; % correct
 
-Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
-
-% remove participants who dont have enough trials
-BadParticipants = Tots<MinTots;
-Tots(BadParticipants) = nan;
-
-Matrix = cat(3, EO_Matrix, EC_Matrix(:, :, 1));
-
-BadParticipants = any(any(isnan(Matrix), 3), 2); % remove anyone missing any data at any point
-Matrix(BadParticipants, :, :) = nan;
-
-Data = squeeze(mean(100*Matrix./Tots, 1, 'omitnan')); % average, normalizing totals
-
+% assemble trial types
+disp('B: ')
+Data = assembleLapses(Trials_PVT, Participants, Sessions_PVT, [], MinTots);
+Data = squeeze(mean(Data, 1, 'omitnan')); % average, normalizing totals
 
 % assemble plot parameters
-Order = [4 1 2 3]; % order in which to have trial types
+TallyOrder = [4 1 2 3]; % order in which to have trial types
 
 YLim = [0 100];
 XLim = [0.33 2.66];
 
 Red = getColors([1 4], '', 'red'); % dark red for lapses EC
-Colors = [PlotProps.Color.Types; Red(1, :)];
-Colors = Colors(Order, :);
+TallyColors = [PlotProps.Color.Types; Red(1, :)];
+TallyColors = TallyColors(TallyOrder, :);
 
 AllTallyLabels = {'Lapses (EO)', 'Late', 'Correct', 'Lapses (EC)'};
-AllTallyLabels = AllTallyLabels(Order);
+AllTallyLabels = AllTallyLabels(TallyOrder);
+AllTallyLabels_PVT = AllTallyLabels;
+AllTallyLabels_PVT(3) = {''};
 
-Data = Data(:, Order);
+Data = Data(:, TallyOrder);
 
 % plot
 subfigure([], Grid, [1, 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
 
-plotStackedBars(Data, SB_Labels, YLim, AllTallyLabels, Colors, PlotProps)
-ylabel('% trials')
+plotStackedBars(Data, SB_Labels, YLim, AllTallyLabels_PVT, TallyColors, PlotProps)
+ylabel('% PVT trials')
 set(legend, 'location', 'northwest')
 xlim(XLim)
 
-% display how much data is in not-plotted task types
-NotPlotted = 100*mean(sum(EC_Matrix(:, :, 2:3), 3)./Tots, 'omitnan');
 
-% info on figure
-disp(['B: N=', num2str(numel(BadParticipants) - nnz(BadParticipants))])
-disp(['Not plotted data in B: ', num2str(NotPlotted(2), '%.2f'), '%'])
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% LAT
+
+%%% D: Reaction time distributions
+XLim = [.5 2.5];
+YLim = [ 0.1  1.01];
+
+subfigure([], Grid, [2 1], [], true, PlotProps.Indexes.Letters{4}, PlotProps);
+hold on
+plot([0 3], [.5 .5], 'Color', PlotProps.Color.Generic, 'LineStyle', ':', 'LineWidth', 1) % demarkation of when answer is late
+plotFlames(FlameStruct, PlotProps.Color.Participants, .15, PlotProps)
+ylabel('LAT reaction times (s)')
+xlim(XLim)
+ylim(YLim)
+legend off
+
+disp(['D: N=', num2str(numel(unique(Trials.Participant)))])
+
+
+%%% E: Proportion of trials
+
+% assemble data
+disp('E: ')
+[Data, EO_Matrix, EC_Matrix] = assembleLapses(Trials, Participants, Sessions, SessionGroups, MinTots);
+Data = squeeze(mean(Data, 1, 'omitnan')); % average, normalizing totals
+Data = Data(:, TallyOrder);
+
+% plot
+YLim = [0 100];
+XLim = [0.33 2.66];
+
+subfigure([], Grid, [2, 2], [], true, PlotProps.Indexes.Letters{5}, PlotProps);
+
+plotStackedBars(Data, SB_Labels, YLim, AllTallyLabels, TallyColors, PlotProps)
+ylabel('% LAT trials')
+set(legend, 'location', 'northwest')
+xlim(XLim)
+
 
 
 
