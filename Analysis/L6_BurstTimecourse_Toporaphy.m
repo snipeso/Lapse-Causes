@@ -10,7 +10,7 @@ close all
 P = analysisParameters();
 
 Participants = P.Participants;
-SessionGroup = 'SD';
+SessionGroup = 'BL';
 Sessions = P.SessionBlocks.(SessionGroup);
 Paths = P.Paths;
 Task = P.Labels.Task;

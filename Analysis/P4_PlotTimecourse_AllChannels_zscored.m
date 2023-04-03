@@ -16,7 +16,7 @@ StatsP = P.StatsP;
 Bands = P.Bands;
 BandLabels = fieldnames(Bands);
 
-SessionGroup = 'SD';
+SessionGroup = 'BL';
 TitleTag = strjoin({'Timecourse', 'Topoplot', SessionGroup}, '_');
 
 Pool = fullfile(Paths.Pool, 'EEG');
@@ -89,4 +89,4 @@ for Indx_B = 1:2
     A.Position(2) = A.Position(2)-.1;
     plotColorbar('Divergent', CLims, [BandLabels{Indx_B}, ' t-values'], PlotProps)
 end
-saveFig('Figure_4', Paths.PaperResults, PlotProps)
+saveFig(['Figure_4_', SessionGroup], Paths.PaperResults, PlotProps)
