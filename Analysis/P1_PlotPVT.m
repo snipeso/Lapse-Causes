@@ -1,7 +1,7 @@
 
 clear
 clc
-% close all
+close all
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
@@ -25,8 +25,8 @@ Pool = fullfile(Paths.Pool, 'Tasks');
 load(fullfile(Pool, [Task, '_AllTrials.mat']), 'Trials') % from script Load_Trials
 
 % get trial subsets
-EO = Trials.EC == 0;
-EC = Trials.EC == 1;
+EO_Trials = Trials.EC == 0;
+EC_Trials = Trials.EC == 1;
 
 Lapses = Trials.Type == 1;
 
@@ -47,6 +47,7 @@ for Indx_S = 1:2
 end
 
 
+OldType = Trials.Type;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Plots & stats
 
@@ -56,6 +57,7 @@ clc
 
 Grid = [1 3];
 CheckEyes = true;
+PlotProps.Figure.Padding = 20;
 
 figure('Units','centimeters', 'Position',[0 0  PlotProps.Figure.Width, PlotProps.Figure.Height*.3])
 
@@ -74,17 +76,18 @@ legend off
 
 disp(['A: N=', num2str(numel(unique(Trials.Participant)))])
 
+Trials.Type = OldType;
 Trials.Type(~isnan(Trials.RT)) = 1; % full lapse
-Trials.Type(Trials.RT<.6) = 3; % correct
+Trials.Type(Trials.RT<.5) = 3; % correct
 % Trials.Type(Trials.RT>1) = 1; % full lapse
 
 
 %%% B: Proportion of trials
 
 % assemble data
-[EO_Matrix, ~] = tabulateTable(Trials, EO, 'Type', 'tabulate', ...
+[EO_Matrix, ~] = tabulateTable(Trials, EO_Trials, 'Type', 'tabulate', ...
     Participants, Sessions, [], CheckEyes); % P x SB x TT
-[EC_Matrix, ~] = tabulateTable(Trials, EC, 'Type', 'tabulate', ...
+[EC_Matrix, ~] = tabulateTable(Trials, EC_Trials, 'Type', 'tabulate', ...
     Participants, Sessions, [], CheckEyes);
 
 Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
@@ -131,4 +134,41 @@ NotPlotted = 100*mean(sum(EC_Matrix(:, :, 2:3), 3)./Tots, 'omitnan');
 disp(['B: N=', num2str(numel(BadParticipants) - nnz(BadParticipants))])
 disp(['Not plotted data in B: ', num2str(NotPlotted(2), '%.2f'), '%'])
 
+
+
+%%% C: proportion of trials as lapses
+
+
+% assemble data
+Thresholds = .3:.1:1;
+
+LapseTally = nan(numel(Participants), numel(Thresholds));
+
+for Indx_T = 1:numel(Thresholds)
+
+    Trials.Type = OldType;
+    Trials.Type(~isnan(Trials.RT)) = 1; % full lapse
+    Trials.Type(Trials.RT<Thresholds(Indx_T)) = 3; % correct
+
+[EO_Matrix, ~] = tabulateTable(Trials, EO_Trials, 'Type', 'tabulate', ...
+    Participants, Sessions, [], CheckEyes); % P x SB x TT
+[EC_Matrix, ~] = tabulateTable(Trials, EC_Trials, 'Type', 'tabulate', ...
+    Participants, Sessions, [], CheckEyes);
+
+
+    EO = squeeze(EO_Matrix(:, 2, 1));
+    EC = squeeze(EC_Matrix(:, 2, 1));
+    Tot = EO+EC;
+
+    LapseTally(:, Indx_T) = 100*EC./Tot;
+end
+
+% plot
+subfigure([], Grid, [1 3], [1 1], true, PlotProps.Indexes.Letters{3}, PlotProps);
+plotSpikeBalls(LapseTally, num2str(Thresholds'), {}, ...
+    Colors(1, :), 'IQ', PlotProps)
+xlabel('Lapse threshold')
+ylabel('% Lapses with EC')
+
+% saveFig('Figure_1-1', Paths.PaperResults, PlotProps)
 

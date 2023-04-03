@@ -9,12 +9,12 @@ close all
 Info = blinkParameters();
 
 Paths = Info.Paths;
-Refresh = true;
+Refresh = false;
 Triggers = Info.Triggers;
 Participants = Info.Participants;
 Sessions = Info.Sessions;
 
-Task = 'LAT';
+Task = 'PVT';
 fs = 250;
 
 %%% paths
@@ -69,6 +69,14 @@ for Indx_P = 1:numel(Participants)
         DQ_P = DQ.(Levels{3})(strcmp(DQ.Participant, Levels{1}));
 
         if exist(EyePath, 'file') && DQ_P > 0
+
+            % Adjust PVT
+            if strcmp(Task, 'PVT')
+                StartTrialIndx = find(strcmp({EEG.event.type}, T.SyncEyes), 1, 'first');
+                StartStimIndx = find(strcmp({EEG.event.type}, 'S  3'), 1, 'first');
+                EEG.event(StartTrialIndx).latency = EEG.event(StartStimIndx).latency;
+            end
+
             Eyes = syncEEG_Eyes(EEG, EyePath, T.SyncEyes);
         else
             % blanks in case there's no data
