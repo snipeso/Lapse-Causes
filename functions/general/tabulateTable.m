@@ -24,7 +24,8 @@ if strcmp(Aggregator, 'tabulate')
     if isnumeric(Data)
         Data(isnan(Data)) = [];
     end
-    Things = unique(Data);
+    Table = tabulate(Data);
+    Things = Table(:, 1);
     Matrix = nan(numel(Participants), nSessions, numel(Things));
 
     if islogical(Things)
@@ -89,7 +90,11 @@ for Indx_P = 1:numel(Participants)
                         Matrix(Indx_P, Indx_S, :) = 0;
                     else
                         Tots = zeros(numel(Things), 1);
+                        try
                         Tots(ismember(Things, Table(:, 1))) = Table(:, 2);
+                        catch
+                            a=1
+                        end
                         Matrix(Indx_P, Indx_S, :) = Tots;
                     end
                 else

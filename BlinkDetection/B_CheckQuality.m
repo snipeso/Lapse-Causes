@@ -8,7 +8,8 @@ Info = blinkParameters();
 Paths = Info.Paths;
 Participants = Info.Participants;
 Sessions = Info.Sessions;
-Task = 'LAT';
+
+Task = 'PVT';
 
 
 for Indx_P = 1:numel(Participants)

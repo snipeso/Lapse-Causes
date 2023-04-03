@@ -14,7 +14,7 @@ Triggers = Info.Triggers;
 Participants = Info.Participants;
 Sessions = Info.Sessions;
 
-Task = 'LAT';
+Task = 'PVT';
 fs = 250;
 
 %%% paths
@@ -31,7 +31,7 @@ end
 Content = getContent(Source_Eyes);
 
 % get data quality table to know which eye to use
-DataQaulity_Filepath = fullfile(Paths.Core, 'QualityCheck', 'Theta Bursts', 'DataQuality_Pupils.csv'); % file indicating manually identified eye
+DataQaulity_Filepath = fullfile(Paths.Core, 'QualityCheck', 'Theta Bursts', ['DataQuality_', Task, '_Pupils.csv']); % file indicating manually identified eye
 DataQuality_Table = readtable(DataQaulity_Filepath);
 
 for Indx_P = 1:numel(Participants)
@@ -69,6 +69,14 @@ for Indx_P = 1:numel(Participants)
         DQ_P = DQ.(Levels{3})(strcmp(DQ.Participant, Levels{1}));
 
         if exist(EyePath, 'file') && DQ_P > 0
+
+            % Adjust PVT
+            if strcmp(Task, 'PVT')
+                StartTrialIndx = find(strcmp({EEG.event.type}, T.SyncEyes), 1, 'first');
+                StartStimIndx = find(strcmp({EEG.event.type}, 'S  3'), 1, 'first');
+                EEG.event(StartTrialIndx).latency = EEG.event(StartStimIndx).latency;
+            end
+
             Eyes = syncEEG_Eyes(EEG, EyePath, T.SyncEyes);
         else
             % blanks in case there's no data

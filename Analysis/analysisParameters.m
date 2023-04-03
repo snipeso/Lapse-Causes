@@ -43,6 +43,12 @@ SessionBlocks.SD = { 'Session2Beam1', 'Session2Beam2', 'Session2Beam3'};
 
 P.Sessions = [SessionBlocks.BL, SessionBlocks.SD];
 
+SessionBlocks.BL = {'BaselineBeam',  'MainPre', 'MainPost'};
+SessionBlocks.SD = { 'Session2Beam1', 'Session2Beam2', 'Session2Beam3'};
+
+P.Sessions_PVT = {'BaselineBeam', 'Session2Beam'};
+
+
 P.SessionBlocks = SessionBlocks;
 
 Labels.Tally = {'Lapses', 'Late', 'Correct'};

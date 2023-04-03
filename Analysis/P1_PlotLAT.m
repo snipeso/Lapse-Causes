@@ -3,7 +3,7 @@
 
 clear
 clc
-close all
+% close all
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
@@ -13,6 +13,7 @@ Participants = P.Participants;
 Paths = P.Paths;
 PlotProps = P.Manuscript;
 StatsP = P.StatsP;
+Task = 'LAT';
 
 MinTots = P.Parameters.MinTots; % minimum total of trials for that participant to be considered
 
@@ -28,7 +29,7 @@ SessionGroups = {1:3, 4:6};
 
 %%% get trial data
 Pool = fullfile(Paths.Pool, 'Tasks');
-load(fullfile(Pool, 'AllTrials.mat'), 'Trials') % from script Load_Trials
+load(fullfile(Pool, [Task, '_AllTrials.mat']), 'Trials') % from script Load_Trials
 
 % get trial subsets
 EO = Trials.EC == 0;
@@ -67,6 +68,7 @@ figure('Units','centimeters', 'Position',[0 0  PlotProps.Figure.Width, PlotProps
 
 %%% A: Reaction time distributions
 XLim = [.5 2.5];
+YLim = [ 0.2036  1.0810];
 
 subfigure([], Grid, [1 1], [1 1], true, PlotProps.Indexes.Letters{1}, PlotProps);
 hold on
@@ -74,6 +76,7 @@ plot([0 3], [.5 .5], 'Color', PlotProps.Color.Generic, 'LineStyle', ':', 'LineWi
 plotFlames(FlameStruct, PlotProps.Color.Participants, .15, PlotProps)
 ylabel('Reaction times (s)')
 xlim(XLim)
+ylim(YLim)
 legend off
 
 disp('A: N=18')
