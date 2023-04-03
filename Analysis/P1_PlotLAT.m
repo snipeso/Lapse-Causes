@@ -248,7 +248,7 @@ YLim = [0 60];
 
 % plot
 subfigure([], Grid, [2 3], [1 1], true, PlotProps.Indexes.Letters{6}, PlotProps);
-plotSpikeBalls(LapseTally, [], {'BL (EO)', 'BL (EC)', 'SD (EO)', 'SD (EC)'}, ...
+plotSpikeBalls(LapseTally, [], {'BL, EO', 'BL, EC', 'SD, EO', 'SD, EC'}, ...
     Colors, 'IQ', PlotProps)
 ylabel('LAT lapses (% trials)')
 ylim(YLim)
