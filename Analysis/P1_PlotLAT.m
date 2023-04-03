@@ -126,10 +126,11 @@ xlim(XLim)
 
 %%% C: proportion of trials as lapses
 
+CheckEyes = true;
+
 % get trial subsets
 EO_Trials = Trials_PVT.EC == 0;
 EC_Trials = Trials_PVT.EC == 1;
-Lapses = Trials_PVT.Type == 1;
 
 % assemble data
 Thresholds = .3:.1:1;
@@ -210,7 +211,7 @@ EC = Trials.EC == 1;
 Lapses = Trials.Type == 1;
 
 % assign a distance quantile for each trial
-qBin = .2; % bin size for quantiles
+qBin = 1/6; % bin size for quantiles
 Radius = Trials.Radius;
 Edges = quantile(Radius(:), 0:qBin:1);
 Bins = discretize(Radius, Edges);
