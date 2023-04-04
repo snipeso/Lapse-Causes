@@ -1,4 +1,4 @@
-function [FlameStruct, MEANS, Q99] = assembleRTs(Trials, Participants, Sessions, SessionLabels)
+function [FlameStruct, MEANS, Q99, Q01] = assembleRTs(Trials, Participants, Sessions, SessionLabels)
 % from a table of all trials, gets reaction times into struct needed for
 % overlapping flame plot.
 % Sessions can be either a structure, like Struct.BL = {'BaselinePre',
@@ -16,6 +16,7 @@ nSessions = numel(SessionLabels);
 FlameStruct = struct();
 MEANS = nan(numel(Participants), nSessions);
 Q99 = MEANS; % keep track of distribution for description of RTs
+Q01 = MEANS;
 for Indx_S = 1:nSessions
     for Indx_P = 1:numel(Participants)
 
@@ -32,5 +33,6 @@ for Indx_S = 1:nSessions
 
         MEANS(Indx_P, Indx_S) = mean(RTs);
         Q99(Indx_P, Indx_S) = quantile(RTs, .99);
+        Q01(Indx_P, Indx_S) = quantile(RTs, .01);
     end
 end

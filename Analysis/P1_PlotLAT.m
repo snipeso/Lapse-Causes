@@ -49,8 +49,11 @@ load(fullfile(Pool, [Task, '_AllTrials.mat']), 'Trials') % from script Load_Tria
 Lapses = Trials.Type == 1;
 
 % assemble reaction times into structure for flame plot
-[FlameStruct, MEANS, Q99] = assembleRTs(Trials, Participants, SessionBlocks);
+[FlameStruct, MEANS, Q99, Q01] = assembleRTs(Trials, Participants, SessionBlocks);
 
+% for L1_Trials, identify what's the bottom 1% of RTs
+clc
+dispDescriptive(Q01(:, 2), 'Fastest 1% RTs', 's', 3);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Plots & stats
