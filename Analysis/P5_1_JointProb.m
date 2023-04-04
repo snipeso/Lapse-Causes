@@ -17,10 +17,11 @@ MinTots = P.Parameters.MinTots; % minimum total of trials for that participant t
 SessionBlocks = P.SessionBlocks;
 Sessions = [SessionBlocks.BL, SessionBlocks.SD];
 SessionGroups = {1:6};
+Task = 'LAT';
 
 Parameters = P.Parameters;
 
-load(fullfile(Paths.Pool, 'Tasks', 'AllTrials.mat'), 'Trials')
+load(fullfile(Paths.Pool, 'Tasks', [Task, '_AllTrials.mat']), 'Trials')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Gather data
@@ -56,50 +57,50 @@ xLabels = {};
 % eye status (compare furthest and closest trials with EO)
 ProbType = squeeze(jointTally(Trials, SD & ~Furthest & ~NanEyes, EC, Lapses, Participants, ...
     Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, StatsP, Plot));
+AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
 xLabels = cat(1, xLabels, 'Eyes closed');
 
 % radius
 ProbType = squeeze(jointTally(Trials, EO & (Furthest | Closest) & ~NanEyes, Furthest==1, Lapses, Participants, ...
     Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, StatsP, Plot));
+AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
 xLabels = cat(1, xLabels, 'Distance');
 
 
 % sleep deprivation
 ProbType = squeeze(jointTally(Trials, [], SD, Lapses, Participants, ...
     Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, StatsP, Plot));
+AllStats = catStruct(AllStats, getProbStats(ProbType,  Plot));
 xLabels = cat(1, xLabels, 'Sleep Dep');
 
 ProbType = squeeze(jointTally(Trials, ~Furthest & EO & ~NanEyes, SD, Lapses, Participants, ...
     Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, StatsP, Plot));
+AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
 xLabels = cat(1, xLabels, 'Sleep Dep (EO, close)');
 
 
 % visual hemifield
 ProbType = squeeze(jointTally(Trials, SD & Furthest & EO & ~NanEyes, Trials.isRight==1, Lapses, Participants, ...
     Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, StatsP, Plot));
+AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
 xLabels = cat(1, xLabels, 'R Hemifield (EO, far)');
 
 ProbType = squeeze(jointTally(Trials, SD, Trials.isRight==1, Lapses, Participants, ...
     Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, StatsP, Plot));
+AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
 xLabels = cat(1, xLabels, 'R Hemifield');
 
 
 % theta
 ProbType = squeeze(jointTally(Trials, SD & ~Furthest & (Theta | NotTheta) & EO & ~NanEEG & ~NanEyes, Theta, Lapses, Participants, ...
     Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, StatsP, Plot));
+AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
 xLabels = cat(1, xLabels, 'Theta');
 
 % alpha
 ProbType = squeeze(jointTally(Trials, SD & ~Furthest & (Alpha | NotAlpha) & EO & ~NanEEG & ~NanEyes, Alpha, Lapses, Participants, ...
     Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, StatsP, Plot));
+AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
 xLabels = cat(1, xLabels, 'Alpha');
 
 

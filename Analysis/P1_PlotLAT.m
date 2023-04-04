@@ -96,6 +96,9 @@ Trials_PVT.Type(Trials_PVT.RT<.5) = 3; % correct
 % assemble trial types
 disp('B: ')
 Data = assembleLapses(Trials_PVT, Participants, Sessions_PVT, [], MinTots);
+
+% disp EC vs 
+
 Data = squeeze(mean(Data, 1, 'omitnan')); % average, normalizing totals
 
 % assemble plot parameters
@@ -161,6 +164,8 @@ plotSpikeBalls(LapseTally, Thresholds, {}, ...
     TallyColors(1, :), 'IQ', PlotProps)
 xlabel('Lapse threshold (s)')
 ylabel('PVT lapses with EC (% lapses)')
+
+dispDescriptive(LapseTally(:, 3), 'Proportion of PVT Lapses:', '%', 0);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%

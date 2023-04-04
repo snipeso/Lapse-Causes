@@ -34,3 +34,12 @@ NotPlotted = 100*mean(sum(EC_Matrix(:, :, 2:3), 3)./Tots, 'omitnan');
 % indicate how much data was removed
 disp(['N=', num2str(numel(BadParticipants) - nnz(BadParticipants))])
 disp(['Not plotted data: ', num2str(NotPlotted(2), '%.2f'), '%'])
+
+
+% indicate proportion of lapses that are eyes-closed
+EOL = squeeze(Data(:, 2, 1));
+ ECL = squeeze(Data(:, 2, 4));
+
+ dispDescriptive( 100*ECL./(EOL+ECL), 'EC lapses:', '% lapses', 0);
+
+ dispDescriptive(ECL, 'EC lapses:', '% tot', 0);
