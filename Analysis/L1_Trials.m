@@ -1,5 +1,5 @@
 % Gather a table of all the trials, associating burst and eye-closure
-% status for each trial.
+% status for each trial. Need for XXXX
 
 clear
 clc
