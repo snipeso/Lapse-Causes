@@ -28,17 +28,27 @@ elseif PreserveDim==3 % bursts
         end
     end
 elseif PreserveDim==4 % bursts
+
+    % subtract general probability of each channel
+    for Indx_P = 1:Dims(1)
+        for Indx_Ch = 1:Dims(3)
+            for Indx_B = 1:Dims(4)
+                ProbAll(Indx_P, :, Indx_Ch, Indx_B, :) = ...
+                    ProbAll(Indx_P, :, Indx_Ch, Indx_B, :) - GenProb(Indx_P, Indx_Ch, Indx_B);
+                zGenProb(Indx_P, Indx_Ch, Indx_B) = 0;
+            end
+        end
+    end
+
+    % z-score data
     for Indx_P = 1:Dims(1)
         for Indx_B = 1:Dims(4)
-            Prob = ProbAll(Indx_P, :, :, Indx_B, :)-GenProb(Indx_P, :, Indx_B);
+            Prob = ProbAll(Indx_P, :, :, Indx_B, :);
             MEAN = mean(Prob, 'all', 'omitnan');
             STD = std(Prob, 0, 'all', 'omitnan');
             zProb(Indx_P, :, :, Indx_B, :) = (Prob-MEAN)./STD;
-
-            zGenProb(Indx_P, :, Indx_B) = 0;
         end
     end
 end
-
 
 end

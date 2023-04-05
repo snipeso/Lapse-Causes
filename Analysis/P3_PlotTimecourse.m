@@ -2,7 +2,7 @@
 
 clear
 clc
-% close all
+close all
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
@@ -54,8 +54,8 @@ t_burst = t_window;
 % remove all data from participants missing any of the trial types
 
 for Indx_B = 1:2
-[ProbBurst_Stim_Pooled(:, :, Indx_B, :), ProbBurst_Resp_Pooled(:, :, Indx_B, :)] = ...
-    removeBlankParticipants(squeeze(ProbBurst_Stim_Pooled(:, :, Indx_B, :)), squeeze(ProbBurst_Resp_Pooled(:, :, Indx_B, :)));
+    [ProbBurst_Stim_Pooled(:, :, Indx_B, :), ProbBurst_Resp_Pooled(:, :, Indx_B, :)] = ...
+        removeBlankParticipants(squeeze(ProbBurst_Stim_Pooled(:, :, Indx_B, :)), squeeze(ProbBurst_Resp_Pooled(:, :, Indx_B, :)));
 end
 
 % remove low sdTheta participants for obvious reasons
@@ -154,7 +154,7 @@ legend off
 disp(['F: N=', num2str(mode(Stats.df(:))+1)])
 
 
-saveFig('Figure_3', Paths.PaperResults, PlotProps)
+saveFig(['Figure_3_', SessionGroup], Paths.PaperResults, PlotProps)
 
 
 
@@ -219,7 +219,7 @@ ylabel('Probability of alpha (z-scored)')
 legend off
 
 
-saveFig('Figure_3-1', Paths.PaperResults, PlotProps)
+saveFig(['Figure_3-1_', SessionGroup], Paths.PaperResults, PlotProps)
 
 
 %%

@@ -5,14 +5,17 @@ function Prob = reduxProbEvent(ProbEvent, t, Windows)
 % the probabilities
 
 nWindows = size(Windows, 1);
+nChannels = size(ProbEvent, 1);
 
-Prob = nan(1, nWindows);
+Prob = nan(nChannels, nWindows);
 
-for Indx_W = 1:nWindows
+for Indx_Ch = 1:nChannels
+    for Indx_W = 1:nWindows
 
-    % get indexes for the window edges
-    Edges = dsearchn(t', Windows(Indx_W, :)');
+        % get indexes for the window edges
+        Edges = dsearchn(t', Windows(Indx_W, :)');
 
-    % get average probability for that window
-    Prob(:, Indx_W) = mean(ProbEvent(Edges(1):Edges(2)));
+        % get average probability for that window
+        Prob(Indx_Ch, Indx_W) = mean(ProbEvent(Indx_Ch, Edges(1):Edges(2)), 'omitnan');
+    end
 end

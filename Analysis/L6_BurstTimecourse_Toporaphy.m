@@ -24,7 +24,6 @@ fs = Parameters.fs;
 ConfidenceThreshold = Parameters.EC_ConfidenceThreshold;
 
 Windows_Stim = [-1.5 0;  0 0.25;  0.25 1]; % time windows to aggregate info
-
 Windows_Resp = [-.5 0; 0 1];
 
 minTrials = Parameters.MinTypes;
@@ -185,7 +184,7 @@ for Indx_P = 1:numel(Participants)
             end
         end
 
-        zGenProbBurst(Indx_P, :, Indx_B)  = 0;
+        zGenProbBurst(Indx_P, :, Indx_B) = 0;
 
     end
 

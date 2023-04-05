@@ -7,7 +7,9 @@ for Indx_P = 1:size(ProbStim, 1)
         ProbStim(Indx_P, :, :) = nan;
     end
 
-    if any(isnan(ProbResp(Indx_P, 2:3, :)), 'all') % first is lapses, which of course is blank
-        ProbResp(Indx_P, :, :) = nan;
+    if exist("ProbResp", 'var')
+        if any(isnan(ProbResp(Indx_P, 2:3, :)), 'all') % first is lapses, which of course is blank
+            ProbResp(Indx_P, :, :) = nan;
+        end
     end
 end

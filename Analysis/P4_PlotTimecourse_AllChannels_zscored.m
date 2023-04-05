@@ -17,7 +17,7 @@ StatsP = P.StatsP;
 Bands = P.Bands;
 BandLabels = fieldnames(Bands);
 
-SessionGroup = 'BL';
+SessionGroup = 'SD';
 TitleTag = strjoin({'Timecourse', 'Topoplot', SessionGroup}, '_');
 
 Pool = fullfile(Paths.Pool, 'EEG');
@@ -25,11 +25,48 @@ Pool = fullfile(Paths.Pool, 'EEG');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% load data
 
-load(fullfile(Pool, ['ProbBurst_Channels_', SessionGroup, '_zscored.mat']), 'zProbBurst_Stim', ...
-    'zGenProbBurst', 'Chanlocs')
+% load(fullfile(Pool, ['ProbBurst_Channels_', SessionGroup, '_zscored.mat']), 'zProbBurst_Stim', ...
+%     'zGenProbBurst', 'Chanlocs')
+%
+% zProbBurst_Stim(~Participants, :, :, :, :) = nan; % P x TT x Ch x B x W
+% nWindows = size(zProbBurst_Stim, 5);
 
-zProbBurst_Stim(~Participants, :, :, :, :) = nan; % P x TT x Ch x B x W
-nWindows = size(zProbBurst_Stim, 5);
+load(fullfile(Paths.Pool, 'EEG', ['ProbBurst_', SessionGroup, '.mat']), 'ProbBurst_Stim', ...
+    't_window',  'GenProbBurst', 'Chanlocs')
+t_burst = t_window;
+TotChannels = size(GenProbBurst, 2);
+
+% remove all data from participants missing any of the trial types
+for Indx_B = 1:2
+    for Indx_Ch = 1:TotChannels
+        ProbBurst_Stim(:, :, Indx_Ch, Indx_B, :)= ...
+            removeBlankParticipants(squeeze(ProbBurst_Stim(:, :, Indx_Ch, Indx_B, :)));
+    end
+end
+
+% remove low sdTheta participants for obvious reasons
+ProbBurst_Stim(~Participants, :, :) = nan;
+
+%  z-score
+[zProbBurst_Stim, zGenProbBurst] = ...
+    zscoreTimecourse(ProbBurst_Stim, GenProbBurst, 4);
+% zProbBurst_Stim = ProbBurst_Stim;
+% zGenProbBurst = GenProbBurst;
+
+%%% reduce to windows
+Windows_Stim = [-1.5 0;  0 0.3; .3, 1.5]; % time windows to aggregate info
+nWindows = size(Windows_Stim, 1);
+
+wProbBurst_Stim = nan(numel(Participants), 3, TotChannels, 2, nWindows);
+for Indx_P = 1:numel(Participants)
+    for Indx_TT = 1:3
+        for Indx_B = 1:2
+            wProbBurst_Stim(Indx_P, Indx_TT, :, Indx_B, :) = ...
+                reduxProbEvent(squeeze(zProbBurst_Stim(Indx_P, Indx_TT, :, Indx_B, :)),...
+                t_window, Windows_Stim);
+        end
+    end
+end
 
 
 %% plot theta and alpha
@@ -54,11 +91,13 @@ for Indx_B = 1:2
 
         % stim windows
         for Indx_W = 1:nWindows
-            Data = squeeze(zProbBurst_Stim(:, Types(Indx_TT), :, Indx_B, Indx_W));
+            Data = squeeze(wProbBurst_Stim(:, Types(Indx_TT), :, Indx_B, Indx_W));
             Baseline = squeeze(zGenProbBurst(:, :, Indx_B));
 
             subfigure(Space, miniGrid, [Indx_TT, Indx_W], [], false, '', PlotProps);
             Stats = topoDiff(Baseline, Data, Chanlocs, CLims, StatsP, PlotProps);
+% plotTopoplot(mean(Baseline, 1, 'omitnan'), [], Chanlocs, [], 'zvalues', 'Linear', PlotProps)
+% colorbar
             colorbar off
 
             W= WindowTitles{Indx_W};
