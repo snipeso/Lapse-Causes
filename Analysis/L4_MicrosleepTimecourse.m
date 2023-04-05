@@ -1,5 +1,5 @@
-% gets the data showing the probability of eyesclosed over time for both
-% lapses and other types of responses
+% gets the data showing the probability of eyesclosed over time for each
+% trial outcome type. 
 
 clear
 clc
@@ -16,6 +16,7 @@ Paths = P.Paths;
 Task = P.Labels.Task;
 Parameters = P.Parameters;
 
+TrialWindow = Parameters.Timecourse.Window;
 StartTime = Parameters.Timecourse.Start;
 EndTime = Parameters.Timecourse.End;
 fs = Parameters.fs;
@@ -36,7 +37,7 @@ SesionBlockLabels = fieldnames(SessionBlocks);
 load(fullfile(Paths.Pool, 'Tasks', [Task, '_AllTrials.mat']), 'Trials')
 Q = quantile(Trials.Radius, Parameters.Radius);
 
-t = linspace(StartTime, EndTime, fs*(EndTime-StartTime));
+t = linspace(TrialWindow(1), TrialWindow(2), fs*(TrialWindow(2)-TrialWindow(1)));
 
 for Indx_SB = 1:numel(SessionBlockLabels)
 
@@ -77,7 +78,7 @@ for Indx_SB = 1:numel(SessionBlockLabels)
 
             % cut out each trial, pool together
             [Trials_Stim, Trials_Resp] = ...
-                chopTrials(EyeClosed, Trials, CurrentTrials, StartTime, EndTime, fs);
+                chopTrials(EyeClosed, Trials(CurrentTrials, :), TrialWindow, fs);
 
             % pool sessions
             AllTrials_Stim = cat(1, AllTrials_Stim, Trials_Stim);

@@ -11,8 +11,7 @@ P.Parameters.MinTots = 10;
 P.Parameters.MinTypes = 5; % minimum number of trials for a given type for some sub-analyses
 P.Parameters.MinNanProportion = 0.5;
 
-P.Parameters.Timecourse.Start = -2;
-P.Parameters.Timecourse.End = 2;
+P.Parameters.Timecourse.Window = [-2, 2];
 
 P.Parameters.EC_ConfidenceThreshold = 0.5;
 P.Parameters.fs = 250;
