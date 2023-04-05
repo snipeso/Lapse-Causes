@@ -13,45 +13,49 @@ P = analysisParameters();
 Participants = P.Participants;
 SessionBlocks = P.SessionBlocks;
 Paths = P.Paths;
-Task = P.Labels.Task;
+Task = P.Labels.Task; % LAT
 Parameters = P.Parameters;
 
 TrialWindow = Parameters.Timecourse.Window;
-StartTime = Parameters.Timecourse.Start;
-EndTime = Parameters.Timecourse.End;
 fs = Parameters.fs;
-ConfidenceThreshold = Parameters.EC_ConfidenceThreshold;
-minTrials = Parameters.MinTypes;
-minNanProportion = Parameters.MinNanProportion; % any more nans than this in a given trial is grounds to exclude the trial
+ConfidenceThreshold = Parameters.EC_ConfidenceThreshold; % value of pupil confidence to mark eye-closures
+minTrials = Parameters.MinTypes; % there needs to be at least these many trials for all trial types to include that participant.
+minNanProportion = Parameters.MinNanProportion; % any more nans in time than this in a given trial is grounds to exclude the trial
+Max_Radius_Quantile = Parameters.Radius; % only use trials that are relatively close to fixation point
 
+nTrialTypes = 3; 
+
+% locations
 Pool = fullfile(Paths.Pool, 'Eyes'); % place to save matrices so they can be plotted in next script
-
 MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
 
 SesionBlockLabels = fieldnames(SessionBlocks);
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% get data
 
 % load trial information
 load(fullfile(Paths.Pool, 'Tasks', [Task, '_AllTrials.mat']), 'Trials')
-Q = quantile(Trials.Radius, Parameters.Radius);
+Max_Radius = quantile(Trials.Radius, Max_Radius_Quantile);
 
-t = linspace(TrialWindow(1), TrialWindow(2), fs*(TrialWindow(2)-TrialWindow(1)));
+t = linspace(TrialWindow(1), TrialWindow(2), fs*(TrialWindow(2)-TrialWindow(1))); % time vector
 
-for Indx_SB = 1:numel(SessionBlockLabels)
+
+for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
     Sessions = P.SessionBlocks.(SesionBlockLabels{Indx_SB});
 
-    ProbMicrosleep_Stim = nan(numel(Participants), 3, numel(t));
+    ProbMicrosleep_Stim = nan(numel(Participants), nTrialTypes, numel(t)); % P x TT x t matrix with final probabilities
     ProbMicrosleep_Resp = ProbMicrosleep_Stim;
-    GenProbMicrosleep = zeros(numel(Participants), 2); % point with EC, and total points
+    GenProbMicrosleep = nan(numel(Participants), 1); % get general probability of a microsleep for a given session block (to control for when z-scoring)
 
     for Indx_P = 1:numel(Participants)
 
-        AllTrials_Stim = [];
+        AllTrials_Stim = []; % need to pool all trials across sessions in a given session block
         AllTrials_Resp = [];
         AllTrials_Table = table();
+        MicrosleepTimepoints = [0 0]; % total number of points in recording that is a microsleep; total number of points, pooling sessions
 
         for Indx_S = 1:numel(Sessions)
 
@@ -86,9 +90,8 @@ for Indx_SB = 1:numel(SessionBlockLabels)
 
             % save info
             AllTrials_Table = cat(1, AllTrials_Table, Trials(CurrentTrials, :));
-            GenProbMicrosleep(Indx_P, 1) =  GenProbMicrosleep(Indx_P, 1) + nnz(EyeClosed==1);
-            GenProbMicrosleep(Indx_P, 2) =  GenProbMicrosleep(Indx_P, 2) + nnz(EyeClosed==1 | EyeClosed==0);
 
+            MicrosleepTimepoints = tallyTimepoints(MicrosleepTimepoints, EyeClosed);
         end
 
         if isempty(AllTrials_Table)
@@ -100,7 +103,7 @@ for Indx_SB = 1:numel(SessionBlockLabels)
         for Indx_TT = 1:3
 
             % choose trials
-            Trial_Indexes = AllTrials_Table.Type==Indx_TT & AllTrials_Table.Radius < Q; % & Closest;
+            Trial_Indexes = AllTrials_Table.Type==Indx_TT & AllTrials_Table.Radius < Max_Radius; % & Closest;
             nTrials = nnz(Trial_Indexes);
             TypeTrials_Stim = AllTrials_Stim(Trial_Indexes, :);
 
@@ -116,6 +119,8 @@ for Indx_SB = 1:numel(SessionBlockLabels)
             end
         end
 
+        % calculate general probability of a microsleep
+GenProbMicrosleep(Indx_P) = Tally(1)./Tally(2);
         disp(['Finished ', Participants{Indx_P}])
     end
 
@@ -129,9 +134,6 @@ for Indx_SB = 1:numel(SessionBlockLabels)
             ProbMicrosleep_Resp(Indx_P, :, :) = nan;
         end
     end
-
-    % get general probability as fraction
-    GenProbMicrosleep = GenProbMicrosleep(:, 1)./GenProbMicrosleep(:, 2);
 
     %%% save
     save(fullfile(Pool, ['ProbMicrosleep_', SesionBlockLabels{Indx_SB}, '.mat']), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't', 'GenProbMicrosleep')
