@@ -1,5 +1,5 @@
 % gets the data showing the probability of eyesclosed over time for each
-% trial outcome type. 
+% trial outcome type.
 
 clear
 clc
@@ -23,7 +23,7 @@ minTrials = Parameters.MinTypes; % there needs to be at least these many trials 
 minNanProportion = Parameters.MinNanProportion; % any more nans in time than this in a given trial is grounds to exclude the trial
 Max_Radius_Quantile = Parameters.Radius; % only use trials that are relatively close to fixation point
 
-nTrialTypes = 3; 
+nTrialTypes = 3;
 
 % locations
 Pool = fullfile(Paths.Pool, 'Eyes'); % place to save matrices so they can be plotted in next script
@@ -62,7 +62,6 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
             % trial info for current recording
             CurrentTrials = find(strcmp(Trials.Participant, Participants{Indx_P}) & ...
                 strcmp(Trials.Session, Sessions{Indx_S}));
-            nTrials = nnz(CurrentTrials);
 
             % load in eye data
             Eyes = loadMATFile(MicrosleepPath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
@@ -77,8 +76,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
             % get 1s and 0s of whether eyes were open
             [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold); % not using internal microsleep identifier so that I'm flexible
-            EyeClosed = double(EyeOpen == 0); % just keep track of eyes closed
-            EyeClosed(isnan(EyeOpen)) = nan;
+            EyeClosed = flipVector(EyeOpen);
 
             % cut out each trial, pool together
             [Trials_Stim, Trials_Resp] = ...
@@ -120,7 +118,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
         end
 
         % calculate general probability of a microsleep
-GenProbMicrosleep(Indx_P) = Tally(1)./Tally(2);
+        GenProbMicrosleep(Indx_P) = Tally(1)./Tally(2);
         disp(['Finished ', Participants{Indx_P}])
     end
 
