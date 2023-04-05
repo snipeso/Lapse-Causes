@@ -7,9 +7,10 @@ function [Trials_Stim, Trials_Resp] = chopTrials(Timecourse, Trials, TrialWindow
 
 Pnts = numel((TrialWindow(1)*fs):(TrialWindow(2)*fs-1));
 nTrials = size(Trials, 1);
+nChannels = size(Timecourse, 1);
 
-Trials_Stim = nan(nTrials, Pnts);
-Trials_Resp = nan(nTrials, Pnts);
+Trials_Stim = nan(nTrials, nChannels, Pnts);
+Trials_Resp = nan(nTrials, nChannels, Pnts);
 
 for Indx_T = 1:nTrials
 
@@ -18,7 +19,7 @@ for Indx_T = 1:nTrials
     Start = StimT+TrialWindow(1)*fs;
     End = StimT+TrialWindow(2)*fs-1;
 
-    Trial = Timecourse(Start:End);
+    Trial = Timecourse(:, Start:End);
     Trials_Stim(Indx_T, :) = Trial;
 
 
@@ -32,9 +33,13 @@ for Indx_T = 1:nTrials
     Start = RespT+TrialWindow(1)*fs;
     End = RespT+TrialWindow(2)*fs-1;
 
-    Trial = Timecourse(Start:End);
+    Trial = Timecourse(:, Start:End);
     Trials_Resp(Indx_T, :) = Trial;
 end
+
+% if only 1 channel, remove extra dimention
+Trials_Stim = squeeze(Trials_Stim);
+Trials_Resp = squeeze(Trials_Resp);
 
 
 

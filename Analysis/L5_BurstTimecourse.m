@@ -35,7 +35,7 @@ EyePath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
 
 % load trial information
 load(fullfile(Paths.Pool, 'Tasks', [Task, '_AllTrials.mat']), 'Trials')
-Q = quantile(Trials.Radius, Parameters.Radius); % only look at trials within a certain radius
+Max_Radius = quantile(Trials.Radius, Parameters.Radius); % only look at trials within a certain radius
 
 t_window = linspace(StartTime, EndTime, fs*(EndTime-StartTime)); % time vector for epoched data
 
@@ -128,7 +128,7 @@ for Indx_P = 1:numel(Participants)
         for Indx_TT = 1:3
 
             % get prob of burst in stim trial
-            TT_Indexes = AllTrials_Table.Type==Indx_TT & AllTrials_Table.Radius < Q;
+            TT_Indexes = AllTrials_Table.Type==Indx_TT & AllTrials_Table.Radius < Max_Radius;
             nTrials = nnz(TT_Indexes);
             TypeTrials_Stim = squeeze(AllTrials_Stim(TT_Indexes, Indx_B, :));
 

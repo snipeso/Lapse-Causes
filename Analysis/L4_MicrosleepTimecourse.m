@@ -39,14 +39,14 @@ SessionBlockLabels = fieldnames(SessionBlocks);
 load(fullfile(Paths.Pool, 'Tasks', [Task, '_AllTrials.mat']), 'Trials')
 Max_Radius = quantile(Trials.Radius, Max_Radius_Quantile);
 
-t = linspace(TrialWindow(1), TrialWindow(2), fs*(TrialWindow(2)-TrialWindow(1))); % time vector
+t_window = linspace(TrialWindow(1), TrialWindow(2), fs*(TrialWindow(2)-TrialWindow(1))); % time vector
 
 
 for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
     Sessions = P.SessionBlocks.(SessionBlockLabels{Indx_SB});
 
-    ProbMicrosleep_Stim = nan(numel(Participants), nTrialTypes, numel(t)); % P x TT x t matrix with final probabilities
+    ProbMicrosleep_Stim = nan(numel(Participants), nTrialTypes, numel(t_window)); % P x TT x t matrix with final probabilities
     ProbMicrosleep_Resp = ProbMicrosleep_Stim;
     GenProbMicrosleep = nan(numel(Participants), 1); % get general probability of a microsleep for a given session block (to control for when z-scoring)
 
@@ -111,7 +111,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
 
     %%% save
-    save(fullfile(Pool, ['ProbMicrosleep_', SessionBlockLabels{Indx_SB}, '.mat']), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't', 'GenProbMicrosleep')
+    save(fullfile(Pool, ['ProbMicrosleep_', SessionBlockLabels{Indx_SB}, '.mat']), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't_window', 'GenProbMicrosleep')
 end
 
 
