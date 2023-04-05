@@ -19,15 +19,24 @@ Channels = P.Channels;
 StatsP = P.StatsP;
 
 SmoothFactor = 0.3; % in seconds, smooth signal to be visually pleasing
-
+CheckEyes = false; % check if person had eyes open or closed
+Closest = false; % only use closest trials
 SessionGroup = 'BL';
-TitleTag = strjoin({'Timecourse', SessionGroup}, '_');
+
+TitleTag = SessionGroup;
+if CheckEyes
+    TitleTag = [TitleTag, '_EO'];
+end
+
+if Closest
+    TitleTag = [ TitleTag, '_Close'];
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% load data
 
 %%% microsleep data
-load(fullfile(Paths.Pool, 'Eyes', ['ProbMicrosleep_', SessionGroup, '.mat']), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't_window', 'GenProbMicrosleep')
+load(fullfile(Paths.Pool, 'Eyes', ['ProbMicrosleep_', TitleTag, '.mat']), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't_window', 'GenProbMicrosleep')
 t_microsleep = t_window;
 
 % remove all data from participants missing any of the trial types
@@ -154,7 +163,7 @@ legend off
 disp(['F: N=', num2str(mode(Stats.df(:))+1)])
 
 
-saveFig(['Figure_3_', SessionGroup], Paths.PaperResults, PlotProps)
+saveFig(['Figure_3_', TitleTag], Paths.PaperResults, PlotProps)
 
 
 
@@ -219,7 +228,7 @@ ylabel('Probability of alpha (z-scored)')
 legend off
 
 
-saveFig(['Figure_3-1_', SessionGroup], Paths.PaperResults, PlotProps)
+saveFig(['Figure_3-1_', TitleTag], Paths.PaperResults, PlotProps)
 
 
 %%

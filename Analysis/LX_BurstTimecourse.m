@@ -25,6 +25,9 @@ nTrialTypes = 3;
 TotChannels = 123;
 TotBands = 2;
 
+CheckEyes = false; % check if person had eyes open or closed
+Closest = false; % only use closest trials
+
 % locations
 Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plotted in next script
 BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts_AllChannels', Task);
@@ -37,12 +40,24 @@ SessionBlockLabels = fieldnames(SessionBlocks);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% get data
 
+
 % load trial information
 load(fullfile(Paths.Pool, 'Tasks', [Task, '_AllTrials.mat']), 'Trials')
-Max_Radius = quantile(Trials.Radius, Max_Radius_Quantile);
 
 t_window = linspace(TrialWindow(1), TrialWindow(2), fs*(TrialWindow(2)-TrialWindow(1))); % time vector
 
+
+TitleTag = '';
+if CheckEyes
+    TitleTag = [TitleTag, '_EO'];
+end
+
+if Closest
+    TitleTag = [ TitleTag, '_Close'];
+    Max_Radius = quantile(Trials.Radius, Max_Radius_Quantile);
+else
+    Max_Radius = max(Trials.Radius);
+end
 
 for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
@@ -91,25 +106,31 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
             Channels = [Bursts.Channel];
 
 
-            %%% load in eye data
-            Eyes = loadMATFile(EyePath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
-            if isempty(Eyes); continue; end
+            %%% control for bursts during eyes-closed
+            if CheckEyes
 
-            if isnan(Eyes.DQ) || Eyes.DQ == 0
-                warning(['Bad data in ', Participants{Indx_P}, Sessions{Indx_S}])
-                continue
+                % load in eye data
+                Eyes = loadMATFile(EyePath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
+                if isempty(Eyes); continue; end
+
+                if isnan(Eyes.DQ) || Eyes.DQ == 0
+                    warning(['Bad data in ', Participants{Indx_P}, Sessions{Indx_S}])
+                    continue
+                end
+
+                Eye = round(Eyes.DQ); % which eye
+
+                % get 1s and 0s of whether eyes were open
+                [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold);
+
+
+                % exclude EC timepoints
+                t_valid = t_valid & EyeOpen==1;
             end
-
-            Eye = round(Eyes.DQ); % which eye
-
-            % get 1s and 0s of whether eyes were open
-            [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold);
-
 
             %%% Gather trials
 
-            % exclude EC timepoints
-            t_valid = t_valid & EyeOpen==1;
+
 
             % get matrix of when there are bursts for each channel
             BurstTimes = bursts2timeChannels(Bursts, Bands, TotChannels, t_valid); % Ch x B x t
@@ -179,7 +200,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
     GenProbBurst_Pooled = GenProbBurst_Pooled(:, :, 1)./GenProbBurst_Pooled(:, :, 2); % P x B x t
 
     %%% save
-    save(fullfile(Pool, ['ProbBurst_', SessionBlockLabels{Indx_SB}, '.mat']), ...
+    save(fullfile(Pool, ['ProbBurst_', SessionBlockLabels{Indx_SB}, TitleTag, '.mat']), ...
         'ProbBurst_Stim', 'ProbBurst_Resp', ...
         'ProbBurst_Stim_Pooled', 'ProbBurst_Resp_Pooled', ...
         't_window', 'Chanlocs', 'GenProbBurst', 'GenProbBurst_Pooled')

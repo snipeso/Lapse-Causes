@@ -17,13 +17,23 @@ StatsP = P.StatsP;
 Bands = P.Bands;
 BandLabels = fieldnames(Bands);
 
+CheckEyes = false; % check if person had eyes open or closed
+Closest = false; % only use closest trials
 SessionGroup = 'BL';
-TitleTag = strjoin({'Timecourse', 'Topoplot', SessionGroup}, '_');
 
 Pool = fullfile(Paths.Pool, 'EEG');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% load data
+
+TitleTag = SessionGroup;
+if CheckEyes
+    TitleTag = [TitleTag, '_EO'];
+end
+
+if Closest
+    TitleTag = [ TitleTag, '_Close'];
+end
 
 load(fullfile(Paths.Pool, 'EEG', ['ProbBurst_', SessionGroup, '.mat']), 'ProbBurst_Stim', ...
     't_window',  'GenProbBurst', 'Chanlocs')
@@ -90,8 +100,8 @@ for Indx_B = 1:2
 
             subfigure(Space, miniGrid, [Indx_TT, Indx_W], [], false, '', PlotProps);
             Stats = topoDiff(Baseline, Data, Chanlocs, CLims, StatsP, PlotProps);
-% plotTopoplot(mean(Baseline, 1, 'omitnan'), [], Chanlocs, [], 'zvalues', 'Linear', PlotProps)
-% colorbar
+            % plotTopoplot(mean(Baseline, 1, 'omitnan'), [], Chanlocs, [], 'zvalues', 'Linear', PlotProps)
+            % colorbar
             colorbar off
 
             W= WindowTitles{Indx_W};
@@ -123,4 +133,4 @@ for Indx_B = 1:2
     A.Position(2) = A.Position(2)-.1;
     plotColorbar('Divergent', CLims, [BandLabels{Indx_B}, ' t-values'], PlotProps)
 end
-saveFig(['Figure_4_', SessionGroup], Paths.PaperResults, PlotProps)
+saveFig(['Figure_4_', TitleTag], Paths.PaperResults, PlotProps)
