@@ -2,7 +2,7 @@ function Tally = tallyTimepoints(Tally, Vector)
 % Tally is a Ch x 2 array, the first column indicating the total number of
 % 1s, and the second column the total number of points in Vector.
 
-TotChannels = size(Tally, 1);
+TotChannels = size(Vector, 1);
 
 for Indx_Ch = 1:TotChannels
     Tally(Indx_Ch, 1) = Tally(Indx_Ch, 1) + nnz(Vector(Indx_Ch, :)==1);
