@@ -1,4 +1,5 @@
-% script to get info on bursts occurance in time
+% script to see how much the bursts occupy EEG (to see if reasonable to
+% assume they also cause the lapses)
 
 clear
 clc

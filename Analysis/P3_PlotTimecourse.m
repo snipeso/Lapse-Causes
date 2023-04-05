@@ -10,6 +10,7 @@ close all
 P = analysisParameters();
 
 Participants = P.Participants_sdTheta; % only look at participants with substantial sdTheta
+Participants = ones(1, 18);
 Sessions = P.Sessions;
 TallyLabels = P.Labels.Tally;
 Paths = P.Paths;
