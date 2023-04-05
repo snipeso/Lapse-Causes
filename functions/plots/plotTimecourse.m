@@ -1,15 +1,18 @@
-function plotTimecourse(t, Data, Baseline, YLims, LineLabels, Text, Colors, StatsP, PlotProps)
+function Stats = plotTimecourse(t, Data, Baseline, YLims, LineLabels, Text, Colors, StatsP, PlotProps)
 % plots the timecourse locked to stimulus onset.
 % Data is a P x TT x t matrix
 
+    BadParticipants = any(all(isnan(Data(:, [1, 2], :)), 3), 2);
+   Data(BadParticipants, :, :) = nan;
+
 %%% Get stats
 if ~isempty(StatsP) && ~isempty(Baseline)
+       Baseline(BadParticipants) = nan;
     Data1 = repmat(Baseline, 1, size(Data, 3)); % baseline
     Data2 = Data;
     Stats = pairedttest(Data1, Data2, StatsP);
     Stats.timepoints = t;
     Stats.lines = LineLabels;
-    Dims = size(Data1);
 
     Sig = Stats.p_fdr <= StatsP.Alpha;
 else

@@ -106,9 +106,6 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
         disp(['Finished ', Participants{Indx_P}])
     end
 
-    % remove all data from participants missing any of the trial types
-    [ProbMicrosleep_Stim, ProbMicrosleep_Resp] = removeBlankParticipants(ProbMicrosleep_Stim, ProbMicrosleep_Resp);
-
 
     %%% save
     save(fullfile(Pool, ['ProbMicrosleep_', SessionBlockLabels{Indx_SB}, '.mat']), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't_window', 'GenProbMicrosleep')
