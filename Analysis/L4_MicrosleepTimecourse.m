@@ -78,7 +78,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
             [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold); % not using internal microsleep identifier so that I'm flexible
             EyeClosed = flipVector(EyeOpen);
 
-            % cut out each trial, pool together
+            % cut out each trial
             [Trials_Stim, Trials_Resp] = ...
                 chopTrials(EyeClosed, Trials(CurrentTrials, :), TrialWindow, fs);
 
@@ -102,21 +102,16 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
 
         % calculate general probability of a microsleep
-        GenProbMicrosleep(Indx_P) = Tally(1)./Tally(2);
+        GenProbMicrosleep(Indx_P) =  MicrosleepTimepoints(1)./MicrosleepTimepoints(2);
         disp(['Finished ', Participants{Indx_P}])
     end
 
     % remove all data from participants missing any of the trial types
-    for Indx_P = 1:numel(Participants)
-        if any(isnan(ProbMicrosleep_Stim(Indx_P, :, :)), 'all')
-            ProbMicrosleep_Stim(Indx_P, :, :) = nan;
-        end
+    [ProbMicrosleep_Stim, ProbMicrosleep_Resp] = removeBlankParticipants(ProbMicrosleep_Stim, ProbMicrosleep_Resp);
 
-        if any(isnan(ProbMicrosleep_Resp(Indx_P, 2:3, :)), 'all')
-            ProbMicrosleep_Resp(Indx_P, :, :) = nan;
-        end
-    end
 
     %%% save
     save(fullfile(Pool, ['ProbMicrosleep_', SesionBlockLabels{Indx_SB}, '.mat']), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't', 'GenProbMicrosleep')
 end
+
+
