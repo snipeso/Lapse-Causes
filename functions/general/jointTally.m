@@ -28,7 +28,6 @@ for Indx_P = 1:numel(Participants)
             ismember(Trials.Session, Sessions(SessionGroups{Indx_S})) & TrialSubset;
 
         % check if the dataset was missing, so should output NaN
-        disp(nnz(CurrentTrials))
         if nnz(CurrentTrials)==0
             continue
         end

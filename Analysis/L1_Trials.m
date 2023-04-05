@@ -1,4 +1,5 @@
-% associates eye /eeg info to trials
+% Gather a table of all the trials, associating burst and eye-closure
+% status for each trial.
 
 clear
 clc
@@ -8,26 +9,22 @@ close all
 %%% Parameters
 
 P = analysisParameters();
-
 Participants = P.Participants;
-% Sessions = P.Sessions;
-Sessions = P.Sessions_PVT;
-
 Paths = P.Paths;
-Task = P.Labels.Task;
-Task = 'PVT';
-Bands = P.Bands;
 Triggers = P.Triggers;
 Parameters = P.Parameters;
-
+Bands = P.Bands;
 fs = Parameters.fs; % sampling rate of data
 
-Pool = fullfile(Paths.Pool, 'Tasks'); % place to save matrices so they can be plotted in next script
+Task = 'LAT'; % could be LAT or PVT
 
-Window = [0 .5]; % window in which to see if there is an event or not
-MinWindow = 1/3; % minimum proportion of window needed to have event to count
+% Trial parameters
+Window = [0 .3]; % window in which to see if there is an event or not
+MinWindow = 1/2; % minimum proportion of window needed to have event to count
 
 % locations
+Pool = fullfile(Paths.Pool, 'Tasks'); % place to save matrices so they can be plotted in next script
+
 MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
 BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
 
@@ -37,20 +34,30 @@ DataQuality_Table = readtable(DataQaulity_Filepath);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % Load trials
 
+if strcmp(Task, 'PVT')
+    Sessions = P.Sessions_PVT;
+    BurstPath = MicrosleepPath; % because I don't have burst path
+else
+    Sessions = P.Sessions;
+end
+
 %%% get trial information
 Trials = loadBehavior(Participants, Sessions, Task, Paths, false);
 
 % get time of stim and response trigger
-Trials = getTrialLatencies(Trials, MicrosleepPath, Triggers);
+Trials = getTrialLatencies(Trials, BurstPath, Triggers);
 
 % get eyes-closed info
 Trials = getECtrials(Trials, MicrosleepPath, DataQuality_Table, fs, Window, MinWindow);
 
-% get burst info
-% Trials = getBurstTrials(Trials, BurstPath, Bands, fs, Window, MinWindow);
+% get burst info (have not calculated for PVT)
+if strcmp(Task, 'LAT')
+    Trials = getBurstTrials(Trials, BurstPath, Bands, fs, Window, MinWindow);
 
-% Trials.isRight = double(Trials.isRight);
+    Trials.isRight = double(Trials.isRight);
+end
 
+% save
 save(fullfile(Pool, [Task, '_AllTrials.mat']), 'Trials')
 
 disp('Done!')

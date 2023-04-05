@@ -6,7 +6,7 @@ Diff = Data2-Data1;
 
 [p,sig, stats] = signrank(Diff);
 
-Stats.zval = stats.zval;
+% Stats.zval = stats.zval;
 Stats.p = p;
 Stats.sig = sig;
 Stats.df = numel(Diff) - nnz(isnan(Diff)) - 1;

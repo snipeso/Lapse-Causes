@@ -53,26 +53,9 @@ for Indx_P = 1:numel(Participants)
 
         % determine based on amount of eyes closed time, whether classify
         % trial as EC
-        for Indx_T = 1:nTrials
-            StimT = round(fs*Trials.StimTime(CurrentTrials(Indx_T)));
-            Start = StimT+Window(1)*fs;
-            End = StimT+Window(2)*fs;
-            wPnts = numel(Start:End); % window points
-
-            for Indx_B = 1:numel(BandLabels)
-
-                BT = BurstTime(Indx_B, Start:End);
-
-                if nnz(isnan(BT))/wPnts > MinWindow
-                    Trials.(BandLabels{Indx_B})(CurrentTrials(Indx_T)) = nan;
-
-                elseif nnz(BT==1)/wPnts >= MinWindow
-                    Trials.(BandLabels{Indx_B})(CurrentTrials(Indx_T)) = 1;
-
-                else
-                    Trials.(BandLabels{Indx_B})(CurrentTrials(Indx_T)) = 0;
-                end
-            end
+        for Indx_B = 1:numel(BandLabels)
+            Trials = getTrialStatus(Trials, BandLabels{Indx_B}, CurrentTrials,  ...
+                BurstTime(Indx_B, :), fs, Window, MinWindow);
         end
     end
     disp(['Finished ', Participants{Indx_P}])

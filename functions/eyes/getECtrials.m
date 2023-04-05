@@ -25,7 +25,6 @@ for Indx_P = 1:numel(Participants)
         % trial info for current recording
         CurrentTrials = find(strcmp(Trials.Participant, Participants{Indx_P}) & ...
             strcmp(Trials.Session, Sessions{Indx_S}));
-        nTrials = nnz(CurrentTrials);
 
         % load in eye data
         Eyes = loadMATFile(EyePath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
@@ -49,28 +48,15 @@ for Indx_P = 1:numel(Participants)
             continue
         end
 
+        % get eyes closed (have to flip eye)
         [EyeOpen, ~] = classifyEye(Eye, fs, ConfidenceThreshold);
+        EyeClosed = flipVector(EyeOpen);
+
 
         % determine based on amount of eyes closed time, whether classify
         % trial as EC
-        for Indx_T = 1:nTrials
-            StimT = round(fs*Trials.StimTime(CurrentTrials(Indx_T)));
-            Start = StimT+Window(1)*fs;
-            End = StimT+Window(2)*fs;
-
-            Pnts = numel(Start:End);
-            EO = EyeOpen(Start:End);
-
-            if nnz(isnan(EO))/Pnts > MinWindow
-                Trials.EC(CurrentTrials(Indx_T)) = nan;
-
-            elseif nnz(EO==0)/Pnts > MinWindow
-                Trials.EC(CurrentTrials(Indx_T)) = 1;
-
-            else
-                Trials.EC(CurrentTrials(Indx_T)) = 0;
-            end
-        end
+        Trials = getTrialStatus(Trials, 'EC', CurrentTrials, EyeClosed, fs, Window, MinWindow);
+       
     end
 
     disp(['Finished ', Participants{Indx_P}])
