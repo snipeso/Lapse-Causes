@@ -1,4 +1,4 @@
-function BurstTimes = classifyBursts(Bursts, Bands, TotChannels, t_valid)
+function BurstTimes = bursts2timeChannels(Bursts, Bands, TotChannels, t_valid)
 % BurstTimes is a Ch x B x t matrix of 1s, zeros, and nans for when there
 % are bursts.
 

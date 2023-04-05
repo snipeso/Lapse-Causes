@@ -22,6 +22,7 @@ Max_Radius_Quantile = Parameters.Radius; % only use trials that are relatively c
 
 nTrialTypes = 3;
 TotChannels = 123;
+TotBands = 2;
 
 % locations
 Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plotted in next script
@@ -46,17 +47,22 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
     Sessions = P.SessionBlocks.(SessionBlockLabels{Indx_SB});
 
-    ProbMicrosleep_Stim = nan(numel(Participants), nTrialTypes, TotChannels, 2, numel(t_window)); % P x TT x Ch x B x t matrix with final probabilities
+    ProbMicrosleep_Stim = nan(numel(Participants), nTrialTypes, TotChannels, TotBands, numel(t_window)); % P x TT x Ch x B x t matrix with final probabilities
     ProbMicrosleep_Resp = ProbMicrosleep_Stim;
-    GenProbBurst = zeros(numel(Participants), 123, numel(BandLabels), 2); % get general probability of a burst for a given session block (to control for when z-scoring)
-    GenProbBurst_Pooled = zeros(numel(Participants), numel(BandLabels), 2); % once collapsed all channels
+
+    ProbMicrosleep_Stim_Pooled = nan(numel(Participants), nTrialTypes, TotBands, numel(t_window)); % P x TT x B x t matrix with final probabilities
+    ProbMicrosleep_Resp_Pooled = ProbMicrosleep_Stim_Pooled;
+
+    GenProbBurst = zeros(numel(Participants), TotChannels, TotBands, 2); % get general probability of a burst for a given session block (to control for when z-scoring)
+    GenProbBurst_Pooled = zeros(numel(Participants), TotBands, 2); % once collapsed all channels
 
     for Indx_P = 1:numel(Participants)
 
-        AllTrials_Stim = []; % need to pool all trials across sessions in a given session block
+        AllTrials_Stim = []; % Tr x Ch x B x t; need to pool all trials across sessions in a given session block
         AllTrials_Resp = [];
         AllTrials_Table = table();
-        MicrosleepTimepoints = [0 0]; % total number of points in recording that is a microsleep; total number of points, pooling sessions
+        MicrosleepTimepoints = zeros(TotChannels, TotBands, 2); % total number of points in recording that is a microsleep; total number of points, pooling sessions
+        MicrosleepTimepoints_Pooled = zeros(TotBands, 2);
 
         for Indx_S = 1:numel(Sessions)
 
@@ -105,19 +111,61 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
             t_valid = t_valid & EyeOpen==1;
 
             % get matrix of when there are bursts for each channel
-            BurstTimes = classifyBursts(Bursts, Bands, TotChannels, t_valid);
+            BurstTimes = bursts2timeChannels(Bursts, Bands, TotChannels, t_valid);
 
             % chop matrix into trials
-            Trials_Stim = nan(TotChannels, TotBands, nnz(CurrentTrials), numel(t_window));
+            Trials_Stim = nan(nnz(CurrentTrials), TotChannels, numel(t_window), TotBands);
             Trials_Resp = Trials_Stim;
 
             for Indx_B = 1:TotBands
-                [Trials_Stim(:, Indx_B, :, :), Trials_Resp(:, Indx_B, :, :)] = ...
+                [Trials_Stim(:, :, :, Indx_B), Trials_Resp(:, :, :, Indx_B)] = ...
                     chopTrials(squeeze(BurstTimes(:, Indx_B, :)), ...
-                    Trials(CurrentTrials, :), TrialWindow, fs);
+                    Trials(CurrentTrials, :), TrialWindow, fs); % Tr x Ch x t x B
             end
+
+            % pool sessions
+            AllTrials_Stim = cat(1, AllTrials_Stim, permute(Trials_Stim, [1 2 4 3])); % Tr x Ch x B x t
+            AllTrials_Resp = cat(1, AllTrials_Resp, permute(Trials_Resp, [1 2 4 3]));
+
+            % save info
+            AllTrials_Table = cat(1, AllTrials_Table, Trials(CurrentTrials, :)); % important that it be in the same order!
+
+            MicrosleepTimepoints = tallyTimepoints(MicrosleepTimepoints, BurstTimes);
+
+            BurstTimes_Pooled = any(BurstTimes==1); % collapse channels, see if there's a burst anywhere
+            BurstTimes_Pooled(~(t_valid)) = nan; % ignore timepoints with bad data
+            MicrosleepTimepoints_Pooled = tallyTimepoints(MicrosleepTimepoints_Pooled, BurstTimes_Pooled);
         end
 
+        if isempty(AllTrials_Table)
+            warning('empty table')
+            continue
+        end
+
+        %%% get probability of burst for each trial type
+        for Indx_B = 1:TotBands
+
+            % for each channel
+            for Indx_Ch = 1:TotChannels
+
+                [ProbMicrosleep_Stim(Indx_P, :, Indx_Ch, Indx_B, :), ...
+                    ProbMicrosleep_Resp(Indx_P, :, Indx_Ch, Indx_B, :)] = ...
+                    getProbTrialType(AllTrials_Stim(:, Indx_Ch, Indx_B, :), ...
+                    AllTrials_Resp(:, Indx_Ch, Indx_B, :), AllTrials_Table, ...
+                    minNanProportion, minTrials);
+
+            end
+
+            % pooled
+            AllStim = poolTrials(squeeze(AllTrials_Stim(:, :, Indx_B, :)));
+            AllResp = poolTrials(squeeze(AllTrials_Resp(:, :, Indx_B, :)));
+
+            [ProbMicrosleep_Stim_Pooled(Indx_P, :, Indx_B, :), ...
+                ProbMicrosleep_Resp_Pooled(Indx_P, :, Indx_B, :)] = ...
+                getProbTrialType(AllStim, AllResp, AllTrials_Table, ...
+                minNanProportion, minTrials);
+
+        end
 
 
     end

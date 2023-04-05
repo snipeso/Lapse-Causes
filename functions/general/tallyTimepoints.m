@@ -1,6 +1,11 @@
 function Tally = tallyTimepoints(Tally, Vector)
-% Tally is a 1 x 2 array, the first number indicating the total number of
-% 1s, and the second number the total number of points in Vector.
+% Tally is a Ch x 2 array, the first column indicating the total number of
+% 1s, and the second column the total number of points in Vector.
 
-Tally(1) = Tally(1) + nnz(Vector==1);
-Tally(2) = Tally(2) + nnz(Vector==1 | Vector==0); % like this so it doesn't count nans
+TotChannels = size(Tally, 1);
+
+for Indx_Ch = 1:TotChannels
+    Tally(Indx_Ch, 1) = Tally(Indx_Ch, 1) + nnz(Vector(Indx_Ch, :)==1);
+    Tally(Indx_Ch, 2) = Tally(Indx_Ch, 2) + nnz(Vector(Indx_Ch, :)==1 | ...
+        Vector(Indx_Ch, :)==0); % like this so it doesn't count nans
+end
