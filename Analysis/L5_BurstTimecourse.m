@@ -10,7 +10,8 @@ close all
 P = analysisParameters();
 
 Participants = P.Participants;
-Sessions = P.SessionBlocks.SD;
+SessionGroup = 'BL';
+Sessions = P.SessionBlocks.(SessionGroup);
 Paths = P.Paths;
 Task = P.Labels.Task;
 Parameters = P.Parameters;
@@ -33,7 +34,7 @@ EyePath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
 %%% get data
 
 % load trial information
-load(fullfile(Paths.Pool, 'Tasks', 'AllTrials.mat'), 'Trials')
+load(fullfile(Paths.Pool, 'Tasks', [Task, '_AllTrials.mat']), 'Trials')
 Q = quantile(Trials.Radius, Parameters.Radius); % only look at trials within a certain radius
 
 t_window = linspace(StartTime, EndTime, fs*(EndTime-StartTime)); % time vector for epoched data
@@ -167,4 +168,4 @@ GenProbBurst = GenProbBurst(:, :, 1)./GenProbBurst(:, :, 2);
 
 %%% save
 t = t_window;
-save(fullfile(Pool, 'ProbBurst.mat'), 'ProbBurst_Stim', 'ProbBurst_Resp', 't', 'GenProbBurst')
+save(fullfile(Pool, ['ProbBurst_', SessionGroup, '.mat']), 'ProbBurst_Stim', 'ProbBurst_Resp', 't', 'GenProbBurst')

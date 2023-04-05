@@ -10,6 +10,7 @@ close all
 P = analysisParameters();
 
 Participants = P.Participants_sdTheta;
+Participants = ones(1, 18);
 TallyLabels = P.Labels.Tally;
 Paths = P.Paths;
 StatsP = P.StatsP;

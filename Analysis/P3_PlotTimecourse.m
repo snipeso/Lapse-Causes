@@ -2,7 +2,7 @@
 
 clear
 clc
-close all
+% close all
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
@@ -20,14 +20,14 @@ StatsP = P.StatsP;
 
 SmoothFactor = 0.3; % in seconds, smooth signal to be visually pleasing
 
-TitleTag = strjoin({'Timecourse'}, '_');
-
+SessionGroup = 'BL';
+TitleTag = strjoin({'Timecourse', SessionGroup}, '_');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% load data
 
 %%% microsleep data
-load(fullfile(Paths.Pool, 'Eyes', 'ProbMicrosleep.mat'), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't', 'GenProbMicrosleep')
+load(fullfile(Paths.Pool, 'Eyes', ['ProbMicrosleep_', SessionGroup, '.mat']), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't', 'GenProbMicrosleep')
 t_microsleep = t;
 
 % remove low sdTheta participants for fairness of comparison
@@ -45,7 +45,7 @@ sProbMicrosleep_Resp = smoothFreqs(ProbMicrosleep_Resp, t_microsleep, 'last', Sm
 
 
 %%% burst data
-load(fullfile(Paths.Pool, 'EEG', 'ProbBurst.mat'), 'ProbBurst_Stim', 'ProbBurst_Resp', 't',  'GenProbBurst')
+load(fullfile(Paths.Pool, 'EEG', ['ProbBurst_', SessionGroup, '.mat']), 'ProbBurst_Stim', 'ProbBurst_Resp', 't',  'GenProbBurst')
 t_burst = t;
 
 % remove low sdTheta participants for obvious reasons
