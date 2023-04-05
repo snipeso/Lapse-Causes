@@ -22,6 +22,10 @@ Task = 'LAT'; % could be LAT or PVT
 Window = [0 .3]; % window in which to see if there is an event or not
 MinWindow = 1/2; % minimum proportion of window needed to have event to count
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Load trials
+
 % locations
 Pool = fullfile(Paths.Pool, 'Tasks'); % place to save matrices so they can be plotted in next script
 
@@ -30,9 +34,6 @@ BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
 
 DataQaulity_Filepath = fullfile(Paths.Core, 'QualityCheck', 'Theta Bursts', ['DataQuality_', Task, '_Pupils.csv']); % file indicating manually identified eye
 DataQuality_Table = readtable(DataQaulity_Filepath);
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% Load trials
 
 if strcmp(Task, 'PVT')
     Sessions = P.Sessions_PVT;
