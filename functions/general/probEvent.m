@@ -1,7 +1,6 @@
 function Prob = probEvent(AllTrials, minNanProportion, minTrials)
 % gets the probability of an event.
 % AllTrials is a Trials x time matrix of ones and zeros and nans
-% TrialIndexes is a T x 1 of ones and zeros
 % MinTrials is the minimum number of trials to keep, otherwise Prob is just
 % nans.
 % minNanProportion is the minimum timepoints that can be nans before
@@ -22,7 +21,6 @@ if isempty(AllTrials) || nTrials < minTrials || any(nTrials - Nans < minTrials) 
     Prob = nan(1, Pnts);
     return
 end
-
 
 % average trials
 nTrialsPoints = sum(AllTrials==1)+sum(AllTrials==0); % for each timepoint

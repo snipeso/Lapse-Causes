@@ -61,7 +61,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
             % trial info for current recording
             CurrentTrials = find(strcmp(Trials.Participant, Participants{Indx_P}) & ...
-                strcmp(Trials.Session, Sessions{Indx_S}));
+                strcmp(Trials.Session, Sessions{Indx_S}) & Trials.Radius < Max_Radius);
 
             % load in eye data
             Eyes = loadMATFile(MicrosleepPath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
@@ -87,8 +87,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
             AllTrials_Resp = cat(1, AllTrials_Resp, Trials_Resp);
 
             % save info
-            AllTrials_Table = cat(1, AllTrials_Table, Trials(CurrentTrials, :));
-
+            AllTrials_Table = cat(1, AllTrials_Table, Trials(CurrentTrials, :)); % important that it be in the same order!
             MicrosleepTimepoints = tallyTimepoints(MicrosleepTimepoints, EyeClosed);
         end
 
@@ -97,25 +96,10 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
             continue
         end
 
-        %%% get probability of microsleep (in time) for each trial type
-        for Indx_TT = 1:3
+        % get probability of microsleep (in time) for each trial type
+        [ProbMicrosleep_Stim(Indx_P, :, :), ProbMicrosleep_Resp(Indx_P, :, :)] = ...
+            getProbTrialType(AllTrials_Stim, AllTrials_Resp, AllTrials_Table, minNanProportion, minTrials);
 
-            % choose trials
-            Trial_Indexes = AllTrials_Table.Type==Indx_TT & AllTrials_Table.Radius < Max_Radius; % & Closest;
-            nTrials = nnz(Trial_Indexes);
-            TypeTrials_Stim = AllTrials_Stim(Trial_Indexes, :);
-
-            ProbMicrosleep_Stim(Indx_P, Indx_TT, :) = ...
-                probEvent(TypeTrials_Stim, minNanProportion, minTrials);
-
-
-            % response trials
-            if Indx_TT > 1
-                TypeTrials_Resp = AllTrials_Resp(Trial_Indexes, :);
-                ProbMicrosleep_Resp(Indx_P, Indx_TT, :) = ...
-                    probEvent(TypeTrials_Resp, minNanProportion, minTrials);
-            end
-        end
 
         % calculate general probability of a microsleep
         GenProbMicrosleep(Indx_P) = Tally(1)./Tally(2);
