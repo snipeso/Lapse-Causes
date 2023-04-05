@@ -29,7 +29,7 @@ nTrialTypes = 3;
 Pool = fullfile(Paths.Pool, 'Eyes'); % place to save matrices so they can be plotted in next script
 MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
 
-SesionBlockLabels = fieldnames(SessionBlocks);
+SessionBlockLabels = fieldnames(SessionBlocks);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -44,7 +44,7 @@ t = linspace(TrialWindow(1), TrialWindow(2), fs*(TrialWindow(2)-TrialWindow(1)))
 
 for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
-    Sessions = P.SessionBlocks.(SesionBlockLabels{Indx_SB});
+    Sessions = P.SessionBlocks.(SessionBlockLabels{Indx_SB});
 
     ProbMicrosleep_Stim = nan(numel(Participants), nTrialTypes, numel(t)); % P x TT x t matrix with final probabilities
     ProbMicrosleep_Resp = ProbMicrosleep_Stim;
@@ -111,7 +111,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
 
     %%% save
-    save(fullfile(Pool, ['ProbMicrosleep_', SesionBlockLabels{Indx_SB}, '.mat']), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't', 'GenProbMicrosleep')
+    save(fullfile(Pool, ['ProbMicrosleep_', SessionBlockLabels{Indx_SB}, '.mat']), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't', 'GenProbMicrosleep')
 end
 
 

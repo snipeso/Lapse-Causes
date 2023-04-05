@@ -2,7 +2,7 @@ function [ProbStim, ProbResp] = removeBlankParticipants(ProbStim, ProbResp)
 % ProbStim is a P x TT x t matrix, and if any of the TT are nans (so no
 % trials for a given type), it removes all data for that participant
 
-for Indx_P = 1:numel(Participants)
+for Indx_P = 1:size(ProbStim, 1)
     if any(isnan(ProbStim(Indx_P, :, :)), 'all')
         ProbStim(Indx_P, :, :) = nan;
     end
