@@ -44,11 +44,11 @@ Max_Radius = quantile(Trials.Radius, Max_Radius_Quantile);
 t_window = linspace(TrialWindow(1), TrialWindow(2), fs*(TrialWindow(2)-TrialWindow(1))); % time vector
 
 
-
 for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
     Sessions = P.SessionBlocks.(SessionBlockLabels{Indx_SB});
 
+    % set up blanks
     ProbBurst_Stim = nan(numel(Participants), nTrialTypes, TotChannels, TotBands, numel(t_window)); % P x TT x Ch x B x t matrix with final probabilities
     ProbBurst_Resp = ProbBurst_Stim;
 

@@ -17,19 +17,13 @@ StatsP = P.StatsP;
 Bands = P.Bands;
 BandLabels = fieldnames(Bands);
 
-SessionGroup = 'SD';
+SessionGroup = 'BL';
 TitleTag = strjoin({'Timecourse', 'Topoplot', SessionGroup}, '_');
 
 Pool = fullfile(Paths.Pool, 'EEG');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% load data
-
-% load(fullfile(Pool, ['ProbBurst_Channels_', SessionGroup, '_zscored.mat']), 'zProbBurst_Stim', ...
-%     'zGenProbBurst', 'Chanlocs')
-%
-% zProbBurst_Stim(~Participants, :, :, :, :) = nan; % P x TT x Ch x B x W
-% nWindows = size(zProbBurst_Stim, 5);
 
 load(fullfile(Paths.Pool, 'EEG', ['ProbBurst_', SessionGroup, '.mat']), 'ProbBurst_Stim', ...
     't_window',  'GenProbBurst', 'Chanlocs')
