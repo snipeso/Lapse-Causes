@@ -290,7 +290,7 @@ for Indx_B = 1:2
 
     Prob = squeeze(mean(zProbBurst_Resp(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
 
-    Stats = pairedttest(GenProbBurst_Pooled(:,Indx_B), Prob(:, 3), StatsP);
+    Stats = pairedttest(GenProbBurst(:,Indx_B), Prob(:, 3), StatsP);
     dispStat(Stats, [1 1], 'Post resp:');
 
 

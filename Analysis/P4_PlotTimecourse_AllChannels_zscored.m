@@ -19,11 +19,10 @@ BandLabels = fieldnames(Bands);
 
 CheckEyes = false; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionGroup = 'SD';
+SessionGroup = 'BL';
 
 % Windows_Stim = [-1 0;  .3 .75; 1 1.5]; % time windows to aggregate info
-Windows_Stim = [-1 0;  0 .3; .3 1; 2, 4];
-% Windows_Stim = [0 .3];
+Windows_Stim = [-1 0;  0 .3; .3 1; 1 2];
 
 
 Pool = fullfile(Paths.Pool, 'EEG');
@@ -68,11 +67,11 @@ wProbBurst_Stim = nan(numel(Participants), 3, TotChannels, 2, nWindows);
 for Indx_P = 1:numel(Participants)
     for Indx_TT = 1:3
         for Indx_Ch = 1:TotChannels
-        for Indx_B = 1:2
-            wProbBurst_Stim(Indx_P, Indx_TT, Indx_Ch, Indx_B, :) = ...
-                reduxProbEvent(squeeze(zProbBurst_Stim(Indx_P, Indx_TT, Indx_Ch, Indx_B, :))',...
-                t_window, Windows_Stim);
-        end
+            for Indx_B = 1:2
+                wProbBurst_Stim(Indx_P, Indx_TT, Indx_Ch, Indx_B, :) = ...
+                    reduxProbEvent(squeeze(zProbBurst_Stim(Indx_P, Indx_TT, Indx_Ch, Indx_B, :))',...
+                    t_window, Windows_Stim);
+            end
         end
     end
 end
@@ -82,16 +81,21 @@ end
 clc
 
 PlotProps = P.Manuscript;
+PlotProps.Figure.Padding = 15;
+
 PlotProps.Colorbar.Location = 'north';
 Grid = [5 2];
 miniGrid = [3 nWindows];
 CLims = [-8 8];
 
 Types = [3 2 1];
-WindowTitles = {["Pre", "[-1, 0]"], ["Stimulus", "[0, 0.3]"], ["Response", "[.3 1]"], ["Post", "[2 4"]};
+WindowTitles = {["Pre", "[-1, 0]"], ["Stimulus", "[0, 0.3]"], ["Response", "[.3 1]"], ["Post", "[2 4]"]};
 
-figure('Units','centimeters', 'Position',[0 0 PlotProps.Figure.Width*1.3, PlotProps.Figure.Height*.4])
+figure('Units','centimeters', 'Position',[0 0 PlotProps.Figure.Width*1.3, PlotProps.Figure.Height*.43])
 for Indx_B = 1:2
+
+    PlotProps.Axes.xPadding = 20;
+    PlotProps.Axes.yPadding = 20;
 
     Space = subaxis(Grid, [4 Indx_B], [4 1], PlotProps.Indexes.Letters{Indx_B}, PlotProps);
     Space(2) = Space(2)-Space(4)*.05;
@@ -101,6 +105,9 @@ for Indx_B = 1:2
         for Indx_W = 1:nWindows
             Data = squeeze(wProbBurst_Stim(:, Types(Indx_TT), :, Indx_B, Indx_W));
             Baseline = squeeze(zGenProbBurst(:, :, Indx_B));
+
+            PlotProps.Axes.xPadding = 5;
+            PlotProps.Axes.yPadding = 5;
 
             subfigure(Space, miniGrid, [Indx_TT, Indx_W], [], false, '', PlotProps);
             Stats = topoDiff(Baseline, Data, Chanlocs, CLims, StatsP, PlotProps);
@@ -131,6 +138,9 @@ for Indx_B = 1:2
         end
 
     end
+
+    PlotProps.Axes.xPadding = 20;
+    PlotProps.Axes.yPadding = 20;
 
     A = subfigure([], Grid, [5, Indx_B], [], false, '', PlotProps);
     A.Position(4) = A.Position(4)*2;
