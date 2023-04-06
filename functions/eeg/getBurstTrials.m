@@ -17,9 +17,10 @@ Participants = unique(Trials.Participant);
 Sessions = unique(Trials.Session);
 BandLabels = fieldnames(Bands);
 
-% set up new column
 for Indx_B = 1:numel(BandLabels)
-    Trials.(BandLabels{Indx_B}) = nan(size(Trials, 1), 1);
+    for Indx_W = 1:size(Windows, 1)
+        Trials.([BandLabels{Indx_B},  '_', WindowColumns{Indx_W}]) = nan(size(Trials, 1), 1);
+    end
 end
 
 for Indx_P = 1:numel(Participants)

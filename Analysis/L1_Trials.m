@@ -16,7 +16,7 @@ Parameters = P.Parameters;
 Bands = P.Bands;
 fs = Parameters.fs; % sampling rate of data
 
-Task = 'LAT'; % could be LAT or PVT
+Task = 'PVT'; % could be LAT or PVT
 
 % Trial parameters
 Windows = [-2 0; 0 .3]; % window in which to see if there is an event or not

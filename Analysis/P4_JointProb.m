@@ -1,4 +1,4 @@
-% script to 
+% script to
 
 clear
 clc
@@ -31,21 +31,20 @@ Q = quantile(Trials.Radius, [1/3 2/3]);
 Closest = Trials.Radius<=Q(1);
 Furthest = Trials.Radius>=Q(2);
 
-EO = Trials.EC == 0;
-EC = Trials.EC == 1;
+EC_Stim = Trials.EC_Stimulus == 1;
 
 BL = ismember(Trials.Session, SessionBlocks.BL);
 SD = ismember(Trials.Session, SessionBlocks.SD);
 
-Theta = Trials.Theta == 1;
-NotTheta = Trials.Theta == 0;
-Alpha = Trials.Alpha == 1;
-NotAlpha = Trials.Alpha == 0;
+Theta_Stim = Trials.Theta_Stimulus == 1;
+NotTheta_Stim = Trials.Theta_Stimulus == 0;
+Alpha_Stim = Trials.Alpha_Stimulus == 1;
+NotAlpha_Stim = Trials.Alpha_Stimulus == 0;
 
 Lapses = Trials.Type==1;
 
-NanEyes = isnan(Trials.EC);
-NanEEG = isnan(Trials.Theta);
+NanEyes = isnan(Trials.EC_Stimulus);
+NanEEG = isnan(Trials.Theta_Stimulus);
 
 
 %% Gather data
@@ -55,7 +54,7 @@ AllStats = struct();
 xLabels = {};
 
 % eye status (compare furthest and closest trials with EO)
-ProbType = squeeze(jointTally(Trials, [], EC, Lapses, Participants, ...
+ProbType = squeeze(jointTally(Trials, [], EC_Stim, Lapses, Participants, ...
     Sessions, SessionGroups));
 AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
 xLabels = cat(1, xLabels, 'Eyes closed');
@@ -76,65 +75,116 @@ xLabels = cat(1, xLabels, 'Sleep Deprivation');
 
 
 % alpha
-ProbType = squeeze(jointTally(Trials, SD & (Alpha | NotAlpha) & ~NanEEG & ~NanEyes, Alpha, Lapses, Participants, ...
+ProbType = squeeze(jointTally(Trials, SD & (Alpha_Stim | NotAlpha_Stim) & ~NanEEG, Alpha_Stim, Lapses, Participants, ...
     Sessions, SessionGroups));
 AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'Alpha burst');
+xLabels = cat(1, xLabels, 'Alpha burst (SD)');
 
 % theta
-ProbType = squeeze(jointTally(Trials, SD & (Theta | NotTheta) & ~NanEEG & ~NanEyes, Theta, Lapses, Participants, ...
+ProbType = squeeze(jointTally(Trials, SD & (Theta_Stim | NotTheta_Stim) & ~NanEEG, Theta_Stim, Lapses, Participants, ...
     Sessions, SessionGroups));
 AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'Theta burst');
+xLabels = cat(1, xLabels, 'Theta burst (SD)');
 
+
+%%% gather pre-stim probs
+
+% SD pre-EC
+
+% BL pre-EC
+
+
+Bands = {'EC', 'Alpha', 'Theta'};
+SessBlocks = {'SD', 'BL'};
+
+Correct = Trials.Type==3;
+for Indx_B = 1:numel(Bands)
+
+    for Indx_SB = 1:numel(SessBlocks)
+
+        Column = [Bands{Indx_B}, '_Pre'];
+        Pre = Trials.(Column) == 1;
+        Not_Pre =  Trials.(Column) == 0;
+
+        if strcmp(SessBlocks{Indx_SB}, 'SD')
+            Sess = SD;
+        else
+            Sess = BL;
+        end
+
+        ProbType = squeeze(jointTally(Trials, Sess & (Pre | Not_Pre) & ~NanEEG, Pre, Correct, Participants, ...
+            Sessions, SessionGroups));
+        AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
+        xLabels = cat(1, xLabels, [Bands{Indx_B}, ' ', SessBlocks{Indx_SB}]);
+
+    end
+end
 
 [sig, ~, ~, p_fdr] = fdr_bh([AllStats.p], StatsP.Alpha, StatsP.ttest.dep);
-
+% sig = [AllStats.p]<.05;
 
 
 %% plot effect sizes
 
-figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*1.2, PlotProps.Figure.Height*.15])
-Grid = [1 1];
+figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*1.2, PlotProps.Figure.Height*.3])
+Grid = [2 1];
 
 Legend = {};
-Colors = [getColors(1, '', 'blue');
-    getColors(1, '', 'green');
-    getColors(1, '', 'purple');  
-    getColors(1, '', 'yellow');
-        getColors(1, '', 'red');
+Colors = [getColors(1, '', 'blue'); % EC
+    getColors(1, '', 'green'); % distance
+    getColors(1, '', 'purple'); % sleep deprivation
+    getColors(1, '', 'yellow'); % alpha
+    getColors(1, '', 'red'); % theta
+getColors([1 2], '', 'blue');
+  getColors([1 2], '', 'yellow'); % alpha
+    getColors([1 2], '', 'red'); % theta
+
     ];
+
+RangeA = 1:5; % for figure A
+RangeB = 6:11; % for Figure B
 
 Orientation = 'vertical';
 PlotProps = P.Manuscript;
 PlotProps.Axes.xPadding = 40;
 PlotProps.Axes.yPadding = 30;
-% subfigure([], Grid, [1 1], [], true, '', PlotProps);
-plotUFO([AllStats.prcnt]', [AllStats.prcntIQ]', xLabels, Legend, Colors, Orientation, PlotProps)
+
+
+% subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
+subplot(2, 1, 1)
+plotUFO([AllStats(RangeA).prcnt]', [AllStats(RangeA).prcntIQ]', xLabels(RangeA), ...
+    Legend, Colors(RangeA, :), Orientation, PlotProps)
 
 
 % plot significance
-Means = [AllStats.prcnt];
-Means(~sig) = nan;
+Means = [AllStats(RangeA).prcnt];
+Means(~sig(RangeA)) = nan;
+
 scatter(numel(Means):-1:1, Means, 'filled', 'w');
 set(gca,'YAxisLocation','right', 'XAxisLocation', 'bottom');
 ylabel("Increased probability of a lapse due to ...")
 ylim([-.1 1])
+
+% subfigure([], Grid, [2 1], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
+subplot(2, 1, 2)
+plotUFO([AllStats(RangeB).prcnt]', [AllStats(RangeB).prcntIQ]', xLabels(RangeB), ...
+    Legend, Colors(RangeB, :), Orientation, PlotProps)
+
+% plot significance
+Means = [AllStats(RangeB).prcnt];
+Means(~sig(RangeB)) = nan;
+scatter(numel(Means):-1:1, Means, 'filled', 'w');
+set(gca,'YAxisLocation','right', 'XAxisLocation', 'bottom');
+ylabel("Increased probability of a correct response when anticipated by ...")
+ylim([-.1 1])
+
+
 saveFig('Figure_5', Paths.PaperResults, PlotProps)
 
 
 
 
-% TODO:
-% GET DF!!
-% might be better to always make the 100% relative to the occurances of
-% interest (EC, theta), rather than the smallest?
 
-
-
-
-
-%% functions
 
 
 

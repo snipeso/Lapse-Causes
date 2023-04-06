@@ -16,8 +16,9 @@ ConfidenceThreshold = 0.5; % threshold for deciding if eyes were open or closed
 Participants = unique(Trials.Participant);
 Sessions = unique(Trials.Session);
 
-% create column
-Trials.EC = nan(size(Trials, 1), 1);
+for Indx_W = 1:size(Windows, 1) % important ot make sure blank recordings are nans
+    Trials.(['EC',  '_', WindowColumns{Indx_W}]) = nan(size(Trials, 1), 1);
+end
 
 for Indx_P = 1:numel(Participants)
     for Indx_S = 1:numel(Sessions)
