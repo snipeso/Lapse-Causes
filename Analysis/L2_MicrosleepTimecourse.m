@@ -24,13 +24,15 @@ minNanProportion = Parameters.MinNanProportion; % any more nans in time than thi
 Max_Radius_Quantile = Parameters.Radius; % only use trials that are relatively close to fixation point
 
 nTrialTypes = 3;
-Closest = false; % only use closest trials
+Closest = true; % only use closest trials
 
 % locations
 Pool = fullfile(Paths.Pool, 'Eyes'); % place to save matrices so they can be plotted in next script
-MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
+if ~exist(Pool, 'dir')
+    mkdir(Pool)
+end
 
-SessionBlockLabels = fieldnames(SessionBlocks);
+MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -50,6 +52,7 @@ else
     Max_Radius = max(Trials.Radius);
 end
 
+SessionBlockLabels = fieldnames(SessionBlocks);
 for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
     Sessions = P.SessionBlocks.(SessionBlockLabels{Indx_SB});
@@ -114,9 +117,8 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
         disp(['Finished ', Participants{Indx_P}])
     end
 
-
     %%% save
-    save(fullfile(Pool, ['ProbMicrosleep_', SessionBlockLabels{Indx_SB}, '.mat']), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't_window', 'GenProbMicrosleep')
+    save(fullfile(Pool, ['ProbMicrosleep_', SessionBlockLabels{Indx_SB}, TitleTag, '.mat']), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't_window', 'GenProbMicrosleep')
 end
 
 

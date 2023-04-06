@@ -31,6 +31,10 @@ Closest = false; % only use closest trials
 
 % locations
 Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plotted in next script
+if ~exist(Pool, 'dir')
+    mkdir(Pool)
+end
+
 BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts_AllChannels', Task);
 WholeBurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task); % needed for valid t
 EyePath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
