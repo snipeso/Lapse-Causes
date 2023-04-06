@@ -36,7 +36,7 @@ end
 %%% load data
 
 %%% microsleep data
-load(fullfile(Paths.Pool, 'Eyes', ['ProbMicrosleep_', TitleTag, '.mat']), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't_window', 'GenProbMicrosleep')
+load(fullfile(Paths.Pool, 'Eyes', ['ProbMicrosleep_', SessionGroup, '.mat']), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't_window', 'GenProbMicrosleep')
 t_microsleep = t_window;
 
 % remove all data from participants missing any of the trial types
@@ -57,7 +57,7 @@ sProbMicrosleep_Resp = smoothFreqs(ProbMicrosleep_Resp, t_microsleep, 'last', Sm
 
 
 %%% burst data
-load(fullfile(Paths.Pool, 'EEG', ['ProbBurst_', SessionGroup, '.mat']), 'ProbBurst_Stim_Pooled', 'ProbBurst_Resp_Pooled', 't_window',  'GenProbBurst_Pooled')
+load(fullfile(Paths.Pool, 'EEG', ['ProbBurst_', TitleTag, '.mat']), 'ProbBurst_Stim_Pooled', 'ProbBurst_Resp_Pooled', 't_window',  'GenProbBurst_Pooled')
 t_burst = t_window;
 
 % remove all data from participants missing any of the trial types

@@ -7,6 +7,12 @@ function Prob = reduxProbEvent(ProbEvent, t, Windows)
 nWindows = size(Windows, 1);
 nChannels = size(ProbEvent, 1);
 
+Dims = size(ProbEvent);
+if numel(Dims)>2
+    error('Matrix too big for reduxProbEvent')
+end
+
+
 Prob = nan(nChannels, nWindows);
 
 for Indx_Ch = 1:nChannels

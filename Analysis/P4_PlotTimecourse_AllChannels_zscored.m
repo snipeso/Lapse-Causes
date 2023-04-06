@@ -21,6 +21,10 @@ CheckEyes = false; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 SessionGroup = 'BL';
 
+Windows_Stim = [-1 0;  .3 .75; 1 1.5]; % time windows to aggregate info
+% Windows_Stim = [0 .3];
+
+
 Pool = fullfile(Paths.Pool, 'EEG');
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -35,9 +39,8 @@ if Closest
     TitleTag = [ TitleTag, '_Close'];
 end
 
-load(fullfile(Paths.Pool, 'EEG', ['ProbBurst_', SessionGroup, '.mat']), 'ProbBurst_Stim', ...
-    't_window',  'GenProbBurst', 'Chanlocs')
-t_burst = t_window;
+load(fullfile(Paths.Pool, 'EEG', ['ProbBurst_', TitleTag, '.mat']), 'ProbBurst_Stim', ...
+    'ProbBurst_Resp', 't_window',  'GenProbBurst', 'Chanlocs')
 TotChannels = size(GenProbBurst, 2);
 
 % remove all data from participants missing any of the trial types
@@ -49,7 +52,7 @@ for Indx_B = 1:2
 end
 
 % remove low sdTheta participants for obvious reasons
-ProbBurst_Stim(~Participants, :, :) = nan;
+ProbBurst_Stim(~Participants, :, :, :, :) = nan;
 
 %  z-score
 [zProbBurst_Stim, zGenProbBurst] = ...
@@ -58,20 +61,20 @@ ProbBurst_Stim(~Participants, :, :) = nan;
 % zGenProbBurst = GenProbBurst;
 
 %%% reduce to windows
-Windows_Stim = [-1.5 0;  0 0.3; .3, 1.5]; % time windows to aggregate info
 nWindows = size(Windows_Stim, 1);
 
 wProbBurst_Stim = nan(numel(Participants), 3, TotChannels, 2, nWindows);
 for Indx_P = 1:numel(Participants)
     for Indx_TT = 1:3
+        for Indx_Ch = 1:TotChannels
         for Indx_B = 1:2
-            wProbBurst_Stim(Indx_P, Indx_TT, :, Indx_B, :) = ...
-                reduxProbEvent(squeeze(zProbBurst_Stim(Indx_P, Indx_TT, :, Indx_B, :)),...
+            wProbBurst_Stim(Indx_P, Indx_TT, Indx_Ch, Indx_B, :) = ...
+                reduxProbEvent(squeeze(zProbBurst_Stim(Indx_P, Indx_TT, Indx_Ch, Indx_B, :))',...
                 t_window, Windows_Stim);
+        end
         end
     end
 end
-
 
 %% plot theta and alpha
 
@@ -84,7 +87,7 @@ miniGrid = [3 3];
 CLims = [-8 8];
 
 Types = [3 2 1];
-WindowTitles = {["Pre", "[-1.5, 0]"], ["Stimulus", "[0, 0.25]"], ["Response", "[.25 1]"]};
+WindowTitles = {["Pre", "[-1, 0]"], ["Stimulus", "[0, 0.3]"], ["Response", "[.3 1]"]};
 
 figure('Units','centimeters', 'Position',[0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.45])
 for Indx_B = 1:2
