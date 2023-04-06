@@ -1,3 +1,4 @@
+% script to 
 
 clear
 clc
@@ -10,7 +11,6 @@ Bands = P.Bands;
 BandLabels = fieldnames(Bands)';
 PlotProps = P.Manuscript;
 Participants = P.Participants;
-BadParticipants = not(P.Participants_sdTheta)';
 TitleTag = 'ES';
 MinTots = P.Parameters.MinTots; % minimum total of trials for that participant to be considered
 
@@ -55,13 +55,13 @@ AllStats = struct();
 xLabels = {};
 
 % eye status (compare furthest and closest trials with EO)
-ProbType = squeeze(jointTally(Trials, SD & ~Furthest & ~NanEyes, EC, Lapses, Participants, ...
+ProbType = squeeze(jointTally(Trials, [], EC, Lapses, Participants, ...
     Sessions, SessionGroups));
 AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
 xLabels = cat(1, xLabels, 'Eyes closed');
 
 % radius
-ProbType = squeeze(jointTally(Trials, EO & (Furthest | Closest) & ~NanEyes, Furthest==1, Lapses, Participants, ...
+ProbType = squeeze(jointTally(Trials, (Furthest | Closest), Furthest==1, Lapses, Participants, ...
     Sessions, SessionGroups));
 AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
 xLabels = cat(1, xLabels, 'Distance');
@@ -71,38 +71,21 @@ xLabels = cat(1, xLabels, 'Distance');
 ProbType = squeeze(jointTally(Trials, [], SD, Lapses, Participants, ...
     Sessions, SessionGroups));
 AllStats = catStruct(AllStats, getProbStats(ProbType,  Plot));
-xLabels = cat(1, xLabels, 'Sleep Dep');
-
-ProbType = squeeze(jointTally(Trials, ~Furthest & EO & ~NanEyes, SD, Lapses, Participants, ...
-    Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'Sleep Dep (EO, close)');
+xLabels = cat(1, xLabels, 'Sleep Deprivation');
 
 
-% visual hemifield
-ProbType = squeeze(jointTally(Trials, SD & Furthest & EO & ~NanEyes, Trials.isRight==1, Lapses, Participants, ...
-    Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'R Hemifield (EO, far)');
-
-ProbType = squeeze(jointTally(Trials, SD, Trials.isRight==1, Lapses, Participants, ...
-    Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'R Hemifield');
-
-
-% theta
-ProbType = squeeze(jointTally(Trials, SD & ~Furthest & (Theta | NotTheta) & EO & ~NanEEG & ~NanEyes, Theta, Lapses, Participants, ...
-    Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'Theta');
 
 % alpha
-ProbType = squeeze(jointTally(Trials, SD & ~Furthest & (Alpha | NotAlpha) & EO & ~NanEEG & ~NanEyes, Alpha, Lapses, Participants, ...
+ProbType = squeeze(jointTally(Trials, SD & (Alpha | NotAlpha) & ~NanEEG & ~NanEyes, Alpha, Lapses, Participants, ...
     Sessions, SessionGroups));
 AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'Alpha');
+xLabels = cat(1, xLabels, 'Alpha burst');
 
+% theta
+ProbType = squeeze(jointTally(Trials, SD & (Theta | NotTheta) & ~NanEEG & ~NanEyes, Theta, Lapses, Participants, ...
+    Sessions, SessionGroups));
+AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
+xLabels = cat(1, xLabels, 'Theta burst');
 
 
 [sig, ~, ~, p_fdr] = fdr_bh([AllStats.p], StatsP.Alpha, StatsP.ttest.dep);
@@ -111,18 +94,15 @@ xLabels = cat(1, xLabels, 'Alpha');
 
 %% plot effect sizes
 
-figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*1.2, PlotProps.Figure.Height*.2])
+figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*1.2, PlotProps.Figure.Height*.15])
 Grid = [1 1];
 
 Legend = {};
 Colors = [getColors(1, '', 'blue');
     getColors(1, '', 'green');
     getColors(1, '', 'purple');  
-     getColors(1, '', 'pink');  
-    .4, .4, .4;
-    .8 .8 .8;
-    getColors(1, '', 'red');
     getColors(1, '', 'yellow');
+        getColors(1, '', 'red');
     ];
 
 Orientation = 'vertical';
@@ -139,7 +119,7 @@ Means(~sig) = nan;
 scatter(numel(Means):-1:1, Means, 'filled', 'w');
 set(gca,'YAxisLocation','right', 'XAxisLocation', 'bottom');
 ylabel("Increased probability of a lapse due to ...")
-ylim([-40 100])
+ylim([-.1 1])
 saveFig('Figure_5', Paths.PaperResults, PlotProps)
 
 

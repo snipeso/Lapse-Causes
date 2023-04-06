@@ -14,13 +14,13 @@ ExpectedJointProb = Prob1.*Prob2;
 % Stats = pairedttest(ExpectedJointProb, ActualJointProb, StatsP);
 Stats = pairedWilcoxon(ExpectedJointProb, ActualJointProb);
 
-% quantify the difference as a percentage from the possible values, with 0%
-% being entirely the expected joint probability, and 100% being completely
-% dependent (and -100% completely anti-correlated)
+% quantify the difference as a percentage from the possible values, with 0
+% being entirely the expected joint probability, and 1 being completely
+% dependent (and -1 completely anti-correlated)
 
 % MinProb =  min(ProbType(:, [1 2]), [], 2);
 MinProb =  ProbType(:, 1);
-Prcnt = 100*(ProbType(:, 3)-ExpectedJointProb)./(MinProb-ExpectedJointProb);
+Prcnt = (ProbType(:, 3)-ExpectedJointProb)./(MinProb-ExpectedJointProb);
 
 Stats.prcnt = mean(Prcnt, 'omitnan');
 Stats.prcntIQ = quantile(Prcnt, [.25 .75])';
