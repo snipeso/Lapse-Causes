@@ -66,7 +66,7 @@ for Indx_P = 1:numel(Participants)
             Eye = round(Eyes.DQ); % which eye
             [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold);
             EyeClosed = flipVector(EyeOpen);
-            EyeClosed = EyeClosed & ValidTime;
+            EyeClosed = EyeClosed==1 & ValidTime;
 
             % save overall EC time
             TimeSpent(Indx_P, Indx_SB, 3) = ...
@@ -81,7 +81,7 @@ for Indx_P = 1:numel(Participants)
             for Indx_B = 1:numel(BandLabels)
                 Band = Bands.(BandLabels{Indx_B});
                 BurstTime = bursts2time(Bursts(BurstFreqs>=Band(1) & BurstFreqs<Band(2)), Pnts);
-                BurstTime = BurstTime & ValidTime; % only consider bursts during task
+                BurstTime = BurstTime==1 & ValidTime; % only consider bursts during task
 
                 % save overall burst time
                 TimeSpent(Indx_P, Indx_SB, Indx_B) = ...
