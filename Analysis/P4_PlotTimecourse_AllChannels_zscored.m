@@ -21,7 +21,8 @@ CheckEyes = false; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 SessionGroup = 'BL';
 
-Windows_Stim = [-1 0;  .3 .75; 1 1.5]; % time windows to aggregate info
+% Windows_Stim = [-1 0;  .3 .75; 1 1.5]; % time windows to aggregate info
+Windows_Stim = [-1 0;  0 .3; .3 1];
 % Windows_Stim = [0 .3];
 
 
