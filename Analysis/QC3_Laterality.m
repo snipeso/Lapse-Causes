@@ -1,10 +1,5 @@
 % Script to get left vs right topography of theta and alpha
 
-
-clear
-clc
-close all
-
 clear
 clc
 close all
@@ -46,7 +41,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
     Sessions = P.SessionBlocks.(SessionBlockLabels{Indx_SB});
 
     % set up blanks
-    ProbBurst = zeros(numel(Participants), 2, TotChannels, TotBands, 2); % P x H x Ch x B x t matrix with final probabilities
+    ProbBurst = zeros(numel(Participants), 2, TotChannels, TotBands, 2); % P x H x Ch x B x 2 matrix with final probabilities
 
     for Indx_P = 1:numel(Participants)
         for Indx_S = 1:numel(Sessions)
@@ -98,7 +93,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
     %%% save
     save(fullfile(Pool, ['Laterality_', SessionBlockLabels{Indx_SB}, '.mat']), ...
-        'ProbBurst', 't_window', 'Chanlocs')
+        'ProbBurst', 'Chanlocs')
 end
 
 
