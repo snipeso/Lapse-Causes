@@ -16,10 +16,11 @@ Parameters = P.Parameters;
 Bands = P.Bands;
 fs = Parameters.fs; % sampling rate of data
 
-Task = 'PVT'; % could be LAT or PVT
+Task = 'LAT'; % could be LAT or PVT
 
 % Trial parameters
-Window = [0 .3]; % window in which to see if there is an event or not
+Windows = [-2 0; 0 .3]; % window in which to see if there is an event or not
+WindowColumns = {'Pre', 'Stimulus'};
 MinWindow = 1/2; % minimum proportion of window needed to have event to count
 
 
@@ -52,11 +53,11 @@ Trials = loadBehavior(Participants, Sessions, Task, Paths, false);
 Trials = getTrialLatencies(Trials, BurstPath, Triggers);
 
 % get eyes-closed info
-Trials = getECtrials(Trials, MicrosleepPath, DataQuality_Table, fs, Window, MinWindow);
+Trials = getECtrials(Trials, MicrosleepPath, DataQuality_Table, fs, Windows, MinWindow, WindowColumns);
 
 % get burst info (have not calculated for PVT)
 if strcmp(Task, 'LAT')
-    Trials = getBurstTrials(Trials, BurstPath, Bands, fs, Window, MinWindow);
+    Trials = getBurstTrials(Trials, BurstPath, Bands, fs, Windows, MinWindow, WindowColumns);
 
     Trials.isRight = double(Trials.isRight);
 end

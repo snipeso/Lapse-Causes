@@ -1,4 +1,4 @@
-function Trials = getECtrials(Trials, EyePath, DataQuality_Table, fs, Window, MinWindow)
+function Trials = getECtrials(Trials, EyePath, DataQuality_Table, fs, Windows, MinWindow, WindowColumns)
 % using EEG and microsleep data with same sampling rate, identifies which
 % trials had more than MinWindow eyes closed.
 % Trials is table of trials
@@ -55,7 +55,7 @@ for Indx_P = 1:numel(Participants)
 
         % determine based on amount of eyes closed time, whether classify
         % trial as EC
-        Trials = getTrialStatus(Trials, 'EC', CurrentTrials, EyeClosed, fs, Window, MinWindow);
+        Trials = getTrialStatus(Trials, 'EC', CurrentTrials, EyeClosed, fs, Windows, MinWindow, WindowColumns);
        
     end
 

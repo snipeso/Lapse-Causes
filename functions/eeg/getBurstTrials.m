@@ -1,4 +1,4 @@
-function Trials = getBurstTrials(Trials, BurstPath, Bands, fs, Window, MinWindow)
+function Trials = getBurstTrials(Trials, BurstPath, Bands, fs, Windows, MinWindow, WindowColumns)
 % using EEG and burst data with same sampling rate, identifies which
 % trials had more than MinWindow eyes closed.
 % Trials is table of trials.
@@ -55,7 +55,7 @@ for Indx_P = 1:numel(Participants)
         % trial as EC
         for Indx_B = 1:numel(BandLabels)
             Trials = getTrialStatus(Trials, BandLabels{Indx_B}, CurrentTrials,  ...
-                BurstTime(Indx_B, :), fs, Window, MinWindow);
+                BurstTime(Indx_B, :), fs, Windows, MinWindow, WindowColumns);
         end
     end
     disp(['Finished ', Participants{Indx_P}])
