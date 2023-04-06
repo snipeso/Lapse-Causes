@@ -15,6 +15,8 @@ Bands = P.Bands;
 Parameters = P.Parameters;
 
 TrialWindow = Parameters.Timecourse.Window;
+TrialWindow = [-2 4];
+
 fs = Parameters.fs;
 ConfidenceThreshold = Parameters.EC_ConfidenceThreshold; % value of pupil confidence to mark eye-closures
 minTrials = Parameters.MinTypes; % there needs to be at least these many trials for all trial types to include that participant.
@@ -25,7 +27,7 @@ nTrialTypes = 3;
 TotChannels = 123;
 TotBands = 2;
 
-CheckEyes = true; % check if person had eyes open or closed
+CheckEyes = false; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 
 % locations
@@ -129,8 +131,6 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
             end
 
             %%% Gather trials
-
-
 
             % get matrix of when there are bursts for each channel
             BurstTimes = bursts2timeChannels(Bursts, Bands, TotChannels, t_valid); % Ch x B x t

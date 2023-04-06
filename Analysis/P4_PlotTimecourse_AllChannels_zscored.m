@@ -19,10 +19,10 @@ BandLabels = fieldnames(Bands);
 
 CheckEyes = false; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionGroup = 'BL';
+SessionGroup = 'SD';
 
 % Windows_Stim = [-1 0;  .3 .75; 1 1.5]; % time windows to aggregate info
-Windows_Stim = [-1 0;  0 .3; .3 1];
+Windows_Stim = [-1 0;  0 .3; .3 1; 2, 4];
 % Windows_Stim = [0 .3];
 
 
@@ -84,13 +84,13 @@ clc
 PlotProps = P.Manuscript;
 PlotProps.Colorbar.Location = 'north';
 Grid = [5 2];
-miniGrid = [3 3];
+miniGrid = [3 nWindows];
 CLims = [-8 8];
 
 Types = [3 2 1];
-WindowTitles = {["Pre", "[-1, 0]"], ["Stimulus", "[0, 0.3]"], ["Response", "[.3 1]"]};
+WindowTitles = {["Pre", "[-1, 0]"], ["Stimulus", "[0, 0.3]"], ["Response", "[.3 1]"], ["Post", "[2 4"]};
 
-figure('Units','centimeters', 'Position',[0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.45])
+figure('Units','centimeters', 'Position',[0 0 PlotProps.Figure.Width*1.3, PlotProps.Figure.Height*.4])
 for Indx_B = 1:2
 
     Space = subaxis(Grid, [4 Indx_B], [4 1], PlotProps.Indexes.Letters{Indx_B}, PlotProps);
