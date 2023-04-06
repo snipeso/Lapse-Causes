@@ -9,9 +9,8 @@ close all
 
 P = analysisParameters();
 
-Participants = P.Participants_sdTheta;
-Participants = ones(1, 18);
 TallyLabels = P.Labels.Tally;
+Participants = P.Participants;
 Paths = P.Paths;
 StatsP = P.StatsP;
 Bands = P.Bands;
@@ -21,8 +20,7 @@ CheckEyes = false; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 SessionGroup = 'BL';
 
-% Windows_Stim = [-1 0;  .3 .75; 1 1.5]; % time windows to aggregate info
-Windows_Stim = [-1 0;  0 .3; .3 1; 1 2];
+Windows_Stim = [-2 0; 0 0.3; 0.3 1; 2 4];
 
 
 Pool = fullfile(Paths.Pool, 'EEG');
@@ -51,14 +49,9 @@ for Indx_B = 1:2
     end
 end
 
-% remove low sdTheta participants for obvious reasons
-ProbBurst_Stim(~Participants, :, :, :, :) = nan;
-
 %  z-score
 [zProbBurst_Stim, zGenProbBurst] = ...
     zscoreTimecourse(ProbBurst_Stim, GenProbBurst, 4);
-% zProbBurst_Stim = ProbBurst_Stim;
-% zGenProbBurst = GenProbBurst;
 
 %%% reduce to windows
 nWindows = size(Windows_Stim, 1);
@@ -89,7 +82,7 @@ miniGrid = [3 nWindows];
 CLims = [-8 8];
 
 Types = [3 2 1];
-WindowTitles = {["Pre", "[-1, 0]"], ["Stimulus", "[0, 0.3]"], ["Response", "[.3 1]"], ["Post", "[2 4]"]};
+WindowTitles = {["Pre", "[-2, 0]"], ["Stimulus", "[0, 0.3]"], ["Response", "[0.3 1]"], ["Post", "[2 4]"]};
 
 figure('Units','centimeters', 'Position',[0 0 PlotProps.Figure.Width*1.3, PlotProps.Figure.Height*.43])
 for Indx_B = 1:2

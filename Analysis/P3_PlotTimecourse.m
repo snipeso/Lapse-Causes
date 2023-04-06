@@ -8,9 +8,6 @@ close all
 %%% Parameters
 
 P = analysisParameters();
-
-Participants = P.Participants_sdTheta; % only look at participants with substantial sdTheta
-Participants = ones(1, 18);
 Sessions = P.Sessions;
 TallyLabels = P.Labels.Tally;
 Paths = P.Paths;
@@ -21,8 +18,8 @@ StatsP = P.StatsP;
 SmoothFactor = 0.3; % in seconds, smooth signal to be visually pleasing
 CheckEyes = false; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-ZScore = true;
-SessionGroup = 'BL';
+ZScore = true; % best only z-scored; when raw, it's the average prob for each individual channel 
+SessionGroup = 'SD';
 
 TitleTag = SessionGroup;
 if CheckEyes
@@ -31,21 +28,20 @@ end
 
 if Closest
     TitleTag = [TitleTag, '_Close'];
+    MicrosleepTag = '_Close';
+else
+    MicrosleepTag = '';
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% load data
 
 %%% microsleep data
-load(fullfile(Paths.Pool, 'Eyes', ['ProbMicrosleep_', SessionGroup, '.mat']), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't_window', 'GenProbMicrosleep')
+load(fullfile(Paths.Pool, 'Eyes', ['ProbMicrosleep_', SessionGroup, MicrosleepTag, '.mat']), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't_window', 'GenProbMicrosleep')
 t_microsleep = t_window;
 
 % remove all data from participants missing any of the trial types
 [ProbMicrosleep_Stim, ProbMicrosleep_Resp] = removeBlankParticipants(ProbMicrosleep_Stim, ProbMicrosleep_Resp);
-
-% remove low sdTheta participants for fairness of comparison
-ProbMicrosleep_Stim(~Participants, :, :) = nan;
-ProbMicrosleep_Resp(~Participants, :, :) = nan;
 
 % smooth and z-score data
 sProbMicrosleep_Stim = smoothFreqs(ProbMicrosleep_Stim, t_microsleep, 'last', SmoothFactor);
@@ -84,6 +80,8 @@ if ZScore
 
     TitleTag = [TitleTag, '_z-score'];
     zTag = ' (z-scored)';
+    EC_Range = [-2 5.5];
+    Range = [-2 1.5];
 else
     % microsleep data
     zProbMicrosleep_Stim = sProbMicrosleep_Stim;
@@ -96,6 +94,8 @@ else
     zGenProbBurst = GenProbBurst;
      TitleTag = [TitleTag, '_raw'];
      zTag = '';
+         EC_Range = [0 1];
+    Range = [0 1];
 end
 
 % average channels
@@ -126,12 +126,12 @@ PlotProps.Axes.xPadding = 25;
 
 Grid = [2 3];
 
-figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
+figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*1.2, PlotProps.Figure.Height*.5])
 
 %%% stimulus locked
 
 % eyeclosure
-EC_Range = [-2 5.5];
+
 subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
 Stats = plotTimecourse(t_microsleep, flip(zProbMicrosleep_Stim, 2), zGenProbMicrosleep, ...
     EC_Range, flip(TallyLabels), 'Stimulus', getColors(3), StatsP, PlotProps);
@@ -141,7 +141,6 @@ ylabel(['Probability of EC', zTag])
 disp(['A: N=', num2str(mode(Stats.df(:))+1)])
 
 % theta
-Range = [-2 1.5];
 subfigure([], Grid, [1 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
 Stats = plotTimecourse(t_burst, flip(squeeze(zProbBurst_Stim(:, :, 1, :)), 2), ...
     zGenProbBurst(:, 1), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps);

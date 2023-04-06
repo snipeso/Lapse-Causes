@@ -54,4 +54,3 @@ if ~isempty(LineLabels)
 end
 
 xlabel('Time (s)')
-axis square

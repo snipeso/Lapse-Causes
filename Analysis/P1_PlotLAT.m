@@ -11,9 +11,7 @@ clc
 P = analysisParameters();
 Participants = P.Participants;
 Paths = P.Paths;
-PlotProps = P.Manuscript;
 StatsP = P.StatsP;
-Task = 'LAT';
 
 MinTots = P.Parameters.MinTots; % minimum total of trials for that participant to be considered
 
