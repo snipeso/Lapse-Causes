@@ -26,8 +26,8 @@ nTrialTypes = 3;
 TotChannels = 123;
 TotBands = 2;
 
-CheckEyes = false; % check if person had eyes open or closed
-Closest = false; % only use closest trials
+CheckEyes = true; % check if person had eyes open or closed
+Closest = true; % only use closest trials
 
 % locations
 Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plotted in next script
@@ -101,10 +101,6 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
             % get frequency of each burst
             Bursts = meanFreq(Bursts);
-
-            Freqs = [Bursts.Frequency];
-            Channels = [Bursts.Channel];
-
 
             %%% control for bursts during eyes-closed
             if CheckEyes
