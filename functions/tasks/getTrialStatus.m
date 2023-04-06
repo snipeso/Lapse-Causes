@@ -3,6 +3,7 @@ function Trials = getTrialStatus(Trials, ColumnName, CurrentTrials, Vector, fs, 
 % Vector is nans, 1s and 0s, and vector needs to have more than MinWindow
 % to count as a 1.
 
+MinNanProportion = 0.5;
 nTrials = nnz(CurrentTrials);
 
 for Indx_T = 1:nTrials
@@ -13,7 +14,7 @@ for Indx_T = 1:nTrials
     Pnts = numel(Start:End); % uses both nans and 0s
     V = Vector(Start:End);
 
-    if nnz(isnan(V))/Pnts > 0.5 % if too much nan, then ignore
+    if nnz(isnan(V))/Pnts > MinNanProportion % if too much nan, then ignore
         Trials.(ColumnName)(CurrentTrials(Indx_T)) = nan;
 
     elseif nnz(V==1)/Pnts > MinWindow

@@ -24,6 +24,7 @@ minNanProportion = Parameters.MinNanProportion; % any more nans in time than thi
 Max_Radius_Quantile = Parameters.Radius; % only use trials that are relatively close to fixation point
 
 nTrialTypes = 3;
+Closest = false; % only use closest trials
 
 % locations
 Pool = fullfile(Paths.Pool, 'Eyes'); % place to save matrices so they can be plotted in next script
@@ -37,10 +38,17 @@ SessionBlockLabels = fieldnames(SessionBlocks);
 
 % load trial information
 load(fullfile(Paths.Pool, 'Tasks', [Task, '_AllTrials.mat']), 'Trials')
-Max_Radius = quantile(Trials.Radius, Max_Radius_Quantile);
 
 t_window = linspace(TrialWindow(1), TrialWindow(2), fs*(TrialWindow(2)-TrialWindow(1))); % time vector
 
+% specify only close trials, or all trials
+TitleTag = '';
+if Closest
+    TitleTag = [ TitleTag, '_Close'];
+    Max_Radius = quantile(Trials.Radius, Max_Radius_Quantile);
+else
+    Max_Radius = max(Trials.Radius);
+end
 
 for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 

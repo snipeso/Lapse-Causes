@@ -11,23 +11,18 @@ P.Parameters.MinTots = 10;
 P.Parameters.MinTypes = 5; % minimum number of trials for a given type for some sub-analyses
 P.Parameters.MinNanProportion = 0.5;
 
-P.Parameters.Timecourse.Window = [-2, 2];
+P.Parameters.Timecourse.Window = [-2, 4];
 
 P.Parameters.EC_ConfidenceThreshold = 0.5;
 P.Parameters.fs = 250;
 
-% P.Parameters.Radius = 1; % use all trials
-P.Parameters.Radius = 2/3; % use all trials
+P.Parameters.Radius = 4/6; % exclude outer third of trials
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Labels
 
 P.Participants = {'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', ...
     'P09', 'P10', 'P11', 'P12', 'P13', 'P14', 'P15', 'P16', 'P17', 'P19'};
-Keep = { 'P02', 'P06', 'P07', 'P08', ...
-    'P09', 'P11', 'P13', 'P14', 'P15', 'P16', 'P17', 'P19'};
-
-P.Participants_sdTheta = ismember(P.Participants, Keep);
 
 P.AllTasks = {'Match2Sample', 'LAT', 'PVT', 'SpFT', 'Game', 'Music'};
 P.TaskLabels = {'STM', 'LAT', 'PVT', 'Speech', 'Game', 'Music'};
@@ -145,7 +140,6 @@ addpath(fullfile(Paths.Analysis, 'functions','plots'))
 addpath(fullfile(Paths.Analysis, 'functions','tasks'))
 addpath(fullfile(Paths.Analysis, 'functions','eyes'))
 addpath(fullfile(Paths.Analysis, 'functions','stats'))
-% addpath(fullfile(Paths.Analysis, 'functions','pupils'))
 addpath(fullfile(Paths.Analysis, 'functions','external'))
 addExternalFunctions
 
@@ -209,7 +203,6 @@ Channels.Hemifield.Right = [1:5, 8:10, 14, 76:80, 82:87, 88:125];
 Channels.Hemifield.Left = [12, 13, 18:54, 56:61, 63:71, 73, 74];
 
 Format.Colors.preROI = getColors(numel(fieldnames(Channels.preROI)));
-
 
 P.Channels = Channels;
 P.AllBands = AllBands;

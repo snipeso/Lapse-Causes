@@ -28,6 +28,9 @@ MinWindow = 1/2; % minimum proportion of window needed to have event to count
 
 % locations
 Pool = fullfile(Paths.Pool, 'Tasks'); % place to save matrices so they can be plotted in next script
+if ~exist(Pool, 'dir')
+    mkdir(Pool)
+end
 
 MicrosleepPath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
 BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task);

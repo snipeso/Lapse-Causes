@@ -15,7 +15,6 @@ Bands = P.Bands;
 Parameters = P.Parameters;
 
 TrialWindow = Parameters.Timecourse.Window;
-TrialWindow = [-2 4];
 
 fs = Parameters.fs;
 ConfidenceThreshold = Parameters.EC_ConfidenceThreshold; % value of pupil confidence to mark eye-closures
