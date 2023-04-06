@@ -1,5 +1,3 @@
-% gets the data showing the probability of burst in time
-
 clear
 clc
 close all
@@ -10,162 +8,200 @@ close all
 P = analysisParameters();
 
 Participants = P.Participants;
-SessionGroup = 'BL';
-Sessions = P.SessionBlocks.(SessionGroup);
+SessionBlocks = P.SessionBlocks;
 Paths = P.Paths;
-Task = P.Labels.Task;
-Parameters = P.Parameters;
+Task = P.Labels.Task; % LAT
 Bands = P.Bands;
-BandLabels = fieldnames(Bands);
+Parameters = P.Parameters;
 
-StartTime = Parameters.Timecourse.Start; % window around triggers
-EndTime = Parameters.Timecourse.End;
+TrialWindow = Parameters.Timecourse.Window;
 fs = Parameters.fs;
-ConfidenceThreshold = Parameters.EC_ConfidenceThreshold;
-minTrials = Parameters.MinTypes; % minimum number of trials for each category
-minNanProportion = Parameters.MinNanProportion; % any more nans than this in a given trial is grounds to exclude the trial
+ConfidenceThreshold = Parameters.EC_ConfidenceThreshold; % value of pupil confidence to mark eye-closures
+minTrials = Parameters.MinTypes; % there needs to be at least these many trials for all trial types to include that participant.
+minNanProportion = Parameters.MinNanProportion; % any more nans in time than this in a given trial is grounds to exclude the trial
+Max_Radius_Quantile = Parameters.Radius; % only use trials that are relatively close to fixation point
 
+nTrialTypes = 3;
+TotChannels = 123;
+TotBands = 2;
+
+CheckEyes = true; % check if person had eyes open or closed
+Closest = false; % only use closest trials
+
+% locations
 Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plotted in next script
-BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task);
+BurstPath = fullfile(Paths.Data, 'EEG', 'Bursts_AllChannels', Task);
+WholeBurstPath = fullfile(Paths.Data, 'EEG', 'Bursts', Task); % needed for valid t
 EyePath = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
+
+SessionBlockLabels = fieldnames(SessionBlocks);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% get data
 
+
 % load trial information
 load(fullfile(Paths.Pool, 'Tasks', [Task, '_AllTrials.mat']), 'Trials')
-Max_Radius = quantile(Trials.Radius, Parameters.Radius); % only look at trials within a certain radius
 
-t_window = linspace(StartTime, EndTime, fs*(EndTime-StartTime)); % time vector for epoched data
+t_window = linspace(TrialWindow(1), TrialWindow(2), fs*(TrialWindow(2)-TrialWindow(1))); % time vector
 
-% blanks to fill
-ProbBurst_Stim = nan(numel(Participants), 3, 2, numel(t_window));
-ProbBurst_Resp = nan(numel(Participants), 3, 2, numel(t_window));
-GenProbBurst = zeros(numel(Participants), numel(BandLabels), 2);
 
-for Indx_P = 1:numel(Participants)
+TitleTag = '';
+if CheckEyes
+    TitleTag = [TitleTag, '_EO'];
+end
 
-    AllTrials_Stim = [];
-    AllTrials_Resp = [];
-    AllTrials_Table = table();
+if Closest
+    TitleTag = [ TitleTag, '_Close'];
+    Max_Radius = quantile(Trials.Radius, Max_Radius_Quantile);
+else
+    Max_Radius = max(Trials.Radius);
+end
 
-    for Indx_S = 1:numel(Sessions)
+for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
-        %%% Load data
+    Sessions = P.SessionBlocks.(SessionBlockLabels{Indx_SB});
 
-        % trial info for current recording
-        CurrentTrials = find(strcmp(Trials.Participant, Participants{Indx_P}) & ...
-            strcmp(Trials.Session, Sessions{Indx_S}));
-        nTrials = nnz(CurrentTrials);
+    % set up blanks
+    ProbBurst_Stim = nan(numel(Participants), nTrialTypes, TotChannels, TotBands, numel(t_window)); % P x TT x Ch x B x t matrix with final probabilities
+    ProbBurst_Resp = ProbBurst_Stim;
 
-        % load in burst data
-        Bursts = loadMATFile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'Bursts');
-        if isempty(Bursts); continue; end
+    ProbBurst_Stim_Pooled = nan(numel(Participants), nTrialTypes, TotBands, numel(t_window)); % P x TT x B x t matrix with final probabilities
+    ProbBurst_Resp_Pooled = ProbBurst_Stim_Pooled;
 
-        % load in EEG data
-        EEG = loadMATFile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'EEG');
-        Pnts = EEG.pnts;
-        t_valid = EEG.valid_t;
+    GenProbBurst = zeros(numel(Participants), TotChannels, TotBands, 2); % get general probability of a burst for a given session block (to control for when z-scoring)
+    GenProbBurst_Pooled = zeros(numel(Participants), TotBands, 2); % once collapsed all channels
 
-        % load in eye data
-        Eyes = loadMATFile(EyePath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
-        if isempty(Eyes); continue; end
+    for Indx_P = 1:numel(Participants)
 
-        if isnan(Eyes.DQ) || Eyes.DQ == 0
-            warning(['Bad data in ', Participants{Indx_P}, Sessions{Indx_S}])
+        AllTrials_Stim = []; % Tr x Ch x B x t; need to pool all trials across sessions in a given session block
+        AllTrials_Resp = [];
+        AllTrials_Table = table();
+
+        for Indx_S = 1:numel(Sessions)
+
+            % trial info for current recording
+            CurrentTrials = find(strcmp(Trials.Participant, Participants{Indx_P}) & ...
+                strcmp(Trials.Session, Sessions{Indx_S}) & Trials.Radius < Max_Radius);
+            nTrials = nnz(CurrentTrials);
+
+
+            %%% load in burst data
+            Bursts = loadMATFile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'AllBursts');
+            if isempty(Bursts); continue; end
+
+            EEG = loadMATFile(WholeBurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'EEG');
+            Pnts = EEG.pnts;
+            t_valid = EEG.valid_t;
+            Chanlocs = EEG.chanlocs;
+
+            % remove bursts that were chopped
+            Bursts = removeChopped(Bursts);
+
+            % get frequency of each burst
+            Bursts = meanFreq(Bursts);
+
+            Freqs = [Bursts.Frequency];
+            Channels = [Bursts.Channel];
+
+
+            %%% control for bursts during eyes-closed
+            if CheckEyes
+
+                % load in eye data
+                Eyes = loadMATFile(EyePath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
+                if isempty(Eyes); continue; end
+
+                if isnan(Eyes.DQ) || Eyes.DQ == 0
+                    warning(['Bad data in ', Participants{Indx_P}, Sessions{Indx_S}])
+                    continue
+                end
+
+                Eye = round(Eyes.DQ); % which eye
+
+                % get 1s and 0s of whether eyes were open
+                [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold);
+
+
+                % exclude EC timepoints
+                t_valid = t_valid & EyeOpen==1;
+            end
+
+            %%% Gather trials
+
+
+
+            % get matrix of when there are bursts for each channel
+            BurstTimes = bursts2timeChannels(Bursts, Bands, TotChannels, t_valid); % Ch x B x t
+
+            % chop matrix into trials
+            Trials_Stim = nan(nnz(CurrentTrials), TotChannels, numel(t_window), TotBands);
+            Trials_Resp = Trials_Stim;
+
+            for Indx_B = 1:TotBands
+                BT = squeeze(BurstTimes(:, Indx_B, :)); % Ch x t
+                [Trials_Stim(:, :, :, Indx_B), Trials_Resp(:, :, :, Indx_B)] = ...
+                    chopTrials(BT, ...
+                    Trials(CurrentTrials, :), TrialWindow, fs); % Tr x Ch x t x B
+
+
+                % get general probability of bursts by band
+                GenProbBurst(Indx_P, :, Indx_B, :) = ...
+                    tallyTimepoints(squeeze(GenProbBurst(Indx_P, :, Indx_B, :)), BT);
+
+                BT_Pooled = double(any(BT==1)); % collapse channels, see if there's a burst anywhere
+                BT_Pooled(~t_valid) = nan; % ignore timepoints with bad data
+                GenProbBurst_Pooled(Indx_P, Indx_B, :) = tallyTimepoints(...
+                    squeeze(GenProbBurst_Pooled(Indx_P, Indx_B, :))', BT_Pooled);
+            end
+
+            % pool sessions
+            AllTrials_Stim = cat(1, AllTrials_Stim, permute(Trials_Stim, [1 2 4 3])); % Tr x Ch x B x t
+            AllTrials_Resp = cat(1, AllTrials_Resp, permute(Trials_Resp, [1 2 4 3]));
+
+            % save info
+            AllTrials_Table = cat(1, AllTrials_Table, Trials(CurrentTrials, :)); % important that it be in the same order!
+        end
+
+        if isempty(AllTrials_Table)
+            warning('empty table')
             continue
         end
 
-        Eye = round(Eyes.DQ); % which eye
+        %%% get probability of burst for each trial type
+        for Indx_B = 1:TotBands
 
-        % get 1s and 0s of whether eyes were open
-        [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold);
+            % for each channel
+            for Indx_Ch = 1:TotChannels
 
-
-        %%% select data
-
-        % exclude EC timepoints
-        t_valid = t_valid & EyeOpen==1;
-
-        % select bursts
-        Freqs = [Bursts.Frequency];
-
-        Trials_B_Stim = nan(nTrials, numel(BandLabels), numel(t_window));
-        Trials_B_Resp = nan(nTrials, numel(BandLabels), numel(t_window));
-
-        for Indx_B = 1:numel(BandLabels)
-
-            % 0s and 1s of whether there is a burst or not, nans for noise
-            Band = Bands.(BandLabels{Indx_B});
-            BT = bursts2time(Bursts(Freqs>=Band(1) & Freqs<Band(2)), Pnts);
-            BT(not(t_valid)) = nan;
-
-            % get trial info
-            [Trials_B_Stim(:, Indx_B, :), Trials_B_Resp(:, Indx_B, :)] = ...
-                chopTrials(BT, Trials, CurrentTrials, StartTime, EndTime, fs);
-
-            % get general probability of a burst
-            GenProbBurst(Indx_P, Indx_B, 1) = GenProbBurst(Indx_P, Indx_B, 1) + sum(BT==1); % burst
-            GenProbBurst(Indx_P, Indx_B, 2) = GenProbBurst(Indx_P, Indx_B, 2) + sum(BT==1 | BT==0); % all points
-        end
-
-        % pool sessions
-        AllTrials_Stim = cat(1, AllTrials_Stim, Trials_B_Stim);
-        AllTrials_Resp = cat(1, AllTrials_Resp, Trials_B_Resp);
-
-        % save trial info
-        AllTrials_Table = cat(1, AllTrials_Table, Trials(CurrentTrials, :));
-    end
-
-    if isempty(AllTrials_Table)
-        warning('empty table')
-        continue
-    end
-
-    %%% get probability of microsleep (in time) for each trial type
-    for Indx_B = 1:numel(BandLabels)
-        for Indx_TT = 1:3
-
-            % get prob of burst in stim trial
-            TT_Indexes = AllTrials_Table.Type==Indx_TT & AllTrials_Table.Radius < Max_Radius;
-            nTrials = nnz(TT_Indexes);
-            TypeTrials_Stim = squeeze(AllTrials_Stim(TT_Indexes, Indx_B, :));
-
-            ProbBurst_Stim(Indx_P, Indx_TT, Indx_B, :) = ...
-                probEvent(TypeTrials_Stim, minNanProportion, minTrials);
-
-
-            % get prob of burst in resp trial
-            if Indx_TT>1 % not lapses
-                TypeTrials_Resp = squeeze(AllTrials_Resp(TT_Indexes, Indx_B, :));
-
-                ProbBurst_Resp(Indx_P, Indx_TT, Indx_B, :)  = ...
-                    probEvent(TypeTrials_Resp, minNanProportion, minTrials);
+                [ProbBurst_Stim(Indx_P, :, Indx_Ch, Indx_B, :), ...
+                    ProbBurst_Resp(Indx_P, :, Indx_Ch, Indx_B, :)] = ...
+                    getProbTrialType(squeeze(AllTrials_Stim(:, Indx_Ch, Indx_B, :)), ...
+                    squeeze(AllTrials_Resp(:, Indx_Ch, Indx_B, :)), AllTrials_Table, ...
+                    minNanProportion, minTrials);
             end
+
+            % pooled by channel
+            AllStim = poolTrials(squeeze(AllTrials_Stim(:, :, Indx_B, :)));
+            AllResp = poolTrials(squeeze(AllTrials_Resp(:, :, Indx_B, :)));
+
+            [ProbBurst_Stim_Pooled(Indx_P, :, Indx_B, :), ...
+                ProbBurst_Resp_Pooled(Indx_P, :, Indx_B, :)] = ...
+                getProbTrialType(AllStim, AllResp, AllTrials_Table, ...
+                minNanProportion, minTrials);
         end
+
+        disp(['Finished ', Participants{Indx_P}])
     end
 
+    % calculate general probabilities
+    GenProbBurst = GenProbBurst(:, :, :, 1)./GenProbBurst(:, :, :, 2); % P x Ch x B x t
+    GenProbBurst_Pooled = GenProbBurst_Pooled(:, :, 1)./GenProbBurst_Pooled(:, :, 2); % P x B x t
 
-    disp(['Finished ', Participants{Indx_P}])
+    %%% save
+    save(fullfile(Pool, ['ProbBurst_', SessionBlockLabels{Indx_SB}, TitleTag, '.mat']), ...
+        'ProbBurst_Stim', 'ProbBurst_Resp', ...
+        'ProbBurst_Stim_Pooled', 'ProbBurst_Resp_Pooled', ...
+        't_window', 'Chanlocs', 'GenProbBurst', 'GenProbBurst_Pooled')
 end
-
-% remove all data from participants missing any of the trial types
-for Indx_P = 1:numel(Participants)
-    for Indx_B = 1:numel(BandLabels)
-        if any(isnan(ProbBurst_Stim(Indx_P, :, Indx_B, :)), 'all')
-            ProbBurst_Stim(Indx_P, :, Indx_B, :) = nan;
-        end
-
-        if any(isnan(ProbBurst_Resp(Indx_P, 2:3, Indx_B, :)), 'all')
-            ProbBurst_Resp(Indx_P, :, Indx_B, :) = nan;
-        end
-    end
-end
-
-% get general probability as fraction
-GenProbBurst = GenProbBurst(:, :, 1)./GenProbBurst(:, :, 2);
-
-%%% save
-t = t_window;
-save(fullfile(Pool, ['ProbBurst_', SessionGroup, '.mat']), 'ProbBurst_Stim', 'ProbBurst_Resp', 't', 'GenProbBurst')
