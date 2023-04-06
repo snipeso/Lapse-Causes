@@ -53,30 +53,6 @@ sProbMicrosleep_Stim = smoothFreqs(ProbMicrosleep_Stim, t_microsleep, 'last', Sm
 sProbMicrosleep_Resp = smoothFreqs(ProbMicrosleep_Resp, t_microsleep, 'last', SmoothFactor);
 
 %%% burst data
-% load(fullfile(Paths.Pool, 'EEG', ['ProbBurst_', TitleTag, '.mat']), 'ProbBurst_Stim_Pooled', 'ProbBurst_Resp_Pooled', 't_window',  'GenProbBurst_Pooled')
-% t_burst = t_window;
-%
-% % remove all data from participants missing any of the trial types
-%
-% for Indx_B = 1:2
-%     [ProbBurst_Stim_Pooled(:, :, Indx_B, :), ProbBurst_Resp_Pooled(:, :, Indx_B, :)] = ...
-%         removeBlankParticipants(squeeze(ProbBurst_Stim_Pooled(:, :, Indx_B, :)), squeeze(ProbBurst_Resp_Pooled(:, :, Indx_B, :)));
-% end
-%
-% % remove low sdTheta participants for obvious reasons
-% ProbBurst_Stim_Pooled(~Participants, :, :) = nan;
-% ProbBurst_Resp_Pooled(~Participants, :, :) = nan;
-%
-% % smooth and z-score
-% sProbBurst_Stim = smoothFreqs(ProbBurst_Stim_Pooled, t_burst, 'last', SmoothFactor);
-% [zProbBurst_Stim, zGenProbBurst_Stim] = ...
-%     zscoreTimecourse(sProbBurst_Stim, GenProbBurst_Pooled, 3);
-%
-% sProbBurst_Resp = smoothFreqs(ProbBurst_Resp_Pooled, t_burst, 'last', SmoothFactor);
-% [zProbBurst_Resp, zGenProbBurst_Resp] = ...
-%     zscoreTimecourse(sProbBurst_Resp, GenProbBurst_Pooled, 3);
-
-
 load(fullfile(Paths.Pool, 'EEG', ['ProbBurst_', TitleTag, '.mat']), 'ProbBurst_Stim', ...
     'ProbBurst_Resp', 't_window',  'GenProbBurst', 'Chanlocs')
 t_burst = t_window;
