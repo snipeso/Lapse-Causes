@@ -121,13 +121,11 @@ for Indx_B = 1:numel(Bands)
 end
 
 [sig, ~, ~, p_fdr] = fdr_bh([AllStats.p], StatsP.Alpha, StatsP.ttest.dep);
-% sig = [AllStats.p]<.05;
 
 
 %% plot effect sizes
 
-figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*1.2, PlotProps.Figure.Height*.3])
-Grid = [2 1];
+figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*1.2, PlotProps.Figure.Height*.15])
 
 Legend = {};
 Colors = [getColors(1, '', 'blue'); % EC
@@ -149,12 +147,8 @@ PlotProps = P.Manuscript;
 PlotProps.Axes.xPadding = 40;
 PlotProps.Axes.yPadding = 30;
 
-
-% subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
-subplot(2, 1, 1)
 plotUFO([AllStats(RangeA).prcnt]', [AllStats(RangeA).prcntIQ]', xLabels(RangeA), ...
     Legend, Colors(RangeA, :), Orientation, PlotProps)
-
 
 % plot significance
 Means = [AllStats(RangeA).prcnt];
@@ -163,19 +157,6 @@ Means(~sig(RangeA)) = nan;
 scatter(numel(Means):-1:1, Means, 'filled', 'w');
 set(gca,'YAxisLocation','right', 'XAxisLocation', 'bottom');
 ylabel("Increased probability of a lapse due to ...")
-ylim([-.1 1])
-
-% subfigure([], Grid, [2 1], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
-subplot(2, 1, 2)
-plotUFO([AllStats(RangeB).prcnt]', [AllStats(RangeB).prcntIQ]', xLabels(RangeB), ...
-    Legend, Colors(RangeB, :), Orientation, PlotProps)
-
-% plot significance
-Means = [AllStats(RangeB).prcnt];
-Means(~sig(RangeB)) = nan;
-scatter(numel(Means):-1:1, Means, 'filled', 'w');
-set(gca,'YAxisLocation','right', 'XAxisLocation', 'bottom');
-ylabel("Increased probability of a correct response when anticipated by ...")
 ylim([-.1 1])
 
 

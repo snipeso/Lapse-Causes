@@ -3,7 +3,7 @@
 
 clear
 clc
-% close all
+close all
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
@@ -49,6 +49,7 @@ Lapses = Trials.Type == 1;
 % assemble reaction times into structure for flame plot
 [FlameStruct, MEANS, Q99, Q01] = assembleRTs(Trials, Participants, SessionBlocks);
 
+%%
 % for L1_Trials, identify what's the bottom 1% of RTs
 clc
 dispDescriptive(Q01(:, 2), 'Fastest 1% RTs', 's', 3);
@@ -133,8 +134,8 @@ xlim(XLim)
 CheckEyes = true;
 
 % get trial subsets
-EO_Trials = Trials_PVT.EC == 0;
-EC_Trials = Trials_PVT.EC == 1;
+EO_Trials = Trials_PVT.EC_Stimulus == 0;
+EC_Trials = Trials_PVT.EC_Stimulus == 1;
 
 % assemble data
 Thresholds = .3:.1:1;
@@ -212,8 +213,8 @@ xlim(XLim)
 
 %%% F: plot change in lapses with distance
 % get trial subsets
-EO = Trials.EC == 0;
-EC = Trials.EC == 1;
+EO = Trials.EC_Stimulus == 0;
+EC = Trials.EC_Stimulus == 1;
 Lapses = Trials.Type == 1;
 
 % assign a distance quantile for each trial
@@ -287,6 +288,44 @@ dispDescriptive(1000*Q99(:, SB_Indx), 'RT for 99% of SD data:', ' ms', 0);
 
 
 %% lapses
+
+clc
+
+%%% LAT
+disp('---LAT---')
+[Data, EO_Matrix, EC_Matrix] = assembleLapses(Trials, Participants, Sessions, SessionGroups, MinTots);
+
+% just lapses
+Tots = EO_Matrix(:, :, 1) + EC_Matrix(:, :, 1);
+ECvEO_Lapses = 100*EC_Matrix(:, :, 1)./Tots;
+
+
+% proportion of EC lapses out of overall lapses
+dispDescriptive(squeeze(ECvEO_Lapses(:, 1)), 'BL EC vs All Lapses', '%', '%.1f');
+dispDescriptive(squeeze(ECvEO_Lapses(:, 2)), 'SD EC vs All Lapses', '%', '%.1f');
+disp('*')
+
+
+%%% PVT
+disp('---PVT---')
+    Trials_PVT.Type = OldType;
+[Data, EO_Matrix, EC_Matrix] = assembleLapses(Trials_PVT, Participants, [Sessions_PVT(2), Sessions_PVT(2)], [],  MinTots);
+
+% just lapses
+Tots = EO_Matrix(:, :, 1) + EC_Matrix(:, :, 1);
+ECvEO_Lapses = 100*EC_Matrix(:, :, 1)./Tots;
+
+
+% proportion of EC lapses out of overall lapses
+dispDescriptive(squeeze(ECvEO_Lapses(:, 1)), 'BL EC vs All Lapses', '%', '%.1f');
+dispDescriptive(squeeze(ECvEO_Lapses(:, 2)), 'SD EC vs All Lapses', '%', '%.1f');
+disp('*')
+
+
+
+
+
+%%
 
 %%% total lapses
 [All_Matrix, ~] = tabulateTable(Trials, [], 'Type', 'tabulate', ...

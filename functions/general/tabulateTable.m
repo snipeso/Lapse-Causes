@@ -49,7 +49,7 @@ for Indx_P = 1:numel(Participants)
             continue
         end
 
-        if exist('CheckEyes', 'var') && CheckEyes && all(isnan(Trials.EC(CurrentTrials)))
+        if exist('CheckEyes', 'var') && CheckEyes && all(isnan(Trials.EC_Stimulus(CurrentTrials)))
             continue
         end
 
@@ -90,11 +90,7 @@ for Indx_P = 1:numel(Participants)
                         Matrix(Indx_P, Indx_S, :) = 0;
                     else
                         Tots = zeros(numel(Things), 1);
-                        try
                         Tots(ismember(Things, Table(:, 1))) = Table(:, 2);
-                        catch
-                            a=1
-                        end
                         Matrix(Indx_P, Indx_S, :) = Tots;
                     end
                 else
