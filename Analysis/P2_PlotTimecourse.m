@@ -16,8 +16,8 @@ Channels = P.Channels;
 StatsP = P.StatsP;
 
 SmoothFactor = 0.3; % in seconds, smooth signal to be visually pleasing
-CheckEyes = false; % check if person had eyes open or closed
-Closest = false; % only use closest trials
+CheckEyes = true; % check if person had eyes open or closed
+Closest = true; % only use closest trials
 ZScore = true; % best only z-scored; when raw, it's the average prob for each individual channel 
 SessionGroup = 'SD';
 
@@ -207,6 +207,7 @@ saveFig(['Figure_3_', TitleTag], Paths.PaperResults, PlotProps)
 clc
 
 % probability of EC before stim
+disp('---EC---')
 preWindow = [-2 0];
 Window = dsearchn(t_microsleep', preWindow');
 
@@ -217,7 +218,7 @@ dispStat(Stats, [1 1], 'Pre Lapse probability:');
 
 
 % during stim
-stimWindow = [0 0.25];
+stimWindow = [0 0.3];
 Window = dsearchn(t_microsleep', stimWindow');
 
 Prob = squeeze(mean(zProbMicrosleep_Stim(:, :, Window(1):Window(2)), 3, 'omitnan')); % P x TT
@@ -255,7 +256,6 @@ for Indx_B = 1:2
 
     % prob before stim
     Window = dsearchn(t_burst', preWindow');
-
     Prob = squeeze(mean(zProbBurst_Stim(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
 
     Stats = pairedttest(zGenProbBurst(:, Indx_B), Prob(:, 1), StatsP);
@@ -263,6 +263,16 @@ for Indx_B = 1:2
 
     Stats = pairedttest(zGenProbBurst(:, Indx_B), Prob(:, 3), StatsP);
     dispStat(Stats, [1 1], 'Pre Correct probability:');
+
+        % prob JUST before stim
+    Window = dsearchn(t_burst', [-.5 0]');
+    Prob = squeeze(mean(zProbBurst_Stim(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
+
+    Stats = pairedttest(zGenProbBurst(:, Indx_B), Prob(:, 1), StatsP);
+    dispStat(Stats, [1 1], 'Narrow Pre Lapse probability:');
+
+    Stats = pairedttest(zGenProbBurst(:, Indx_B), Prob(:, 3), StatsP);
+    dispStat(Stats, [1 1], 'Narrow Pre Correct probability:');
 
 
     % during stim
@@ -273,15 +283,17 @@ for Indx_B = 1:2
     Stats = pairedttest(zGenProbBurst(:, Indx_B), Prob(:, 1), StatsP);
     dispStat(Stats, [1 1], 'Stim Lapse probability:');
 
-
-    % diff with correct
-    Window = [.5 1.5];
-    Window = dsearchn(t_burst', Window');
+    % lapse well afte rresponse
+      Window = dsearchn(t_burst', [2 4]');
 
     Prob = squeeze(mean(zProbBurst_Stim(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
 
-    Stats = pairedttest(Prob(:, 3), Prob(:, 1), StatsP);
-    dispStat(Stats, [1 1], 'Post resp probability lapse v correct stim locked:');
+    Stats = pairedttest(zGenProbBurst(:, Indx_B), Prob(:, 1), StatsP);
+    dispStat(Stats, [1 1], 'Post stim Lapse probability:');
+
+        Stats = pairedttest(zGenProbBurst(:, Indx_B), Prob(:, 3), StatsP);
+    dispStat(Stats, [1 1], 'Post stim correct probability:');
+
 
     % correct after response
     Window = [0 1];
@@ -290,7 +302,10 @@ for Indx_B = 1:2
     Prob = squeeze(mean(zProbBurst_Resp(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
 
     Stats = pairedttest(GenProbBurst(:,Indx_B), Prob(:, 3), StatsP);
-    dispStat(Stats, [1 1], 'Post resp:');
+    dispStat(Stats, [1 1], 'Post resp correct:');
+
+        Stats = pairedttest(GenProbBurst(:,Indx_B), Prob(:, 2), StatsP);
+    dispStat(Stats, [1 1], 'Post resp late:');
 
 
     disp('____________')

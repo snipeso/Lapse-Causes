@@ -16,9 +16,9 @@ StatsP = P.StatsP;
 Bands = P.Bands;
 BandLabels = fieldnames(Bands);
 
-CheckEyes = false; % check if person had eyes open or closed
+CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionGroup = 'BL';
+SessionGroup = 'SD';
 
 Windows_Stim = [-2 0; 0 0.3; 0.3 1; 2 4];
 
@@ -104,6 +104,7 @@ for Indx_B = 1:2
 
             subfigure(Space, miniGrid, [Indx_TT, Indx_W], [], false, '', PlotProps);
             Stats = topoDiff(Baseline, Data, Chanlocs, CLims, StatsP, PlotProps);
+            Stats.p = Stats.p_fdr';
             % plotTopoplot(mean(Baseline, 1, 'omitnan'), [], Chanlocs, [], 'zvalues', 'Linear', PlotProps)
             % colorbar
             colorbar off
@@ -141,3 +142,18 @@ for Indx_B = 1:2
     plotColorbar('Divergent', CLims, [BandLabels{Indx_B}, ' t-values'], PlotProps)
 end
 saveFig(['Figure_4_', TitleTag], Paths.PaperResults, PlotProps)
+
+
+
+%% occipital alpha lapses pre
+
+
+Data = squeeze(wProbBurst_Stim(:, 1, :,2, 1));
+Baseline = squeeze(zGenProbBurst(:, :, 2));
+
+figure
+Stats = topoDiff(Baseline, Data, Chanlocs, CLims, StatsP, PlotProps);
+Stats.p = Stats.p_fdr';
+[~, I] = max(Stats.t);
+dispStat(Stats, [I, 1], ['Max ch: ', Chanlocs(I).labels]);
+

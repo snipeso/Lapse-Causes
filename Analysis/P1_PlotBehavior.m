@@ -297,12 +297,20 @@ disp('---LAT---')
 
 % just lapses
 Tots = EO_Matrix(:, :, 1) + EC_Matrix(:, :, 1);
-ECvEO_Lapses = 100*EC_Matrix(:, :, 1)./Tots;
+ECvEO_Lapses = 100*EO_Matrix(:, :, 1)./Tots;
+
+% all
+Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
+EOvAll_Matrix = 100*EO_Matrix(:, :, 1)./Tots; % Matrix is EO lapses, late, correct, EC lapses
 
 
 % proportion of EC lapses out of overall lapses
-dispDescriptive(squeeze(ECvEO_Lapses(:, 1)), 'BL EC vs All Lapses', '%', '%.1f');
-dispDescriptive(squeeze(ECvEO_Lapses(:, 2)), 'SD EC vs All Lapses', '%', '%.1f');
+dispDescriptive(squeeze(ECvEO_Lapses(:, 2)), 'SD EO vs All Lapses', '%', '%.0f');
+dispDescriptive(squeeze(EOvAll_Matrix(:, 1)), 'BL EO vs All Trials', '%', '%.0f');
+dispDescriptive(squeeze(EOvAll_Matrix(:, 2)), 'SD EO vs All Trials', '%', '%.0f');
+
+Stats = pairedttest(EOvAll_Matrix(:, 1), EOvAll_Matrix(:, 2), StatsP);
+dispStat(Stats, [1 1], 'SD effect on EO lapses:');
 disp('*')
 
 
@@ -313,12 +321,16 @@ disp('---PVT---')
 
 % just lapses
 Tots = EO_Matrix(:, :, 1) + EC_Matrix(:, :, 1);
-ECvEO_Lapses = 100*EC_Matrix(:, :, 1)./Tots;
+ECvEO_Lapses = 100*EO_Matrix(:, :, 1)./Tots;
+
+% all
+Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
+EOvAll_Matrix = 100*EO_Matrix(:, :, 1)./Tots; % Matrix is EO lapses, late, correct, EC lapses
 
 
 % proportion of EC lapses out of overall lapses
-dispDescriptive(squeeze(ECvEO_Lapses(:, 1)), 'BL EC vs All Lapses', '%', '%.1f');
-dispDescriptive(squeeze(ECvEO_Lapses(:, 2)), 'SD EC vs All Lapses', '%', '%.1f');
+dispDescriptive(squeeze(ECvEO_Lapses(:, 2)), 'SD EO vs All Lapses', '%', '%.0f');
+dispDescriptive(squeeze(EOvAll_Matrix(:, 2)), 'SD EO vs All Trials', '%', '%.0f');
 disp('*')
 
 
@@ -327,65 +339,65 @@ disp('*')
 
 %%
 
-%%% total lapses
-[All_Matrix, ~] = tabulateTable(Trials, [], 'Type', 'tabulate', ...
-    Participants, Sessions, SessionGroups, false); % P x SB x TT
-
-All_Matrix = 100*All_Matrix./sum(All_Matrix, 3, 'omitnan');
-
-%%% EO/EC lapses
-Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
-ECvAll_Matrix = 100*EC_Matrix(:, :, 1)./Tots; % Matrix is EO lapses, late, correct, EC lapses
-
-% just lapses
-Tots = EO_Matrix(:, :, 1) + EC_Matrix(:, :, 1);
-ECvEO_Lapses = 100*EC_Matrix(:, :, 1)./Tots;
-
-
-clc
-
-% overall proportion of lapses
-dispDescriptive(squeeze(All_Matrix(:, 1, 1)), 'BL Lapses', '%', '%.0f');
-dispDescriptive(squeeze(All_Matrix(:, 2, 1)), 'SD Lapses', '%', '%.0f');
-disp('*')
-
-% proportion of EC lapses out of overall lapses
-dispDescriptive(squeeze(ECvEO_Lapses(:, 1)), 'BL EC vs All Lapses', '%', '%.1f');
-dispDescriptive(squeeze(ECvEO_Lapses(:, 2)), 'SD EC vs All Lapses', '%', '%.1f');
-disp('*')
-
-% proportion of EC lapses on overall trials
-dispDescriptive(squeeze(ECvAll_Matrix(:, 1)), 'BL EC vs All Trials', '%', '%.1f');
-dispDescriptive(squeeze(ECvAll_Matrix(:, 2)), 'SD EC vs All Trials', '%', '%.1f');
-disp('*')
-
-%%% lapses
-EO_Lapses = squeeze(EO_Matrix(:, :, 1));
-EC_Lapses = squeeze(EC_Matrix(:, :, 1));
-
-% total lapses EO SD
-dispDescriptive(EO_Lapses(:, 2), 'SD tot lapses', ' lapses', '%.0f');
-
-
-MinLapses = P.Parameters.MinTypes;
-disp(['# participants with at least ', num2str(MinLapses), ' EO lapses: ', num2str(nnz(EO_Lapses(:, 2)>MinLapses))])
-
-disp('*')
-% change in number of lapses from BL to SD EO
-Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
-
-Tots(Tots<MinTots) = nan;
-
-EO_Lapses = EO_Lapses./Tots;
-
-Stats = pairedttest(EO_Lapses(:, 1), EO_Lapses(:, 2), StatsP);
-dispStat(Stats, [1 1], 'SD effect on EO lapses:');
-
-% EC
-EC_Lapses = EC_Lapses./Tots;
-
-Stats = pairedttest(EC_Lapses(:, 1), EC_Lapses(:, 2), StatsP);
-dispStat(Stats, [1 1], 'SD effect on EC lapses:');
+% %%% total lapses
+% [All_Matrix, ~] = tabulateTable(Trials, [], 'Type', 'tabulate', ...
+%     Participants, Sessions, SessionGroups, false); % P x SB x TT
+% 
+% All_Matrix = 100*All_Matrix./sum(All_Matrix, 3, 'omitnan');
+% 
+% %%% EO/EC lapses
+% Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
+% EOvAll_Matrix = 100*EC_Matrix(:, :, 1)./Tots; % Matrix is EO lapses, late, correct, EC lapses
+% 
+% % just lapses
+% Tots = EO_Matrix(:, :, 1) + EC_Matrix(:, :, 1);
+% ECvEO_Lapses = 100*EC_Matrix(:, :, 1)./Tots;
+% 
+% 
+% clc
+% 
+% % overall proportion of lapses
+% dispDescriptive(squeeze(All_Matrix(:, 1, 1)), 'BL Lapses', '%', '%.0f');
+% dispDescriptive(squeeze(All_Matrix(:, 2, 1)), 'SD Lapses', '%', '%.0f');
+% disp('*')
+% 
+% % proportion of EC lapses out of overall lapses
+% dispDescriptive(squeeze(ECvEO_Lapses(:, 1)), 'BL EC vs All Lapses', '%', '%.1f');
+% dispDescriptive(squeeze(ECvEO_Lapses(:, 2)), 'SD EC vs All Lapses', '%', '%.1f');
+% disp('*')
+% 
+% % proportion of EC lapses on overall trials
+% dispDescriptive(squeeze(EOvAll_Matrix(:, 1)), 'BL EC vs All Trials', '%', '%.1f');
+% dispDescriptive(squeeze(EOvAll_Matrix(:, 2)), 'SD EC vs All Trials', '%', '%.1f');
+% disp('*')
+% 
+% %%% lapses
+% EO_Lapses = squeeze(EO_Matrix(:, :, 1));
+% EC_Lapses = squeeze(EC_Matrix(:, :, 1));
+% 
+% % total lapses EO SD
+% dispDescriptive(EO_Lapses(:, 2), 'SD tot lapses', ' lapses', '%.0f');
+% 
+% 
+% MinLapses = P.Parameters.MinTypes;
+% disp(['# participants with at least ', num2str(MinLapses), ' EO lapses: ', num2str(nnz(EO_Lapses(:, 2)>MinLapses))])
+% 
+% disp('*')
+% % change in number of lapses from BL to SD EO
+% Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
+% 
+% Tots(Tots<MinTots) = nan;
+% 
+% EO_Lapses = EO_Lapses./Tots;
+% 
+% Stats = pairedttest(EO_Lapses(:, 1), EO_Lapses(:, 2), StatsP);
+% dispStat(Stats, [1 1], 'SD effect on EO lapses:');
+% 
+% % EC
+% EC_Lapses = EC_Lapses./Tots;
+% 
+% Stats = pairedttest(EC_Lapses(:, 1), EC_Lapses(:, 2), StatsP);
+% dispStat(Stats, [1 1], 'SD effect on EC lapses:');
 
 
 
@@ -407,7 +419,7 @@ clc
 dispDescriptive(squeeze(LapseTally(:, 1, 1)), 'BL EO close lapses', '%', '%.1f');
 
 % far lapses
-dispDescriptive(squeeze(LapseTally(:, 5, 1)), 'BL EO far lapses', '%', '%.1f');
+dispDescriptive(squeeze(LapseTally(:, end, 1)), 'BL EO far lapses', '%', '%.1f');
 disp('*')
 
 % each distance
