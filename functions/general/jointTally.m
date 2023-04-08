@@ -53,7 +53,6 @@ for Indx_P = 1:numel(Participants)
 
         % Join proportion
         ProbType(Indx_P, Indx_S, 3) = nnz(Trials1 & Trials2)/Tot;
-
     end
 end
 

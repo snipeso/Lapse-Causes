@@ -54,7 +54,7 @@ AllStats = struct();
 xLabels = {};
 
 % eye status (compare furthest and closest trials with EO)
-ProbType = squeeze(jointTally(Trials, [], EC_Stim, Lapses, Participants, ...
+ProbType = squeeze(jointTally(Trials, ~NanEyes, EC_Stim, Lapses, Participants, ...
     Sessions, SessionGroups));
 AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
 xLabels = cat(1, xLabels, 'Eyes closed');
@@ -86,39 +86,6 @@ ProbType = squeeze(jointTally(Trials, SD & (Theta_Stim | NotTheta_Stim) & ~NanEE
 AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
 xLabels = cat(1, xLabels, 'Theta burst (SD)');
 
-
-%%% gather pre-stim probs
-
-% SD pre-EC
-
-% BL pre-EC
-
-
-Bands = {'EC', 'Alpha', 'Theta'};
-SessBlocks = {'SD', 'BL'};
-
-Correct = Trials.Type==3;
-for Indx_B = 1:numel(Bands)
-
-    for Indx_SB = 1:numel(SessBlocks)
-
-        Column = [Bands{Indx_B}, '_Pre'];
-        Pre = Trials.(Column) == 1;
-        Not_Pre =  Trials.(Column) == 0;
-
-        if strcmp(SessBlocks{Indx_SB}, 'SD')
-            Sess = SD;
-        else
-            Sess = BL;
-        end
-
-        ProbType = squeeze(jointTally(Trials, Sess & (Pre | Not_Pre) & ~NanEEG, Pre, Correct, Participants, ...
-            Sessions, SessionGroups));
-        AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-        xLabels = cat(1, xLabels, [Bands{Indx_B}, ' ', SessBlocks{Indx_SB}]);
-
-    end
-end
 
 [sig, ~, ~, p_fdr] = fdr_bh([AllStats.p], StatsP.Alpha, StatsP.ttest.dep);
 
@@ -163,6 +130,13 @@ ylim([-.1 1])
 saveFig('Figure_5', Paths.PaperResults, PlotProps)
 
 
+%% display statistics
+clc
+
+for Indx_S = 1:numel(AllStats)
+    dispStat(AllStats(Indx_S), [1 1], xLabels{Indx_S});
+    
+end
 
 
 

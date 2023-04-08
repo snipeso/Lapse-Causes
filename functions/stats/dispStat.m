@@ -23,6 +23,25 @@ if any(strcmp(Fieldnames, 't')) % paired t-test
         pString , ', g = ', num2str(Stats.hedgesg(P(1), P(2)), '%.2f')];
 
     disp(String)
+
+elseif any(strcmp(Fieldnames, 'zval')) % paired t-test
+    pValue = num2str(Stats.p(P(1), P(2)), '%.3f');
+
+    pValue = extractAfter(pValue, '.');
+
+    if Stats.p(P(1), P(2)) < .001
+        pString = ', p < .001';
+    else
+        pString = [', p = .', pValue];
+    end
+    
+
+    disp(Label)
+    String = ['N = ', num2str(Stats.N), ...
+        ', z-value = ', num2str(Stats.zval(P(1), P(2)), '%.2f'), ...
+        pString ];
+
+    disp(String)
     
 elseif any(strcmp(Fieldnames, 'ranovatbl')) % 2 way rmANOVA
     Positions = [3, 5, 7]; % Session, Task, Interaction
