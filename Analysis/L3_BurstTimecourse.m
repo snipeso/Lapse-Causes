@@ -74,7 +74,12 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
     % set up blanks
     ProbBurst_Stim = nan(numel(Participants), nTrialTypes, TotChannels, TotBands, numel(t_window)); % P x TT x Ch x B x t matrix with final probabilities
     ProbBurst_Resp = ProbBurst_Stim;
+
+    ProbBurst_Stim_Pooled =  nan(numel(Participants), nTrialTypes, TotBands, numel(t_window));  % P x TT x B x t
+    ProbBurst_Resp_Pooled = ProbBurst_Stim_Pooled;
+
     GenProbBurst = zeros(numel(Participants), TotChannels, TotBands, 2); % get general probability of a burst for a given session block (to control for when z-scoring)
+    GenProbBurst_Pooled = zeros(numel(Participants), TotBands, 2);
 
     for Indx_P = 1:numel(Participants)
 
@@ -146,6 +151,11 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
                 % get general probability of bursts by band
                 GenProbBurst(Indx_P, :, Indx_B, :) = ...
                     tallyTimepoints(squeeze(GenProbBurst(Indx_P, :, Indx_B, :)), BT);
+
+                BT_Pooled = double(squeeze(any(BT==1, 1)));
+                BT_Pooled(isnan(BT(1, :))) = nan;
+                 GenProbBurst_Pooled(Indx_P, Indx_B, :) = ...
+                    tallyTimepoints(squeeze(GenProbBurst_Pooled(Indx_P, Indx_B, :))', BT_Pooled);
             end
 
             % pool sessions
@@ -166,13 +176,21 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
             % for each channel
             for Indx_Ch = 1:TotChannels
-
                 [ProbBurst_Stim(Indx_P, :, Indx_Ch, Indx_B, :), ...
                     ProbBurst_Resp(Indx_P, :, Indx_Ch, Indx_B, :)] = ...
                     getProbTrialType(squeeze(AllTrials_Stim(:, Indx_Ch, Indx_B, :)), ...
                     squeeze(AllTrials_Resp(:, Indx_Ch, Indx_B, :)), AllTrials_Table, ...
                     minNanProportion, minTrials);
             end
+
+            % same for pooled
+            
+              [ProbBurst_Stim_Pooled(Indx_P, :, Indx_B, :), ...
+                    ProbBurst_Resp_Pooled(Indx_P, :, Indx_B, :)] = ...
+                    getProbTrialType(...
+                    poolTrials(squeeze(AllTrials_Stim(:, :, Indx_B, :))), ...
+                    poolTrials(squeeze(AllTrials_Resp(:, :, Indx_B, :))), ...
+                    AllTrials_Table, minNanProportion, minTrials);
         end
 
         disp(['Finished ', Participants{Indx_P}])
@@ -180,11 +198,13 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
     % calculate general probabilities
     GenProbBurst = GenProbBurst(:, :, :, 1)./GenProbBurst(:, :, :, 2); % P x Ch x B x t
+    GenProbBurst_Pooled = GenProbBurst_Pooled(:, :, 1)./GenProbBurst_Pooled(:, :, 2); % P x B x t
 
     %%% save
     save(fullfile(Pool, ['ProbBurst_', SessionBlockLabels{Indx_SB}, TitleTag, '.mat']), ...
         'ProbBurst_Stim', 'ProbBurst_Resp', ...
-        't_window', 'Chanlocs', 'GenProbBurst')
+        't_window', 'Chanlocs', 'GenProbBurst', 'GenProbBurst_Pooled', ...
+        'ProbBurst_Resp_Pooled', 'ProbBurst_Stim_Pooled')
 end
 
 

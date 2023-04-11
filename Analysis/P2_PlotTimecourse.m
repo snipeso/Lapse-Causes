@@ -17,11 +17,11 @@ StatsP = P.StatsP;
 Windows = P.Parameters.Topography.Windows;
 
 
-SmoothFactor = 0.3; % in seconds, smooth signal to be visually pleasing
+SmoothFactor = 0.5; % in seconds, smooth signal to be visually pleasing
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 ZScore = false; % best only z-scored; when raw, it's the average prob for each individual channel
-SessionGroup = 'BL';
+SessionGroup = 'SD';
 
 TitleTag = SessionGroup;
 if CheckEyes
@@ -39,7 +39,8 @@ end
 %%% load data
 
 %%% microsleep data
-load(fullfile(Paths.Pool, 'Eyes', ['ProbMicrosleep_', SessionGroup, MicrosleepTag, '.mat']), 'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't_window', 'GenProbMicrosleep')
+load(fullfile(Paths.Pool, 'Eyes', ['ProbMicrosleep_', SessionGroup, MicrosleepTag, '.mat']), ...
+    'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't_window', 'GenProbMicrosleep')
 t_microsleep = t_window;
 
 % remove all data from participants missing any of the trial types
@@ -51,10 +52,9 @@ sProbMicrosleep_Stim = smoothFreqs(ProbMicrosleep_Stim, t_microsleep, 'last', Sm
 sProbMicrosleep_Resp = smoothFreqs(ProbMicrosleep_Resp, t_microsleep, 'last', SmoothFactor);
 
 %%% burst data
-load(fullfile(Paths.Pool, 'EEG', ['ProbBurst_', TitleTag, '.mat']), 'ProbBurst_Stim', ...
-    'ProbBurst_Resp', 't_window',  'GenProbBurst', 'Chanlocs')
+load(fullfile(Paths.Pool, 'EEG', ['ProbBurst_', TitleTag, '.mat']), 'ProbBurst_Stim_Pooled', ...
+    'ProbBurst_Resp_Pooled', 't_window',  'GenProbBurst_Pooled', 'Chanlocs')
 t_burst = t_window;
-TotChannels = size(GenProbBurst, 2);
 
 % remove all data from participants missing any of the trial types
 % for Indx_B = 1:2
@@ -65,6 +65,9 @@ TotChannels = size(GenProbBurst, 2);
 %     end
 % end
 
+% smooth signals
+sProbBurst_Stim = smoothFreqs(ProbBurst_Stim_Pooled, t_burst, 'last', SmoothFactor); % P x TT x B x t
+sProbBurst_Resp = smoothFreqs(ProbBurst_Resp_Pooled, t_burst, 'last', SmoothFactor);
 %  z-score
 if ZScore
 
@@ -76,14 +79,15 @@ if ZScore
 
     % z-score burst data
     [zProbBurst_Stim, zGenProbBurst] = ...
-        zscoreTimecourse(ProbBurst_Stim, GenProbBurst, 4);
+        zscoreTimecourse(sProbBurst_Stim, GenProbBurst_Pooled, 3);
     [zProbBurst_Resp, ~] = ...
-        zscoreTimecourse(ProbBurst_Resp, GenProbBurst, 4);
+        zscoreTimecourse(sProbBurst_Resp, GenProbBurst_Pooled, 3);
 
     TitleTag = [TitleTag, '_z-score'];
     zTag = ' (z-scored)';
     EC_Range = [-2 5.5];
     Range = [-2 1.5];
+
 else
 
     % z-score microsleep data
@@ -92,30 +96,20 @@ else
     [zProbMicrosleep_Resp, ~] = ...
         meanscoreTimecourse(sProbMicrosleep_Resp, GenProbMicrosleep, []);
 
-    % z-score burst data
+    % mean-shift burst data
     [zProbBurst_Stim, zGenProbBurst] = ...
-        meanscoreTimecourse(ProbBurst_Stim, GenProbBurst, 4);
+        meanscoreTimecourse(sProbBurst_Stim, GenProbBurst_Pooled, 3);
     [zProbBurst_Resp, ~] = ...
-        meanscoreTimecourse(ProbBurst_Resp, GenProbBurst, 4);
+        meanscoreTimecourse(sProbBurst_Resp, GenProbBurst_Pooled, 3);
 
     TitleTag = [TitleTag, '_raw'];
     zTag = '';
-    EC_Range = [-.15 .2];
-    Range = [-.06 .04];
+%     EC_Range = [-100 300];
+%     Range = [-100 100];
+
+EC_Range = [-.1 .3];
+Range = [-.2 .2];
 end
-
-% average channels
-zProbBurst_Stim = squeeze(mean(zProbBurst_Stim, 3, 'omitnan'));
-zProbBurst_Resp = squeeze(mean(zProbBurst_Resp, 3, 'omitnan'));
-
-
-% smooth signals
-zProbBurst_Stim = smoothFreqs(zProbBurst_Stim, t_burst, 'last', SmoothFactor); % P x TT x B x t
-zProbBurst_Resp = smoothFreqs(zProbBurst_Resp, t_burst, 'last', SmoothFactor);
-
-
-
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
