@@ -27,7 +27,7 @@ TotChannels = 123;
 TotBands = 2;
 
 CheckEyes = true; % check if person had eyes open or closed
-Closest = true; % only use closest trials
+Closest = false; % only use closest trials
 
 % locations
 Pool = fullfile(Paths.Pool, 'EEG'); % place to save matrices so they can be plotted in next script
@@ -55,6 +55,9 @@ t_window = linspace(TrialWindow(1), TrialWindow(2), fs*(TrialWindow(2)-TrialWind
 TitleTag = '';
 if CheckEyes
     TitleTag = [TitleTag, '_EO'];
+    EO = Trials.EC_Stimulus == 0;
+else
+    EO = true(size(Trials, 1), 1);
 end
 
 if Closest
@@ -83,7 +86,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
             % trial info for current recording
             CurrentTrials = find(strcmp(Trials.Participant, Participants{Indx_P}) & ...
-                strcmp(Trials.Session, Sessions{Indx_S}) & Trials.Radius < Max_Radius);
+                strcmp(Trials.Session, Sessions{Indx_S}) & Trials.Radius < Max_Radius & EO);
             nTrials = nnz(CurrentTrials);
 
 

@@ -15,13 +15,12 @@ Paths = P.Paths;
 StatsP = P.StatsP;
 Bands = P.Bands;
 BandLabels = fieldnames(Bands);
+Windows_Stim = P.Parameters.Topography.Windows;
 
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionGroup = 'SD';
-
-Windows_Stim = [-2 0; 0 0.3; 0.3 1; 2 4];
-
+ZScore = false; % best only z-scored; when raw, it's the average prob for each individual channel
+SessionGroup = 'BL';
 
 Pool = fullfile(Paths.Pool, 'EEG');
 
@@ -41,17 +40,28 @@ load(fullfile(Paths.Pool, 'EEG', ['ProbBurst_', TitleTag, '.mat']), 'ProbBurst_S
     'ProbBurst_Resp', 't_window',  'GenProbBurst', 'Chanlocs')
 TotChannels = size(GenProbBurst, 2);
 
-% remove all data from participants missing any of the trial types
-for Indx_B = 1:2
-    for Indx_Ch = 1:TotChannels
-        ProbBurst_Stim(:, :, Indx_Ch, Indx_B, :)= ...
-            removeBlankParticipants(squeeze(ProbBurst_Stim(:, :, Indx_Ch, Indx_B, :)));
-    end
-end
+% % remove all data from participants missing any of the trial types
+% for Indx_B = 1:2
+%     for Indx_Ch = 1:TotChannels
+%         ProbBurst_Stim(:, :, Indx_Ch, Indx_B, :)= ...
+%             removeBlankParticipants(squeeze(ProbBurst_Stim(:, :, Indx_Ch, Indx_B, :)));
+%     end
+% end
 
-%  z-score
-[zProbBurst_Stim, zGenProbBurst] = ...
-    zscoreTimecourse(ProbBurst_Stim, GenProbBurst, 4);
+if ZScore
+    %  z-score
+    [zProbBurst_Stim, zGenProbBurst] = ...
+        zscoreTimecourse(ProbBurst_Stim, GenProbBurst, 4);
+    TitleTag = [TitleTag, '_z-score'];
+    zTag = ' (z-scored)';
+    CLims = [-8 8];
+else
+    zProbBurst_Stim = ProbBurst_Stim;
+    zGenProbBurst = GenProbBurst;
+    TitleTag = [TitleTag, '_raw'];
+    zTag = '';
+    CLims = [-7 7];
+end
 
 %%% reduce to windows
 nWindows = size(Windows_Stim, 1);
@@ -79,7 +89,6 @@ PlotProps.Figure.Padding = 15;
 PlotProps.Colorbar.Location = 'north';
 Grid = [5 2];
 miniGrid = [3 nWindows];
-CLims = [-8 8];
 
 Types = [3 2 1];
 WindowTitles = {["Pre", "[-2, 0]"], ["Stimulus", "[0, 0.3]"], ["Response", "[0.3 1]"], ["Post", "[2 4]"]};
@@ -103,7 +112,12 @@ for Indx_B = 1:2
             PlotProps.Axes.yPadding = 5;
 
             subfigure(Space, miniGrid, [Indx_TT, Indx_W], [], false, '', PlotProps);
+            PlotProps.Stats.PlotN = false;
+            if Indx_W == 1
+                PlotProps.Stats.PlotN = true;
+            end
             Stats = topoDiff(Baseline, Data, Chanlocs, CLims, StatsP, PlotProps);
+            OldP = Stats.p;
             Stats.p = Stats.p_fdr';
             % plotTopoplot(mean(Baseline, 1, 'omitnan'), [], Chanlocs, [], 'zvalues', 'Linear', PlotProps)
             % colorbar
@@ -139,7 +153,7 @@ for Indx_B = 1:2
     A = subfigure([], Grid, [5, Indx_B], [], false, '', PlotProps);
     A.Position(4) = A.Position(4)*2;
     A.Position(2) = A.Position(2)-.1;
-    plotColorbar('Divergent', CLims, [BandLabels{Indx_B}, ' t-values'], PlotProps)
+    plotColorbar('Divergent', CLims, [BandLabels{Indx_B}, [' t-values', zTag]], PlotProps)
 end
 saveFig(['Figure_4_', TitleTag], Paths.PaperResults, PlotProps)
 

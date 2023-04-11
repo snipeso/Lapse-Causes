@@ -7,11 +7,13 @@ function P = analysisParameters()
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
 
-P.Parameters.MinTots = 10;
-P.Parameters.MinTypes = 5; % minimum number of trials for a given type for some sub-analyses
+P.Parameters.MinTots = 20;
+P.Parameters.MinTypes = 10; % minimum number of trials for a given type for some sub-analyses
 P.Parameters.MinNanProportion = 0.5;
 
 P.Parameters.Timecourse.Window = [-2, 4];
+P.Parameters.Topography.Windows = [-2 0; 0 0.3; 0.3 1; 2 4];
+
 
 P.Parameters.EC_ConfidenceThreshold = 0.5;
 P.Parameters.fs = 250;
