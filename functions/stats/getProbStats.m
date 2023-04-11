@@ -36,7 +36,7 @@ if exist('Plot', 'var') && Plot
     xlabel('Expected joint probability')
     xlim([0 1])
     ylim([0 1])
-
+    axis square
 end
 
 end

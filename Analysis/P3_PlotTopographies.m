@@ -20,7 +20,7 @@ Windows_Stim = P.Parameters.Topography.Windows;
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 ZScore = false; % best only z-scored; when raw, it's the average prob for each individual channel
-SessionGroup = 'SD';
+SessionGroup = 'BL';
 
 Pool = fullfile(Paths.Pool, 'EEG');
 

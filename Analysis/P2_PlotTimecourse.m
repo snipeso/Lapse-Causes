@@ -21,7 +21,7 @@ SmoothFactor = 0.3; % in seconds, smooth signal to be visually pleasing
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 ZScore = false; % best only z-scored; when raw, it's the average prob for each individual channel
-SessionGroup = 'SD';
+SessionGroup = 'BL';
 
 TitleTag = SessionGroup;
 if CheckEyes
@@ -96,11 +96,11 @@ else
 
     TitleTag = [TitleTag, '_raw'];
     zTag = '';
-%     EC_Range = [-100 300];
-%     Range = [-100 100];
+    %     EC_Range = [-100 300];
+    %     Range = [-100 100];
 
-EC_Range = [-.25 .3];
-Range = [-.4 .2];
+    EC_Range = [-.35 .35];
+    Range = [-.35 .35];
 end
 
 
@@ -257,6 +257,6 @@ for Indx_B = 1:2
 end
 
 Window =  dsearchn(t_burst', [1 2]');
-  Prob = squeeze(mean(zProbBurst_Stim(:, :, 2, Window(1):Window(2)), 4, 'omitnan')); % P x TT
+Prob = squeeze(mean(zProbBurst_Stim(:, :, 2, Window(1):Window(2)), 4, 'omitnan')); % P x TT
 Stats = pairedttest(zGenProbBurst(:, 2), Prob(:, 1), StatsP);
-            dispStat(Stats, [1 1], ['Intermezzo ', TrialTypes{1}]);
+dispStat(Stats, [1 1], ['Intermezzo ', TrialTypes{1}]);
