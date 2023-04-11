@@ -21,7 +21,7 @@ SmoothFactor = 0.5; % in seconds, smooth signal to be visually pleasing
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 ZScore = false; % best only z-scored; when raw, it's the average prob for each individual channel
-SessionGroup = 'SD';
+SessionGroup = 'BL';
 
 TitleTag = SessionGroup;
 if CheckEyes
@@ -107,8 +107,8 @@ else
 %     EC_Range = [-100 300];
 %     Range = [-100 100];
 
-EC_Range = [-.1 .3];
-Range = [-.2 .2];
+EC_Range = [-.3 .3];
+Range = [-.3 .3];
 end
 
 
