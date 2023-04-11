@@ -17,11 +17,11 @@ StatsP = P.StatsP;
 Windows = P.Parameters.Topography.Windows;
 
 
-SmoothFactor = 0.5; % in seconds, smooth signal to be visually pleasing
+SmoothFactor = 0.3; % in seconds, smooth signal to be visually pleasing
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 ZScore = false; % best only z-scored; when raw, it's the average prob for each individual channel
-SessionGroup = 'BL';
+SessionGroup = 'SD';
 
 TitleTag = SessionGroup;
 if CheckEyes
@@ -56,14 +56,6 @@ load(fullfile(Paths.Pool, 'EEG', ['ProbBurst_', TitleTag, '.mat']), 'ProbBurst_S
     'ProbBurst_Resp_Pooled', 't_window',  'GenProbBurst_Pooled', 'Chanlocs')
 t_burst = t_window;
 
-% remove all data from participants missing any of the trial types
-% for Indx_B = 1:2
-%     for Indx_Ch = 1:TotChannels
-%         [ProbBurst_Stim(:, :, Indx_Ch, Indx_B, :), ProbBurst_Resp(:, :, Indx_Ch, Indx_B, :)] = ...
-%             removeBlankParticipants(squeeze(ProbBurst_Stim(:, :, Indx_Ch, Indx_B, :)), ...
-%             squeeze(ProbBurst_Resp(:, :, Indx_Ch, Indx_B, :)));
-%     end
-% end
 
 % smooth signals
 sProbBurst_Stim = smoothFreqs(ProbBurst_Stim_Pooled, t_burst, 'last', SmoothFactor); % P x TT x B x t
@@ -107,8 +99,8 @@ else
 %     EC_Range = [-100 300];
 %     Range = [-100 100];
 
-EC_Range = [-.3 .3];
-Range = [-.3 .3];
+EC_Range = [-.25 .3];
+Range = [-.4 .2];
 end
 
 
@@ -131,12 +123,12 @@ figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*1.2, PlotPr
 %%% stimulus locked
 
 % eyeclosure
-
+PlotProps.Stats.PlotN = true;
 subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
 Stats = plotTimecourse(t_microsleep, flip(zProbMicrosleep_Stim, 2), zGenProbMicrosleep, ...
     EC_Range, flip(TallyLabels), 'Stimulus', getColors(3), StatsP, PlotProps);
 ylim(EC_Range)
-ylabel(['Proportion of EC', zTag])
+ylabel(['\Delta EC', zTag])
 
 disp(['A: N=', num2str(mode(Stats.df(:))+1)])
 
@@ -145,7 +137,7 @@ subfigure([], Grid, [1 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
 Stats = plotTimecourse(t_burst, flip(squeeze(zProbBurst_Stim(:, :, 1, :)), 2), ...
     zGenProbBurst(:, 1), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps);
 ylim(Range)
-ylabel(['Proportion of theta', zTag])
+ylabel(['\Delta theta', zTag])
 legend off
 
 disp(['B: N=',  num2str(mode(Stats.df(:))+1)])
@@ -155,7 +147,7 @@ subfigure([], Grid, [1 3], [], true, PlotProps.Indexes.Letters{3}, PlotProps);
 Stats = plotTimecourse(t_burst, flip(squeeze(zProbBurst_Stim(:, :, 2, :)), 2),  ...
     zGenProbBurst(:, 2), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps);
 ylim(Range)
-ylabel(['Proportion of alpha', zTag])
+ylabel(['\Delta alpha', zTag])
 legend off
 
 disp(['C: N=', num2str(mode(Stats.df(:))+1)])
@@ -168,7 +160,7 @@ subfigure([], Grid, [2 1], [], true, PlotProps.Indexes.Letters{4}, PlotProps);
 Stats = plotTimecourse(t_microsleep, flip(zProbMicrosleep_Resp, 2), zGenProbMicrosleep, ...
     EC_Range, flip(TallyLabels), 'Response', getColors(3), StatsP, PlotProps);
 ylim(EC_Range)
-ylabel(['Proportion of EC', zTag])
+ylabel(['\Delta EC', zTag])
 legend off
 
 disp(['D: N=', num2str(mode(Stats.df(:))+1)])
@@ -178,7 +170,7 @@ subfigure([], Grid, [2 2], [], true, PlotProps.Indexes.Letters{5}, PlotProps);
 Stats = plotTimecourse(t_burst, flip(squeeze(zProbBurst_Resp(:, :, 1, :)), 2), ...
     zGenProbBurst(:, 1), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps);
 ylim(Range)
-ylabel(['Proportion of theta', zTag])
+ylabel(['\Delta theta', zTag])
 legend off
 
 disp(['E: N=', num2str(mode(Stats.df(:))+1)])
@@ -189,13 +181,13 @@ subfigure([], Grid, [2 3], [], true, PlotProps.Indexes.Letters{6}, PlotProps);
 Stats = plotTimecourse(t_burst, flip(squeeze(zProbBurst_Resp(:, :, 2, :)), 2),  ...
     zGenProbBurst(:, 2), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps);
 ylim(Range)
-ylabel(['Proportion of alpha', zTag])
+ylabel(['\Delta alpha', zTag])
 legend off
 
 disp(['F: N=', num2str(mode(Stats.df(:))+1)])
 
 
-% saveFig(['Figure_3_', TitleTag], Paths.PaperResults, PlotProps)
+saveFig(['Figure_3_', TitleTag], Paths.PaperResults, PlotProps)
 
 
 
