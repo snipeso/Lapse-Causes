@@ -26,116 +26,78 @@ load(fullfile(Paths.Pool, 'Tasks', [Task, '_AllTrials.mat']), 'Trials')
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Gather data
 
-% trial indexing
-Q = quantile(Trials.Radius, [1/3 2/3]);
-Closest = Trials.Radius<=Q(1);
-Furthest = Trials.Radius>=Q(2);
 
-EC_Stim = Trials.EC_Stimulus == 1;
-EC_Pre = Trials.EC_Pre == 1;
-
-BL = ismember(Trials.Session, SessionBlocks.BL);
-SD = ismember(Trials.Session, SessionBlocks.SD);
-
-Theta_Stim = Trials.Theta_Stimulus == 1;
-NotTheta_Stim = Trials.Theta_Stimulus == 0;
-Alpha_Stim = Trials.Alpha_Stimulus == 1;
-NotAlpha_Stim = Trials.Alpha_Stimulus == 0;
-
-Theta_Pre = Trials.Theta_Pre == 1;
-NotTheta_Pre = Trials.Theta_Pre == 0;
-Alpha_Pre = Trials.Alpha_Pre == 1;
-NotAlpha_Pre = Trials.Alpha_Pre == 0;
-
-Lapses = Trials.Type==1;
-
-NanEyes = isnan(Trials.EC_Stimulus);
-NanEEG = isnan(Trials.Theta_Stimulus);
-
-
-%% Gather data
+Windows = {'Pre', 'Stimulus', 'Response'};
 
 Plot = false;
 AllStats = struct();
 xLabels = {};
 
-% eye status (compare furthest and closest trials with EO)
-ProbType = squeeze(jointTally(Trials, ~NanEyes & SD, EC_Stim, Lapses, Participants, ...
-    Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'Eyes closed – SD');
+for Indx_W = 1:numel(Windows)
 
-ProbType = squeeze(jointTally(Trials, ~NanEyes & BL, EC_Stim, Lapses, Participants, ...
-    Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'Eyes closed – BL');
+    Window = Windows{Indx_W};
 
-% radius
-ProbType = squeeze(jointTally(Trials, (Furthest | Closest) & ~EC_Stim, Furthest==1, Lapses, Participants, ...
-    Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'Distance');
+    % trial indexing
+    Q = quantile(Trials.Radius, [1/3 2/3]);
+    Closest = Trials.Radius<=Q(1);
+    Furthest = Trials.Radius>=Q(2);
 
+    EC = Trials.(['EC_', Window]) == 1;
 
-% alpha
-ProbType = squeeze(jointTally(Trials, SD & (Alpha_Stim | NotAlpha_Stim) & ~NanEEG & ~EC_Stim, Alpha_Stim, Lapses, Participants, ...
-    Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'Alpha burst – SD');
+    BL = ismember(Trials.Session, SessionBlocks.BL);
+    SD = ismember(Trials.Session, SessionBlocks.SD);
 
-ProbType = squeeze(jointTally(Trials, BL & (Alpha_Stim | NotAlpha_Stim) & ~NanEEG & ~EC_Stim, Alpha_Stim, Lapses, Participants, ...
-    Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'Alpha burst – BL');
+    Theta = Trials.(['Theta_', Window]) == 1;
+    NotTheta = Trials.(['Theta_', Window]) == 0;
+    Alpha = Trials.(['Alpha_', Window]) == 1;
+    NotAlpha = Trials.(['Alpha_', Window]) == 0;
+
+    Lapses = Trials.Type==1;
+
+    NanEyes = isnan(Trials.EC_Stimulus); % only ignore trials with EC during stimulus
+    NanEEG = isnan(Trials.(['Theta_', Window])); % ignore trials depending on window of interest
 
 
-% theta
-ProbType = squeeze(jointTally(Trials, SD & (Theta_Stim | NotTheta_Stim) & ~NanEEG & ~EC_Stim, Theta_Stim, Lapses, Participants, ...
-    Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'Theta burst – SD');
-
-ProbType = squeeze(jointTally(Trials, BL & (Theta_Stim | NotTheta_Stim) & ~NanEEG & ~EC_Stim, Theta_Stim, Lapses, Participants, ...
-    Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'Theta burst – BL');
 
 
-%%% figure 2: pre-stim
+    %%% gather data
 
-% eyes
-ProbType = squeeze(jointTally(Trials, ~NanEyes & SD, EC_Pre, Lapses, Participants, ...
-    Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'Eyes closed – SD');
+    % eye status (compare furthest and closest trials with EO)
+    ProbType = squeeze(jointTally(Trials, ~NanEyes & SD, EC, Lapses, Participants, ...
+        Sessions, SessionGroups));
+    AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
+    xLabels = cat(1, xLabels, 'Eyes closed – SD');
 
-ProbType = squeeze(jointTally(Trials, ~NanEyes & BL, EC_Pre, Lapses, Participants, ...
-    Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'Eyes closed – BL');
-
-% alpha
-ProbType = squeeze(jointTally(Trials, SD & (Alpha_Pre | NotAlpha_Pre) & ~NanEEG & ~EC_Stim, Alpha_Stim, Lapses, Participants, ...
-    Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'Alpha burst – SD');
-
-ProbType = squeeze(jointTally(Trials, BL & (Alpha_Pre | NotAlpha_Pre) & ~NanEEG & ~EC_Stim, Alpha_Stim, Lapses, Participants, ...
-    Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'Alpha burst – BL');
+    ProbType = squeeze(jointTally(Trials, ~NanEyes & BL, EC, Lapses, Participants, ...
+        Sessions, SessionGroups));
+    AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
+    xLabels = cat(1, xLabels, 'Eyes closed – BL');
 
 
-% theta
-ProbType = squeeze(jointTally(Trials, SD & (Theta_Pre | NotTheta_Pre) & ~NanEEG & ~EC_Stim, Theta_Stim, Lapses, Participants, ...
-    Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'Theta burst – SD');
+    % alpha
+    ProbType = squeeze(jointTally(Trials, SD & (Alpha | NotAlpha) & ~NanEEG & ~EC, Alpha, Lapses, Participants, ...
+        Sessions, SessionGroups));
+    AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
+    xLabels = cat(1, xLabels, 'Alpha burst – SD');
 
-ProbType = squeeze(jointTally(Trials, BL & (Theta_Pre | NotTheta_Pre) & ~NanEEG & ~EC_Stim, Theta_Stim, Lapses, Participants, ...
-    Sessions, SessionGroups));
-AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
-xLabels = cat(1, xLabels, 'Theta burst – BL');
+    ProbType = squeeze(jointTally(Trials, BL & (Alpha | NotAlpha) & ~NanEEG & ~EC, Alpha, Lapses, Participants, ...
+        Sessions, SessionGroups));
+    AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
+    xLabels = cat(1, xLabels, 'Alpha burst – BL');
+
+
+    % theta
+    ProbType = squeeze(jointTally(Trials, SD & (Theta | NotTheta) & ~NanEEG & ~EC, Theta, Lapses, Participants, ...
+        Sessions, SessionGroups));
+    AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
+    xLabels = cat(1, xLabels, 'Theta burst – SD');
+
+    ProbType = squeeze(jointTally(Trials, BL & (Theta | NotTheta) & ~NanEEG & ~EC, Theta, Lapses, Participants, ...
+        Sessions, SessionGroups));
+    AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
+    xLabels = cat(1, xLabels, 'Theta burst – BL');
+
+end
 
 
 [sig, ~, ~, p_fdr] = fdr_bh([AllStats.p], StatsP.Alpha, StatsP.ttest.dep);
@@ -147,7 +109,6 @@ figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width, PlotProp
 
 Legend = {};
 Colors = [getColors([1 2], '', 'blue'); % EC
-    getColors(1, '', 'green'); % distance
   getColors([1 2], '', 'yellow'); % alpha
     getColors([1 2], '', 'red'); % theta
 getColors([1 2], '', 'blue'); % EC
@@ -155,8 +116,8 @@ getColors([1 2], '', 'blue'); % EC
     getColors([1 2], '', 'red'); % theta
     ];
 
-RangeA = 1:7; % for figure A
-RangeB = 8:13; % for figure A
+RangeA = 1:6; % for figure A
+RangeB = 7:12; % for figure A
 
 Orientation = 'vertical';
 PlotProps = P.Manuscript;

@@ -16,11 +16,11 @@ Parameters = P.Parameters;
 Bands = P.Bands;
 fs = Parameters.fs; % sampling rate of data
 
-Task = 'PVT'; % could be LAT or PVT
+Task = 'LAT'; % could be LAT or PVT
 
 % Trial parameters
-Windows = [-2 0; 0 .3]; % window in which to see if there is an event or not
-WindowColumns = {'Pre', 'Stimulus'};
+Windows = [-2 0; 0 .3; .3 1]; % window in which to see if there is an event or not
+WindowColumns = {'Pre', 'Stimulus', 'Response'};
 MinWindow = 1/2; % minimum proportion of window needed to have event to count
 
 
