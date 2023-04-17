@@ -21,10 +21,21 @@ Stats = pairedWilcoxon(ExpectedJointProb, ActualJointProb);
 
 % MinProb =  min(ProbType(:, [1 2]), [], 2);
 MinProb =  ProbType(:, 1);
-Prcnt = (ProbType(:, 3)-ExpectedJointProb)./(MinProb-ExpectedJointProb);
+
+% split if value above or below expected prob
+IsLarger = ActualJointProb>ExpectedJointProb;
+Prcnt = (ProbType(:, 3)-ExpectedJointProb)./ExpectedJointProb;
+Prcnt(IsLarger) = (ProbType(IsLarger, 3)-ExpectedJointProb(IsLarger))./...
+    (MinProb(IsLarger)-ExpectedJointProb(IsLarger));
+
+Zeros = (ProbType(:, 3)-ExpectedJointProb)==0;
+Prcnt(Zeros) = 0;
+Nans = any(isnan(ProbType), 2) | (MinProb-ExpectedJointProb)==0; % if there's no instance of that event
+Prcnt(Nans) = nan;
 
 Stats.prcnt = mean(Prcnt, 'omitnan');
 Stats.prcntIQ = quantile(Prcnt, [.25 .75])';
+Stats.prcntN = nnz(~isnan(Prcnt));
 
 
 if exist('Plot', 'var') && Plot

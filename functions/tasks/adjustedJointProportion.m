@@ -9,7 +9,7 @@ if isempty(TrialSubset)
     TrialSubset = ones(size(Trials, 1), 1);
 end
 
-AJP = nan(numel(Participants), 2);
+AJP = nan(numel(Participants), 3);
 
 for Indx_P = 1:numel(Participants)
 
@@ -34,12 +34,17 @@ for Indx_P = 1:numel(Participants)
     OJProp =  nnz(AllTrials & OJ)/nnz(AllTrials);
 
     % expected joint proportion
-    EJProp = TTProp * EvProp;
+%     EJProp = TTProp * EvProp;
 
-    % adjust to proportion of event
-    AJP(Indx_P, 1) = EJProp/EvProp; %NB: this is the same as TTprop
-    AJP(Indx_P, 2) = OJProp/EvProp;
-    if OJProp/EvProp>1 % if EVProp ==0, this gets to infinity
- AJP(Indx_P, 2) = 1;
-    end
+    AJP(Indx_P, 1) = EvProp;
+    AJP(Indx_P, 2) = TTProp;
+    AJP(Indx_P, 3) =OJProp;
+
+    %
+    %     % adjust to proportion of event
+    %     AJP(Indx_P, 1) = EJProp/EvProp; %NB: this is the same as TTprop
+    %     AJP(Indx_P, 2) = OJProp/EvProp;
+    %     if OJProp/EvProp>1 % if EVProp ==0, this gets to infinity
+    %  AJP(Indx_P, 2) = 1;
+    %     end
 end
