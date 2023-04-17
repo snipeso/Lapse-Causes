@@ -33,7 +33,7 @@ Plot = false;
 AllStats = struct();
 xLabels = {};
 
-for Indx_W = 3 %1:numel(Windows)
+for Indx_W = 2%1:numel(Windows)
 
     Window = Windows{Indx_W};
 
@@ -52,12 +52,11 @@ for Indx_W = 3 %1:numel(Windows)
     Alpha = Trials.(['Alpha_', Window]) == 1;
     NotAlpha = Trials.(['Alpha_', Window]) == 0;
 
-    Lapses = Trials.Type==1;
+%     Lapses = Trials.Type==1;
+ Lapses = Trials.Type==3;
 
     NanEyes = isnan(Trials.EC_Stimulus); % only ignore trials with EC during stimulus
     NanEEG = isnan(Trials.(['Theta_', Window])); % ignore trials depending on window of interest
-
-
 
 
     %%% gather data
@@ -65,6 +64,7 @@ for Indx_W = 3 %1:numel(Windows)
     % eye status (compare furthest and closest trials with EO)
     ProbType = squeeze(jointTally(Trials, ~NanEyes & SD, EC, Lapses, Participants, ...
         Sessions, SessionGroups));
+    JP = getEventProb(ProbType);
     AllStats = catStruct(AllStats, getProbStats(ProbType, Plot));
     xLabels = cat(1, xLabels, 'Eyes closed – SD');
 

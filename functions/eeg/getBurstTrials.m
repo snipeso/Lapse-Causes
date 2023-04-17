@@ -20,6 +20,7 @@ BandLabels = fieldnames(Bands);
 for Indx_B = 1:numel(BandLabels)
     for Indx_W = 1:size(Windows, 1)
         Trials.([BandLabels{Indx_B},  '_', WindowColumns{Indx_W}]) = nan(size(Trials, 1), 1);
+         Trials.([BandLabels{Indx_B},  '_', WindowColumns{Indx_W}, '_BR']) = nan(size(Trials, 1), 1);
     end
 end
 

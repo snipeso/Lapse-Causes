@@ -18,6 +18,7 @@ Sessions = unique(Trials.Session);
 
 for Indx_W = 1:size(Windows, 1) % important ot make sure blank recordings are nans
     Trials.(['EC',  '_', WindowColumns{Indx_W}]) = nan(size(Trials, 1), 1);
+    Trials.(['EC',  '_', WindowColumns{Indx_W}, '_BR']) = nan(size(Trials, 1), 1);
 end
 
 for Indx_P = 1:numel(Participants)
