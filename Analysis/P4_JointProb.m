@@ -25,7 +25,7 @@ load(fullfile(Paths.Pool, 'Tasks', [Task, '_AllTrials.mat']), 'Trials')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Gather data
-
+%%
 
 Windows = {'Pre', 'Stimulus', 'Response'};
 
@@ -33,7 +33,7 @@ Plot = false;
 AllStats = struct();
 xLabels = {};
 
-for Indx_W = 1:numel(Windows)
+for Indx_W = 3 %1:numel(Windows)
 
     Window = Windows{Indx_W};
 
@@ -105,61 +105,55 @@ sig = [AllStats.p] <.05;
 
 %% plot effect sizes
 
-figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.4])
-
-Legend = {};
-Colors = [getColors([1 2], '', 'blue'); % EC
-  getColors([1 2], '', 'yellow'); % alpha
-    getColors([1 2], '', 'red'); % theta
-getColors([1 2], '', 'blue'); % EC
-      getColors([1 2], '', 'yellow'); % alpha
-    getColors([1 2], '', 'red'); % theta
-    ];
-
-RangeA = 1:6; % for figure A
-RangeB = 7:12; % for figure A
 
 Orientation = 'vertical';
 PlotProps = P.Manuscript;
 PlotProps.Axes.xPadding = 40;
 PlotProps.Axes.yPadding = 30;
 
-subplot(2, 1, 1)
-plotUFO([AllStats(RangeA).prcnt]', [AllStats(RangeA).prcntIQ]', xLabels(RangeA), ...
-    Legend, Colors(RangeA, :), Orientation, PlotProps)
 
-% plot significance
-Means = [AllStats(RangeA).prcnt];
-Means(~sig(RangeA)) = nan;
+Legend = {};
+Colors = [getColors([1 2], '', 'blue'); % EC
+    getColors([1 2], '', 'yellow'); % alpha
+    getColors([1 2], '', 'red'); % theta
+    ];
 
-scatter(numel(Means):-1:1, Means, 'filled', 'w');
-set(gca,'YAxisLocation','right', 'XAxisLocation', 'bottom');
-ylabel("Increased probability of a lapse due to ... DURING stimulus")
-ylim([-.1 1])
 
-subplot(2, 1, 2)
-plotUFO([AllStats(RangeB).prcnt]', [AllStats(RangeB).prcntIQ]', xLabels(RangeB), ...
-    Legend, Colors(RangeB, :), Orientation, PlotProps)
+WindowLabels = {'BEFORE stimulus', 'DURING stimulus', 'DURING response'};
+TotLines = 6;
+Starts = 1:TotLines:numel(AllStats);
 
-% plot significance
-Means = [AllStats(RangeB).prcnt];
-Means(~sig(RangeB)) = nan;
+figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.6])
 
-scatter(numel(Means):-1:1, Means, 'filled', 'w');
-set(gca,'YAxisLocation','right', 'XAxisLocation', 'bottom');
-ylabel("Increased probability of a lapse due to ... BEFORE stimulus")
-ylim([-.1 1])
+for Indx_W = 1:numel(Windows)
 
+    Range = Starts(Indx_W):Starts(Indx_W)+TotLines-1;
+
+
+    subplot(numel(Windows), 1, Indx_W)
+    plotUFO([AllStats(Range).prcnt]', [AllStats(Range).prcntIQ]', xLabels(Range), ...
+        Legend, Colors, Orientation, PlotProps)
+
+    % plot significance
+    Means = [AllStats(Range).prcnt];
+    Means(~sig(Range)) = nan;
+
+    scatter(numel(Means):-1:1, Means, 'filled', 'w');
+    set(gca,'YAxisLocation','right', 'XAxisLocation', 'bottom');
+    ylabel(['Increased probability of a lapse due to ... ', WindowLabels{Indx_W}])
+    ylim([-.1 1])
+
+end
 
 saveFig('Figure_5', Paths.PaperResults, PlotProps)
 
 
 %% display statistics
-clc
-
-for Indx_S = 1:numel(AllStats)
-    dispStat(AllStats(Indx_S), [1 1], xLabels{Indx_S});    
-end
+% clc
+% 
+% for Indx_S = 1:numel(AllStats)
+%     dispStat(AllStats(Indx_S), [1 1], xLabels{Indx_S});
+% end
 
 
 
