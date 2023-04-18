@@ -16,11 +16,15 @@ StatsP = P.StatsP;
 Bands = P.Bands;
 BandLabels = fieldnames(Bands);
 Windows_Stim = P.Parameters.Topography.Windows;
+WindowTitles = {["Pre", "[-2, 0]"], ["Stimulus", "[0, 0.3]"], ["Response", "[0.3 1]"], ["Post", "[2 4]"]};
+
+Windows_Stim = [-1.5 -.5; -.2 0; 0 .1; .1 .2; .2 .3; .3 .4; .5 .75; .75 1; 1 1.5; 1.5 2];
+WindowTitles = {'-1.5 -.5', '-.2 0', '0 .1', '.1 .2', '.2 .3', '.3 .4', '.5 .75', '.75 1', '1 1.5', '1.5 2'};
 
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 ZScore = false; % best only z-scored; when raw, it's the average prob for each individual channel
-SessionGroup = 'BL';
+SessionGroup = 'SD';
 
 Pool = fullfile(Paths.Pool, 'EEG');
 
@@ -39,6 +43,8 @@ end
 load(fullfile(Paths.Pool, 'EEG', ['ProbBurst_', TitleTag, '.mat']), 'ProbBurst_Stim', ...
     'ProbBurst_Resp', 't_window',  'GenProbBurst', 'Chanlocs')
 TotChannels = size(GenProbBurst, 2);
+
+TitleTag = [TitleTag, '_HR'];
 
 % % remove all data from participants missing any of the trial types
 % for Indx_B = 1:2
@@ -91,16 +97,15 @@ Grid = [5 2];
 miniGrid = [3 nWindows];
 
 Types = [3 2 1];
-WindowTitles = {["Pre", "[-2, 0]"], ["Stimulus", "[0, 0.3]"], ["Response", "[0.3 1]"], ["Post", "[2 4]"]};
-
-figure('Units','centimeters', 'Position',[0 0 PlotProps.Figure.Width*1.3, PlotProps.Figure.Height*.43])
+% 
+% figure('Units','centimeters', 'Position',[0 0 PlotProps.Figure.Width*1.3, PlotProps.Figure.Height*.43])
 for Indx_B = 1:2
 
     PlotProps.Axes.xPadding = 20;
     PlotProps.Axes.yPadding = 20;
-
-    Space = subaxis(Grid, [4 Indx_B], [4 1], PlotProps.Indexes.Letters{Indx_B}, PlotProps);
-    Space(2) = Space(2)-Space(4)*.05;
+figure('Units','normalized', 'Position', [0 0 1 .5])
+%     Space = subaxis(Grid, [4 Indx_B], [4 1], PlotProps.Indexes.Letters{Indx_B}, PlotProps);
+%     Space(2) = Space(2)-Space(4)*.05;
     for Indx_TT = 1:3
 
         % stim windows
@@ -111,7 +116,8 @@ for Indx_B = 1:2
             PlotProps.Axes.xPadding = 5;
             PlotProps.Axes.yPadding = 5;
 
-            subfigure(Space, miniGrid, [Indx_TT, Indx_W], [], false, '', PlotProps);
+%             subfigure(Space, miniGrid, [Indx_TT, Indx_W], [], false, '', PlotProps);
+subfigure([], miniGrid, [Indx_TT, Indx_W], [], false, '', PlotProps);
             PlotProps.Stats.PlotN = false;
             if Indx_W == 1
                 PlotProps.Stats.PlotN = true;
@@ -146,16 +152,18 @@ for Indx_B = 1:2
         end
 
     end
+    saveFig(['Figure_4_', TitleTag, BandLabels{Indx_B}], Paths.PaperResults, PlotProps)
 
-    PlotProps.Axes.xPadding = 20;
-    PlotProps.Axes.yPadding = 20;
 
-    A = subfigure([], Grid, [5, Indx_B], [], false, '', PlotProps);
-    A.Position(4) = A.Position(4)*2;
-    A.Position(2) = A.Position(2)-.1;
-    plotColorbar('Divergent', CLims, [BandLabels{Indx_B}, [' t-values', zTag]], PlotProps)
+%     PlotProps.Axes.xPadding = 20;
+%     PlotProps.Axes.yPadding = 20;
+% 
+%     A = subfigure([], Grid, [5, Indx_B], [], false, '', PlotProps);
+%     A.Position(4) = A.Position(4)*2;
+%     A.Position(2) = A.Position(2)-.1;
+%     plotColorbar('Divergent', CLims, [BandLabels{Indx_B}, [' t-values', zTag]], PlotProps)
 end
-saveFig(['Figure_4_', TitleTag], Paths.PaperResults, PlotProps)
+% saveFig(['Figure_4_', TitleTag], Paths.PaperResults, PlotProps)
 
 
 
