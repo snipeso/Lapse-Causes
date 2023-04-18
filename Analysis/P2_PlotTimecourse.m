@@ -206,11 +206,13 @@ disp('---EC---')
 
 
 for Indx_W = 1:size(Windows, 1)
-    Window = dsearchn(t_microsleep', Windows(Indx_W, :)');
-    Prob = squeeze(mean(zProbMicrosleep_Stim(:, :, Window(1):Window(2)), 3, 'omitnan')); % P x TT
+    for Indx_TT = 1:numel(TrialTypes)
+        Window = dsearchn(t_microsleep', Windows(Indx_W, :)');
+        Prob = squeeze(mean(zProbMicrosleep_Stim(:, :, Window(1):Window(2)), 3, 'omitnan')); % P x TT
 
-    Stats = pairedttest(zGenProbMicrosleep, Prob(:, 1), StatsP);
-    dispStat(Stats, [1 1], [WindowLabels{Indx_W}, ' lapses']);
+        Stats = pairedttest(zGenProbMicrosleep, Prob(:, Indx_TT), StatsP);
+        dispStat(Stats, [1 1], [WindowLabels{Indx_W}, ' ' TrialTypes{Indx_TT}]);
+    end
 end
 
 % mean values
@@ -241,12 +243,12 @@ TrialTypes = {'Lapses', 'Late', 'Correct'};
 for Indx_B = 1:2
 
     disp(BandLabels{Indx_B})
+    for Indx_TT = 1:3
+        for Indx_W  = 1:size(Windows, 1)
 
-    for Indx_W  = 1:size(Windows, 1)
+            Window = dsearchn(t_burst', Windows(Indx_W, :)');
+            Prob = squeeze(mean(zProbBurst_Stim(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
 
-        Window = dsearchn(t_burst', Windows(Indx_W, :)');
-        Prob = squeeze(mean(zProbBurst_Stim(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
-        for Indx_TT = 1:3
             Stats = pairedttest(zGenProbBurst(:, Indx_B), Prob(:, Indx_TT), StatsP);
             dispStat(Stats, [1 1], [WindowLabels{Indx_W}, ' ', TrialTypes{Indx_TT}]);
         end
