@@ -38,8 +38,16 @@ disp(['Not plotted data: ', num2str(NotPlotted(2), '%.2f'), '%'])
 
 % indicate proportion of lapses that are eyes-closed
 EOL = squeeze(Data(:, 2, 1));
- ECL = squeeze(Data(:, 2, 4));
+ECL = squeeze(Data(:, 2, 4));
 
- dispDescriptive( 100*ECL./(EOL+ECL), 'EC lapses:', '% lapses', 0);
+dispDescriptive( 100*ECL./(EOL+ECL), 'EC lapses:', '% lapses', 0);
+dispDescriptive(ECL, 'EC lapses:', '% tot', 0);
 
- dispDescriptive(ECL, 'EC lapses:', '% tot', 0);
+
+% total number of lapses
+Matrix(:, :, 1) =  Matrix(:, :, 1) + Matrix(:, :, 4);
+Matrix = Matrix(:, :, 1:3);
+
+D = 100*Matrix./Tots;
+dispDescriptive(squeeze(D(:, 1, 1)), 'BL lapses:', '% tot', 0);
+dispDescriptive(squeeze(D(:, 2, 1)), 'SD lapses:', '% tot', 0);
