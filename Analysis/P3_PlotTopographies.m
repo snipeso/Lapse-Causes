@@ -108,20 +108,17 @@ for Indx_B = 1:2
             PlotProps.Axes.yPadding = 5;
 
             subfigure(Space, miniGrid, [Indx_TT, Indx_W], [], false, '', PlotProps);
-% subfigure([], miniGrid, [Indx_TT, Indx_W], [], false, '', PlotProps);
             PlotProps.Stats.PlotN = false;
             if Indx_W == 1
                 PlotProps.Stats.PlotN = true;
             end
             Stats = topoDiff(Baseline, Data, Chanlocs, CLims, StatsP, PlotProps);
-            % OldP = Stats.p;
-            % Stats.p = Stats.p_fdr';
-            % plotTopoplot(mean(Baseline, 1, 'omitnan'), [], Chanlocs, [], 'zvalues', 'Linear', PlotProps)
-            % colorbar
             colorbar off
 
             W= WindowTitles{Indx_W};
-            String = strjoin({BandLabels{Indx_B}, TallyLabels{Types(Indx_TT)}, char(W(1))}, ' ');
+            String = strjoin({BandLabels{Indx_B}, TallyLabels{Types(Indx_TT)}, ...
+                  '; tot ch:' num2str(round(100*nnz(Stats.sig)/numel(Stats.sig))), '%', ...
+                'max Ch:', char(W(1))}, ' ');
             dispMaxTChanlocs(Stats, Chanlocs, String);
 
             if Indx_TT ==1
@@ -136,6 +133,13 @@ for Indx_B = 1:2
                     'FontSize', PlotProps.Text.TitleSize, 'FontName', PlotProps.Text.FontName, ...
                     'FontWeight', 'Bold', 'HorizontalAlignment', 'Center', 'Rotation', 90);
             end
+
+            %%% stat of all channels
+            disp('*')
+            Stats = pairedttest(mean(Baseline, 2, 'omitnan'), mean(Data, 2, 'omitnan'), StatsP);
+            dispStat(Stats, [1 1], [BandLabels{Indx_B}, ' ', TallyLabels{Types(Indx_TT)}, ' ',char(W(1))]);
+
+            disp('__________')
         end
 
         if Indx_TT ==1
