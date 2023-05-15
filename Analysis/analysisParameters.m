@@ -47,7 +47,7 @@ P.Sessions_PVT = {'BaselineBeam', 'Session2Beam'};
 
 P.SessionBlocks = SessionBlocks;
 
-Labels.Tally = {'Lapses', 'Late', 'Correct'};
+Labels.Tally = {'Lapses', 'Slow', 'Fast'};
 Labels.EyeType = [0 1];
 
 Labels.Task = 'LAT';

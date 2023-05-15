@@ -11,6 +11,11 @@ sData = nan(Dims);
 switch FreqDim
     case 'last'
         switch numel(Dims)
+            case 2
+                   for Indx_P = 1:Dims(1)
+                            sData(Indx_P, :) = smoothF(Data(Indx_P, :), Freqs, SmoothSpan);
+                end
+
             case 3
                   for Indx_P = 1:Dims(1)
                     for Indx_S = 1:Dims(2)

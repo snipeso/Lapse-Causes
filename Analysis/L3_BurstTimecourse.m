@@ -26,7 +26,7 @@ nTrialTypes = 3;
 TotChannels = 123;
 TotBands = 2;
 
-CheckEyes = true; % check if person had eyes open or closed
+CheckEyes = false; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 
 % locations

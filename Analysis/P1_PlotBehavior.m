@@ -113,7 +113,7 @@ Red = getColors([1 4], '', 'red'); % dark red for lapses EC
 TallyColors = [PlotProps.Color.Types; Red(1, :)];
 TallyColors = TallyColors(TallyOrder, :);
 
-AllTallyLabels = {'Lapses (EO)', 'Late', 'Correct', 'Lapses (EC)'};
+AllTallyLabels = {'EO Lapses', 'Slow responses', 'Fast responses', 'EC Lapses'};
 AllTallyLabels = AllTallyLabels(TallyOrder);
 AllTallyLabels_PVT = AllTallyLabels;
 AllTallyLabels_PVT(3) = {''};
