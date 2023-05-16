@@ -4,10 +4,11 @@ function Stats = plotTimecourse(t, Data, Baseline, YLims, LineLabels, Text, Colo
 
 % BadParticipants = any(all(isnan(Data(:, [1, 2], :)), 3), 2);
 % Data(BadParticipants, :, :) = nan;
+StatsP.ANOVA.nBoot = 1;
 
 %%% Get stats
 if ~isempty(StatsP) && ~isempty(Baseline)
-%     Baseline(BadParticipants) = nan;
+    %     Baseline(BadParticipants) = nan;
     Data1 = repmat(Baseline, 1, size(Data, 3)); % baseline
     Data2 = Data;
     Stats = pairedttest(Data1, Data2, StatsP);
@@ -69,4 +70,31 @@ if PlotProps.Stats.PlotN
             'FontName', PlotProps.Text.FontName, 'FontSize', PlotProps.Text.LegendSize,...
             'Color',Colors(Indx_TT, :))
     end
+end
+
+
+
+%%% display
+if PlotProps.Stats.DispStat
+Windows = [-2 -0.5;
+    -0.5 .3;
+    0.3, 2;
+    2 4];
+
+for Indx_L = 1:numel(LineLabels)
+    disp(LineLabels{Indx_L})
+    for Indx_W = 1:size(Windows, 1)
+
+        S = abs(Stats.t(Indx_L, :));
+        S(t<Windows(Indx_W, 1) | t>Windows(Indx_W, 2)) = nan;
+        [~, Indx] = max(S);
+
+        if Sig(Indx_L, Indx)
+            dispStat(Stats, [Indx_L, Indx], ['max t: ', num2str(t(Indx), '%.1f'), 's']);
+        end
+
+    end
+    disp('_____________')
+end
+
 end

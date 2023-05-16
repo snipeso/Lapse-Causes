@@ -127,6 +127,13 @@ elseif numel(Dims1) == 2 && numel(Dims2) == 3 % D
     Stats.t = t_values;
     Stats.df = df;
     Stats.N = N;
+
+    stats =  hedgesG(Data1, Data2, StatsP);
+    Stats.(StatsP.Paired.ES) = stats.(StatsP.Paired.ES);
+    Stats.([StatsP.Paired.ES, 'CI']) = stats.([StatsP.Paired.ES, 'CI']);
+
+
+
 end
 end
 
