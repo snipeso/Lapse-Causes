@@ -16,20 +16,21 @@ if any(strcmp(Fieldnames, 't')) % paired t-test
         pString = [', p = .', pValue];
     end
     
-    % get needed n for that effect size
-    if isfield(Stats, 'mean2')
-    Stats.RequiredN =  sampsizepwr('t', [Stats.mean1(P(1), P(2)), ...
-        sqrt((Stats.std1(P(1), P(2))^2 + Stats.std2(P(1), P(2))^2)/2 )], ...
-        [Stats.mean2(P(1), P(2))], .8, []);
-    else
-        Stats.RequiredN = nan;
-    end
+    % % get needed n for that effect size
+    % if isfield(Stats, 'mean2')
+    % Stats.RequiredN =  sampsizepwr('t', [Stats.mean1(P(1), P(2)), ...
+    %     sqrt((Stats.std1(P(1), P(2))^2 + Stats.std2(P(1), P(2))^2)/2 )], ...
+    %     [Stats.mean2(P(1), P(2))], .8, []);
+    % else
+    %     Stats.RequiredN = nan;
+    % end
 
 
     disp(Label)
     String = ['N = ', num2str(Stats.N), ...
         ', t = ', num2str(Stats.t(P(1), P(2)), '%.2f'), ...
-        pString , ', g = ', num2str(Stats.hedgesg(P(1), P(2)), '%.2f'), ', required N = ', num2str(Stats.RequiredN)];
+        pString , ', g = ', num2str(Stats.hedgesg(P(1), P(2)), '%.2f') ];%, ...
+        % ', required N = ', num2str(Stats.RequiredN)];
 
     disp(String)
 

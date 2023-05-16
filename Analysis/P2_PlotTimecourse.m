@@ -21,7 +21,7 @@ SmoothFactor = 0.3; % in seconds, smooth signal to be visually pleasing
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 ZScore = false; % best only z-scored; when raw, it's the average prob for each individual channel
-SessionGroup = 'SD';
+SessionGroup = 'BL';
 
 TitleTag = SessionGroup;
 if CheckEyes
@@ -42,9 +42,6 @@ end
 load(fullfile(Paths.Pool, 'Eyes', ['ProbMicrosleep_', SessionGroup, MicrosleepTag, '.mat']), ...
     'ProbMicrosleep_Stim', 'ProbMicrosleep_Resp', 't_window', 'GenProbMicrosleep')
 t_microsleep = t_window;
-
-% remove all data from participants missing any of the trial types
-[ProbMicrosleep_Stim, ProbMicrosleep_Resp] = removeBlankParticipants(ProbMicrosleep_Stim, ProbMicrosleep_Resp);
 
 % smooth and z-score data
 sProbMicrosleep_Stim = smoothFreqs(ProbMicrosleep_Stim, t_microsleep, 'last', SmoothFactor);
