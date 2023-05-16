@@ -20,3 +20,7 @@ Stats.mean_diff = mean(Diff, 'omitnan');
 Stats.std_diff = std(Diff, 'omitnan');
 Stats.mean1 = mean(Data1, 'omitnan');
 Stats.mean2 = mean(Data2, 'omitnan');
+
+PooledSTD = sqrt((std(Data1, 'omitnan')^2 + std(Data2, 'omitnan')^2)/2);
+
+Stats.RequiredN =  sampsizepwr('z', [Stats.mean1, PooledSTD], [Stats.mean2], .8, []);
