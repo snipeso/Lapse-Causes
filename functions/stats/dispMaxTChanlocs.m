@@ -1,10 +1,13 @@
 function dispMaxTChanlocs(Stats, Chanlocs, String)
 
-if ~any(Stats.sig)
-    return
-end
+% if ~any(Stats.sig)
+%     return
+% end
 
-Stats.t(~Stats.sig) = nan;
-[~, Indx] = max(abs(Stats.t));
+t = Stats.t;
+% t(~Stats.sig) = nan;
+Stats.p_fdr = Stats.p_fdr(:);
+Stats.N = repmat(Stats.N, numel(Stats.p_fdr), 1);
+[~, Indx] = max(abs(t));
 
 dispStat(Stats, [Indx, 1], [String, ' ', Chanlocs(Indx).labels]);

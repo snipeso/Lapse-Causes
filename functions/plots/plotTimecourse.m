@@ -78,8 +78,8 @@ end
 if PlotProps.Stats.DispStat
 Windows = [-2 -0.5;
     -0.5 .3;
-    0.3, 2;
-    2 4];
+    0.3, 1.5;
+    1.5 4];
 
 for Indx_L = 1:numel(LineLabels)
     disp(LineLabels{Indx_L})
@@ -89,9 +89,9 @@ for Indx_L = 1:numel(LineLabels)
         S(t<Windows(Indx_W, 1) | t>Windows(Indx_W, 2)) = nan;
         [~, Indx] = max(S);
 
-        if Sig(Indx_L, Indx)
-            dispStat(Stats, [Indx_L, Indx], ['max t: ', num2str(t(Indx), '%.1f'), 's']);
-        end
+        % if Sig(Indx_L, Indx)
+            dispStat(Stats, [Indx_L, Indx], ['max t: ', num2str(t(Indx), '%.1f'), ' s']);
+        % end
 
     end
     disp('_____________')

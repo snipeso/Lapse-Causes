@@ -17,9 +17,6 @@ Bands = P.Bands;
 BandLabels = fieldnames(Bands);
 Windows_Stim = P.Parameters.Topography.Windows;
 WindowTitles = {["Pre", "[-2, 0]"], ["Stimulus", "[0, 0.3]"], ["Response", "[0.3 1]"], ["Post", "[2 4]"]};
-% 
-% Windows_Stim = [-1.5 -.5; -.2 0; 0 .1; .1 .2; .2 .3; .3 .4; .5 .75; .75 1; 1 1.5; 1.5 2];
-% WindowTitles = {'-1.5 -.5', '-.2 0', '0 .1', '.1 .2', '.2 .3', '.3 .4', '.5 .75', '.75 1', '1 1.5', '1.5 2'};
 
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
@@ -43,8 +40,6 @@ end
 load(fullfile(Paths.Pool, 'EEG', ['ProbBurst_', TitleTag, '.mat']), 'ProbBurst_Stim', ...
     'ProbBurst_Resp', 't_window',  'GenProbBurst', 'Chanlocs')
 TotChannels = size(GenProbBurst, 2);
-
-% TitleTag = [TitleTag, '_HR'];
 
 if ZScore
     %  z-score
@@ -134,20 +129,14 @@ for Indx_B = 1:2
                     'FontWeight', 'Bold', 'HorizontalAlignment', 'Center', 'Rotation', 90);
             end
 
-            %%% stat of all channels
-            disp('*')
-            Stats = pairedttest(mean(Baseline, 2, 'omitnan'), mean(Data, 2, 'omitnan'), StatsP);
-            dispStat(Stats, [1 1], [BandLabels{Indx_B}, ' ', TallyLabels{Types(Indx_TT)}, ' ',char(W(1))]);
-
-            disp('__________')
+           
         end
-
+ disp('__________')
         if Indx_TT ==1
             title(WindowTitles{Indx_W})
         end
 
     end
-    % saveFig(['Figure_4_', TitleTag, BandLabels{Indx_B}], Paths.PaperResults, PlotProps)
 
 
     PlotProps.Axes.xPadding = 20;

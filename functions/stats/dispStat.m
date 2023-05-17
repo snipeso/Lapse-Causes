@@ -6,43 +6,39 @@ function String = dispStat(Stats, P, Label)
 Fieldnames = fieldnames(Stats);
 
 if any(strcmp(Fieldnames, 't')) % paired t-test
-    pValue = num2str(Stats.p(P(1), P(2)), '%.3f');
+    if isfield(Stats, 'p_fdr')
 
-    pValue = extractAfter(pValue, '.');
-
-    if Stats.p(P(1), P(2)) < .001
-        pString = ', p < .001';
+ pValue = Stats.p_fdr(P(1), P(2));
+ pString = 'p_fdr';
     else
-        pString = [', p = .', pValue];
+ pValue =Stats.p(P(1), P(2));
+    pString = 'p';
     end
-    
-    % % get needed n for that effect size
-    % if isfield(Stats, 'mean2')
-    % Stats.RequiredN =  sampsizepwr('t', [Stats.mean1(P(1), P(2)), ...
-    %     sqrt((Stats.std1(P(1), P(2))^2 + Stats.std2(P(1), P(2))^2)/2 )], ...
-    %     [Stats.mean2(P(1), P(2))], .8, []);
-    % else
-    %     Stats.RequiredN = nan;
-    % end
+   pValueString = num2str(pValue, '%.3f');
+    pValueString = extractAfter(pValueString, '.');
 
+    if pValue < .001
+        pString = [', ', pString, ' < .001'];
+    else
+        pString = [', ', pString, ' = .', pValueString];
+    end
 
     disp(Label)
     String = ['N = ', num2str(Stats.N(P(1), P(2))), ...
         ', t = ', num2str(Stats.t(P(1), P(2)), '%.2f'), ...
-        pString , ', g = ', num2str(Stats.hedgesg(P(1), P(2)), '%.2f') ];%, ...
-        % ', required N = ', num2str(Stats.RequiredN)];
+        pString , ', g = ', num2str(Stats.hedgesg(P(1), P(2)), '%.2f') ];
 
     disp(String)
 
-elseif any(strcmp(Fieldnames, 'zval')) % paired t-test
-    pValue = num2str(Stats.p(P(1), P(2)), '%.3f');
+elseif any(strcmp(Fieldnames, 'zval'))
+    pValueString = num2str(Stats.p(P(1), P(2)), '%.3f');
 
-    pValue = extractAfter(pValue, '.');
+    pValueString = extractAfter(pValueString, '.');
 
     if Stats.p(P(1), P(2)) < .001
         pString = ', p < .001';
     else
-        pString = [', p = .', pValue];
+        pString = [', p = .', pValueString];
     end
     
 
