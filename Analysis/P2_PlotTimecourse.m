@@ -55,8 +55,12 @@ t_burst = t_window;
 
 
 % smooth signals
-sProbBurst_Stim = smoothFreqs(ProbBurst_Stim_Pooled, t_burst, 'last', SmoothFactor); % P x TT x B x t
-sProbBurst_Resp = smoothFreqs(ProbBurst_Resp_Pooled, t_burst, 'last', SmoothFactor);
+% sProbBurst_Stim = smoothFreqs(ProbBurst_Stim_Pooled, t_burst, 'last', SmoothFactor); % P x TT x B x t
+% sProbBurst_Resp = smoothFreqs(ProbBurst_Resp_Pooled, t_burst, 'last', SmoothFactor);
+
+sProbBurst_Stim = ProbBurst_Stim_Pooled;
+sProbBurst_Resp = ProbBurst_Resp_Pooled;
+
 %  z-score
 if ZScore
 
