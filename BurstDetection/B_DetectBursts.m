@@ -13,7 +13,7 @@ Bands = Info.Bands;
 BandLabels = fieldnames(Bands);
 
 Task = 'LAT';
-Refresh = false;
+Refresh = true;
 
 % Parameters for bursts
 BT = Info.BurstThresholds;
@@ -35,7 +35,7 @@ if ~exist(Destination, 'dir')
 end
 
 Content = getContent(Source);
-for Indx_F = 1:numel(Content)
+for Indx_F = 103%1:numel(Content)
 
     % load data
     Filename_Source = Content{Indx_F};
