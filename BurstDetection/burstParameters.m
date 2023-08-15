@@ -11,33 +11,33 @@ Info = struct();
 
 % short
 BT = struct();
-BT(1).periodConsistency = .3;
-BT(1).amplitude = 25;
-BT(1).Min_Peaks = 3;
+BT(1).PeriodConsistency = .3;
+BT(1).Amplitude = 25;
+BT(1).MinCyclesPerBurst = 3;
 BT(1).isProminent = 1;
-BT(1).truePeak = 1;
+BT(1).isTruePeak = 1;
 
 % long
-BT(2).monotonicity = .5;
-BT(2).periodConsistency = .5;
+BT(2).MonotoncityInTime = .5;
+BT(2).PeriodConsistency = .5;
 BT(2).periodMeanConsistency = .5;
-BT(2).efficiency = .6;
-BT(2).truePeak = 1;
-BT(2).flankConsistency = .5;
-BT(2).ampConsistency = .5;
-% BT(2).efficiencyAdj = .5; TODO????
-BT(2).Min_Peaks = 6;
+BT(2).MonotoncityInAmplitude = .6;
+BT(2).isTruePeak = 1;
+BT(2).FlankConsistency = .5;
+BT(2).AmplitudeConsistency = .5;
+% BT(2).MonotoncityInAmplitudeAdj = .5; TODO????
+BT(2).MinCyclesPerBurst = 6;
 
 
 % clean
-BT(3).monotonicity = .6;
-BT(3).periodConsistency = .6; % C
+BT(3).MonotoncityInTime = .6;
+BT(3).PeriodConsistency = .6; % C
 BT(3).periodMeanConsistency = .6;
-BT(3).efficiency = .6;
-BT(3).truePeak = 1; % A
-BT(3).flankConsistency = .5; % D
-BT(3).ampConsistency = .6;% E
-BT(3).Min_Peaks = 4;
+BT(3).MonotoncityInAmplitude = .6;
+BT(3).isTruePeak = 1; % A
+BT(3).FlankConsistency = .5; % D
+BT(3).AmplitudeConsistency = .6;% E
+BT(3).MinCyclesPerBurst = 4;
 
 Info.BurstThresholds = BT;
 

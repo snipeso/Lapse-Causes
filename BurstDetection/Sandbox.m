@@ -27,13 +27,13 @@ Filename_Source = strjoin({Participant, Task, Session, 'Clean.mat'}, '_');
 Min_Peaks = 4;
 
 BT = struct();
-BT.monotonicity = .6;
-BT.periodConsistency = .6;
+BT.MonotoncityInTime = .6;
+BT.PeriodConsistency = .6;
 BT.periodMeanConsistency = .6;
-BT.efficiency = .6;
-BT.truePeak = 1;
-BT.flankConsistency = .5;
-BT.ampConsistency = .6;
+BT.MonotoncityInAmplitude = .6;
+BT.isTruePeak = 1;
+BT.FlankConsistency = .5;
+BT.AmplitudeConsistency = .6;
 
 
 
@@ -73,35 +73,34 @@ end
 
 % short
 % BT = struct();
-% BT.periodConsistency = .3;
-% BT.amplitude = 25;
+% BT.PeriodConsistency = .3;
+% BT.Amplitude = 25;
 % Min_Peaks = 3;
 % BT.isProminent = 1;
-% BT.truePeak = 1;
+% BT.isTruePeak = 1;
 
 % long
 % BT = struct();
-% BT.monotonicity = .5;
-% BT.periodConsistency = .5;
-% BT.efficiency = .6;
-% BT.truePeak = 1;
-% BT.flankConsistency = .5;
-% BT.ampConsistency = .5;
-% BT.efficiencyAdj = .5;
-% BT.Min_Peaks = 6;
+% BT.MonotoncityInTime = .5;
+% BT.PeriodConsistency = .5;
+% BT.MonotoncityInAmplitude = .6;
+% BT.isTruePeak = 1;
+% BT.FlankConsistency = .5;
+% BT.AmplitudeConsistency = .5;
+% BT.MinCyclesPerBurst = 6;
 % BT.periodMeanConsistency = .5;
 % Min_Peaks = 6;
 
 % clean
 BT = struct();
-BT.monotonicity = .6;
-BT.periodConsistency = .6;
+BT.MonotoncityInTime = .6;
+BT.PeriodConsistency = .6;
 BT.periodMeanConsistency = .6;
-BT.efficiency = .6;
-BT.truePeak = 1;
-BT.flankConsistency = .5;
-BT.ampConsistency = .5;
-% BT.amplitude = 10;
+BT.MonotoncityInAmplitude = .6;
+BT.isTruePeak = 1;
+BT.FlankConsistency = .5;
+BT.AmplitudeConsistency = .5;
+% BT.Amplitude = 10;
 Min_Peaks = 3;
 
 
@@ -127,32 +126,32 @@ plotBursts(Signal, fs, Peaks, BurstPeakIDs, BT)
 
 % short
 BT = struct();
-BT(1).periodConsistency = .3;
-BT(1).amplitude = 25;
-BT(1).Min_Peaks = 3;
+BT(1).PeriodConsistency = .3;
+BT(1).Amplitude = 25;
+BT(1).MinCyclesPerBurst = 3;
 BT(1).isProminent = 1;
-BT(1).truePeak = 1;
+BT(1).isTruePeak = 1;
 
 % long
-BT(2).monotonicity = .5;
-BT(2).periodConsistency = .5;
-BT(2).efficiency = .6;
-BT(2).truePeak = 1;
-BT(2).flankConsistency = .5;
-BT(2).ampConsistency = .5;
-BT(2).efficiencyAdj = .5;
-BT(2).Min_Peaks = 6;
+BT(2).MonotoncityInTime = .5;
+BT(2).PeriodConsistency = .5;
+BT(2).MonotoncityInAmplitude = .6;
+BT(2).isTruePeak = 1;
+BT(2).FlankConsistency = .5;
+BT(2).AmplitudeConsistency = .5;
+BT(2).MonotoncityInAmplitudeAdj = .5;
+BT(2).MinCyclesPerBurst = 6;
 BT(2).periodMeanConsistency = .5;
 
 % clean
-BT(3).monotonicity = .6;
-BT(3).periodConsistency = .6;
+BT(3).MonotoncityInTime = .6;
+BT(3).PeriodConsistency = .6;
 BT(3).periodMeanConsistency = .6;
-BT(3).efficiency = .6;
-BT(3).truePeak = 1;
-BT(3).flankConsistency = .5;
-BT(3).ampConsistency = .6;
-BT(3).Min_Peaks = 4;
+BT(3).MonotoncityInAmplitude = .6;
+BT(3).isTruePeak = 1;
+BT(3).FlankConsistency = .5;
+BT(3).AmplitudeConsistency = .6;
+BT(3).MinCyclesPerBurst = 4;
 
 % get bursts in all data
 AllBursts = getAllBursts(EEG, FiltEEG, BT, [], Bands, Keep_Points);
@@ -219,18 +218,18 @@ Info.Tasks = {'Fixation', 'Standing', 'Oddball'};
 
 %%% parameters to find bursts in single channels
 
-Info.Min_Peaks = 4;
+Info.MinCyclesPerBurst = 4;
 
 Info.Max_Minutes = 6; % first number of clean minutes to look for bursts in
 
 BT = struct();
-BT.monotonicity = .6;
-BT.periodConsistency = .6;
+BT.MonotoncityInTime = .6;
+BT.PeriodConsistency = .6;
 BT.periodMeanConsistency = .6;
-BT.efficiency = .6;
-BT.truePeak = 1;
-BT.flankConsistency = .5;
-BT.ampConsistency = .6;
+BT.MonotoncityInAmplitude = .6;
+BT.isTruePeak = 1;
+BT.FlankConsistency = .5;
+BT.AmplitudeConsistency = .6;
 Info.BurstThresholds = BT;
 
 
