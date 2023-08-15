@@ -16,7 +16,7 @@ Task = 'LAT';
 Refresh = true;
 
 % Parameters for bursts
-BT = Info.BurstThresholds;
+BT = Info.CriteriaSets;
 Min_Peaks = [];
 
 

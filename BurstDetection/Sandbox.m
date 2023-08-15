@@ -230,7 +230,7 @@ BT.MonotoncityInAmplitude = .6;
 BT.isTruePeak = 1;
 BT.FlankConsistency = .5;
 BT.AmplitudeConsistency = .6;
-Info.BurstThresholds = BT;
+Info.CriteriaSets = BT;
 
 
 %%% Parameters to aggregate across channels

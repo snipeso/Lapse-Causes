@@ -142,7 +142,7 @@ end
 
 Min_Peaks = 4;
 Keep_Points = ones(size(t));
-FinalBursts = getAllBursts(AllEEG, AllfEEG, P.BurstThresholds, Min_Peaks, P.Bands, Keep_Points);
+FinalBursts = getAllBursts(AllEEG, AllfEEG, P.CriteriaSets, Min_Peaks, P.Bands, Keep_Points);
 FinalBursts = meanFreq(FinalBursts);
 
 BurstFreqs = [FinalBursts.Frequency];
@@ -189,7 +189,7 @@ Peaks = peakDetection(D, Df);
 Peaks = peakProperties(D, Peaks, fs);
 Peaks = meanFreq(Peaks);
 
-BT = P.BurstThresholds(3);
+BT = P.CriteriaSets(3);
 BT.period = 1./[4 8];
 BT = removeEmptyFields(BT);
 [Bursts, BurstPeakIDs, Diagnostics] = findBursts(Peaks, BT, Min_Peaks, Keep_Points);

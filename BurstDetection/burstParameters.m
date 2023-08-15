@@ -1,8 +1,8 @@
-function Info = burstParameters()
+function Parameters = burstParameters()
 % parameters for detecting bursts
 % Lapses-Causes
 
-Info = struct();
+Parameters = struct();
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Burst Parameters
@@ -10,41 +10,33 @@ Info = struct();
 %%% parameters to find bursts in single channels
 
 % short
-BT = struct();
-BT(1).PeriodConsistency = .3;
-BT(1).Amplitude = 25;
-BT(1).MinCyclesPerBurst = 3;
-BT(1).isProminent = 1;
-BT(1).isTruePeak = 1;
+CriteriaSets = struct();
+CriteriaSets(1).PeriodConsistency = .3;
+CriteriaSets(1).Amplitude = 25;
+CriteriaSets(1).MinCyclesPerBurst = 3;
+CriteriaSets(1).isProminent = 1;
+CriteriaSets(1).isTruePeak = 1;
 
 % long
-BT(2).MonotoncityInTime = .5;
-BT(2).PeriodConsistency = .5;
-BT(2).periodMeanConsistency = .5;
-BT(2).MonotoncityInAmplitude = .6;
-BT(2).isTruePeak = 1;
-BT(2).FlankConsistency = .5;
-BT(2).AmplitudeConsistency = .5;
-% BT(2).MonotoncityInAmplitudeAdj = .5; TODO????
-BT(2).MinCyclesPerBurst = 6;
+CriteriaSets(2).MonotoncityInTime = .5;
+CriteriaSets(2).PeriodConsistency = .5;
+CriteriaSets(2).MonotoncityInAmplitude = .6;
+CriteriaSets(2).isTruePeak = 1;
+CriteriaSets(2).FlankConsistency = .5;
+CriteriaSets(2).AmplitudeConsistency = .5;
+CriteriaSets(2).MinCyclesPerBurst = 6;
 
 
 % clean
-BT(3).MonotoncityInTime = .6;
-BT(3).PeriodConsistency = .6; % C
-BT(3).periodMeanConsistency = .6;
-BT(3).MonotoncityInAmplitude = .6;
-BT(3).isTruePeak = 1; % A
-BT(3).FlankConsistency = .5; % D
-BT(3).AmplitudeConsistency = .6;% E
-BT(3).MinCyclesPerBurst = 4;
+CriteriaSets(3).MonotoncityInTime = .6;
+CriteriaSets(3).PeriodConsistency = .6; % C
+CriteriaSets(3).MonotoncityInAmplitude = .6;
+CriteriaSets(3).isTruePeak = 1; % A
+CriteriaSets(3).FlankConsistency = .5; % D
+CriteriaSets(3).AmplitudeConsistency = .6;% E
+CriteriaSets(3).MinCyclesPerBurst = 4;
 
-Info.BurstThresholds = BT;
-
-
-%%% Parameters to aggregate across channels
-Info.MinCoherence = .7;
-Info.MinCorr = .8;
+Parameters.CriteriaSets = CriteriaSets;
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -74,12 +66,8 @@ if ~exist('topoplot', 'file')
     close all
 end
 
-% same for matcycle scripts, saved to a different repo (https://github.com/hubersleeplab/matcycle)
-addMatcyclePaths()
-
 % get path where these scripts were saved
 CD = mfilename('fullpath');
-% Paths.Analysis = fullfile(extractBefore(Paths.Analysis, 'Analysis'));
 Paths.Analysis = fullfile(extractBefore(CD, 'Lapse-Causes'), 'Lapse-Causes');
 
 % get all folders in functions
@@ -90,7 +78,7 @@ for Indx_F = 1:numel(Subfolders)
     addpath(fullfile(Paths.Analysis, 'functions', Subfolders{Indx_F}))
 end
 
-Info.Paths = Paths;
+Parameters.Paths = Paths;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% EEG info
@@ -101,30 +89,9 @@ Bands.Theta = [4 8];
 Bands.ThetaAlpha = [6 10];
 Bands.Alpha = [8 12];
 Bands.AlphaHigh = [10 14];
+Bands.Sigma = [12 16];
 
-% % bands used to
-% PowerBands.Delta = [1 4];
-% PowerBands.Theta = [4 8];
-% PowerBands.Alpha = [8 12];
-% PowerBands.Beta = [15 25];
-% Info.PowerBands = PowerBands;
-
-Info.Bands = Bands;
-
-Channels = struct();
-Frontspot = [22 15 9 23 18 16 10 3 24 19 11 4 124 20 12 5 118 13 6 112 21 17 14 25 8 26 2 27 123 28 117];
-Backspot = [66 71 76 84 65 70 75 83 90 69 74 82 89 59 58 64 68 73 81 88 94 95 96 67 72 77 91];
-Centerspot = [129 7 106 80 55 31 30 37 54 79 87 105 36 42 53 61 62 78 86 93 104 41 47  52 92 98 103 60 85];
-
-Channels.preROI.Front = Frontspot;
-Channels.preROI.Center = Centerspot;
-Channels.preROI.Back = Backspot;
-
-Channels.Hemifield.Right = [1:5, 8:10, 14, 76:80, 82:87, 88:125];
-Channels.Hemifield.Left = [12, 13, 18:54, 56:61, 63:71, 73, 74];
-Info.Channels = Channels;
-
-
+Parameters.Bands = Bands;
 
 
 Triggers.SyncEyes = 'S192';
@@ -140,21 +107,21 @@ Triggers.LeftBlock = 'S 10';
 Triggers.RightBlock = 'S 11';
 Triggers.Tones = 'S 12';
 
-Info.Triggers = Triggers;
+Parameters.Triggers = Triggers;
 
 
 Pix = get(0,'screensize');
 if Pix(3) < 2000
-    Format = getProperties({'LSM', 'SmallScreen'});
+    PlotProperties = getProperties({'LSM', 'SmallScreen'});
 else
-    Format = getProperties({'LSM', 'LargeScreen'});
+    PlotProperties = getProperties({'LSM', 'LargeScreen'});
 end
 
 Manuscript = getProperties({'LSM', 'Manuscript'});
 Powerpoint =  getProperties({'LSM', 'Powerpoint'});
 Poster =  getProperties({'LSM', 'Poster'});
 
-Info.Manuscript = Manuscript; % for papers
-Info.Powerpoint = Powerpoint; % for presentations
-Info.Poster = Poster;
-Info.Format = Format; % plots just to view data
+Parameters.Manuscript = Manuscript; % for papers
+Parameters.Powerpoint = Powerpoint; % for presentations
+Parameters.Poster = Poster;
+Parameters.Format = PlotProperties; % plots just to view data
