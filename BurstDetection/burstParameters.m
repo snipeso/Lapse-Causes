@@ -109,14 +109,6 @@ Triggers.Tones = 'S 12';
 
 Parameters.Triggers = Triggers;
 
-
-Pix = get(0,'screensize');
-if Pix(3) < 2000
-    PlotProperties = getProperties({'LSM', 'SmallScreen'});
-else
-    PlotProperties = getProperties({'LSM', 'LargeScreen'});
-end
-
 Manuscript = getProperties({'LSM', 'Manuscript'});
 Powerpoint =  getProperties({'LSM', 'Powerpoint'});
 Poster =  getProperties({'LSM', 'Poster'});
@@ -124,4 +116,6 @@ Poster =  getProperties({'LSM', 'Poster'});
 Parameters.Manuscript = Manuscript; % for papers
 Parameters.Powerpoint = Powerpoint; % for presentations
 Parameters.Poster = Poster;
-Parameters.Format = PlotProperties; % plots just to view data
+
+
+

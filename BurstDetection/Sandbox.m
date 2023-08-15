@@ -13,52 +13,65 @@ BandLabels = fieldnames(Bands);
 % Session = 'Session2';
 % Participant = 'P10';
 
-Task = 'LAT'; % Game or Standing
-Session = 'Session2Beam1';
+Task = 'PVT'; % Game or Standing
+Session = 'Session2Beam';
 Participant = 'P10';
 
+Source = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task); % normal data
 Filename_Source = strjoin({Participant, Task, Session, 'Clean.mat'}, '_');
 
+load(fullfile(Source, Filename_Source), 'EEG')
+SampleRate = EEG.srate;
 
 
-%%
+%% select data and plot spectrum
+
+Channel = 11;
+
+% select data
+DataBroadband = EEG.data(labels2indexes(Channel, EEG.chanlocs), :);
+
+[Power, Frequencies] = cycy.utils.compute_power(DataBroadband, SampleRate);
+
+figure
+cycy.plot.power_spectrum(Power, Frequencies, true, true)
+
+%% filter data
+
+Range = [4 9]; % select a range that is wide enough to cover the variability you expect for a specific band (i.e. start and end of the oscillatory bump in the power spectrum)
+
+DataNarrowband = cycy.utils.highpass_filter(DataBroadband, SampleRate, Range(1)); % if you want, you can specify other aspects of the filter; see function
+DataNarrowband = cycy.utils.lowpass_filter(DataNarrowband, SampleRate, Range(2));
 
 
-Min_Peaks = 4;
+%% Single channel
 
-BT = struct();
-BT.MonotoncityInTime = .6;
-BT.PeriodConsistency = .6;
-BT.periodMeanConsistency = .6;
-BT.MonotoncityInAmplitude = .6;
-BT.isTruePeak = 1;
-BT.FlankConsistency = .5;
-BT.AmplitudeConsistency = .6;
+CriteriaSet = struct();
+CriteriaSet.MonotoncityInTime = .8;
+CriteriaSet.PeriodConsistency = .6;
+CriteriaSet.MonotoncityInAmplitude = .6;
+CriteriaSet.FlankConsistency = .6;
+CriteriaSet.AmplitudeConsistency = .6;
+CriteriaSet.MinCyclesPerBurst = 3;
+
+% detect cycles
+Cycles = cycy.detect_cycles(DataBroadband, DataNarrowband);
+AugmentedCycles = cycy.measure_cycle_properties(DataBroadband, Cycles, SampleRate);
+
+% detect bursts
+[Bursts, Diagnostics] = cycy.aggregate_cycles_into_bursts(AugmentedCycles, CriteriaSet);
 
 
+cycy.plot.cycles_and_criteria(DataBroadband, SampleRate, DataNarrowband, ...
+    AugmentedCycles, CriteriaSet, Bursts);
+cycy.plot.criteriaset_diagnostics(Diagnostics)
+% cycy.plot.properties_distributions(AugmentedCycles)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
-Source = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task); % normal data
-Source_Filtered = fullfile(Paths.Preprocessed, 'Clean', 'Waves_Filtered', Task); % extremely filtered data
-Source_Cuts = fullfile(Paths.Preprocessed, 'Cutting', 'Cuts', Task); % timepoints marked as artefacts
 
-
-% load data
-Filename_Filtered = replace(Filename_Source, 'Clean.mat', 'Filtered.mat');
-Filename_Cuts = replace(Filename_Source, 'Clean.mat', 'Cuts.mat');
-
-M = load(fullfile(Source, Filename_Source), 'EEG');
-EEG = M.EEG;
-fs = EEG.srate;
-
-% get timepoints without noise
-NoiseEEG = nanNoise(EEG, fullfile(Source_Cuts, Filename_Cuts));
-Keep_Points = ~isnan(NoiseEEG.data(1, :));
-
-% need to concatenate structures
-FiltEEG = EEG;
-FiltEEG.Band = [];
+load(fullfile(Source, Filename_Source), 'EEG')
+SampleRate = EEG.srate;
 
 for Indx_B = 1:numel(BandLabels) % get bursts for all provided bands
 
@@ -92,14 +105,14 @@ end
 % Min_Peaks = 6;
 
 % clean
-BT = struct();
-BT.MonotoncityInTime = .6;
-BT.PeriodConsistency = .6;
-BT.periodMeanConsistency = .6;
-BT.MonotoncityInAmplitude = .6;
-BT.isTruePeak = 1;
-BT.FlankConsistency = .5;
-BT.AmplitudeConsistency = .5;
+CriteriaSet = struct();
+CriteriaSet.MonotoncityInTime = .6;
+CriteriaSet.PeriodConsistency = .6;
+CriteriaSet.periodMeanConsistency = .6;
+CriteriaSet.MonotoncityInAmplitude = .6;
+CriteriaSet.isTruePeak = 1;
+CriteriaSet.FlankConsistency = .5;
+CriteriaSet.AmplitudeConsistency = .5;
 % BT.Amplitude = 10;
 Min_Peaks = 3;
 
@@ -116,45 +129,45 @@ Signal = Sign*EEG.data(Ch, :);
 fSignal = Sign*FiltEEG(Indx_B).data(Ch, :);
 
 Peaks = peakDetection(Signal, fSignal);
-Peaks = peakProperties(Signal, Peaks, fs);
-BT.period = 1./Bands.(BandLabels{Indx_B}); % add period threshold
-[Bursts, BurstPeakIDs, Diagnostics] = findBursts(Peaks, BT, Min_Peaks, Keep_Points);
+Peaks = peakProperties(Signal, Peaks, SampleRate);
+CriteriaSet.period = 1./Bands.(BandLabels{Indx_B}); % add period threshold
+[Bursts, BurstPeakIDs, Diagnostics] = findBursts(Peaks, CriteriaSet, Min_Peaks, Keep_Points);
 
-plotBursts(Signal, fs, Peaks, BurstPeakIDs, BT)
+plotBursts(Signal, SampleRate, Peaks, BurstPeakIDs, CriteriaSet)
 
 %% Everything
 
 % short
-BT = struct();
-BT(1).PeriodConsistency = .3;
-BT(1).Amplitude = 25;
-BT(1).MinCyclesPerBurst = 3;
-BT(1).isProminent = 1;
-BT(1).isTruePeak = 1;
+CriteriaSet = struct();
+CriteriaSet(1).PeriodConsistency = .3;
+CriteriaSet(1).Amplitude = 25;
+CriteriaSet(1).MinCyclesPerBurst = 3;
+CriteriaSet(1).isProminent = 1;
+CriteriaSet(1).isTruePeak = 1;
 
 % long
-BT(2).MonotoncityInTime = .5;
-BT(2).PeriodConsistency = .5;
-BT(2).MonotoncityInAmplitude = .6;
-BT(2).isTruePeak = 1;
-BT(2).FlankConsistency = .5;
-BT(2).AmplitudeConsistency = .5;
-BT(2).MonotoncityInAmplitudeAdj = .5;
-BT(2).MinCyclesPerBurst = 6;
-BT(2).periodMeanConsistency = .5;
+CriteriaSet(2).MonotoncityInTime = .5;
+CriteriaSet(2).PeriodConsistency = .5;
+CriteriaSet(2).MonotoncityInAmplitude = .6;
+CriteriaSet(2).isTruePeak = 1;
+CriteriaSet(2).FlankConsistency = .5;
+CriteriaSet(2).AmplitudeConsistency = .5;
+CriteriaSet(2).MonotoncityInAmplitudeAdj = .5;
+CriteriaSet(2).MinCyclesPerBurst = 6;
+CriteriaSet(2).periodMeanConsistency = .5;
 
 % clean
-BT(3).MonotoncityInTime = .6;
-BT(3).PeriodConsistency = .6;
-BT(3).periodMeanConsistency = .6;
-BT(3).MonotoncityInAmplitude = .6;
-BT(3).isTruePeak = 1;
-BT(3).FlankConsistency = .5;
-BT(3).AmplitudeConsistency = .6;
-BT(3).MinCyclesPerBurst = 4;
+CriteriaSet(3).MonotoncityInTime = .6;
+CriteriaSet(3).PeriodConsistency = .6;
+CriteriaSet(3).periodMeanConsistency = .6;
+CriteriaSet(3).MonotoncityInAmplitude = .6;
+CriteriaSet(3).isTruePeak = 1;
+CriteriaSet(3).FlankConsistency = .5;
+CriteriaSet(3).AmplitudeConsistency = .6;
+CriteriaSet(3).MinCyclesPerBurst = 4;
 
 % get bursts in all data
-AllBursts = getAllBursts(EEG, FiltEEG, BT, [], Bands, Keep_Points);
+AllBursts = getAllBursts(EEG, FiltEEG, CriteriaSet, [], Bands, Keep_Points);
 
 
 previewBursts(EEG, 20, AllBursts, 'BT')
@@ -222,15 +235,15 @@ Info.MinCyclesPerBurst = 4;
 
 Info.Max_Minutes = 6; % first number of clean minutes to look for bursts in
 
-BT = struct();
-BT.MonotoncityInTime = .6;
-BT.PeriodConsistency = .6;
-BT.periodMeanConsistency = .6;
-BT.MonotoncityInAmplitude = .6;
-BT.isTruePeak = 1;
-BT.FlankConsistency = .5;
-BT.AmplitudeConsistency = .6;
-Info.CriteriaSets = BT;
+CriteriaSet = struct();
+CriteriaSet.MonotoncityInTime = .6;
+CriteriaSet.PeriodConsistency = .6;
+CriteriaSet.periodMeanConsistency = .6;
+CriteriaSet.MonotoncityInAmplitude = .6;
+CriteriaSet.isTruePeak = 1;
+CriteriaSet.FlankConsistency = .5;
+CriteriaSet.AmplitudeConsistency = .6;
+Info.CriteriaSets = CriteriaSet;
 
 
 %%% Parameters to aggregate across channels
