@@ -78,21 +78,25 @@ EEGNarrowbands = cycy.filter_eeg_narrowbands(EEG, Bands);
 
 %%
 
+% long bursts
 CriteriaSets = struct();
-CriteriaSets.MonotonicityInTime = .7;
-CriteriaSets.MonotonicityInAmplitude = .6;
 CriteriaSets.PeriodConsistency = .6;
-CriteriaSets.FlankConsistency = .5;
-CriteriaSets.AmplitudeConsistency = .5;
+CriteriaSets.MonotonicityInAmplitude = .5;
+CriteriaSets.FlankConsistency = 0.5;
+CriteriaSets.AmplitudeConsistency = 0.5;
+CriteriaSets.ShapeConsistency = .5;
 CriteriaSets.MinCyclesPerBurst = 4;
+CriteriaSets.MonotonicityInTime = 1;
 
+
+% short bursts
+CriteriaSets(2).PeriodConsistency = .7;
 CriteriaSets(2).MonotonicityInAmplitude = .9;
-CriteriaSets(2).MonotonicityInTime = .9;
-CriteriaSets(2).AmplitudeConsistency = .2;
-CriteriaSets(2).PeriodConsistency = .8;
+CriteriaSets(2).PeriodNeg = true;
+CriteriaSets(2).ShapeConsistency = .5;
+CriteriaSets(2).isProminent = 1;
+CriteriaSets(2).FlankConsistency = 0.3;
 CriteriaSets(2).MinCyclesPerBurst = 3;
-
-
 
 %% Single channel
 close all
@@ -106,7 +110,8 @@ cycy.plot.plot_all_bursts(EEG, 40, Bursts, 'Band');
 
 %% single set
 
-Bursts = cycy.test_criteria_set(EEG.data(Channel, :), SampleRate, Bands.Alpha, CriteriaSets(2));
+BurstsSingle = cycy.test_criteria_set(EEG.data(Channel, :), SampleRate, ...
+    Bands.AlphaHigh, CriteriaSets(2));
 
 
 
