@@ -109,13 +109,9 @@ Triggers.Tones = 'S 12';
 
 Parameters.Triggers = Triggers;
 
-Manuscript = getProperties({'LSM', 'Manuscript'});
-Powerpoint =  getProperties({'LSM', 'Powerpoint'});
-Poster =  getProperties({'LSM', 'Poster'});
-
-Parameters.Manuscript = Manuscript; % for papers
-Parameters.Powerpoint = Powerpoint; % for presentations
-Parameters.Poster = Poster;
+Parameters.PlotProps.Manuscript = chART.load_plot_properties({'LSM', 'Manuscript'});
+Parameters.PlotProps.Powerpoint = chART.load_plot_properties({'LSM', 'Powerpoint'});
+Parameters.PlotProps.Poster = chART.load_plot_properties({'LSM', 'Poster'});
 
 
 
