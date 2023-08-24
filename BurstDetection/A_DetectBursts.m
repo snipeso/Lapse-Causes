@@ -8,6 +8,7 @@ Sessions = Parameters.Sessions;
 Participants = Parameters.Participants;
 Bands = Parameters.Bands;
 CriteriaSets = Parameters.CriteriaSets;
+Triggers = Parameters.Triggers;
 
 RunParallelBurstDetection = true;
 RerunAnalysis = false;
@@ -44,10 +45,20 @@ for FilenameSource = Filenames'
     % get timepoints without noise
     if exist(fullfile(EEGSourceCuts, FilenameCuts), 'file')
         NoiseEEG = nanNoise(EEG, fullfile(EEGSourceCuts, FilenameCuts));
-        KeepTimepoints = ~isnan(NoiseEEG.data(1, :));
+        CleanTimepoints = ~isnan(NoiseEEG.data(1, :));
     else
-        KeepTimepoints = ones(1, EEG.pnts);
+        CleanTimepoints = ones(1, EEG.pnts);
     end
+
+    % get vector of points from which the burst data was pooled (task,
+    % clean)
+    TaskPoints = zeros(1, numel(CleanTimepoints));
+    TriggerTypes = {EEG.event.type};
+    TriggerLatencies = [EEG.event.latency];
+    StartTask = round(TriggerLatencies(strcmp(TriggerTypes, Triggers.Start)));
+    EndTask = round(TriggerLatencies(strcmp(TriggerTypes, Triggers.End)));
+    TaskPoints(StartTask:EndTask) = 1;
+    KeepTimepoints = CleanTimepoints & TaskPoints;
 
     % filter data into narrowbands
     EEGNarrowbands = cycy.filter_eeg_narrowbands(EEG, Bands);
@@ -57,20 +68,10 @@ for FilenameSource = Filenames'
         CriteriaSets, RunParallelBurstDetection, KeepTimepoints);
 
     % keep track of how much data is being used
-    EEG.CleanTimepoints = KeepTimepoints;
-    EEG.CleanTimepointsCount = nnz(KeepTimepoints);
+    EEG.CleanTaskTimepoints = KeepTimepoints;
+    EEG.CleanTaskTimepointsCount = nnz(KeepTimepoints);
     EEG.data = []; % only save the metadata
 
-     % get vector of points from which the burst data was pooled (task,
-    % clean)
-    TaskPoints = zeros(1, numel(KeepTimepoints));
-    TriggerTypes = {EEG.event.type};
-    TriggerLatencies = [EEG.event.latency];
-    StartTask = round(TriggerLatencies(strcmp(TriggerTypes, Triggers.Start)));
-    EndTask = round(TriggerLatencies(strcmp(TriggerTypes, Triggers.End)));
-    TaskPoints(StartTask:EndTask) = 1;
-    TaskPoints = TaskPoints & EEG.CleanTimepoints; % both when task starts and stops, and when data is clean
-    EEG.TaskPoints = TaskPoints;
 
     % aggregate bursts into clusters across channels
     BurstClusters = cycy.aggregate_bursts_into_clusters(Bursts, EEG, MinClusteringFrequencyRange);
