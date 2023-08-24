@@ -9,33 +9,24 @@ Parameters = struct();
 
 %%% parameters to find bursts in single channels
 
-% short
+% long bursts
 CriteriaSets = struct();
-CriteriaSets(1).PeriodConsistency = .3;
-CriteriaSets(1).Amplitude = 25;
-CriteriaSets(1).MinCyclesPerBurst = 3;
-CriteriaSets(1).isProminent = 1;
-CriteriaSets(1).isTruePeak = 1;
-
-% long
-CriteriaSets(2).MonotoncityInTime = .5;
-CriteriaSets(2).PeriodConsistency = .5;
-CriteriaSets(2).MonotoncityInAmplitude = .6;
-CriteriaSets(2).isTruePeak = 1;
-CriteriaSets(2).FlankConsistency = .5;
-CriteriaSets(2).AmplitudeConsistency = .5;
-CriteriaSets(2).MinCyclesPerBurst = 6;
+CriteriaSets.PeriodConsistency = .6;
+CriteriaSets.MonotonicityInAmplitude = .5;
+CriteriaSets.FlankConsistency = 0.5;
+CriteriaSets.AmplitudeConsistency = 0.5;
+CriteriaSets.ShapeConsistency = .5;
+CriteriaSets.MinCyclesPerBurst = 4;
 
 
-% clean
-CriteriaSets(3).MonotoncityInTime = .6;
-CriteriaSets(3).PeriodConsistency = .6; % C
-CriteriaSets(3).MonotoncityInAmplitude = .6;
-CriteriaSets(3).isTruePeak = 1; % A
-CriteriaSets(3).FlankConsistency = .5; % D
-CriteriaSets(3).AmplitudeConsistency = .6;% E
-CriteriaSets(3).MinCyclesPerBurst = 4;
-
+% short bursts
+CriteriaSets(2).PeriodConsistency = .7;
+CriteriaSets(2).MonotonicityInAmplitude = .9;
+CriteriaSets(2).PeriodNeg = true;
+CriteriaSets(2).ShapeConsistency = .5;
+CriteriaSets(2).isProminent = 1;
+CriteriaSets(2).FlankConsistency = 0.3;
+CriteriaSets(2).MinCyclesPerBurst = 3;
 Parameters.CriteriaSets = CriteriaSets;
 
 
@@ -79,6 +70,9 @@ for Indx_F = 1:numel(Subfolders)
 end
 
 Parameters.Paths = Paths;
+
+Sessions = {'BaselineBeam', 'MainPre', 'MainPost', 'Session2Beam1', 'Session2Beam2', 'Session2Beam3'};
+Parameters.Sessions = Sessions;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% EEG info

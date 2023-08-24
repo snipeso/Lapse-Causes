@@ -13,8 +13,8 @@ BandLabels = fieldnames(Bands);
 % Session = 'Session2';
 % Participant = 'P10';
 
-Task = 'PVT'; % Game or Standing
-Session = 'Session2Beam';
+Task = 'Fixation'; % Game or Standing
+Session = 'Main8';
 Participant = 'P15';
 
 Source = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task); % normal data
@@ -22,7 +22,7 @@ Filename_Source = strjoin({Participant, Task, Session, 'Clean.mat'}, '_');
 
 load(fullfile(Source, Filename_Source), 'EEG')
 SampleRate = EEG.srate;
-EEG = pop_select(EEG, 'channel', 1:4:size(EEG.data, 1));
+% EEG = pop_select(EEG, 'channel', 1:6:size(EEG.data, 1));
 
 
 %% select data and plot spectrum
@@ -73,53 +73,76 @@ Bursts = cycy.test_criteria_set(DataBroadband, SampleRate, NarrowbandRange, Crit
 
 %% Everything
 
+
 %
+tic
 EEGNarrowbands = cycy.filter_eeg_narrowbands(EEG, Bands);
+toc
 
 %%
 
 % long bursts
+Idx = 1;
 CriteriaSets = struct();
-CriteriaSets.PeriodConsistency = .6;
-CriteriaSets.MonotonicityInAmplitude = .5;
-CriteriaSets.FlankConsistency = 0.5;
-CriteriaSets.AmplitudeConsistency = 0.5;
-CriteriaSets.ShapeConsistency = .5;
-CriteriaSets.MinCyclesPerBurst = 4;
-CriteriaSets.MonotonicityInTime = 1;
-
+% CriteriaSets.PeriodConsistency = .6;
+% CriteriaSets.MonotonicityInAmplitude = .6;
+% CriteriaSets.FlankConsistency = 0.6;
+% CriteriaSets.AmplitudeConsistency = 0.6;
+% CriteriaSets.MinCyclesPerBurst = 4;
+% % without periodneg, to capture bursts that accelerate/decelerate
 
 % short bursts
-CriteriaSets(2).PeriodConsistency = .7;
-CriteriaSets(2).MonotonicityInAmplitude = .9;
-CriteriaSets(2).PeriodNeg = true;
-CriteriaSets(2).ShapeConsistency = .5;
-CriteriaSets(2).isProminent = 1;
-CriteriaSets(2).FlankConsistency = 0.3;
-CriteriaSets(2).MinCyclesPerBurst = 3;
+% Idx = 2;
+% CriteriaSets(2).PeriodConsistency = .7;
+% CriteriaSets(2).MonotonicityInAmplitude = .9;
+% CriteriaSets(2).MonotonicityInTime = .9;
+% CriteriaSets(2).PeriodNeg = true;
+% CriteriaSets(2).ShapeConsistency = .3;
+% CriteriaSets(2).FlankConsistency = 0.3;
+% CriteriaSets(2).MinCyclesPerBurst = 3;
+
+% dirty bursts
+% Idx = 3; 
+CriteriaSets(Idx).PeriodConsistency = .5;
+CriteriaSets(Idx).MonotonicityInTime = .4;
+CriteriaSets(Idx).MonotonicityInAmplitude = .4;
+CriteriaSets(Idx).ReversalRatio = 0.6;
+CriteriaSets(Idx).ShapeConsistency = .1;
+CriteriaSets(Idx).FlankConsistency = .5;
+CriteriaSets(Idx).MinCyclesPerBurst = 3;
+CriteriaSets(Idx).AmplitudeConsistency = .4;
+CriteriaSets(Idx).MinCyclesPerBurst = 3;
+CriteriaSets(Idx).PeriodNeg = true;
 
 %% Single channel
 close all
 
-Channel = labels2indexes(71, EEG.chanlocs);
-
+Channel = labels2indexes(1, EEG.chanlocs);
+%
+% profile on
 Bursts = cycy.detect_bursts(EEG, Channel, EEGNarrowbands,...
     Bands, CriteriaSets);
+% profile viewer
+% % %
+cycy.plot.plot_all_bursts(EEG, 15, Bursts, 'Band');
+% 
+figure
+cycy.plot.power_without_bursts(EEG.data(Channel, :), SampleRate, Bursts);
 
-cycy.plot.plot_all_bursts(EEG, 40, Bursts, 'Band');
-
+cycy.plot.burst_criteriaset_diagnostics(Bursts);
 %% single set
 
+tic
 BurstsSingle = cycy.test_criteria_set(EEG.data(Channel, :), SampleRate, ...
-    Bands.AlphaHigh, CriteriaSets(2));
-
-
+    Bands.Alpha, CriteriaSets(3));
+toc
 
 %% All channels
 % detect bursts
 RunParallel = false; % if there's a lot of data, channels can be run in parallel
 Bursts = cycy.detect_bursts_all_channels(EEG, EEGNarrowbands, Bands, ...
-    CriteriaSets, RunParallel);
+    CriteriaSets, RunParallel); 
+
 
 %%
 MinFrequencyRange = 1;
@@ -129,3 +152,6 @@ BurstClusters = cycy.aggregate_bursts_into_clusters(Bursts, EEG, MinFrequencyRan
 
 %%
 cycy.plot.plot_all_bursts(EEG, 20, BurstClusters, 'Band');
+
+%%
+cycy.plot.burst_criteriaset_diagnostics(BurstClusters)
