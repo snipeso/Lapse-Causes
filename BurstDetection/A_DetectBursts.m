@@ -9,64 +9,73 @@ Participants = Parameters.Participants;
 Bands = Parameters.Bands;
 CriteriaSets = Parameters.CriteriaSets;
 
-RunParallel = true;
+RunParallelBurstDetection = true;
+RerunAnalysis = false;
 Task = 'LAT';
-MinFrequencyRange = 1; % to cluster bursts across channels
+MinClusteringFrequencyRange = 1; % to cluster bursts across channels
 
-Source = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task);
-Source_Cuts = fullfile(Paths.Preprocessed, 'Cutting', 'Cuts', Task); % timepoints marked as artefacts
+EEGSource = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task);
+EEGSourceCuts = fullfile(Paths.Preprocessed, 'Cutting', 'Cuts', Task); % timepoints marked as artefacts
 Destination = fullfile(Paths.Data, 'EEG', 'Bursts_New', Task);
 if ~exist(Destination, 'dir')
     mkdir(Destination)
 end
 
-Filenames = getContent(Source);
+Filenames = getContent(EEGSource);
 Filenames(~contains(Filenames, Sessions)) = [];
 Filenames(~contains(Filenames, Participants)) = [];
 
-for Filename_Source = Filenames'
-    % load data
-    Filename_Destination = replace(Filename_Source, '_Clean.mat', '.mat');
-    Filename_Cuts =  replace(Filename_Source, '_Clean.mat', '_Cuts.mat');
+for FilenameSource = Filenames'
 
-    if exist(fullfile(Destination, Filename_Destination), 'file') && ~Refresh
-        disp(['Skipping ', Filename_Destination])
+    % load data
+    FilenameDestination = replace(FilenameSource, '_Clean.mat', '.mat');
+    FilenameCuts =  replace(FilenameSource, '_Clean.mat', '_Cuts.mat');
+
+    if exist(fullfile(Destination, FilenameDestination), 'file') && ~RerunAnalysis
+        disp(['Skipping ', FilenameDestination])
         continue
     else
-        disp(['Loading ', Filename_Source])
+        disp(['Loading ', FilenameSource])
     end
 
-    load(fullfile(Source, Filename_Source), 'EEG')
+    load(fullfile(EEGSource, FilenameSource), 'EEG')
     SampleRate = EEG.srate;
 
     % get timepoints without noise
-    if exist(fullfile(Source_Cuts, Filename_Cuts), 'file')
-        NoiseEEG = nanNoise(EEG, fullfile(Source_Cuts, Filename_Cuts));
+    if exist(fullfile(EEGSourceCuts, FilenameCuts), 'file')
+        NoiseEEG = nanNoise(EEG, fullfile(EEGSourceCuts, FilenameCuts));
         KeepTimepoints = ~isnan(NoiseEEG.data(1, :));
     else
         KeepTimepoints = ones(1, EEG.pnts);
     end
 
-
     % filter data into narrowbands
     EEGNarrowbands = cycy.filter_eeg_narrowbands(EEG, Bands);
 
-
     % apply burst detection
     Bursts = cycy.detect_bursts_all_channels(EEG, EEGNarrowbands, Bands, ...
-        CriteriaSets, RunParallel, KeepTimepoints);
+        CriteriaSets, RunParallelBurstDetection, KeepTimepoints);
 
     % keep track of how much data is being used
-    EEG.keep_points = KeepTimepoints;
-    EEG.clean_t = nnz(KeepTimepoints);
+    EEG.CleanTimepoints = KeepTimepoints;
+    EEG.CleanTimepointsCount = nnz(KeepTimepoints);
     EEG.data = []; % only save the metadata
 
+     % get vector of points from which the burst data was pooled (task,
+    % clean)
+    TaskPoints = zeros(1, numel(KeepTimepoints));
+    TriggerTypes = {EEG.event.type};
+    TriggerLatencies = [EEG.event.latency];
+    StartTask = round(TriggerLatencies(strcmp(TriggerTypes, Triggers.Start)));
+    EndTask = round(TriggerLatencies(strcmp(TriggerTypes, Triggers.End)));
+    TaskPoints(StartTask:EndTask) = 1;
+    TaskPoints = TaskPoints & EEG.CleanTimepoints; % both when task starts and stops, and when data is clean
+    EEG.TaskPoints = TaskPoints;
 
-    BurstClusters = cycy.aggregate_bursts_into_clusters(Bursts, EEG, MinFrequencyRange);
-
+    % aggregate bursts into clusters across channels
+    BurstClusters = cycy.aggregate_bursts_into_clusters(Bursts, EEG, MinClusteringFrequencyRange);
 
     % save
-    save(fullfile(Destination, Filename_Destination), 'Bursts', 'BurstClusters', 'EEG')
-disp(['Finished ', Filename_Source])
-
+    save(fullfile(Destination, FilenameDestination), 'Bursts', 'BurstClusters', 'EEG')
+    disp(['Finished ', FilenameSource])
 end
