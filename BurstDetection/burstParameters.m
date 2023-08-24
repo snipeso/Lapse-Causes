@@ -8,25 +8,37 @@ Parameters = struct();
 %%% Burst Parameters
 
 %%% parameters to find bursts in single channels
-
-% long bursts
+% irregular shaped bursts
+Idx = 1; % this is to make it easier to try things out in the sandbox
 CriteriaSets = struct();
-CriteriaSets.PeriodConsistency = .6;
-CriteriaSets.MonotonicityInAmplitude = .5;
-CriteriaSets.FlankConsistency = 0.5;
-CriteriaSets.AmplitudeConsistency = 0.5;
-CriteriaSets.ShapeConsistency = .5;
-CriteriaSets.MinCyclesPerBurst = 4;
-
+CriteriaSets(Idx).PeriodConsistency = .6;
+CriteriaSets(Idx).MonotonicityInAmplitude = .6;
+CriteriaSets(Idx).FlankConsistency = 0.6;
+CriteriaSets(Idx).AmplitudeConsistency = 0.6;
+CriteriaSets(Idx).MinCyclesPerBurst = 4;
+% % without periodneg, to capture bursts that accelerate/decelerate
 
 % short bursts
-CriteriaSets(2).PeriodConsistency = .7;
-CriteriaSets(2).MonotonicityInAmplitude = .9;
-CriteriaSets(2).PeriodNeg = true;
-CriteriaSets(2).ShapeConsistency = .5;
-CriteriaSets(2).isProminent = 1;
-CriteriaSets(2).FlankConsistency = 0.3;
-CriteriaSets(2).MinCyclesPerBurst = 3;
+Idx = 2;
+CriteriaSets(Idx).PeriodConsistency = .7;
+CriteriaSets(Idx).MonotonicityInAmplitude = .9;
+CriteriaSets(Idx).PeriodNeg = true;
+CriteriaSets(Idx).FlankConsistency = 0.3;
+CriteriaSets(Idx).MinCyclesPerBurst = 3;
+
+% dirty bursts, relies on shape but low other criteria
+Idx = 3; 
+CriteriaSets(Idx).PeriodConsistency = .5;
+CriteriaSets(Idx).MonotonicityInTime = .4;
+CriteriaSets(Idx).MonotonicityInAmplitude = .4;
+CriteriaSets(Idx).ReversalRatio = 0.6;
+CriteriaSets(Idx).ShapeConsistency = .2;
+CriteriaSets(Idx).FlankConsistency = .5;
+CriteriaSets(Idx).MinCyclesPerBurst = 3;
+CriteriaSets(Idx).AmplitudeConsistency = .4;
+CriteriaSets(Idx).MinCyclesPerBurst = 4;
+CriteriaSets(Idx).PeriodNeg = true;
+
 Parameters.CriteriaSets = CriteriaSets;
 
 
@@ -74,6 +86,8 @@ Parameters.Paths = Paths;
 Sessions = {'BaselineBeam', 'MainPre', 'MainPost', 'Session2Beam1', 'Session2Beam2', 'Session2Beam3'};
 Parameters.Sessions = Sessions;
 
+Parameters.Participants = {'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09',
+    'P10', 'P11', 'P12', 'P13', 'P14', 'P15', 'P16', 'P17', 'P19'};
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% EEG info
 
