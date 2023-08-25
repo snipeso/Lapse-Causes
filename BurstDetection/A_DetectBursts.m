@@ -44,7 +44,7 @@ for FilenameSource = Filenames'
 
     % get timepoints without noise
     if exist(fullfile(EEGSourceCuts, FilenameCuts), 'file')
-        NoiseEEG = nanNoise(EEG, fullfile(EEGSourceCuts, FilenameCuts));
+        NoiseEEG = remove_noise(EEG, fullfile(EEGSourceCuts, FilenameCuts));
         CleanTimepoints = ~isnan(NoiseEEG.data(1, :));
     else
         CleanTimepoints = ones(1, EEG.pnts);

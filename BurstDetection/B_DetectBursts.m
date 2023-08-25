@@ -58,7 +58,7 @@ for Indx_F = 103%1:numel(Content)
 
     % get timepoints without noise
     if exist(fullfile(Source_Cuts, Filename_Cuts), 'file')
-        NoiseEEG = nanNoise(EEG, fullfile(Source_Cuts, Filename_Cuts));
+        NoiseEEG = remove_noise(EEG, fullfile(Source_Cuts, Filename_Cuts));
         Keep_Points = ~isnan(NoiseEEG.data(1, :));
     else
         Keep_Points = ones(1, EEG.pnts);

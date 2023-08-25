@@ -66,7 +66,7 @@ for Indx_F = 1:numel(Files)
     
     % set to nan all cut data
     Cuts_Filepath = fullfile(Source_Cuts, [Filename_Core, '_Cuts.mat']);
-    EEG = nanNoise(EEG, Cuts_Filepath);
+    EEG = remove_noise(EEG, Cuts_Filepath);
     
     
     %%% get epochs
