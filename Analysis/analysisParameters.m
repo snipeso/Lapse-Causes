@@ -7,7 +7,11 @@ Parameters = struct();
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Locations
 
-if exist( 'D:\Data\Raw', 'dir')
+if exist( 'D:\LSM\Preprocessed', 'dir') % KISPI desktop
+     Core = 'D:\LSM\';
+     addpath('H:\Code\chART')
+          addpath('H:\Code\Matcycle')
+elseif exist( 'D:\Data\Raw', 'dir')
     Core = 'D:\Data\';
 elseif exist( 'F:\Data\Raw', 'dir')
     Core = 'F:\Data\';
