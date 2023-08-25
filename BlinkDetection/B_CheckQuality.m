@@ -21,7 +21,7 @@ for Indx_P = 1:numel(Participants)
     for Indx_S = 1:numel(Sessions)
         Indx = Indx+1;
 
-        Path = fullfile(Paths.Preprocessed, 'Pupils', Task);
+        Path = fullfile(Paths.Data, 'Pupils', Task);
         Pupil = loadMATFile(Path, Participants{Indx_P}, Sessions{Indx_S}, 'Pupil');
         if isempty(Pupil); continue; end
 

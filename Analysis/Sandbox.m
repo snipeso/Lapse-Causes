@@ -17,7 +17,7 @@ Task = 'Fixation'; % Game or Standing
 Session = 'Main4';
 Participant = 'P03';
 
-Source = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task); % normal data
+Source = fullfile(Paths.Data, 'Clean', 'Waves', Task); % normal data
 Filename_Source = strjoin({Participant, Task, Session, 'Clean.mat'}, '_');
 
 load(fullfile(Source, Filename_Source), 'EEG')

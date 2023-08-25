@@ -27,8 +27,8 @@ WelchWindow = .5;
 TitleTag = strjoin({'Bursts', 'LAT', 'Hemifield'}, '_');
 
 % get files and paths
-Source = fullfile(Paths.Preprocessed, 'Clean', 'Power', Task);
-Source_Cuts = fullfile(Paths.Preprocessed, 'Cutting', 'Cuts', Task);
+Source = fullfile(Paths.Data, 'Clean', 'Power', Task);
+Source_Cuts = fullfile(Paths.Data, 'Cutting', 'Cuts', Task);
 Destination = fullfile(Paths.Data, 'EEG', 'Locked', Task, ...
     ['s', num2str(StartTime), '_e', num2str(EndTime), '_w', num2str(WelchWindow)]);
 

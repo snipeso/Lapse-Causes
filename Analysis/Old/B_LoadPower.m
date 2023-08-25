@@ -52,7 +52,7 @@ if RefreshTrials || ~exist(fullfile(Paths.Pool, 'Tasks', 'AllTrials.mat'), 'file
     Trials = loadBehavior(Participants, Sessions, Task, Paths, false);
 
     % get time of stim and response trigger
-    EEGPath = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task); % use Waves, since has an fs of 1000
+    EEGPath = fullfile(Paths.Data, 'Clean', 'Waves', Task); % use Waves, since has an fs of 1000
     Trials = getTrialLatencies(Trials, EEGPath, P.Triggers);
 
     % get eyes-closed info

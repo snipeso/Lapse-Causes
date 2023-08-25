@@ -60,8 +60,8 @@ Triggers = Parameters.Triggers;
 %%% Analysis
 
 % set paths and files
-EEGSource = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task);
-EEGSourceCuts = fullfile(Paths.Preprocessed, 'Cutting', 'Cuts', Task); % timepoints marked as artefacts
+EEGSource = fullfile(Paths.Data, 'Clean', 'Waves', Task);
+EEGSourceCuts = fullfile(Paths.Data, 'Cutting', 'Cuts', Task); % timepoints marked as artefacts
 Destination = fullfile(Paths.Data, 'EEG', 'Bursts_New', Task);
 if ~exist(Destination, 'dir')
     mkdir(Destination)
