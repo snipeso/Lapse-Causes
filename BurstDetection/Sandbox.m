@@ -84,8 +84,7 @@ cycy.plot.burst_criteriaset_diagnostics(Bursts);
 %% single set
 
 Channel = labels2indexes(99, EEG.chanlocs);
-BurstsSingle = cycy.test_criteria_set(EEG.data(Channel, :), SampleRate, ...
-    Bands.Alpha, CriteriaSets(3));
+BurstsSingle = cycy.test_criteria_set(EEG.data(Channel, :), SampleRate, Bands.Alpha, CriteriaSets(3));
 
 
 %% All channels

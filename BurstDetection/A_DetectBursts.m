@@ -10,7 +10,7 @@ Bands = Parameters.Bands;
 CriteriaSets = Parameters.CriteriaSets;
 Triggers = Parameters.Triggers;
 
-RunParallelBurstDetection = true;
+RunParallelBurstDetection = false;
 RerunAnalysis = false;
 Task = 'LAT';
 MinClusteringFrequencyRange = 1; % to cluster bursts across channels
@@ -67,14 +67,13 @@ for FilenameSource = Filenames'
     Bursts = cycy.detect_bursts_all_channels(EEG, EEGNarrowbands, Bands, ...
         CriteriaSets, RunParallelBurstDetection, KeepTimepoints);
 
-    % keep track of how much data is being used
+    % aggregate bursts into clusters across channels
+    BurstClusters = cycy.aggregate_bursts_into_clusters(Bursts, EEG, MinClusteringFrequencyRange);
+
+        % keep track of how much data is being used
     EEG.CleanTaskTimepoints = KeepTimepoints;
     EEG.CleanTaskTimepointsCount = nnz(KeepTimepoints);
     EEG.data = []; % only save the metadata
-
-
-    % aggregate bursts into clusters across channels
-    BurstClusters = cycy.aggregate_bursts_into_clusters(Bursts, EEG, MinClusteringFrequencyRange);
 
     % save
     save(fullfile(Destination, FilenameDestination), 'Bursts', 'BurstClusters', 'EEG')
