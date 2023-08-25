@@ -9,10 +9,12 @@ Parameters = struct();
 %%% Analysis paramaters
 
 % Who, what, when
-Parameters.Task = 'LAT';
+Parameters.Task = 'LAT'; % main analysis is done on LAT, but some parts use PVT
 
-Parameters.Sessions = {'BaselineBeam', 'MainPre', 'MainPost', ...
+Parameters.Sessions.LAT = {'BaselineBeam', 'MainPre', 'MainPost', ...
     'Session2Beam1', 'Session2Beam2', 'Session2Beam3'};
+
+Parameters.Sessions.PVT = {'BaselineBeam', 'Session2Beam'};
 
 Parameters.Participants = {'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', ...
     'P10', 'P11', 'P12', 'P13', 'P14', 'P15', 'P16', 'P17', 'P19'};
@@ -72,6 +74,7 @@ Paths.Core = Core;
 
 Paths.RawData = 'G:\LSM\Data\Raw';
 Paths.AnalyzedData  = fullfile(Core, 'Final'); % where data gets saved once its been turned into something else
+Paths.PooledData = fullfile(Paths.AnalyzedData, 'PooledData', 'Lapse-Causes');
 Paths.Results = fullfile(Core, 'Results', 'Lapse-Causes');
 
 if ~exist(Paths.Results, 'dir')

@@ -10,7 +10,6 @@ close all
 % set parameters for how you want to run the script this time
 RunParallelBurstDetection = true; % true for faster processing
 RerunAnalysis = false; % false to skip files already analyzed
-Task = 'LAT';
 
 %%% criteria to find bursts in single channels
 % irregular shaped bursts, few criteria, but needs more cycles
@@ -50,7 +49,8 @@ MinClusteringFrequencyRange = 1; % to cluster bursts across channels
 % load in parameters that are in common across scripts
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
-Sessions = Parameters.Sessions;
+Task = Parameters.Task;
+Sessions = Parameters.Sessions.(Task);
 Participants = Parameters.Participants;
 Bands = Parameters.Bands;
 Triggers = Parameters.Triggers;
