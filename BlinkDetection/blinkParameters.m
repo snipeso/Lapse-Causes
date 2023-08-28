@@ -27,7 +27,7 @@ else
 end
 
 % Core = 'D:\LSM\Data\';
-Paths.Preprocessed = fullfile(Core, 'Preprocessed');
+Paths.Data = fullfile(Core, 'Preprocessed');
 Paths.Core = Core;
 
 Paths.Datasets = 'G:\LSM\Data\Raw';

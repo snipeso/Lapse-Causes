@@ -10,7 +10,6 @@ close all
 % set parameters for how you want to run the script this time
 RunParallelBurstDetection = false; % true for faster processing
 RerunAnalysis = false; % false to skip files already analyzed
-Task = 'LAT';
 
 %%% criteria to find bursts in single channels
 % irregular shaped bursts, few criteria, but needs more cycles
@@ -50,7 +49,8 @@ MinClusteringFrequencyRange = 1; % to cluster bursts across channels
 % load in parameters that are in common across scripts
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
-Sessions = Parameters.Sessions;
+Task = Parameters.Task;
+Sessions = Parameters.Sessions.(Task);
 Participants = Parameters.Participants;
 Bands = Parameters.Bands;
 Triggers = Parameters.Triggers;
@@ -60,8 +60,8 @@ Triggers = Parameters.Triggers;
 %%% Analysis
 
 % set paths and files
-EEGSource = fullfile(Paths.Preprocessed, 'Clean', 'Waves', Task);
-EEGSourceCuts = fullfile(Paths.Preprocessed, 'Cutting', 'Cuts', Task); % timepoints marked as artefacts
+EEGSource = fullfile(Paths.Data, 'Clean', 'Waves', Task);
+EEGSourceCuts = fullfile(Paths.Data, 'Cutting', 'Cuts', Task); % timepoints marked as artefacts
 Destination = fullfile(Paths.Data, 'EEG', 'Bursts_New', Task);
 if ~exist(Destination, 'dir')
     mkdir(Destination)

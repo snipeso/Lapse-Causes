@@ -18,8 +18,8 @@ Task = 'PVT';
 fs = 250;
 
 %%% paths
-Source_EEG = fullfile(Paths.Preprocessed, 'Power', 'SET', Task);
-Source_Eyes = fullfile(Paths.Preprocessed, 'Pupils', Task);
+Source_EEG = fullfile(Paths.Data, 'Power', 'SET', Task);
+Source_Eyes = fullfile(Paths.Data, 'Pupils', Task);
 Destination_Eyes = fullfile(Paths.Data, ['Pupils_', num2str(fs)], Task);
 if ~exist(Destination_Eyes, 'dir')
     mkdir(Destination_Eyes);
