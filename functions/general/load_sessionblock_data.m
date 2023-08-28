@@ -10,11 +10,11 @@ BurstsAllSessions = struct();
 for Session = Sessions
     if ~isempty(Source_Bursts)
         % load bursts
-        Bursts = load_datafile(Source_Bursts, Participant{1}, Session, BurstVariable);
+        Bursts = load_datafile(Source_Bursts, Participant, Session, BurstVariable);
         if isempty(Bursts); continue; end
 
         % load EEG metadata
-        Metadata = load_datafile(Source_Bursts, Participant{1}, Session, 'EEG'); % TODO, when rerun, call EEGMetadata
+        Metadata = load_datafile(Source_Bursts, Participant, Session, 'EEG'); % TODO, when rerun, call EEGMetadata
         ValidTime = Metadata.CleanTaskTimepoints;
     else
         ValidTime = 1; % placeholder so nothing gets naned later
@@ -22,7 +22,7 @@ for Session = Sessions
 
     if ~isempty(Source_EEG)
         % load in EEG data
-        EEG = load_datafile(Source_EEG, Participant{1}, Session, 'EEG');
+        EEG = load_datafile(Source_EEG, Participant, Session, 'EEG');
         if isempty(EEG); continue; end
 
         % remove artefact timepoints
@@ -31,6 +31,6 @@ for Session = Sessions
         EEG = [];
     end
 
-    EEGAllSessions.(Session) = EEG;
-    BurstsAllSessions.(Session) = Bursts;
+    EEGAllSessions.(Session{1}) = EEG;
+    BurstsAllSessions.(Session{1}) = Bursts;
 end
