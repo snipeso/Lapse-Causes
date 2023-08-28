@@ -115,8 +115,8 @@ Narrowbands.Sigma = [12 16];
 
 Parameters.Narrowbands = Narrowbands;
 
-Bands.Theta = [4 8];
-Bands.Alpha = [8 14];
+Bands.Theta = [4 8]; % up to but not including the second edge
+Bands.Alpha = [8 14]; 
 Parameters.Bands = Bands;
 
 
@@ -135,7 +135,8 @@ Triggers.Tones = 'S 12';
 
 % Triggers.Extras = {'boundary', Triggers.Start, Triggers.End, Triggers.Resp, ...
 %     Triggers.FA, Triggers.StartBlank, Triggers.EndBlank, Triggers.Alarm, ...
-%     Triggers.LeftBlock, Triggers.RightBlock, Tones};
+%     Triggers.LeftBlock, Triggers.RightBlock, Tones}; TODO see if needs
+%     removing
 
 
 Parameters.Triggers = Triggers;
@@ -157,5 +158,27 @@ Channels.preROI.Center = Centerspot;
 Channels.preROI.Back = Backspot;
 
 Parameters.Channels = Channels;
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% statistics
+
+Stats = struct();
+
+Stats.ANOVA.ES = 'eta2';
+% Stats.ANOVA.ES_lims = [0 1];
+Stats.ANOVA.nBoot = 2000;
+Stats.ANOVA.pValue = 'pValueGG';
+Stats.ttest.nBoot = 2000;
+Stats.ttest.dep = 'pdep'; % use 'dep' for ERPs, pdep for power
+Stats.Alpha = .05;
+Stats.Trend = .1;
+Stats.Paired.ES = 'hedgesg';
+% Stats.Paired.Benchmarks = -2:.5:2;
+% Stats.FreqBin = 1; % # of frequencies to bool in spectrums stats
+% Stats.minProminence = .1; % minimum prominence for when finding clusters of g values
+Parameters.Stats = Stats;
+
 
 
