@@ -106,13 +106,17 @@ Parameters.Paths = Paths;
 %%% EEG info
 
 % bands used to get bursts
-Bands.ThetaLow = [2 6];
-Bands.Theta = [4 8];
-Bands.ThetaAlpha = [6 10];
-Bands.Alpha = [8 12];
-Bands.AlphaHigh = [10 14];
-Bands.Sigma = [12 16];
+Narrowbands.ThetaLow = [2 6];
+Narrowbands.Theta = [4 8];
+Narrowbands.ThetaAlpha = [6 10];
+Narrowbands.Alpha = [8 12];
+Narrowbands.AlphaHigh = [10 14];
+Narrowbands.Sigma = [12 16];
 
+Parameters.Narrowbands = Narrowbands;
+
+Bands.Theta = [4 8];
+Bands.Alpha = [8 14];
 Parameters.Bands = Bands;
 
 
@@ -142,5 +146,16 @@ Parameters.Manuscript.Figure.Width = 22;
 Parameters.PlotProps.Powerpoint = chART.load_plot_properties({'LSM', 'Powerpoint'});
 Parameters.PlotProps.Poster = chART.load_plot_properties({'LSM', 'Poster'});
 
+%%% channel clusters
+
+Frontspot = [22 15 9 23 18 16 10 3 24 19 11 4 124 20 12 5 118 13 6 112];
+Backspot = [66 71 76 84 65 70 75 83 90 69 74 82 89];
+Centerspot = [129 7 106 80 55 31 30 37 54 79 87 105 36 42 53 61 62 78 86 93 104 35 41 47  52 92 98 103 110, 60 85 51 97];
+
+Channels.preROI.Front = Frontspot;
+Channels.preROI.Center = Centerspot;
+Channels.preROI.Back = Backspot;
+
+Parameters.Channels = Channels;
 
 

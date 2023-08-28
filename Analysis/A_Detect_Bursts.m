@@ -52,7 +52,7 @@ Paths = Parameters.Paths;
 Task = Parameters.Task;
 Sessions = Parameters.Sessions.(Task);
 Participants = Parameters.Participants;
-Bands = Parameters.Bands;
+Bands = Parameters.Narrowbands;
 Triggers = Parameters.Triggers;
 
 
