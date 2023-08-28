@@ -110,12 +110,15 @@ for FilenameSource = Filenames'
     BurstClusters = cycy.aggregate_bursts_into_clusters(Bursts, EEG, MinClusteringFrequencyRange);
 
     % keep track of how much data is being used
-    EEG.CleanTaskTimepoints = KeepTimepoints;
-    EEG.CleanTaskTimepointsCount = nnz(KeepTimepoints);
-    EEG.data = []; % only save the metadata
+    EEGMetadata = EEG;
+    EEGMetadata.data = [];
+    EEGMetadata.pnts = size(EEG.data, 2); % just making sure its correct
+     EEGMetadata.CleanTaskTimepoints = KeepTimepoints;
+     EEGMetadata.CleanTaskTimepointsCount = nnz(KeepTimepoints);
+     EEGMetadata.data = []; % only save the metadata
 
     % save
-    save(fullfile(Destination, FilenameDestination), 'Bursts', 'BurstClusters', 'EEG')
+    save(fullfile(Destination, FilenameDestination), 'Bursts', 'BurstClusters', 'EEGMetadata')
     disp(['Finished ', FilenameSource])
 end
 

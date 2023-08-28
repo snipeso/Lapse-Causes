@@ -1,5 +1,6 @@
-function DataOut = loadMATFile(Path, Participant, Session, Variable)
-% loads a mat file, returns something empty if nothing is there
+function DataOut = load_datafile(Path, Participant, Session, Variable)
+% loads a mat file containing the data of a single participant and single
+% session
 
 % get filename
 Filenames = list_filenames(Path);

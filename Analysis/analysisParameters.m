@@ -77,7 +77,8 @@ Paths.Core = Core;
 
 Paths.RawData = 'G:\LSM\Data\Raw';
 Paths.AnalyzedData  = fullfile(Core, 'Final'); % where data gets saved once its been turned into something else
-Paths.PooledData = fullfile(Paths.AnalyzedData, 'PooledData', 'Lapse-Causes');
+% Paths.PooledData = fullfile(Paths.AnalyzedData, 'PooledData', 'Lapse-Causes');
+Paths.Cache = fullfile(Core, 'Cache', 'Lapse-Causes');
 Paths.Results = fullfile(Core, 'Results', 'Lapse-Causes');
 
 if ~exist(Paths.Results, 'dir')
