@@ -4,7 +4,7 @@
 Path = mfilename('fullpath');
 Path = extractBefore(Path, 'addExternalFunctions');
 
-SubFolders = getContent(Path);
+SubFolders = list_filenames(Path);
 SubFolders(contains(SubFolders, '.')) = [];
 
 for Indx_F = 1:numel(SubFolders)

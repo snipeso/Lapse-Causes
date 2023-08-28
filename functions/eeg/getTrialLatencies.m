@@ -12,7 +12,7 @@ Trials.RespTime = Trials.StimTime;
 Trials.RT_Triggers = Trials.StimTime;
 
 % get whatever tag I used for that EEG dataset
-Filenames = getContent(EEGPath);
+Filenames = list_filenames(EEGPath);
 
 for Indx_P = 1:numel(Participants)
     for Indx_S = 1:numel(Sessions)

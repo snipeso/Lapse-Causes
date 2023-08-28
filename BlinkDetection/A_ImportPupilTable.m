@@ -54,7 +54,7 @@ for Indx_D = 1:size(Datasets,1) % loop through participants
         Exports(strcmp(Exports(:, 1), '0')) = []; % only folders that are numbered
 
         Path = fullfile(Path, Exports(end));
-        Files = getContent(Path);
+        Files = list_filenames(Path);
         if ~any(contains(Files, 'pupil_positions')) || ~any(contains(Files, 'annotations'))
             warning(['missing content in ', char(Path)])
             continue

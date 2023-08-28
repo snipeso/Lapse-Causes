@@ -60,7 +60,7 @@ ProbBurst = nan(numel(Participants), numel(TrialTypeLabels), 2, numel(t_window))
 GenProbBurst = nan(numel(Participants), 2);
 ProbType = nan(numel(Participants), 3, numel(BandLabels), 2); % proportion of trials resulting in lapse, split by whether there was eyes closed or not
 
-Filenames = getContent(BurstPath);
+Filenames = list_filenames(BurstPath);
 
 for Indx_P = 1:numel(Participants)
 

@@ -2,7 +2,7 @@ function DataOut = loadMATFile(Path, Participant, Session, Variable)
 % loads a mat file, returns something empty if nothing is there
 
 % get filename
-Filenames = getContent(Path);
+Filenames = list_filenames(Path);
 Filename = Filenames(contains(Filenames, Participant) & ...
     contains(Filenames, Session));
 

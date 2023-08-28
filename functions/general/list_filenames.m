@@ -1,4 +1,4 @@
-function Folder = getContent(Folder)
+function Folder = list_filenames(Folder)
 % little function for getting whatever is inside a folder, ignoring the
 % stupid dots and turning everything into a string
 

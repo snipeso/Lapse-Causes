@@ -28,7 +28,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Sync EEG
 
-Content = getContent(Source_Eyes);
+Content = list_filenames(Source_Eyes);
 
 % get data quality table to know which eye to use
 DataQaulity_Filepath = fullfile(Paths.Core, 'QualityCheck', 'Theta Bursts', ['DataQuality_', Task, '_Pupils.csv']); % file indicating manually identified eye

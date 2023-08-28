@@ -49,7 +49,7 @@ load(fullfile(Paths.Pool, 'Tasks', 'AllTrials.mat'), 'Trials')
 Q = quantile(Trials.Radius, Parameters.Radius);
 
 TrialTypeLabels = [1 2 3];
-Filenames = getContent(MicrosleepPath);
+Filenames = list_filenames(MicrosleepPath);
 t = linspace(StartTime, EndTime, fs*(EndTime-StartTime));
 
 ProbMicrosleep = nan(numel(Participants), numel(TrialTypeLabels), numel(t));

@@ -8,8 +8,9 @@ close all
 %%% load in and set parameters for analysis
 
 % set parameters for how you want to run the script this time
-RunParallelBurstDetection = false; % true for faster processing
+RunParallelBurstDetection = true; % true for faster processing
 RerunAnalysis = false; % false to skip files already analyzed
+Task = 'LAT';
 
 %%% criteria to find bursts in single channels
 % irregular shaped bursts, few criteria, but needs more cycles
@@ -49,8 +50,7 @@ MinClusteringFrequencyRange = 1; % to cluster bursts across channels
 % load in parameters that are in common across scripts
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
-Task = Parameters.Task;
-Sessions = Parameters.Sessions.(Task);
+Sessions = Parameters.Sessions.LAT;
 Participants = Parameters.Participants;
 Bands = Parameters.Bands;
 Triggers = Parameters.Triggers;
@@ -78,7 +78,7 @@ for FilenameSource = Filenames'
 
     % load data
     FilenameDestination = replace(FilenameSource, '_Clean.mat', '.mat');
-    FilenameCuts =  replace(FilenameSource, '_Clean.mat', '_Cuts.mat');
+    FilenameCuts = replace(FilenameSource, '_Clean.mat', '_Cuts.mat');
 
     if exist(fullfile(Destination, FilenameDestination), 'file') && ~RerunAnalysis
         disp(['Skipping ', FilenameDestination])
@@ -91,10 +91,10 @@ for FilenameSource = Filenames'
     SampleRate = EEG.srate;
 
     % get timepoints without noise
- CleanTimepoints = identify_clean_timepoints(fullfile(EEGSourceCuts, FilenameCuts), EEG);
+    CleanTimepoints = identify_clean_timepoints(fullfile(EEGSourceCuts, FilenameCuts), EEG);
 
     % get timepoints of the task
-   TaskPoints = identify_task_timepoints(EEG, Triggers);
+    TaskPoints = identify_task_timepoints(EEG, Triggers);
 
     % only use clean task timepoints
     KeepTimepoints = CleanTimepoints & TaskPoints;
