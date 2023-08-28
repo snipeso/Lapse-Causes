@@ -8,7 +8,7 @@ close all
 %%% load in and set parameters for analysis
 
 % set parameters for how you want to run the script this time
-RunParallelBurstDetection = true; % true for faster processing
+RunParallelBurstDetection = false; % true for faster processing
 RerunAnalysis = false; % false to skip files already analyzed
 Task = 'LAT';
 
@@ -91,20 +91,10 @@ for FilenameSource = Filenames'
     SampleRate = EEG.srate;
 
     % get timepoints without noise
-    if exist(fullfile(EEGSourceCuts, FilenameCuts), 'file')
-        NoiseEEG = remove_noise(EEG, fullfile(EEGSourceCuts, FilenameCuts));
-        CleanTimepoints = ~isnan(NoiseEEG.data(1, :));
-    else
-        CleanTimepoints = ones(1, EEG.pnts);
-    end
+ CleanTimepoints = identify_clean_timepoints(fullfile(EEGSourceCuts, FilenameCuts), EEG);
 
     % get timepoints of the task
-    TaskPoints = zeros(1, numel(CleanTimepoints));
-    TriggerTypes = {EEG.event.type};
-    TriggerLatencies = [EEG.event.latency];
-    StartTask = round(TriggerLatencies(strcmp(TriggerTypes, Triggers.Start)));
-    EndTask = round(TriggerLatencies(strcmp(TriggerTypes, Triggers.End)));
-    TaskPoints(StartTask:EndTask) = 1;
+   TaskPoints = identify_task_timepoints(EEG, Triggers);
 
     % only use clean task timepoints
     KeepTimepoints = CleanTimepoints & TaskPoints;
@@ -127,4 +117,43 @@ for FilenameSource = Filenames'
     % save
     save(fullfile(Destination, FilenameDestination), 'Bursts', 'BurstClusters', 'EEG')
     disp(['Finished ', FilenameSource])
+end
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% functions
+
+function CleanTimepoints = identify_clean_timepoints(CutsPath, EEG)
+TimepointsCount = size(EEG.data, 2);
+
+if exist(CutsPath, 'file')
+    NoiseEEG = remove_noise(EEG, CutsPath);
+    CleanTimepoints = ~isnan(NoiseEEG.data(1, :));
+else
+    CleanTimepoints = ones(1, TimepointsCount);
+end
+end
+
+
+function TaskPoints = identify_task_timepoints(EEG, Triggers)
+
+TimepointsCount = size(EEG.data, 2);
+TaskPoints = zeros(1, TimepointsCount);
+
+TriggerTypes = {EEG.event.type};
+TriggerLatencies = [EEG.event.latency];
+
+StartTask = round(TriggerLatencies(strcmp(TriggerTypes, Triggers.Start)));
+if isempty(StartTask)
+    StartTask = 1;
+end
+
+EndTask = round(TriggerLatencies(strcmp(TriggerTypes, Triggers.End)));
+if isempty(EndTask)
+    EndTask = numel(TaskPoints);
+end
+
+TaskPoints(StartTask:EndTask) = 1;
 end
