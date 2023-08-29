@@ -18,7 +18,6 @@ Parameters.Sessions.Conditions.SD = { 'Session2Beam1', 'Session2Beam2', 'Session
 
 Parameters.Sessions.PVT = {'BaselineBeam', 'Session2Beam'};
 
-
 Parameters.Participants = {'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08', 'P09', ...
     'P10', 'P11', 'P12', 'P13', 'P14', 'P15', 'P16', 'P17', 'P19'};
 

@@ -56,11 +56,109 @@ ThetaPeriodicPower = fooof_periodic_power(ThetaPowerIntact, Frequencies);
 
 
 
-%% Plot
+%%% Plot
 %%%%%%%%%%%%%
 
 
+%%
 
+Data = cat(2, squeeze(ThetaPowerIntact(1, 2, :)), squeeze(ThetaPowerBurstless(1, 2, :)), squeeze(ThetaPowerBursts(1, 2, :)))';
+figure
+cycy.plot.power_spectrum(Data, Frequencies, true, true, {'Intact', 'Burstless', 'Bursts'})
+
+
+
+%%
+clc
+
+Grid = [1 5];
+PlotProps = P.Manuscript;
+PlotProps.Axes.yPadding = 18;
+PlotProps.Axes.xPadding = 18;
+PlotProps.HandleVisibility = 'on';
+xLog = true;
+xLims = [2 30];
+yLims = [-2.4 2.4];
+
+NormBand = [1 4];
+NormBand_Indx = dsearchn(Freqs, NormBand');
+
+figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.35])
+
+%%% A: theta
+SB = 2;
+B_Indx = 1;
+Ch_Indx = 1;
+
+
+Data = log(squeeze(ChData(:, SB, [B_Indx, 3], Ch_Indx, :)));
+
+Delta = squeeze(mean(Data(:, 1, NormBand_Indx(1):NormBand_Indx(2)), 3, 'omitnan'));
+Shift = Delta - mean(Delta, 'omitnan');
+Data = Data - Shift;
+
+subfigure([], Grid, [1 1], [1 2], true, PlotProps.Indexes.Letters{1}, PlotProps);
+plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
+
+% plot also BL theta, with all bursts
+BL = squeeze(mean(log(ChData(:, 1, 1, Ch_Indx, :))-Shift, 1, 'omitnan'));
+hold on
+plot(log(Freqs), BL, ...
+    'Color', PlotProps.Color.Generic, 'LineStyle','--', 'LineWidth', 1)
+
+ylim(yLims)
+legend({'', 'Front SD theta burst power', 'Front BL power'}, 'location', 'southwest')
+set(legend, 'ItemTokenSize', [15 15])
+ylabel('Log PSD amplitude (\muV^2/Hz)')
+
+disp(['A: N = ', num2str(nnz(~any(any(isnan(Data), 3), 2)))])
+
+%%% B: alpha
+SB = 1;
+B_Indx = 2;
+Ch_Indx = 3;
+
+Data = log(squeeze(ChData(:, SB, [B_Indx, 3], Ch_Indx, :)));
+
+Delta = squeeze(mean(Data(:, 1, NormBand_Indx(1):NormBand_Indx(2)), 3, 'omitnan'));
+Shift = Delta - mean(Delta, 'omitnan');
+Data = Data - Shift;
+
+subfigure([], Grid, [1 3], [1 2], true, PlotProps.Indexes.Letters{2}, PlotProps);
+plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
+legend({'', 'Back BL alpha burst power'}, 'location', 'southwest')
+set(legend, 'ItemTokenSize', [15 15])
+ylim(yLims)
+
+Legend = [append(BandLabels, ' bursts'), 'Both'];
+YLim = [0 100];
+
+ThetaColor = getColors(1, '', 'red');
+AlphaColor = getColors(1, '', 'yellow');
+Colors = [ThetaColor; AlphaColor; getColors(1, '', 'orange')];
+
+disp(['B: N = ', num2str(nnz(~any(any(isnan(Data), 3), 2)))])
+
+
+%%% C: stacked bar plot for time spent
+Data = 100*squeeze(mean(TimeSpent, 1, 'omitnan'));
+
+subfigure([], Grid, [1 5], [], true, PlotProps.Indexes.Letters{3}, PlotProps);
+plotStackedBars(Data(:, [1 3 2]), SB_Labels, YLim, Legend([1 3 2]), Colors([1 3 2], :), PlotProps);
+
+ylabel('Recording duration (%)')
+
+disp(['C: N = ', num2str(nnz(~any(any(isnan(TimeSpent), 3), 2)))])
+
+
+saveFig('Figure_2', Paths.PaperResults, PlotProps)
+
+
+
+
+
+
+%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
@@ -135,6 +233,7 @@ for idxParticipant = 1:numel(Participants)
             Frequencies = Freqs; % do this in case the last recording is empty
         end
     end
+    disp(['Finished ', Participants{idxParticipant}])
 end
 end
 

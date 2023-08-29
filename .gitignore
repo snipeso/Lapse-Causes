@@ -51,3 +51,5 @@ generalFunctions/desktop.ini
 Analysis/surfmesh.mat
 Analysis/surfmesh.mat
 *.mat
+
+.env
