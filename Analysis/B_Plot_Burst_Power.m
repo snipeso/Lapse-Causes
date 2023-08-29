@@ -18,7 +18,6 @@ Parameters = analysisParameters();
 Paths = Parameters.Paths;
 Task = Parameters.Task;
 Participants = Parameters.Participants;
-Participants = Participants(1:9);
 Channels = Parameters.Channels.PreROI;
 Bands = Parameters.Bands;
 SessionBlocks = Parameters.Sessions.Conditions;
