@@ -7,9 +7,6 @@ else
     % TODO: plot stars for group comparison
 end
 
-
-chART.plot.individual_rows(Data, Stats, XLabels, YLims, PlotProps, Colors)
-
 if~isempty(YLims)
     ylim(YLims)
     
@@ -18,3 +15,6 @@ if~isempty(YLims)
         yticklabels(YLabels)
     end
 end
+
+chART.plot.individual_rows(Data, Stats, XLabels, YLims, PlotProps, Colors)
+

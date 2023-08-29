@@ -97,7 +97,7 @@ PlotProps.Axes.yPadding = 18;
 PlotProps.Axes.xPadding = 18;
 PlotProps.HandleVisibility = 'on';
 xLog = false;
-xLims = [1 20];
+xLims = [2 20];
 
 figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*1.5, PlotProps.Figure.Height*.35])
 
@@ -135,7 +135,7 @@ Data = cat(2, permute(ThetaPowerBurstlessSpectrum, [1 3 2]), permute(ThetaPowerI
 
 chART.sub_plot([], Grid, [1 3], [1 2], true, PlotProps.Indexes.Letters{2}, PlotProps);
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
-title('Power spectra without THETA bursts')
+title('Theta periodic power')
 ylabel('Whitened Power (\muV^2/Hz)')
 
 
@@ -144,12 +144,21 @@ Data = cat(2, permute(AlphaPowerBurstlessSpectrum, [1 3 2]), permute(AlphaPowerI
 
 chART.sub_plot([], Grid, [1 5], [1 2], true, PlotProps.Indexes.Letters{3}, PlotProps);
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
-title('Power spectra without ALPHA bursts')
+title('Alpha periodic power')
 ylabel('Whitened Power (\muV^2/Hz)')
 
 chART.save_figure('Figure_2', Paths.Results, PlotProps)
 
 
+%% plot theta burstless all participants
+
+figure('units', 'normalized', 'outerposition', [0 0 1 1])
+for idxParticipant = 1:numel(Participants)
+    subplot(4, 5, idxParticipant)
+    plot(Frequencies, squeeze(ThetaPowerBurstlessSpectrum(idxParticipant, :)))
+    title(Participants{idxParticipant})
+    xlim([2 20])
+end
 
 %%
 
