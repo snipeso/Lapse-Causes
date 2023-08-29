@@ -60,6 +60,7 @@ if exist( 'D:\LSM\Preprocessed', 'dir') % KISPI desktop
     Core = 'D:\LSM\';
     addpath('H:\Code\chART')
     addpath('H:\Code\Matcycle')
+    addpath('H:\Code\fooof_mat\fooof_mat')
 elseif exist( 'D:\Data\Raw', 'dir')
     Core = 'D:\Data\';
 elseif exist( 'F:\Data\Raw', 'dir')
@@ -101,6 +102,8 @@ Subfolders(contains(Subfolders, '.')) = []; % remove all files
 for Indx_F = 1:numel(Subfolders)
     addpath(fullfile(Paths.Analysis, 'functions', Subfolders{Indx_F}))
 end
+
+addExternalFunctions
 
 Parameters.Paths = Paths;
 

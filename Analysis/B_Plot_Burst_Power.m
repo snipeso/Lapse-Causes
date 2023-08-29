@@ -11,14 +11,13 @@ close all
 WelchWindow = 8;
 Overlap = .75;
 MinDuration = 60;
-FooofFittingFrequencyRange = [1 40];
-Refresh = false; % if analysis has already been run, set to false if you want to use the cache
+FooofFittingFrequencyRange = [2 40]; % some low-frequency noise
+Refresh = true; % if analysis has already been run, set to false if you want to use the cache
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
 Task = Parameters.Task;
 Participants = Parameters.Participants;
-Participants = Participants(1:9);
 Channels = Parameters.Channels.PreROI;
 Bands = Parameters.Bands;
 SessionBlocks = Parameters.Sessions.Conditions;
@@ -55,8 +54,6 @@ BandIndex = 1;
 
 % average alpha power
 BandIndex = 2;
-
-%%
 [AlphaPowerIntact, AlphaPowerBursts, AlphaPowerBurstless] = ...
     average_band(AlphaPowerIntactSpectrum, AlphaPowerBurstsSpectrum, AlphaPowerBurstlessSpectrum, ...
     Frequencies, Bands, BandIndex);
@@ -138,11 +135,10 @@ plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
 title('Theta periodic power')
 ylabel('Whitened Power (\muV^2/Hz)')
 
-
 % alpha
 Data = cat(2, permute(AlphaPowerBurstlessSpectrum, [1 3 2]), permute(AlphaPowerIntactSpectrum, [1 3 2]));
 
-chART.sub_plot([], Grid, [1 5], [1 2], true, PlotProps.Indexes.Letters{3}, PlotProps);
+% chART.sub_plot([], Grid, [1 5], [1 2], true, PlotProps.Indexes.Letters{3}, PlotProps);
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
 title('Alpha periodic power')
 ylabel('Whitened Power (\muV^2/Hz)')
@@ -155,7 +151,7 @@ chART.save_figure('Figure_2', Paths.Results, PlotProps)
 figure('units', 'normalized', 'outerposition', [0 0 1 1])
 for idxParticipant = 1:numel(Participants)
     subplot(4, 5, idxParticipant)
-    plot(Frequencies, squeeze(ThetaPowerBurstlessSpectrum(idxParticipant, :)))
+    plot(Frequencies, squeeze(AlphaPowerBurstlessSpectrum(idxParticipant, :)))
     title(Participants{idxParticipant})
     xlim([2 20])
 end
