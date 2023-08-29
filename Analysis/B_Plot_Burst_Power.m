@@ -8,7 +8,7 @@ close all
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% parameters
 
-WelchWindow = 8;
+WelchWindow = 4;
 Overlap = .75;
 MinDuration = 60;
 FooofFittingFrequencyRange = [1 40];
