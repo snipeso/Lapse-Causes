@@ -18,7 +18,6 @@ Parameters = analysisParameters();
 Paths = Parameters.Paths;
 Task = Parameters.Task;
 Participants = Parameters.Participants;
-Participants = { 'P01', 'P02'};
 Channels = Parameters.Channels.PreROI;
 Bands = Parameters.Bands;
 SessionBlocks = Parameters.Sessions.Conditions;
@@ -54,6 +53,8 @@ BandIndex = 1;
 
 % average alpha power
 BandIndex = 2;
+
+%%
 [AlphaPowerIntact, AlphaPowerBursts, AlphaPowerBurstless] = ...
     average_band(AlphaPowerIntactSpectrum, AlphaPowerBurstsSpectrum, AlphaPowerBurstlessSpectrum, ...
     Frequencies, Bands, BandIndex);
@@ -75,10 +76,10 @@ descriptive_distribution(AlphaPercentReduction, 'Alpha percent reduction', '%', 
 % burst ratio power
 % burstless periodic power / burst periodic power
 ThetaBurstRatio = ThetaPowerBurstless./ThetaPowerBursts;
-descriptive_distribution(ThetaBurst, 'Theta burst power ratio', '', 2);
+descriptive_distribution(ThetaBurstRatio, 'Theta burst power ratio', '', 2);
 
 AlphaBurstRatio = AlphaPowerBurstless./AlphaPowerBursts;
-descriptive_distribution(AlphaBurst, 'Alpha burst power ratio', '', 2);
+descriptive_distribution(AlphaBurstRatio, 'Alpha burst power ratio', '', 2);
 
 
 
@@ -94,9 +95,9 @@ PlotProps.Axes.yPadding = 18;
 PlotProps.Axes.xPadding = 18;
 PlotProps.HandleVisibility = 'on';
 xLog = false;
-xLims = [2 15];
+xLims = [1 20];
 
-figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.35])
+figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*1.5, PlotProps.Figure.Height*.35])
 
 %%% change in quantities of bursts
 XLabels = fieldnames(SessionBlocks);
@@ -110,36 +111,36 @@ Stats = plot_change_in_time(Data, XLabels, [], [0 100], Colors, StatParameters, 
 ylabel('% recording')
 title('Theta bursts')
 
-disp_stats(Stats, [2 2], 'Change in theta bursts with time awake')
+disp_stats(Stats, [2 2], 'Change in theta bursts with time awake');
 
 
 % alpha
 Data = 100*AlphaTimeSpent;
 
-chART.sub_plot([], Grid, [1 1], [1 1], true, PlotProps.Indexes.Letters{1}, PlotProps);
+chART.sub_plot([], Grid, [1 2], [1 1], true, '', PlotProps);
 Stats = plot_change_in_time(Data, XLabels, [], [0 100], Colors, StatParameters, PlotProps);
 ylabel('% recording')
 title('Alpha bursts')
 
-disp_stats(Stats, [2 2], 'Change in alphs bursts with time awake')
+disp_stats(Stats, [2 2], 'Change in alphs bursts with time awake');
 
 
 
 %%% Change in whitened power spectra
 
 % theta
-Data = cat(2, ThetaPowerBurstlessSpectrum(:, 2, :), ThetaPowerIntactSpectrum(:, 2, :));
+Data = cat(2, permute(ThetaPowerBurstlessSpectrum, [1 3 2]), permute(ThetaPowerIntactSpectrum, [1 3 2]));
 
-chART.sub_plot([], Grid, [1 3], [1 2], true, PlotProps.Indexes.Letters{3}, PlotProps);
+chART.sub_plot([], Grid, [1 3], [1 2], true, PlotProps.Indexes.Letters{2}, PlotProps);
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
 title('Power spectra without THETA bursts')
 ylabel('Whitened Power (\muV^2/Hz)')
 
 
 % alpha
-Data = cat(2, AlphaPowerBurstlessSpectrum(:, 2, :), AlphaPowerIntactSpectrum(:, 2, :));
+Data = cat(2, permute(AlphaPowerBurstlessSpectrum, [1 3 2]), permute(AlphaPowerIntactSpectrum, [1 3 2]));
 
-chART.sub_plot([], Grid, [1 5], [1 2], true, PlotProps.Indexes.Letters{4}, PlotProps);
+chART.sub_plot([], Grid, [1 5], [1 2], true, PlotProps.Indexes.Letters{3}, PlotProps);
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
 title('Power spectra without ALPHA bursts')
 ylabel('Whitened Power (\muV^2/Hz)')
@@ -215,7 +216,7 @@ for idxParticipant = 1:numel(Participants)
             labels2indexes(ChannelIndexes, Chanlocs), WelchWindow, Overlap, FooofFittingFrequencyRange);
 
         % save to general matrix
-        if ~exist('PowerIntact', 'var') && ~isempty(Freqs) % if first time calculating power
+        if ~exist('PowerIntactSpectrum', 'var') && ~isempty(Freqs) % if first time calculating power
             PowerIntactSpectrum = nan(numel(Participants), numel(SessionBlockLabels), numel(Freqs));
             PowerBurstlessSpectrum = PowerIntactSpectrum;
             PowerBurstsSpectrum = PowerIntactSpectrum;
