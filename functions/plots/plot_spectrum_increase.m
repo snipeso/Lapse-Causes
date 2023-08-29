@@ -1,4 +1,4 @@
-function plotSpectrumMountains(Data, Freqs, xLog, xLims, PlotProps, Labels)
+function plot_spectrum_increase(Data, Freqs, xLog, xLims, PlotProps, Labels)
 % plots spectrum changes of all participants, with mean change on top in
 % black. Based on chART plotMountains().
 % Data is a P x 2 x F matrix.
@@ -28,13 +28,17 @@ end
 
 xlabel(Labels.Frequency)
 
-
 Data1 = squeeze(Data(:, 1, :));
 Data2 = squeeze(Data(:, 2, :));
 
 
 % plot data
-plotMountains(Data1, Data2, X, 'pos', PlotProps.Color.Participants, PlotProps)
+if size(Data1, 1) < 5
+    PlotMean = false;
+else
+    PlotMean = true;
+end
+chART.plot.increases_from_baseline(Data1, Data2, X, 'pos', PlotProps.Color.Participants, PlotMean, PlotProps)
 
 set(gca,'FontName', PlotProps.Text.FontName, 'FontSize', PlotProps.Text.AxisSize, 'XGrid', 'on')
 h=gca; h.XAxis.TickLength = [0 0];

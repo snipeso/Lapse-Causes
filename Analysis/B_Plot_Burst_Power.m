@@ -22,6 +22,7 @@ Participants = {'P02', 'P03'};
 Channels = Parameters.Channels.PreROI;
 Bands = Parameters.Bands;
 SessionBlocks = Parameters.Sessions.Conditions;
+Labels = Parameters.Labels;
 
 Source_EEG = fullfile(Paths.Data, 'Clean', 'Waves', Task);
 Source_Bursts = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_New', Task);
@@ -66,11 +67,33 @@ PlotProps.Axes.yPadding = 18;
 PlotProps.Axes.xPadding = 18;
 PlotProps.HandleVisibility = 'on';
 xLog = false;
-xLims = [2 14];
+xLims = [2 15];
 
+figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.35])
 chART.sub_plot([], Grid, [1 1], [1 2], true, PlotProps.Indexes.Letters{1}, PlotProps);
-Data = cat(2, ThetaPowerIntact(:, 2, :), ThetaPowerBurstless(:, 2, :));
-plotSpectrumMountains(Data, Frequencies, xLog, xLims, PlotProps, P.Labels);
+Data = cat(2, ThetaPowerBurstless(:, 2, :), ThetaPowerIntact(:, 2, :));
+plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
+title('Power spectra without THETA bursts')
+ylabel('Whitened Power (\muV^2/Hz)')
+
+
+chART.sub_plot([], Grid, [1 3], [1 2], true, PlotProps.Indexes.Letters{2}, PlotProps);
+Data = cat(2, AlphaPowerBurstless(:, 2, :), AlphaPowerIntact(:, 2, :));
+plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
+title('Power spectra without ALPHA bursts')
+ylabel('Whitened Power (\muV^2/Hz)')
+
+
+Data = 100*squeeze(mean(TimeSpent, 1, 'omitnan'));
+
+subfigure([], Grid, [1 5], [], true, PlotProps.Indexes.Letters{3}, PlotProps);
+plotStackedBars(Data(:, [1 3 2]), SB_Labels, YLim, Legend([1 3 2]), Colors([1 3 2], :), PlotProps);
+
+ylabel('Recording duration (%)')
+
+disp(['C: N = ', num2str(nnz(~any(any(isnan(TimeSpent), 3), 2)))])
+
+chART.save_figure('Figure_2', Paths.Results, PlotProps)
 
 
 

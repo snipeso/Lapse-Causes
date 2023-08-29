@@ -52,7 +52,7 @@ Labels.EyeType = [0 1];
 
 Labels.Task = 'LAT';
 Labels.logBands = [1 2 4 8 16 32]; % x markers for plot on log scale
-Labels.Bands = [1 4 8 15 25 35 40]; % normal scale
+Labels.Bands = [1 4 8 14 25 35 40]; % normal scale
 Labels.FreqLimits = [1 40];
 Labels.zPower = 'PSD z-scored';
 Labels.Power = 'PSD Amplitude (\muV^2/Hz)';
