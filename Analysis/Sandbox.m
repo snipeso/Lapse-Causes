@@ -10,9 +10,9 @@ BandLabels = fieldnames(Bands);
 %%%% Choose a file
 %%%%
 %%%%
-Task = 'Fixation'; % Game, Standing, Fixation
-Session = 'Main4';
-Participant = 'P03'; % P03 has almost no oscillations, P15 has tons
+Task = 'LAT'; % Game, Standing, Fixation
+Session = 'Session2Beam1';
+Participant = 'P14'; % P03 has almost no oscillations, P15 has tons
 %%%%
 %%%%
 %%%%
@@ -78,7 +78,7 @@ close all
 %%%% Choose a channel
 %%%%
 %%%%
-Channel = labels2indexes(99, EEG.chanlocs);
+Channel = labels2indexes(11, EEG.chanlocs);
 %%%%
 %%%%
 %%%%
