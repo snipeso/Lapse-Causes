@@ -75,7 +75,7 @@ end
 
 
 %%% display
-if PlotProps.Stats.DispStat
+if PlotProps.Stats.disp_stats
 Windows = [-2 -0.5;
     -0.5 .3;
     0.3, 1.5;
@@ -90,7 +90,7 @@ for Indx_L = 1:numel(LineLabels)
         [~, Indx] = max(S);
 
         % if Sig(Indx_L, Indx)
-            dispStat(Stats, [Indx_L, Indx], ['max t: ', num2str(t(Indx), '%.1f'), ' s']);
+            disp_stats(Stats, [Indx_L, Indx], ['max t: ', num2str(t(Indx), '%.1f'), ' s']);
         % end
 
     end

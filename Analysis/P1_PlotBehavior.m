@@ -280,7 +280,7 @@ dispDescriptive(1000*MEANS(:, 1),'BL RT', ' ms', '%.0f');
 dispDescriptive(1000*MEANS(:, 2),'SD RT', ' ms', '%.0f');
 
 Stats = paired_ttest(MEANS(:, 1), MEANS(:, 2), StatsP);
-dispStat(Stats, [1 1], 'SD effect on RTs:');
+disp_stats(Stats, [1 1], 'SD effect on RTs:');
 
 % distribution of RTs to show that they don't go over 1s
 SB_Indx = 2;
@@ -310,7 +310,7 @@ dispDescriptive(squeeze(EOvAll_Matrix(:, 1)), 'BL EO vs All Trials', '%', '%.0f'
 dispDescriptive(squeeze(EOvAll_Matrix(:, 2)), 'SD EO vs All Trials', '%', '%.0f');
 
 Stats = paired_ttest(EOvAll_Matrix(:, 1), EOvAll_Matrix(:, 2), StatsP);
-dispStat(Stats, [1 1], 'SD effect on EO lapses:');
+disp_stats(Stats, [1 1], 'SD effect on EO lapses:');
 disp('*')
 
 
@@ -391,13 +391,13 @@ disp('*')
 % EO_Lapses = EO_Lapses./Tots;
 % 
 % Stats = paired_ttest(EO_Lapses(:, 1), EO_Lapses(:, 2), StatsP);
-% dispStat(Stats, [1 1], 'SD effect on EO lapses:');
+% disp_stats(Stats, [1 1], 'SD effect on EO lapses:');
 % 
 % % EC
 % EC_Lapses = EC_Lapses./Tots;
 % 
 % Stats = paired_ttest(EC_Lapses(:, 1), EC_Lapses(:, 2), StatsP);
-% dispStat(Stats, [1 1], 'SD effect on EC lapses:');
+% disp_stats(Stats, [1 1], 'SD effect on EC lapses:');
 
 
 
@@ -431,6 +431,6 @@ disp('*')
 
 
 % all distance
-dispStat(Stats_Radius, {'Distance', 'Time', 'Interaction'}, 'Distance vs Time:');
-dispStat(Stats_Radius_Redux, {'Distance', 'Time', 'Interaction'}, 'Distance vs Time, first 3 quantiles:');
+disp_stats(Stats_Radius, {'Distance', 'Time', 'Interaction'}, 'Distance vs Time:');
+disp_stats(Stats_Radius_Redux, {'Distance', 'Time', 'Interaction'}, 'Distance vs Time, first 3 quantiles:');
 

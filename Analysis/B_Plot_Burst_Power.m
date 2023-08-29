@@ -33,36 +33,76 @@ CacheDir = fullfile(Paths.Cache, mfilename);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% analysis
 
-% get power values
-[ThetaPowerIntact, ThetaPowerBursts, ThetaPowerBurstless, Frequencies, ThetaTimeSpent] = ...
+%%% Theta
+
+[ThetaPowerIntactSpectrum, ThetaPowerBurstsSpectrum, ThetaPowerBurstlessSpectrum, Frequencies, ThetaTimeSpent] = ...
     whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, Channels, 'Front', ...
     Bands, 'Theta', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, CacheDir, Refresh);
 
-% [AlphaPowerIntact, AlphaPowerBursts, AlphaPowerBurstless, ~, AlphaTimeSpent] = ...
-%     whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, Channels, 'Back', ...
-%     Bands, 'Alpha', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, CacheDir, Refresh);
+% get only SD session
+SessionIndex = 2;
+ThetaPowerIntactSpectrum = squeeze(ThetaPowerIntactSpectrum(:, SessionIndex, :));
+ThetaPowerBurstlessSpectrum = squeeze(ThetaPowerBurstlessSpectrum(:, SessionIndex, :));
+ThetaPowerBurstsSpectrum = squeeze(ThetaPowerBurstsSpectrum(:, SessionIndex, :));
+
+% average theta power
+ThetaPowerIntact = band_spectrum(ThetaPowerIntactSpectrum, Frequencies, Bands, 'last');
+ThetaPowerIntact = ThetaPowerIntact(:, 1);
+ThetaPowerBursts = band_spectrum(ThetaPowerBurstsSpectrum, Frequencies, Bands, 'last');
+ThetaPowerBursts = ThetaPowerBursts(:, 1);
+ThetaPowerBurstless = band_spectrum(ThetaPowerBurstlessSpectrum, Frequencies, Bands, 'last');
+ThetaPowerBurstless = ThetaPowerBurstless(:, 1);
+
+%%% Alpha
+
+[AlphaPowerIntactSpectrum, AlphaPowerBurstsSpectrum, AlphaPowerBurstlessSpectrum, ~, AlphaTimeSpent] = ...
+    whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, Channels, 'Back', ...
+    Bands, 'Alpha', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, CacheDir, Refresh);
+
+% get only BL session
+SessionIndex = 1;
+AlphaPowerIntactSpectrum = squeeze(AlphaPowerIntactSpectrum(:, SessionIndex, :));
+AlphaPowerBurstlessSpectrum = squeeze(AlphaPowerBurstlessSpectrum(:, SessionIndex, :));
+AlphaPowerBurstsSpectrum = squeeze(AlphaPowerBurstsSpectrum(:, SessionIndex, :));
+
+% average alpha power
+AlphaPowerIntact = band_spectrum(AlphaPowerIntactSpectrum, Frequencies, Bands, 'last');
+AlphaPowerIntact = AlphaPowerIntact(:, 2);
+AlphaPowerBursts = band_spectrum(AlphaPowerBurstsSpectrum, Frequencies, Bands, 'last');
+AlphaPowerBursts = AlphaPowerBursts(:, 2);
+AlphaPowerBurstless = band_spectrum(AlphaPowerBurstlessSpectrum, Frequencies, Bands, 'last');
+AlphaPowerBurstless = AlphaPowerBurstless(:, 2);
 
 
 %% Statistics
 %%%%%%%%%%%%%
 
+clc
+
 % percentage of periodic power reduction
 % intact periodic power - burstless periodic power / intact periodic power
+ThetaPercentReduction = 100*(ThetaPowerIntact - ThetaPowerBurstless)./ThetaPowerIntact;
+descriptive_distribution(ThetaPercentReduction, 'Theta percent reduction', '%', 0);
 
-
-
+AlphaPercentReduction = 100*(AlphaPowerIntact - AlphaPowerBurstless)./AlphaPowerIntact;
+descriptive_distribution(AlphaPercentReduction, 'Alpha percent reduction', '%', 0);
 
 % burst ratio power
 % burstless periodic power / burst periodic power
+ThetaBurstRatio = ThetaPowerBurstless./ThetaPowerBursts;
+descriptive_distribution(ThetaBurst, 'Theta burst power ratio', '', 2);
+
+AlphaBurstRatio = AlphaPowerBurstless./AlphaPowerBursts;
+descriptive_distribution(AlphaBurst, 'Alpha burst power ratio', '', 2);
 
 
 
 
 %%% Plot
 %%%%%%%%%%%%%
-
-
 %%
+clc
+
 Grid = [1 6];
 PlotProps = Parameters.PlotProps.Manuscript;
 PlotProps.Axes.yPadding = 18;
@@ -81,25 +121,29 @@ Colors = PlotProps.Color.Participants(1:numel(Participants), :);
 Data = 100*ThetaTimeSpent;
 
 chART.sub_plot([], Grid, [1 1], [1 1], true, PlotProps.Indexes.Letters{1}, PlotProps);
-plot_change_in_time(Data, XLabels, [], [0 100], Colors, StatParameters, PlotProps)
+Stats = plot_change_in_time(Data, XLabels, [], [0 100], Colors, StatParameters, PlotProps);
 ylabel('% recording')
 title('Theta bursts')
+
+disp_stats(Stats, [2 2], 'Change in theta bursts with time awake')
 
 
 % alpha
 Data = 100*AlphaTimeSpent;
 
 chART.sub_plot([], Grid, [1 1], [1 1], true, PlotProps.Indexes.Letters{1}, PlotProps);
-plot_change_in_time(Data, XLabels, [], [0 100], Colors, StatParameters, PlotProps)
+Stats = plot_change_in_time(Data, XLabels, [], [0 100], Colors, StatParameters, PlotProps);
 ylabel('% recording')
 title('Alpha bursts')
+
+disp_stats(Stats, [2 2], 'Change in alphs bursts with time awake')
 
 
 
 %%% Change in whitened power spectra
 
 % theta
-Data = cat(2, ThetaPowerBurstless(:, 2, :), ThetaPowerIntact(:, 2, :));
+Data = cat(2, ThetaPowerBurstlessSpectrum(:, 2, :), ThetaPowerIntactSpectrum(:, 2, :));
 
 chART.sub_plot([], Grid, [1 3], [1 2], true, PlotProps.Indexes.Letters{3}, PlotProps);
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
@@ -108,7 +152,7 @@ ylabel('Whitened Power (\muV^2/Hz)')
 
 
 % alpha
-Data = cat(2, AlphaPowerBurstless(:, 2, :), AlphaPowerIntact(:, 2, :));
+Data = cat(2, AlphaPowerBurstlessSpectrum(:, 2, :), AlphaPowerIntactSpectrum(:, 2, :));
 
 chART.sub_plot([], Grid, [1 5], [1 2], true, PlotProps.Indexes.Letters{4}, PlotProps);
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
@@ -120,99 +164,12 @@ chART.save_figure('Figure_2', Paths.Results, PlotProps)
 
 
 %%
-clc
-
-Grid = [1 5];
-PlotProps = P.Manuscript;
-PlotProps.Axes.yPadding = 18;
-PlotProps.Axes.xPadding = 18;
-PlotProps.HandleVisibility = 'on';
-xLog = true;
-xLims = [2 30];
-yLims = [-2.4 2.4];
-
-NormBand = [1 4];
-NormBand_Indx = dsearchn(Freqs, NormBand');
-
-figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.35])
-
-%%% A: theta
-SB = 2;
-B_Indx = 1;
-Ch_Indx = 1;
-
-
-Data = log(squeeze(ChData(:, SB, [B_Indx, 3], Ch_Indx, :)));
-
-Delta = squeeze(mean(Data(:, 1, NormBand_Indx(1):NormBand_Indx(2)), 3, 'omitnan'));
-Shift = Delta - mean(Delta, 'omitnan');
-Data = Data - Shift;
-
-subfigure([], Grid, [1 1], [1 2], true, PlotProps.Indexes.Letters{1}, PlotProps);
-plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
-
-% plot also BL theta, with all bursts
-BL = squeeze(mean(log(ChData(:, 1, 1, Ch_Indx, :))-Shift, 1, 'omitnan'));
-hold on
-plot(log(Freqs), BL, ...
-    'Color', PlotProps.Color.Generic, 'LineStyle','--', 'LineWidth', 1)
-
-ylim(yLims)
-legend({'', 'Front SD theta burst power', 'Front BL power'}, 'location', 'southwest')
-set(legend, 'ItemTokenSize', [15 15])
-ylabel('Log PSD amplitude (\muV^2/Hz)')
-
-disp(['A: N = ', num2str(nnz(~any(any(isnan(Data), 3), 2)))])
-
-%%% B: alpha
-SB = 1;
-B_Indx = 2;
-Ch_Indx = 3;
-
-Data = log(squeeze(ChData(:, SB, [B_Indx, 3], Ch_Indx, :)));
-
-Delta = squeeze(mean(Data(:, 1, NormBand_Indx(1):NormBand_Indx(2)), 3, 'omitnan'));
-Shift = Delta - mean(Delta, 'omitnan');
-Data = Data - Shift;
-
-subfigure([], Grid, [1 3], [1 2], true, PlotProps.Indexes.Letters{2}, PlotProps);
-plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
-legend({'', 'Back BL alpha burst power'}, 'location', 'southwest')
-set(legend, 'ItemTokenSize', [15 15])
-ylim(yLims)
-
-Legend = [append(BandLabels, ' bursts'), 'Both'];
-YLim = [0 100];
-
-ThetaColor = getColors(1, '', 'red');
-AlphaColor = getColors(1, '', 'yellow');
-Colors = [ThetaColor; AlphaColor; getColors(1, '', 'orange')];
-
-disp(['B: N = ', num2str(nnz(~any(any(isnan(Data), 3), 2)))])
-
-
-%%% C: stacked bar plot for time spent
-Data = 100*squeeze(mean(TimeSpent, 1, 'omitnan'));
-
-subfigure([], Grid, [1 5], [], true, PlotProps.Indexes.Letters{3}, PlotProps);
-plotStackedBars(Data(:, [1 3 2]), SB_Labels, YLim, Legend([1 3 2]), Colors([1 3 2], :), PlotProps);
-
-ylabel('Recording duration (%)')
-
-disp(['C: N = ', num2str(nnz(~any(any(isnan(TimeSpent), 3), 2)))])
-
-
-saveFig('Figure_2', Paths.PaperResults, PlotProps)
-
-
-
-
-
-
-%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
+
+%%%%%%%%%%%
+%%% Analysis functions
 
 function [PowerIntact, PowerBursts, PowerBurstless, Frequencies, TimeSpent] = ...
     whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, Channels, ChannelFieldname, ...

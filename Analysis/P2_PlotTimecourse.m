@@ -131,7 +131,7 @@ figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*1.2, PlotPr
 disp('****** EC ***********')
 % eyeclosure
 PlotProps.Stats.PlotN = true;
- PlotProps.Stats.DispStat = true;
+ PlotProps.Stats.disp_stats = true;
 subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
 Stats = plotTimecourse(t_microsleep, flip(zProbMicrosleep_Stim, 2), zGenProbMicrosleep, ...
     EC_Range, flip(TallyLabels), 'Stimulus', getColors(3), StatsP, PlotProps);
@@ -166,7 +166,7 @@ disp(['C: N=', num2str(mode(Stats.df(:))+1)])
 %%% response locked
 
 % eyeclosure
- PlotProps.Stats.DispStat = false;
+ PlotProps.Stats.disp_stats = false;
 subfigure([], Grid, [2 1], [], true, PlotProps.Indexes.Letters{4}, PlotProps);
 Stats = plotTimecourse(t_microsleep, flip(zProbMicrosleep_Resp, 2), zGenProbMicrosleep, ...
     EC_Range, flip(TallyLabels), 'Response', getColors(3), StatsP, PlotProps);
@@ -222,7 +222,7 @@ for Indx_W = 1:size(Windows, 1)
         Prob = squeeze(mean(zProbMicrosleep_Stim(:, :, Window(1):Window(2)), 3, 'omitnan')); % P x TT
 
         Stats = paired_ttest(zGenProbMicrosleep, Prob(:, Indx_TT), StatsP);
-        dispStat(Stats, [1 1], [WindowLabels{Indx_W}, ' ' TrialTypes{Indx_TT}]);
+        disp_stats(Stats, [1 1], [WindowLabels{Indx_W}, ' ' TrialTypes{Indx_TT}]);
     end
 end
 
@@ -242,7 +242,7 @@ Point = dsearchn(t_microsleep', Point);
 Prob = squeeze(mean(zProbMicrosleep_Stim(:, [2 3], Point), 3, 'omitnan')); % P x TT
 
 Stats = paired_ttest(Prob(:, 2), Prob(:, 1), StatsP);
-dispStat(Stats, [1 1], 'Stim late vs correct Proportion:');
+disp_stats(Stats, [1 1], 'Stim late vs correct Proportion:');
 
 
 %% burst Proportion
@@ -261,7 +261,7 @@ for Indx_B = 1:2
             Prob = squeeze(mean(zProbBurst_Stim(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
 
             Stats = paired_ttest(zGenProbBurst(:, Indx_B), Prob(:, Indx_TT), StatsP);
-            dispStat(Stats, [1 1], [WindowLabels{Indx_W}, ' ', TrialTypes{Indx_TT}]);
+            disp_stats(Stats, [1 1], [WindowLabels{Indx_W}, ' ', TrialTypes{Indx_TT}]);
         end
 
         disp('***')
@@ -272,4 +272,4 @@ end
 Window =  dsearchn(t_burst', [1 2]');
 Prob = squeeze(mean(zProbBurst_Stim(:, :, 2, Window(1):Window(2)), 4, 'omitnan')); % P x TT
 Stats = paired_ttest(zGenProbBurst(:, 2), Prob(:, 1), StatsP);
-dispStat(Stats, [1 1], ['Intermezzo ', TrialTypes{1}]);
+disp_stats(Stats, [1 1], ['Intermezzo ', TrialTypes{1}]);

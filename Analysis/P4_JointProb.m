@@ -113,7 +113,7 @@ saveFig('Figure_7', Paths.PaperResults, PlotProps)
 % clc
 %
 % for Indx_S = 1:numel(AllStats)
-%     dispStat(AllStats(Indx_S), [1 1], xLabels{Indx_S});
+%     disp_stats(AllStats(Indx_S), [1 1], xLabels{Indx_S});
 % end
 
 

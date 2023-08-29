@@ -109,7 +109,7 @@ AllData = permute(AllData, [1 5 2 3 4]); % P x S x T x Ch x F
 zData = zScoreData(AllData, 'last');
 
 % average frequencies into bands
-bData = bandData(zData, Freqs, Bands, 'last');
+bData = band_spectrum(zData, Freqs, Bands, 'last');
 
 % save
 Data = bData;
@@ -136,7 +136,7 @@ AllData = permute(AllData, [1 5 2 3 4]); % P x S x T x Ch x F
 zData = zScoreData(AllData, 'last');
 
 % average frequencies into bands
-bData = bandData(zData, Freqs, Bands, 'last');
+bData = band_spectrum(zData, Freqs, Bands, 'last');
 
 % save
 Data = bData;
@@ -162,7 +162,7 @@ AllData = permute(AllData, [1 5 2 3 4]); % P x S x T x Ch x F
 zData = zScoreData(AllData, 'last');
 
 % average frequencies into bands
-bData = bandData(zData, Freqs, Bands, 'last');
+bData = band_spectrum(zData, Freqs, Bands, 'last');
 
 % save
 Data = bData;

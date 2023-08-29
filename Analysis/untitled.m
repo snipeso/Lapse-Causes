@@ -146,7 +146,7 @@ saveFig('Figure_2', Paths.PaperResults, PlotProps)
 clc
 
 % process data
-bData = bandData(sData, Freqs', Bands, 'last'); % average into theta and alpha power
+bData = band_spectrum(sData, Freqs', Bands, 'last'); % average into theta and alpha power
 lchbData = squeeze(mean(bData, 4, 'omitnan')); % average all channels
 
 
@@ -170,10 +170,10 @@ PrcntSDTheta(sdTheta<.01) = nan;
 dispDescriptive(PrcntSDTheta, 'Theta power removed:', '%', 0);
 
 Stats = paired_ttest(blTheta_Intact, sdTheta_Intact, StatsP);
-dispStat(Stats, [1 1], 'Intact change from BL:');
+disp_stats(Stats, [1 1], 'Intact change from BL:');
 
 Stats = paired_ttest(blTheta_Burstless, sdTheta_Burstless, StatsP);
-dispStat(Stats, [1 1], 'Burstless change from BL:');
+disp_stats(Stats, [1 1], 'Burstless change from BL:');
 
 disp('****')
 
@@ -190,7 +190,7 @@ Data_SD = 100*squeeze(sum(TimeSpent(:, 2, [1 3]), 3));
 dispDescriptive(Data_SD, 'SD Theta', '%', 0);
 
 Stats = paired_ttest(Data_BL, Data_SD, StatsP);
-dispStat(Stats, [1 1], 'Theta bursts BLvsSD:');
+disp_stats(Stats, [1 1], 'Theta bursts BLvsSD:');
 disp('   ')
 
 
@@ -202,7 +202,7 @@ Data_SD = 100*squeeze(sum(TimeSpent(:, 2, [2 3]), 3));
 dispDescriptive(Data_SD, 'SD alpha', '%', 0);
 
 Stats = paired_ttest(Data_BL, Data_SD, StatsP);
-dispStat(Stats, [1 1], 'alpha BLvsSD:');
+disp_stats(Stats, [1 1], 'alpha BLvsSD:');
 
 
 
@@ -227,7 +227,7 @@ disp(Participants(Remove))
 Data_BL = 100*squeeze(sum(TimeSpent(:, 1, [1 3]), 3));
 Data_SD = 100*squeeze(sum(TimeSpent(:, 2, [1 3]), 3));
 Stats = paired_ttest(Data_BL(~Remove), Data_SD(~Remove), StatsP);
-dispStat(Stats, [1 1], 'Theta bursts BLvsSD (redux):');
+disp_stats(Stats, [1 1], 'Theta bursts BLvsSD (redux):');
 
 % make sure there's enough power
 STD1 = std(Data_BL,0, 'omitnan');

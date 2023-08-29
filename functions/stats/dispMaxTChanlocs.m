@@ -10,4 +10,4 @@ Stats.p_fdr = Stats.p_fdr(:);
 Stats.N = repmat(Stats.N, numel(Stats.p_fdr), 1);
 [~, Indx] = max(abs(t));
 
-dispStat(Stats, [Indx, 1], [String, ' ', Chanlocs(Indx).labels]);
+disp_stats(Stats, [Indx, 1], [String, ' ', Chanlocs(Indx).labels]);

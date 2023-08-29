@@ -1,4 +1,4 @@
-function String = dispStat(Stats, P, Label)
+function String = disp_stats(Stats, P, Label)
 % displays as string a statistic of interest
 % From Lapse-causes
 

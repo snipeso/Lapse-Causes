@@ -1,4 +1,4 @@
-function plot_change_in_time(Data, XLabels, YLabels, YLims, Colors, StatParameters, PlotProps)
+function Stats = plot_change_in_time(Data, XLabels, YLabels, YLims, Colors, StatParameters, PlotProps)
 
 if ~isempty(StatParameters)
     Stats = paired_ttest(Data, [], StatParameters);

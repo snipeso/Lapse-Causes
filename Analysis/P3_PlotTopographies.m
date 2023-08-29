@@ -161,5 +161,5 @@ figure
 Stats = topoDiff(Baseline, Data, Chanlocs, CLims, StatsP, PlotProps);
 Stats.p = Stats.p_fdr';
 [~, I] = max(Stats.t);
-dispStat(Stats, [I, 1], ['Max ch: ', Chanlocs(I).labels]);
+disp_stats(Stats, [I, 1], ['Max ch: ', Chanlocs(I).labels]);
 
