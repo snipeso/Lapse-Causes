@@ -169,10 +169,10 @@ PrcntSDTheta = 100*(sdBurst-blBurst)./sdTheta;
 PrcntSDTheta(sdTheta<.01) = nan;
 dispDescriptive(PrcntSDTheta, 'Theta power removed:', '%', 0);
 
-Stats = pairedttest(blTheta_Intact, sdTheta_Intact, StatsP);
+Stats = paired_ttest(blTheta_Intact, sdTheta_Intact, StatsP);
 dispStat(Stats, [1 1], 'Intact change from BL:');
 
-Stats = pairedttest(blTheta_Burstless, sdTheta_Burstless, StatsP);
+Stats = paired_ttest(blTheta_Burstless, sdTheta_Burstless, StatsP);
 dispStat(Stats, [1 1], 'Burstless change from BL:');
 
 disp('****')
@@ -189,7 +189,7 @@ dispDescriptive(Data_BL, 'BL Theta', '%', 0);
 Data_SD = 100*squeeze(sum(TimeSpent(:, 2, [1 3]), 3));
 dispDescriptive(Data_SD, 'SD Theta', '%', 0);
 
-Stats = pairedttest(Data_BL, Data_SD, StatsP);
+Stats = paired_ttest(Data_BL, Data_SD, StatsP);
 dispStat(Stats, [1 1], 'Theta bursts BLvsSD:');
 disp('   ')
 
@@ -201,7 +201,7 @@ dispDescriptive(Data_BL, 'BL alpha', '%', 0);
 Data_SD = 100*squeeze(sum(TimeSpent(:, 2, [2 3]), 3));
 dispDescriptive(Data_SD, 'SD alpha', '%', 0);
 
-Stats = pairedttest(Data_BL, Data_SD, StatsP);
+Stats = paired_ttest(Data_BL, Data_SD, StatsP);
 dispStat(Stats, [1 1], 'alpha BLvsSD:');
 
 
@@ -226,7 +226,7 @@ disp(Participants(Remove))
 % re-calculate change from BL to SD
 Data_BL = 100*squeeze(sum(TimeSpent(:, 1, [1 3]), 3));
 Data_SD = 100*squeeze(sum(TimeSpent(:, 2, [1 3]), 3));
-Stats = pairedttest(Data_BL(~Remove), Data_SD(~Remove), StatsP);
+Stats = paired_ttest(Data_BL(~Remove), Data_SD(~Remove), StatsP);
 dispStat(Stats, [1 1], 'Theta bursts BLvsSD (redux):');
 
 % make sure there's enough power

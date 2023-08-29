@@ -1,4 +1,4 @@
-function Stats = pairedttest(Data1, Data2, StatsP)
+function Stats = paired_ttest(Data1, Data2, StatsP)
 % Calculates t-tests, p values, fdr corrected p values, and effect sizes.
 % Input options:
 % A) Data1 = P x S, Data2 = []: t-tests done for every S with every S. Returns

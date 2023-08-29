@@ -12,7 +12,7 @@ function Stats = topoDiff(Data1, Data2, Chanlocs, CLims, StatsP, PlotProps)
 % Lapse-causes
 
 %%% Statistics
-Stats = pairedttest(Data1, Data2, StatsP);
+Stats = paired_ttest(Data1, Data2, StatsP);
 
 ES = Stats.(StatsP.Paired.ES);
 Sig =  Stats.sig;

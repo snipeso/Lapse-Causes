@@ -11,7 +11,7 @@ if ~isempty(StatsP) && ~isempty(Baseline)
     %     Baseline(BadParticipants) = nan;
     Data1 = repmat(Baseline, 1, size(Data, 3)); % baseline
     Data2 = Data;
-    Stats = pairedttest(Data1, Data2, StatsP);
+    Stats = paired_ttest(Data1, Data2, StatsP);
     Stats.timepoints = t;
     Stats.lines = LineLabels;
 

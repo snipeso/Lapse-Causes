@@ -12,7 +12,7 @@ ExpectedJointProb = Prob1.*Prob2;
 
 % statistically compare expected probability with actual probability
 % P = analysisParameters();
-% Stats = pairedttest(ExpectedJointProb, ActualJointProb, P.StatsP);
+% Stats = paired_ttest(ExpectedJointProb, ActualJointProb, P.StatsP);
 Stats = pairedWilcoxon(ExpectedJointProb, ActualJointProb);
 
 % quantify the difference as a percentage from the possible values, with 0

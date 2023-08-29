@@ -23,6 +23,7 @@ Channels = Parameters.Channels.PreROI;
 Bands = Parameters.Bands;
 SessionBlocks = Parameters.Sessions.Conditions;
 Labels = Parameters.Labels;
+StatParameters = Parameters.Stats;
 
 Source_EEG = fullfile(Paths.Data, 'Clean', 'Waves', Task);
 Source_Bursts = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_New', Task);
@@ -50,6 +51,7 @@ CacheDir = fullfile(Paths.Cache, mfilename);
 
 
 
+
 % burst ratio power
 % burstless periodic power / burst periodic power
 
@@ -61,7 +63,7 @@ CacheDir = fullfile(Paths.Cache, mfilename);
 
 
 %%
-Grid = [1 5];
+Grid = [1 6];
 PlotProps = Parameters.PlotProps.Manuscript;
 PlotProps.Axes.yPadding = 18;
 PlotProps.Axes.xPadding = 18;
@@ -70,28 +72,48 @@ xLog = false;
 xLims = [2 15];
 
 figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.35])
-chART.sub_plot([], Grid, [1 1], [1 2], true, PlotProps.Indexes.Letters{1}, PlotProps);
+
+%%% change in quantities of bursts
+XLabels = fieldnames(SessionBlocks);
+Colors = PlotProps.Color.Participants(1:numel(Participants), :);
+
+% theta
+Data = 100*ThetaTimeSpent;
+
+chART.sub_plot([], Grid, [1 1], [1 1], true, PlotProps.Indexes.Letters{1}, PlotProps);
+plot_change_in_time(Data, XLabels, [], [0 100], Colors, StatParameters, PlotProps)
+ylabel('% recording')
+title('Theta bursts')
+
+
+% alpha
+Data = 100*AlphaTimeSpent;
+
+chART.sub_plot([], Grid, [1 1], [1 1], true, PlotProps.Indexes.Letters{1}, PlotProps);
+plot_change_in_time(Data, XLabels, [], [0 100], Colors, StatParameters, PlotProps)
+ylabel('% recording')
+title('Alpha bursts')
+
+
+
+%%% Change in whitened power spectra
+
+% theta
 Data = cat(2, ThetaPowerBurstless(:, 2, :), ThetaPowerIntact(:, 2, :));
+
+chART.sub_plot([], Grid, [1 3], [1 2], true, PlotProps.Indexes.Letters{3}, PlotProps);
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
 title('Power spectra without THETA bursts')
 ylabel('Whitened Power (\muV^2/Hz)')
 
 
-chART.sub_plot([], Grid, [1 3], [1 2], true, PlotProps.Indexes.Letters{2}, PlotProps);
+% alpha
 Data = cat(2, AlphaPowerBurstless(:, 2, :), AlphaPowerIntact(:, 2, :));
+
+chART.sub_plot([], Grid, [1 5], [1 2], true, PlotProps.Indexes.Letters{4}, PlotProps);
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
 title('Power spectra without ALPHA bursts')
 ylabel('Whitened Power (\muV^2/Hz)')
-
-
-Data = 100*squeeze(mean(TimeSpent, 1, 'omitnan'));
-
-subfigure([], Grid, [1 5], [], true, PlotProps.Indexes.Letters{3}, PlotProps);
-plotStackedBars(Data(:, [1 3 2]), SB_Labels, YLim, Legend([1 3 2]), Colors([1 3 2], :), PlotProps);
-
-ylabel('Recording duration (%)')
-
-disp(['C: N = ', num2str(nnz(~any(any(isnan(TimeSpent), 3), 2)))])
 
 chART.save_figure('Figure_2', Paths.Results, PlotProps)
 

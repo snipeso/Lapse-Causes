@@ -221,7 +221,7 @@ for Indx_W = 1:size(Windows, 1)
         Window = dsearchn(t_microsleep', Windows(Indx_W, :)');
         Prob = squeeze(mean(zProbMicrosleep_Stim(:, :, Window(1):Window(2)), 3, 'omitnan')); % P x TT
 
-        Stats = pairedttest(zGenProbMicrosleep, Prob(:, Indx_TT), StatsP);
+        Stats = paired_ttest(zGenProbMicrosleep, Prob(:, Indx_TT), StatsP);
         dispStat(Stats, [1 1], [WindowLabels{Indx_W}, ' ' TrialTypes{Indx_TT}]);
     end
 end
@@ -241,7 +241,7 @@ Point = dsearchn(t_microsleep', Point);
 
 Prob = squeeze(mean(zProbMicrosleep_Stim(:, [2 3], Point), 3, 'omitnan')); % P x TT
 
-Stats = pairedttest(Prob(:, 2), Prob(:, 1), StatsP);
+Stats = paired_ttest(Prob(:, 2), Prob(:, 1), StatsP);
 dispStat(Stats, [1 1], 'Stim late vs correct Proportion:');
 
 
@@ -260,7 +260,7 @@ for Indx_B = 1:2
             Window = dsearchn(t_burst', Windows(Indx_W, :)');
             Prob = squeeze(mean(zProbBurst_Stim(:, :, Indx_B, Window(1):Window(2)), 4, 'omitnan')); % P x TT
 
-            Stats = pairedttest(zGenProbBurst(:, Indx_B), Prob(:, Indx_TT), StatsP);
+            Stats = paired_ttest(zGenProbBurst(:, Indx_B), Prob(:, Indx_TT), StatsP);
             dispStat(Stats, [1 1], [WindowLabels{Indx_W}, ' ', TrialTypes{Indx_TT}]);
         end
 
@@ -271,5 +271,5 @@ end
 
 Window =  dsearchn(t_burst', [1 2]');
 Prob = squeeze(mean(zProbBurst_Stim(:, :, 2, Window(1):Window(2)), 4, 'omitnan')); % P x TT
-Stats = pairedttest(zGenProbBurst(:, 2), Prob(:, 1), StatsP);
+Stats = paired_ttest(zGenProbBurst(:, 2), Prob(:, 1), StatsP);
 dispStat(Stats, [1 1], ['Intermezzo ', TrialTypes{1}]);
