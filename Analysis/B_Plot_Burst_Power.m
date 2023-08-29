@@ -12,7 +12,7 @@ WelchWindow = 8;
 Overlap = .75;
 MinDuration = 60;
 FooofFittingFrequencyRange = [2 40]; % some low-frequency noise
-Refresh = true; % if analysis has already been run, set to false if you want to use the cache
+Refresh = false; % if analysis has already been run, set to false if you want to use the cache
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
@@ -94,7 +94,7 @@ PlotProps.Axes.yPadding = 18;
 PlotProps.Axes.xPadding = 18;
 PlotProps.HandleVisibility = 'on';
 xLog = false;
-xLims = [2 20];
+xLims = [2 30];
 
 figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*1.5, PlotProps.Figure.Height*.35])
 
@@ -138,7 +138,7 @@ ylabel('Whitened Power (\muV^2/Hz)')
 % alpha
 Data = cat(2, permute(AlphaPowerBurstlessSpectrum, [1 3 2]), permute(AlphaPowerIntactSpectrum, [1 3 2]));
 
-% chART.sub_plot([], Grid, [1 5], [1 2], true, PlotProps.Indexes.Letters{3}, PlotProps);
+chART.sub_plot([], Grid, [1 5], [1 2], true, PlotProps.Indexes.Letters{3}, PlotProps);
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
 title('Alpha periodic power')
 ylabel('Whitened Power (\muV^2/Hz)')
@@ -151,7 +151,7 @@ chART.save_figure('Figure_2', Paths.Results, PlotProps)
 figure('units', 'normalized', 'outerposition', [0 0 1 1])
 for idxParticipant = 1:numel(Participants)
     subplot(4, 5, idxParticipant)
-    plot(Frequencies, squeeze(AlphaPowerBurstlessSpectrum(idxParticipant, :)))
+    plot(Frequencies, squeeze(ThetaPowerBurstlessSpectrum(idxParticipant, :)))
     title(Participants{idxParticipant})
     xlim([2 20])
 end

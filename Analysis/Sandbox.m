@@ -12,7 +12,7 @@ BandLabels = fieldnames(Bands);
 %%%%
 Task = 'LAT'; % Game, Standing, Fixation
 Session = 'Session2Beam1';
-Participant = 'P07'; % P03 has almost no oscillations, P15 has tons
+Participant = 'P14'; % P03 has almost no oscillations, P15 has tons
 %%%%
 %%%%
 %%%%
