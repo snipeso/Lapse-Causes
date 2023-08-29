@@ -4,15 +4,15 @@ close all
 
 Info = analysisParameters();
 Paths = Info.Paths;
-Bands = Info.Bands;
+Bands = Info.Narrowbands;
 BandLabels = fieldnames(Bands);
 
 %%%% Choose a file
 %%%%
 %%%%
-Task = 'Fixation'; % Game, Standing, Fixation
-Session = 'Main4';
-Participant = 'P03'; % P03 has almost no oscillations, P15 has tons
+Task = 'LAT'; % Game, Standing, Fixation
+Session = 'Session2Beam1';
+Participant = 'P07'; % P03 has almost no oscillations, P15 has tons
 %%%%
 %%%%
 %%%%
@@ -27,6 +27,7 @@ SampleRate = EEG.srate;
 
 %% Filter all data in all bands
 
+Bands.Gamma = [25 32];
 EEGNarrowbands = cycy.filter_eeg_narrowbands(EEG, Bands);
 
 %% Choose criteria
@@ -78,7 +79,7 @@ close all
 %%%% Choose a channel
 %%%%
 %%%%
-Channel = labels2indexes(99, EEG.chanlocs);
+Channel = labels2indexes(11, EEG.chanlocs);
 %%%%
 %%%%
 %%%%
@@ -88,7 +89,7 @@ Bursts = cycy.detect_bursts(EEG, Channel, EEGNarrowbands,...
     Bands, CriteriaSets);
 % profile viewer
 
-cycy.plot.plot_all_bursts(EEG, 15, Bursts, 'CriteriaSetIndex');
+cycy.plot.plot_all_bursts(EEG, 15, Bursts, 'Band');
 
 figure
 cycy.plot.power_without_bursts(EEG.data(Channel, :), SampleRate, Bursts);
@@ -101,7 +102,7 @@ cycy.plot.burst_criteriaset_diagnostics(Bursts);
 %%%%
 CriteriaSetIndex = 3;
 Sign = 1;
-Band = 'Alpha';
+Band = 'Theta';
 %%%%
 %%%%
 %%%%

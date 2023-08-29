@@ -12,7 +12,7 @@ WelchWindow = 8;
 Overlap = .75;
 MinDuration = 60;
 FooofFittingFrequencyRange = [1 40];
-Refresh = true; % if analysis has already been run, set to false if you want to use the cache
+Refresh = false; % if analysis has already been run, set to false if you want to use the cache
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
