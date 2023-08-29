@@ -12,13 +12,13 @@ WelchWindow = 8;
 Overlap = .75;
 MinDuration = 60;
 FooofFittingFrequencyRange = [1 40];
-Refresh = false; % if analysis has already been run, set to false if you want to use the cache
+Refresh = true; % if analysis has already been run, set to false if you want to use the cache
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
 Task = Parameters.Task;
 Participants = Parameters.Participants;
-Participants = {'P02', 'P03'};
+Participants = {'P02'};
 Channels = Parameters.Channels.PreROI;
 Bands = Parameters.Bands;
 SessionBlocks = Parameters.Sessions.Conditions;
@@ -34,24 +34,14 @@ CacheDir = fullfile(Paths.Cache, mfilename);
 %%% analysis
 
 %%% Theta
-
 [ThetaPowerIntactSpectrum, ThetaPowerBurstsSpectrum, ThetaPowerBurstlessSpectrum, Frequencies, ThetaTimeSpent] = ...
-    whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, Channels, 'Front', ...
+    whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, 2, Channels, 'Front', ...
     Bands, 'Theta', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, CacheDir, Refresh);
 
-% get only SD session
-SessionIndex = 2;
-ThetaPowerIntactSpectrum = squeeze(ThetaPowerIntactSpectrum(:, SessionIndex, :));
-ThetaPowerBurstlessSpectrum = squeeze(ThetaPowerBurstlessSpectrum(:, SessionIndex, :));
-ThetaPowerBurstsSpectrum = squeeze(ThetaPowerBurstsSpectrum(:, SessionIndex, :));
-
 % average theta power
-ThetaPowerIntact = band_spectrum(ThetaPowerIntactSpectrum, Frequencies, Bands, 'last');
-ThetaPowerIntact = ThetaPowerIntact(:, 1);
-ThetaPowerBursts = band_spectrum(ThetaPowerBurstsSpectrum, Frequencies, Bands, 'last');
-ThetaPowerBursts = ThetaPowerBursts(:, 1);
-ThetaPowerBurstless = band_spectrum(ThetaPowerBurstlessSpectrum, Frequencies, Bands, 'last');
-ThetaPowerBurstless = ThetaPowerBurstless(:, 1);
+[ThetaPowerIntact, ThetaPowerBursts, ThetaPowerBurstless] = ...
+    average_band(ThetaPowerIntactSpectrum, ThetaPowerBurstsSpectrum, ThetaPowerBurstlessSpectrum, ...
+    Frequencies, Bands, BandIndex);
 
 %%% Alpha
 
@@ -59,19 +49,11 @@ ThetaPowerBurstless = ThetaPowerBurstless(:, 1);
     whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, Channels, 'Back', ...
     Bands, 'Alpha', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, CacheDir, Refresh);
 
-% get only BL session
-SessionIndex = 1;
-AlphaPowerIntactSpectrum = squeeze(AlphaPowerIntactSpectrum(:, SessionIndex, :));
-AlphaPowerBurstlessSpectrum = squeeze(AlphaPowerBurstlessSpectrum(:, SessionIndex, :));
-AlphaPowerBurstsSpectrum = squeeze(AlphaPowerBurstsSpectrum(:, SessionIndex, :));
 
 % average alpha power
-AlphaPowerIntact = band_spectrum(AlphaPowerIntactSpectrum, Frequencies, Bands, 'last');
-AlphaPowerIntact = AlphaPowerIntact(:, 2);
-AlphaPowerBursts = band_spectrum(AlphaPowerBurstsSpectrum, Frequencies, Bands, 'last');
-AlphaPowerBursts = AlphaPowerBursts(:, 2);
-AlphaPowerBurstless = band_spectrum(AlphaPowerBurstlessSpectrum, Frequencies, Bands, 'last');
-AlphaPowerBurstless = AlphaPowerBurstless(:, 2);
+[AlphaPowerIntact, AlphaPowerBursts, AlphaPowerBurstless] = ...
+    average_band(AlphaPowerIntactSpectrum, AlphaPowerBurstsSpectrum, AlphaPowerBurstlessSpectrum, ...
+    Frequencies, Bands, BandIndex);
 
 
 %% Statistics
@@ -171,9 +153,11 @@ chART.save_figure('Figure_2', Paths.Results, PlotProps)
 %%%%%%%%%%%
 %%% Analysis functions
 
-function [PowerIntact, PowerBursts, PowerBurstless, Frequencies, TimeSpent] = ...
-    whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, Channels, ChannelFieldname, ...
-    Bands, BandFieldname, WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, CacheDir, Refresh)
+function [PowerIntactSpectrum, PowerBurstsSpectrum, PowerBurstlessSpectrum, ...
+    Frequencies, TimeSpent] = whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, ...
+    Participants, SessionBlocks, SessionIndex, Channels, ChannelFieldname, ...
+    Bands, BandFieldname, WelchWindow, Overlap, MinDuration, ...
+    FooofFittingFrequencyRange, CacheDir, Refresh)
 
 Band = Bands.(BandFieldname);
 SessionBlockLabels = fieldnames(SessionBlocks);
@@ -181,14 +165,19 @@ ChannelIndexes = Channels.(ChannelFieldname);
 
 %%% cache
 % location of cache
-CacheString = strjoin({'burst_power_by_ROI', Source_EEG, ChannelFieldname, BandFieldname, num2str(WelchWindow), ...
-    num2str(Overlap), num2str(MinDuration)}, '_');
+CacheString = strjoin({'burst_power_by_ROI', ...
+    SessionBlockLabels{SessionIndex}, ...
+    ChannelFieldname, ...
+    BandFieldname, ...
+    num2str(WelchWindow), ...
+    num2str(Overlap), ...
+    num2str(MinDuration)}, '_');
 CacheString = [replace(CacheString, '.', '-'), '.mat'];
 CachePath = fullfile(CacheDir, CacheString);
 
 % load from cache
 if exist(CachePath, 'file') && ~Refresh
-    load(CachePath, 'PowerIntact', 'PowerBursts', 'PowerBurstless', 'Frequencies', 'TimeSpent')
+    load(CachePath, 'PowerIntactSpectrum', 'PowerBurstsSpectrum', 'PowerBurstlessSpectrum', 'Frequencies', 'TimeSpent')
     return
 end
 
@@ -224,16 +213,16 @@ for idxParticipant = 1:numel(Participants)
 
         % save to general matrix
         if ~exist('PowerIntact', 'var') && ~isempty(Freqs) % if first time calculating power
-            PowerIntact = nan(numel(Participants), numel(SessionBlockLabels), numel(Freqs));
-            PowerBurstless = PowerIntact;
-            PowerBursts = PowerIntact;
+            PowerIntactSpectrum = nan(numel(Participants), numel(SessionBlockLabels), numel(Freqs));
+            PowerBurstlessSpectrum = PowerIntactSpectrum;
+            PowerBurstsSpectrum = PowerIntactSpectrum;
         end
 
-        PowerIntact(idxParticipant, idxSessionBlock, :) = Power;
-        PowerBursts(idxParticipant, idxSessionBlock, :) = compute_whitened_power_ROI( ...
+        PowerIntactSpectrum(idxParticipant, idxSessionBlock, :) = Power;
+        PowerBurstsSpectrum(idxParticipant, idxSessionBlock, :) = compute_whitened_power_ROI( ...
             EEGBursts, SampleRate, labels2indexes(ChannelIndexes, Chanlocs), ...
             WelchWindow, Overlap, FooofFittingFrequencyRange);
-        PowerBurstless(idxParticipant, idxSessionBlock, :) = compute_whitened_power_ROI( ...
+        PowerBurstlessSpectrum(idxParticipant, idxSessionBlock, :) = compute_whitened_power_ROI( ...
             EEGBurstless, SampleRate, labels2indexes(ChannelIndexes, Chanlocs), ...
             WelchWindow, Overlap, FooofFittingFrequencyRange);
 
@@ -243,6 +232,14 @@ for idxParticipant = 1:numel(Participants)
     end
     disp(['Finished ', Participants{idxParticipant}])
 end
+
+% select only power spectra of interest
+PowerIntactSpectrum = squeeze(PowerIntactSpectrum(:, SessionIndex, :));
+PowerBurstlessSpectrum = squeeze(PowerBurstlessSpectrum(:, SessionIndex, :));
+PowerBurstsSpectrum = squeeze(PowerBurstsSpectrum(:, SessionIndex, :));
+
+% save to cache for future
+save(CachePath, 'PowerIntactSpectrum', 'PowerBurstsSpectrum', 'PowerBurstlessSpectrum', 'Frequencies', 'TimeSpent')
 end
 
 
@@ -303,14 +300,28 @@ EEGBurstless = EEGData(:, ~BurstTimepoints);
 end
 
 
-function [WhitenedPower, FooofFrequencies] = compute_whitened_power_ROI(EEGData, SampleRate, Channels, WelchWindow, Overlap, FooofFittingFrequencyRange)
+function [WhitenedPower, FooofFrequencies] = compute_whitened_power_ROI( ...
+    EEGData, SampleRate, Channels, WelchWindow, Overlap, FooofFittingFrequencyRange)
 if isempty(EEGData)
     WhitenedPower = nan;
     FooofFrequencies = [];
     return
 end
-[Power, Frequencies] = cycy.utils.compute_power(EEGData, SampleRate, WelchWindow, Overlap);
-Power = mean(Power(Channels, :), 1);% select and average ROI
+[Power, Frequencies] = cycy.utils.compute_power(EEGData(Channels, :), SampleRate, WelchWindow, Overlap);
+Power = mean(Power, 1); % select and average ROI
 
 [WhitenedPower, FooofFrequencies] = whiten_spectrum(Power, Frequencies, FooofFittingFrequencyRange);
+end
+
+
+function [PowerIntact, PowerBursts, PowerBurstless] = ...
+    average_band(PowerIntactSpectrum, PowerBurstsSpectrum, PowerBurstlessSpectrum, ...
+    Frequencies, Bands, BandIndex)
+
+PowerIntact = band_spectrum(PowerIntactSpectrum, Frequencies, Bands, 'last');
+PowerIntact = PowerIntact(:, BandIndex);
+PowerBursts = band_spectrum(PowerBurstsSpectrum, Frequencies, Bands, 'last');
+PowerBursts = PowerBursts(:, BandIndex);
+PowerBurstless = band_spectrum(PowerBurstlessSpectrum, Frequencies, Bands, 'last');
+PowerBurstless = PowerBurstless(:, BandIndex);
 end
