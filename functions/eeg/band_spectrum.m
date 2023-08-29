@@ -20,8 +20,10 @@ switch fDim
                     D = Data(:, Band(1):Band(2));
                     if ~all(isnan(D))
                         D = sum(D, 2, 'omitnan').*FreqRes;
+                    else
+                        D = nan;
                     end
-                    bData( :, Indx_B) = D;
+                    bData(:, Indx_B) = D;
                 case 4
                     for Indx_P = 1:size(Data, 1)
                         D = Data(Indx_P, :, :, Band(1):Band(2));

@@ -18,7 +18,7 @@ Parameters = analysisParameters();
 Paths = Parameters.Paths;
 Task = Parameters.Task;
 Participants = Parameters.Participants;
-Participants = {'P02'};
+Participants = { 'P01', 'P02'};
 Channels = Parameters.Channels.PreROI;
 Bands = Parameters.Bands;
 SessionBlocks = Parameters.Sessions.Conditions;
@@ -38,7 +38,9 @@ CacheDir = fullfile(Paths.Cache, mfilename);
     whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, 2, Channels, 'Front', ...
     Bands, 'Theta', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, CacheDir, Refresh);
 
+
 % average theta power
+BandIndex = 1;
 [ThetaPowerIntact, ThetaPowerBursts, ThetaPowerBurstless] = ...
     average_band(ThetaPowerIntactSpectrum, ThetaPowerBurstsSpectrum, ThetaPowerBurstlessSpectrum, ...
     Frequencies, Bands, BandIndex);
@@ -46,11 +48,12 @@ CacheDir = fullfile(Paths.Cache, mfilename);
 %%% Alpha
 
 [AlphaPowerIntactSpectrum, AlphaPowerBurstsSpectrum, AlphaPowerBurstlessSpectrum, ~, AlphaTimeSpent] = ...
-    whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, Channels, 'Back', ...
+    whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, 1, Channels, 'Back', ...
     Bands, 'Alpha', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, CacheDir, Refresh);
 
 
 % average alpha power
+BandIndex = 2;
 [AlphaPowerIntact, AlphaPowerBursts, AlphaPowerBurstless] = ...
     average_band(AlphaPowerIntactSpectrum, AlphaPowerBurstsSpectrum, AlphaPowerBurstlessSpectrum, ...
     Frequencies, Bands, BandIndex);
