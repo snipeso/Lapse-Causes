@@ -8,9 +8,11 @@ EEGAllSessions = struct();
 BurstsAllSessions = struct();
 
 for Session = Sessions
+    EEGAllSessions.(Session{1}) = []; % placeholder in case skipped
+     BurstsAllSessions.(Session{1}) = []; 
     if ~isempty(Source_Bursts)
         % load bursts
-        Bursts = load_datafile(Source_Bursts, Participant, Session, BurstVariable);
+        Bursts = load_datafile(Source_Bursts, Participant, Session{1}, BurstVariable);
         if isempty(Bursts); continue; end
 
         % load EEG metadata

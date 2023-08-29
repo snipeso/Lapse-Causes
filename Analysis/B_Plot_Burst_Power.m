@@ -18,11 +18,13 @@ Parameters = analysisParameters();
 Paths = Parameters.Paths;
 Task = Parameters.Task;
 Participants = Parameters.Participants;
+Participants = Participants(1:9);
 Channels = Parameters.Channels.PreROI;
 Bands = Parameters.Bands;
 SessionBlocks = Parameters.Sessions.Conditions;
 Labels = Parameters.Labels;
 StatParameters = Parameters.Stats;
+SampleRate = Parameters.SampleRate;
 
 Source_EEG = fullfile(Paths.Data, 'Clean', 'Waves', Task);
 Source_Bursts = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_New', Task);
@@ -35,7 +37,7 @@ CacheDir = fullfile(Paths.Cache, mfilename);
 %%% Theta
 [ThetaPowerIntactSpectrum, ThetaPowerBurstsSpectrum, ThetaPowerBurstlessSpectrum, Frequencies, ThetaTimeSpent] = ...
     whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, 2, Channels, 'Front', ...
-    Bands, 'Theta', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, CacheDir, Refresh);
+    Bands, 'Theta', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, SampleRate, CacheDir, Refresh);
 
 
 % average theta power
@@ -48,7 +50,7 @@ BandIndex = 1;
 
 [AlphaPowerIntactSpectrum, AlphaPowerBurstsSpectrum, AlphaPowerBurstlessSpectrum, ~, AlphaTimeSpent] = ...
     whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, 1, Channels, 'Back', ...
-    Bands, 'Alpha', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, CacheDir, Refresh);
+    Bands, 'Alpha', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, SampleRate, CacheDir, Refresh);
 
 
 % average alpha power
@@ -161,7 +163,7 @@ function [PowerIntactSpectrum, PowerBurstsSpectrum, PowerBurstlessSpectrum, ...
     Frequencies, TimeSpent] = whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, ...
     Participants, SessionBlocks, SessionIndex, Channels, ChannelFieldname, ...
     Bands, BandFieldname, WelchWindow, Overlap, MinDuration, ...
-    FooofFittingFrequencyRange, CacheDir, Refresh)
+    FooofFittingFrequencyRange, SampleRate, CacheDir, Refresh)
 
 Band = Bands.(BandFieldname);
 SessionBlockLabels = fieldnames(SessionBlocks);
@@ -199,12 +201,11 @@ for idxParticipant = 1:numel(Participants)
         % load data from all sessions
         [EEGAllSessions, BurstsAllSessions] = load_sessionblock_data( ...
             Source_Bursts, Source_EEG, Participant, SessionBlock, 'BurstClusters');
-        SampleRate = EEGAllSessions.(SessionBlock{1}).srate;
         Chanlocs = EEGAllSessions.(SessionBlock{1}).chanlocs;
 
         % cut up data based on whether there were bursts or not
         [EEGIntact, EEGBursts, EEGBurstless] = chop_EEG_by_bursts( ...
-            EEGAllSessions, BurstsAllSessions, Band, MinDuration);
+            EEGAllSessions, BurstsAllSessions, Band, MinDuration, SampleRate);
 
         % determine how much time was spent in each band
         TotalTime = size(EEGIntact, 2)/SampleRate;
@@ -249,16 +250,18 @@ end
 
 
 function [EEGIntactAllSessions, EEGBurstsAllSessions, EEGBurstlessAllSessions] = chop_EEG_by_bursts( ...
-    EEGAllSessions, BurstsAllSessions, Band, MinDuration)
+    EEGAllSessions, BurstsAllSessions, Band, MinDuration, SampleRate)
 
 Sessions = fieldnames(EEGAllSessions);
-SampleRate = EEGAllSessions.(Sessions{1}).srate;
 
 EEGIntactAllSessions = [];
 EEGBurstsAllSessions = [];
 EEGBurstlessAllSessions = [];
 
 for Session = Sessions'
+    if isempty(EEGAllSessions.(Session{1}))
+        continue
+    end
     EEGIntact = EEGAllSessions.(Session{1}).data;
     EEGIntactAllSessions = cat(2, EEGIntactAllSessions, EEGIntact);
 
@@ -314,9 +317,20 @@ end
 [Power, Frequencies] = cycy.utils.compute_power(EEGData(Channels, :), SampleRate, WelchWindow, Overlap);
 Power = mean(Power, 1); % select and average ROI
 
+% smooth data, because otherwise sometimes fooof doesn't work :(
+SmoothSpan = 2;
+Power = smooth_spectrum(Power, Frequencies, SmoothSpan);
 [WhitenedPower, FooofFrequencies] = whiten_spectrum(Power, Frequencies, FooofFittingFrequencyRange);
 end
 
+
+function SmoothData = smooth_spectrum(Power, Frequencies, SmoothSpan)
+% function for smoothing data
+% Data is a 1 x Freqs matrix.
+FreqRes = Frequencies(2)-Frequencies(1);
+SmoothPoints = round(SmoothSpan/FreqRes);
+SmoothData = smooth(Power, SmoothPoints, 'lowess');
+end
 
 function [PowerIntact, PowerBursts, PowerBurstless] = ...
     average_band(PowerIntactSpectrum, PowerBurstsSpectrum, PowerBurstlessSpectrum, ...
