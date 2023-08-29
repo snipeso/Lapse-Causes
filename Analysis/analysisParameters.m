@@ -103,6 +103,8 @@ for Indx_F = 1:numel(Subfolders)
     addpath(fullfile(Paths.Analysis, 'functions', Subfolders{Indx_F}))
 end
 
+addExternalFunctions
+
 Parameters.Paths = Paths;
 
 
