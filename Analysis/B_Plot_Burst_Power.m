@@ -77,10 +77,10 @@ descriptive_distribution(AlphaPercentReduction, 'Alpha percent reduction', '%', 
 
 % burst ratio power
 % burstless periodic power / burst periodic power
-ThetaBurstRatio = ThetaPowerBurstless./ThetaPowerBursts;
+ThetaBurstRatio = 1-ThetaPowerBurstless./ThetaPowerBursts;
 descriptive_distribution(ThetaBurstRatio, 'Theta burst power ratio', '', 2);
 
-AlphaBurstRatio = AlphaPowerBurstless./AlphaPowerBursts;
+AlphaBurstRatio = 1-AlphaPowerBurstless./AlphaPowerBursts;
 descriptive_distribution(AlphaBurstRatio, 'Alpha burst power ratio', '', 2);
 
 
@@ -113,7 +113,7 @@ Stats = plot_change_in_time(Data, XLabels, [], [0 100], Colors, StatParameters, 
 ylabel('% recording')
 title('Theta bursts')
 
-disp_stats(Stats, [2 2], 'Change in theta bursts with time awake');
+disp_stats(Stats, [1 2], 'Change in theta bursts with time awake');
 
 
 % alpha
@@ -124,7 +124,7 @@ Stats = plot_change_in_time(Data, XLabels, [], [0 100], Colors, StatParameters, 
 ylabel('% recording')
 title('Alpha bursts')
 
-disp_stats(Stats, [2 2], 'Change in alphs bursts with time awake');
+disp_stats(Stats, [1 2], 'Change in alphs bursts with time awake');
 
 
 
