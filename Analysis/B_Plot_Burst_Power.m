@@ -11,6 +11,7 @@ close all
 WelchWindow = 8;
 Overlap = .75;
 MinDuration = 60;
+FooofFittingFrequencyRange = [1 40];
 Refresh = false; % if analysis has already been run, set to false if you want to use the cache
 
 Parameters = analysisParameters();
@@ -32,15 +33,13 @@ CacheDir = fullfile(Paths.Cache, mfilename);
 
 % get power values
 [ThetaPowerIntact, ThetaPowerBursts, ThetaPowerBurstless, Frequencies, ThetaTimeSpent] = ...
-    burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, Channels, 'Front', ...
-    Bands, 'Theta', WelchWindow, Overlap, MinDuration, CacheDir, Refresh);
+    whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, Channels, 'Front', ...
+    Bands, 'Theta', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, CacheDir, Refresh);
 
-[AlphaPowerIntact, AlphaPowerBursts, AlphaPowerBurstless, ~, AlphaTimeSpent] = ...
-    burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, Channels, 'Back', ...
-    Bands, 'Alpha', WelchWindow, Overlap, MinDuration, CacheDir, Refresh);
+% [AlphaPowerIntact, AlphaPowerBursts, AlphaPowerBurstless, ~, AlphaTimeSpent] = ...
+%     whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, Channels, 'Back', ...
+%     Bands, 'Alpha', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, CacheDir, Refresh);
 
-
-ThetaPeriodicPower = fooof_periodic_power(ThetaPowerIntact, Frequencies);
 
 %% Statistics
 %%%%%%%%%%%%%
@@ -61,10 +60,17 @@ ThetaPeriodicPower = fooof_periodic_power(ThetaPowerIntact, Frequencies);
 
 
 %%
+Grid = [1 5];
+PlotProps = Parameters.PlotProps.Manuscript;
+PlotProps.Axes.yPadding = 18;
+PlotProps.Axes.xPadding = 18;
+PlotProps.HandleVisibility = 'on';
+xLog = false;
+xLims = [2 14];
 
-Data = cat(2, squeeze(ThetaPowerIntact(1, 2, :)), squeeze(ThetaPowerBurstless(1, 2, :)), squeeze(ThetaPowerBursts(1, 2, :)))';
-figure
-cycy.plot.power_spectrum(Data, Frequencies, true, true, {'Intact', 'Burstless', 'Bursts'})
+chART.sub_plot([], Grid, [1 1], [1 2], true, PlotProps.Indexes.Letters{1}, PlotProps);
+Data = cat(2, ThetaPowerIntact(:, 2, :), ThetaPowerBurstless(:, 2, :));
+plotSpectrumMountains(Data, Frequencies, xLog, xLims, PlotProps, P.Labels);
 
 
 
@@ -164,8 +170,8 @@ saveFig('Figure_2', Paths.PaperResults, PlotProps)
 %%% functions
 
 function [PowerIntact, PowerBursts, PowerBurstless, Frequencies, TimeSpent] = ...
-    burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, Channels, ChannelFieldname, ...
-    Bands, BandFieldname, WelchWindow, Overlap, MinDuration, CacheDir, Refresh)
+    whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, Channels, ChannelFieldname, ...
+    Bands, BandFieldname, WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, CacheDir, Refresh)
 
 Band = Bands.(BandFieldname);
 SessionBlockLabels = fieldnames(SessionBlocks);
@@ -211,8 +217,8 @@ for idxParticipant = 1:numel(Participants)
         TimeSpent(idxParticipant, idxSessionBlock) = BurstTime/TotalTime;
 
         % calculate power for the selected region of interest
-        [Power, Freqs] = compute_power_ROI(EEGIntact, SampleRate, ...
-            labels2indexes(ChannelIndexes, Chanlocs), WelchWindow, Overlap);
+        [Power, Freqs] = compute_whitened_power_ROI(EEGIntact, SampleRate, ...
+            labels2indexes(ChannelIndexes, Chanlocs), WelchWindow, Overlap, FooofFittingFrequencyRange);
 
         % save to general matrix
         if ~exist('PowerIntact', 'var') && ~isempty(Freqs) % if first time calculating power
@@ -222,12 +228,12 @@ for idxParticipant = 1:numel(Participants)
         end
 
         PowerIntact(idxParticipant, idxSessionBlock, :) = Power;
-        PowerBursts(idxParticipant, idxSessionBlock, :) = compute_power_ROI( ...
+        PowerBursts(idxParticipant, idxSessionBlock, :) = compute_whitened_power_ROI( ...
             EEGBursts, SampleRate, labels2indexes(ChannelIndexes, Chanlocs), ...
-            WelchWindow, Overlap);
-        PowerBurstless(idxParticipant, idxSessionBlock, :) = compute_power_ROI( ...
+            WelchWindow, Overlap, FooofFittingFrequencyRange);
+        PowerBurstless(idxParticipant, idxSessionBlock, :) = compute_whitened_power_ROI( ...
             EEGBurstless, SampleRate, labels2indexes(ChannelIndexes, Chanlocs), ...
-            WelchWindow, Overlap);
+            WelchWindow, Overlap, FooofFittingFrequencyRange);
 
         if ~isempty(Freqs)
             Frequencies = Freqs; % do this in case the last recording is empty
@@ -295,21 +301,14 @@ EEGBurstless = EEGData(:, ~BurstTimepoints);
 end
 
 
-function [Power, Frequencies] = compute_power_ROI(EEGData, SampleRate, Channels, WelchWindow, Overlap)
+function [WhitenedPower, FooofFrequencies] = compute_whitened_power_ROI(EEGData, SampleRate, Channels, WelchWindow, Overlap, FooofFittingFrequencyRange)
 if isempty(EEGData)
-    Power = nan;
-    Frequencies = [];
+    WhitenedPower = nan;
+    FooofFrequencies = [];
     return
 end
 [Power, Frequencies] = cycy.utils.compute_power(EEGData, SampleRate, WelchWindow, Overlap);
 Power = mean(Power(Channels, :), 1);% select and average ROI
-end
 
-
-function ThetaPeriodicPower = fooof_periodic_power(ThetaPowerIntact, Frequencies)
-
-
-
-
-
+[WhitenedPower, FooofFrequencies] = whiten_spectrum(Power, Frequencies, FooofFittingFrequencyRange);
 end
