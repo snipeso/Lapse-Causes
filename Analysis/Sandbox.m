@@ -27,7 +27,6 @@ SampleRate = EEG.srate;
 
 %% Filter all data in all bands
 
-Bands.Gamma = [25 32];
 EEGNarrowbands = cycy.filter_eeg_narrowbands(EEG, Bands);
 
 %% Choose criteria
