@@ -12,12 +12,13 @@ WelchWindow = 8;
 Overlap = .75;
 MinDuration = 60;
 FooofFittingFrequencyRange = [2 40]; % some low-frequency noise
-Refresh = false; % if analysis has already been run, set to false if you want to use the cache
+Refresh = true; % if analysis has already been run, set to false if you want to use the cache
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
 Task = Parameters.Task;
 Participants = Parameters.Participants;
+Participants = Participants(1:16);
 Channels = Parameters.Channels.PreROI;
 Bands = Parameters.Bands;
 SessionBlocks = Parameters.Sessions.Conditions;
