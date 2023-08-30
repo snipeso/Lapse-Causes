@@ -1,4 +1,4 @@
-function Answers = cleanupLAT(AllAnswers)
+function Answers = cleanup_PVT(AllAnswers)
 % Take table from AllAnswers, save relevant information and make it in the
 % correct format type.
 
@@ -18,22 +18,12 @@ for Indx_T = 1:TotTrials
 
 end
 
-Answers.Block = cell2mat(AllAnswers.block);
 Answers.Delay = cell2mat(AllAnswers.delay);
 Answers.RT = cell2mat(AllAnswers.rt);
-Answers.isRight = strcmp(AllAnswers.hemifield, 'right');
 
-Answers.RT(Answers.RT<.1) = nan;
-
-% Classify as lapse, late, or correct response
-Answers.Type = nan(size(Answers.RT));
-Answers.Type(Answers.RT <= .5) = 3;
-Answers.Type(Answers.RT <= 1 & Answers.RT > .5) = 2;
-Answers.Type(isnan(Answers.RT)) = 1;
-
-% convert coordinates into radius and angle
-Coordinates = cell2mat(AllAnswers.coordinates');
-
-[theta, rho] = cart2pol(Coordinates(1, :), Coordinates(2, :));
-Answers.Radius = rho';
-Answers.Angle = theta';
+% deal with false alarms and bugs
+Bugs = Answers.RT<.1;
+Answers.RT(Bugs) = nan;
+Answers.Type = ones(TotTrials, 1);
+Answers.Type(Answers.RT<.5) = 2;
+Answers.Type(Bugs) = 3;

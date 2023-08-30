@@ -15,7 +15,7 @@ Destination_Format = 'Pupils';
 Template = 'PXX';
 Ignore = {'CSVs', 'other', 'Lazy', 'P00', 'Applicants', 'Uncertain'};
 
-[Subfolders, Datasets] = AllFolderPaths(Raw, ...
+[Subfolders, Datasets] = raw_data_paths(Raw, ...
     Template, false, Ignore);
 
 if ~exist(Destination, 'dir')

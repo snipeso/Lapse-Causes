@@ -1,4 +1,4 @@
-function [Subfolders, Datasets] = AllFolderPaths(DataPath, TemplateFolder, isFullPath, IgnoreFolders)
+function [Subfolders, Datasets] = raw_data_paths(DataPath, TemplateFolder, isFullPath, IgnoreFolders)
 % DataPath should indicate the folder where all the datasets are.
 % TemplateFolder indicates the name of the folder that has the template
 % folder structure.
@@ -24,11 +24,11 @@ Subfolders(Metafolders) = [];
 
 % remove initial part of folder path
 if ~isFullPath
-    Subfolders =  erase(Subfolders, TemplateFolderPath);
+    Subfolders = erase(Subfolders, TemplateFolderPath);
 end
 
 %%% get all datasets
-Datasets =  deblank(string(ls(DataPath)));
+Datasets = deblank(string(ls(DataPath)));
 Datasets(contains(Datasets, '.'), :) = []; % remove files and dots
 
 % ignore indicated folders
