@@ -37,7 +37,6 @@ DataQuality_Table = readtable(DataQaulity_Filepath);
 for Indx_P = 1:numel(Participants)
     for Indx_S = 1:numel(Sessions)
 
-        T = Triggers; % stupid parfor thing
         DQ = DataQuality_Table;
 
         %%% load data
@@ -72,12 +71,12 @@ for Indx_P = 1:numel(Participants)
 
             % Adjust PVT
             if strcmp(Task, 'PVT')
-                StartTrialIndx = find(strcmp({EEG.event.type}, T.SyncEyes), 1, 'first');
+                StartTrialIndx = find(strcmp({EEG.event.type}, Triggers.SyncEyes), 1, 'first');
                 StartStimIndx = find(strcmp({EEG.event.type}, 'S  3'), 1, 'first');
                 EEG.event(StartTrialIndx).latency = EEG.event(StartStimIndx).latency;
             end
 
-            Eyes = syncEEG_Eyes(EEG, EyePath, T.SyncEyes);
+            Eyes = syncEEG_Eyes(EEG, EyePath, Triggers.SyncEyes);
         else
             % blanks in case there's no data
             Eyes.Raw = nan(2, nPnts);

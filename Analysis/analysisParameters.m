@@ -73,6 +73,7 @@ else
 end
 
 Paths.Data = fullfile(Core, 'Preprocessed');
+Paths.CleanEEG = fullfile(Paths.Data, 'Clean', 'Waves');
 Paths.Core = Core;
 
 Paths.RawData = 'G:\LSM\Data\Raw';
