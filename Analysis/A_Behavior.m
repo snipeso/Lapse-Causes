@@ -24,7 +24,7 @@ Sessions = Parameters.Sessions;
 %%% Assemble trial data
 
 
-Trials_PVT = assemble_trials_table(Task, TaskDir, Participants, Sessions);
+Trials_PVT = assemble_trials_table(Task);
 
 
 
