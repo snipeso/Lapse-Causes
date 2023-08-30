@@ -26,4 +26,13 @@ SampleRate = EEG.srate;
 
 BurstClusters = load_datafile(Source_Bursts, Participant, Session, 'BurstClusters');
 
-cycy.plot.plot_all_bursts(EEG, 10, BurstClusters, 'Band');
+
+%%
+
+cycy.plot.plot_all_bursts(EEG, 20, BurstClusters, 'CriteriaSetIndex');
+
+
+%%
+figure
+Channel = labels2indexes(70, EEG.chanlocs);
+cycy.plot.power_without_bursts(EEG.data(Channel, :), SampleRate, BurstClusters);

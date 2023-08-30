@@ -29,7 +29,7 @@ else
 end
 
 % make it in a nice table
-Answers = cleanupLAT(AllAnswers);
+Answers = cleanup_LAT(AllAnswers);
 
 
 % set it all up in matrices
