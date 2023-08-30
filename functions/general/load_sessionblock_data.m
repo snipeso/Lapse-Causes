@@ -16,7 +16,7 @@ for Session = Sessions
         if isempty(Bursts); continue; end
 
         % load EEG metadata
-        Metadata = load_datafile(Source_Bursts, Participant, Session, 'EEG'); % TODO, when rerun, call EEGMetadata
+        Metadata = load_datafile(Source_Bursts, Participant, Session, 'EEGMetadata');
         ValidTime = Metadata.CleanTaskTimepoints;
     else
         ValidTime = 1; % placeholder so nothing gets naned later
