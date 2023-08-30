@@ -70,16 +70,21 @@ clc
 ThetaPercentReduction = 100*(ThetaPowerIntact - ThetaPowerBurstless)./ThetaPowerIntact;
 descriptive_distribution(ThetaPercentReduction, 'Theta percent reduction', '%', 0);
 
+ThetaPercentReductionTop50 = ThetaPercentReduction(ThetaPowerIntact>quantile(ThetaPowerIntact, 0.5));
+descriptive_distribution(ThetaPercentReductionTop50, 'Theta percent reduction for participants with high theta', '%', 0);
+
+
+
 AlphaPercentReduction = 100*(AlphaPowerIntact - AlphaPowerBurstless)./AlphaPowerIntact;
 descriptive_distribution(AlphaPercentReduction, 'Alpha percent reduction', '%', 0);
 
-% burst ratio power
+% power redistribution ratio power
 % burstless periodic power / burst periodic power
-ThetaBurstRatio = 1-ThetaPowerBurstless./ThetaPowerBursts;
-descriptive_distribution(ThetaBurstRatio, 'Theta burst power ratio', '', 2);
+ThetaBurstRedistributionRatio = 1-ThetaPowerBurstless./ThetaPowerBursts;
+descriptive_distribution(ThetaBurstRedistributionRatio, 'Theta burst power ratio', '', 2);
 
-AlphaBurstRatio = 1-AlphaPowerBurstless./AlphaPowerBursts;
-descriptive_distribution(AlphaBurstRatio, 'Alpha burst power ratio', '', 2);
+AlphaBurstRedistributionRatio = 1-AlphaPowerBurstless./AlphaPowerBursts;
+descriptive_distribution(AlphaBurstRedistributionRatio, 'Alpha burst power ratio', '', 2);
 
 
 
@@ -95,7 +100,7 @@ PlotProps.Axes.yPadding = 18;
 PlotProps.Axes.xPadding = 18;
 PlotProps.HandleVisibility = 'on';
 xLog = false;
-xLims = [2 30];
+xLims = [3 17];
 
 figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*1.5, PlotProps.Figure.Height*.35])
 
