@@ -26,11 +26,16 @@ for Task = Tasks
     % assemble locations
     PupilTablesDir = fullfile(Paths.Data, 'Pupils', 'Raw', Task{1});
     PupilsDir = fullfile(Paths.Data, 'Pupils', ['Raw_', num2str(SampleRate), 'Hz'], Task{1});
-    EEGDir = fullfile(Paths.CleanEEG, Task); % so that it can be synchronized
+
+    if ~exist(PupilsDir, 'dir')
+        mkdir(PupilsDir)
+    end
+
+    EEGDir = fullfile(Paths.CleanEEG, Task{1}); % so that it can be synchronized
     Sessions = Parameters.Sessions.(Task{1});
 
     % convert raw pupil data, get Pupil and Annotations; saves to disk
-    import_raw_pupil_tables(Paths.RawData, PupilTablesDir, RerunAnalysis)
+    import_raw_pupil_tables(Paths.RawData, PupilTablesDir, Task{1}, RerunAnalysis)
 
     for Participant = Participants
         for Session = Sessions
@@ -48,15 +53,16 @@ for Task = Tasks
             % select only one method type
             Pupil = Pupil(strcmp(Pupil.method, PupilDetectionMethodType), :);
 
-            EEG = adjust_triggers_PVT(Task, EEG, Triggers);
+            EEG = adjust_triggers_PVT(Task{1}, EEG, Triggers);
             [Eyes, ~] = sync_eyes(EEG, Triggers.SyncEyes, Pupil, 'confidence', Annotations);
 
             % save
             EEGMetadata = EEG;
             EEGMetadata.data = [];
-            FilenamePupils = [strjoin({Participant{1}, Task, Session{1}}, '_'), '.mat'];
+            FilenamePupils = [strjoin({Participant{1}, Task{1}, Session{1}}, '_'), '.mat'];
             save(fullfile(PupilsDir, FilenamePupils), 'Eyes', 'EEGMetadata')
         end
+        disp(['Finished ', Participant{1}])
     end
 end
 

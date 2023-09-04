@@ -1,4 +1,4 @@
-function import_raw_pupil_tables(RawPupilDir, DestinationDir, RerunAnalysis)
+function import_raw_pupil_tables(RawPupilDir, DestinationDir, Task, RerunAnalysis)
 % from the output produced by PupilPlayer, saved in the LSM data structure,
 % this goes folder by folder, snd resaves the content into a mat file in
 % the destination folder of choice.
@@ -12,7 +12,7 @@ SubDir(~contains(SubDir, 'EyeTracking')) = [];
 SubDir(~contains(SubDir, Task)) = [];
 
 
-if isempty(Participants)
+if isempty(Participants) || strcmp(Participants, "")
     warning('Couldnt find raw data')
     return
 end
