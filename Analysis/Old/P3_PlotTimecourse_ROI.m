@@ -63,7 +63,7 @@ Indx = 1;
 
 for Indx_Ch = 1:numel(ROI)
 
-subfigure([], Grid, [1 Indx_Ch], [], true, PlotProps.Indexes.Letters{Indx}, PlotProps); Indx = Indx+1;
+chART.sub_plot([], Grid, [1 Indx_Ch], [], true, PlotProps.Indexes.Letters{Indx}, PlotProps); Indx = Indx+1;
 plotTimecourse(t_burst, flip(squeeze(zProbBurst_Stim(:, :, Indx_Ch, Indx_B, :)), 2), ...
     squeeze(zGenProbBurst_Stim(:, Indx_Ch, Indx_B)), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
 ylim(Range)
@@ -77,7 +77,7 @@ end
 %%% response locked
 for Indx_Ch = 1:numel(ROI)
 
-subfigure([], Grid, [2 Indx_Ch], [], true, PlotProps.Indexes.Letters{Indx}, PlotProps); Indx = Indx+1;
+chART.sub_plot([], Grid, [2 Indx_Ch], [], true, PlotProps.Indexes.Letters{Indx}, PlotProps); Indx = Indx+1;
 plotTimecourse(t_burst, flip(squeeze(zProbBurst_Resp(:, :, Indx_Ch, Indx_B, :)), 2), ...
     squeeze(zGenProbBurst_Resp(:, Indx_Ch, Indx_B)), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
 ylim(Range)
@@ -100,14 +100,14 @@ Grid = [2 3];
 
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
 
-subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
+chART.sub_plot([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
 plotTimecourse(t_microsleep, flip(sProbMicrosleep_Stim, 2), GenProbMicrosleep, ...
     Range, flip(TallyLabels), 'Stimulus', getColors(3), StatsP, PlotProps)
 ylim(Range)
 ylabel('Probability of EC (z-scored)')
 
 
-subfigure([], Grid, [1 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
+chART.sub_plot([], Grid, [1 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(sProbBurst_Stim(:, :, 1, :)), 2), ...
     GenProbBurst(:, 1), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
 ylim(Range)
@@ -115,7 +115,7 @@ ylabel('Probability of theta (z-scored)')
 legend off
 
 
-subfigure([], Grid, [1 3], [], true, PlotProps.Indexes.Letters{3}, PlotProps);
+chART.sub_plot([], Grid, [1 3], [], true, PlotProps.Indexes.Letters{3}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(sProbBurst_Stim(:, :, 2, :)), 2),  ...
     GenProbBurst(:, 2), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
 ylim(Range)
@@ -126,14 +126,14 @@ legend off
 %%% response locked
 
 
-subfigure([], Grid, [2 1], [], true, PlotProps.Indexes.Letters{4}, PlotProps);
+chART.sub_plot([], Grid, [2 1], [], true, PlotProps.Indexes.Letters{4}, PlotProps);
 plotTimecourse(t_microsleep, flip(sProbMicrosleep_Resp, 2), GenProbMicrosleep, ...
     Range, flip(TallyLabels), 'Response', getColors(3), StatsP, PlotProps)
 ylim(Range)
 ylabel('Probability of EC (z-scored)')
 legend off
 
-subfigure([], Grid, [2 2], [], true, PlotProps.Indexes.Letters{5}, PlotProps);
+chART.sub_plot([], Grid, [2 2], [], true, PlotProps.Indexes.Letters{5}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(sProbBurst_Resp(:, :, 1, :)), 2), ...
     GenProbBurst(:, 1), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
 ylim(Range)
@@ -141,7 +141,7 @@ ylabel('Probability of theta (z-scored)')
 legend off
 
 
-subfigure([], Grid, [2 3], [], true, PlotProps.Indexes.Letters{6}, PlotProps);
+chART.sub_plot([], Grid, [2 3], [], true, PlotProps.Indexes.Letters{6}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(sProbBurst_Resp(:, :, 2, :)), 2),  ...
     GenProbBurst(:, 2), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
 ylim(Range)

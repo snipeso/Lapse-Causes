@@ -132,7 +132,7 @@ disp('****** EC ***********')
 % eyeclosure
 PlotProps.Stats.PlotN = true;
  PlotProps.Stats.disp_stats = true;
-subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
+chART.sub_plot([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
 Stats = plotTimecourse(t_microsleep, flip(zProbMicrosleep_Stim, 2), zGenProbMicrosleep, ...
     EC_Range, flip(TallyLabels), 'Stimulus', getColors(3), StatsP, PlotProps);
 ylim(EC_Range)
@@ -142,7 +142,7 @@ disp(['A: N=', num2str(mode(Stats.df(:))+1)])
 
 % theta
 disp('****** Theta ***********')
-subfigure([], Grid, [1 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
+chART.sub_plot([], Grid, [1 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
 Stats = plotTimecourse(t_burst, flip(squeeze(zProbBurst_Stim(:, :, 1, :)), 2), ...
     zGenProbBurst(:, 1), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps);
 ylim(Range)
@@ -153,7 +153,7 @@ disp(['B: N=',  num2str(mode(Stats.df(:))+1)])
 
 % alpha
 disp('****** alpha ***********')
-subfigure([], Grid, [1 3], [], true, PlotProps.Indexes.Letters{3}, PlotProps);
+chART.sub_plot([], Grid, [1 3], [], true, PlotProps.Indexes.Letters{3}, PlotProps);
 Stats = plotTimecourse(t_burst, flip(squeeze(zProbBurst_Stim(:, :, 2, :)), 2),  ...
     zGenProbBurst(:, 2), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps);
 ylim(Range)
@@ -167,7 +167,7 @@ disp(['C: N=', num2str(mode(Stats.df(:))+1)])
 
 % eyeclosure
  PlotProps.Stats.disp_stats = false;
-subfigure([], Grid, [2 1], [], true, PlotProps.Indexes.Letters{4}, PlotProps);
+chART.sub_plot([], Grid, [2 1], [], true, PlotProps.Indexes.Letters{4}, PlotProps);
 Stats = plotTimecourse(t_microsleep, flip(zProbMicrosleep_Resp, 2), zGenProbMicrosleep, ...
     EC_Range, flip(TallyLabels), 'Response', getColors(3), StatsP, PlotProps);
 ylim(EC_Range)
@@ -177,7 +177,7 @@ legend off
 disp(['D: N=', num2str(mode(Stats.df(:))+1)])
 
 % theta
-subfigure([], Grid, [2 2], [], true, PlotProps.Indexes.Letters{5}, PlotProps);
+chART.sub_plot([], Grid, [2 2], [], true, PlotProps.Indexes.Letters{5}, PlotProps);
 Stats = plotTimecourse(t_burst, flip(squeeze(zProbBurst_Resp(:, :, 1, :)), 2), ...
     zGenProbBurst(:, 1), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps);
 ylim(Range)
@@ -188,7 +188,7 @@ disp(['E: N=', num2str(mode(Stats.df(:))+1)])
 
 
 % alpha
-subfigure([], Grid, [2 3], [], true, PlotProps.Indexes.Letters{6}, PlotProps);
+chART.sub_plot([], Grid, [2 3], [], true, PlotProps.Indexes.Letters{6}, PlotProps);
 Stats = plotTimecourse(t_burst, flip(squeeze(zProbBurst_Resp(:, :, 2, :)), 2),  ...
     zGenProbBurst(:, 2), Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps);
 ylim(Range)

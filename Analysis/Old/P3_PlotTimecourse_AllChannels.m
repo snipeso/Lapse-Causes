@@ -55,7 +55,7 @@ for Indx_B = 1:2
             Data = squeeze(ProbBurst_Stim(:, Types(Indx_TT), :, Indx_B, Indx_W));
             Baseline = squeeze(GenProbBurst(:, :, Indx_B));
 
-            subfigure(Space, miniGrid, [Indx_TT, Indx_W], [], false, '', PlotProps);
+            chART.sub_plot(Space, miniGrid, [Indx_TT, Indx_W], [], false, '', PlotProps);
             topoDiff(Baseline, Data, Chanlocs, CLims, StatsP, PlotProps);
             colorbar off
 
@@ -80,7 +80,7 @@ for Indx_B = 1:2
 
     end
     
-    A = subfigure([], Grid, [5, Indx_B], [], false, '', PlotProps);
+    A = chART.sub_plot([], Grid, [5, Indx_B], [], false, '', PlotProps);
     A.Position(4) = A.Position(4)*2;
     A.Position(2) = A.Position(2)-.1;
     plotColorbar('Divergent', CLims, [BandLabels{Indx_B}, ' t-values'], PlotProps)
@@ -113,7 +113,7 @@ for Indx_B = 1:2
             Data = squeeze(ProbBurst_Stim(:, Types(Indx_TT), :, Indx_B, Indx_W));
             Baseline = squeeze(GenProbBurst(:, :, Indx_B));
 
-            subfigure([], Grid, [Indx_TT, Indx_W], [], false, '', PlotProps);
+            chART.sub_plot([], Grid, [Indx_TT, Indx_W], [], false, '', PlotProps);
             topoDiff(Baseline, Data, Chanlocs, CLims, StatsP, PlotProps);
             colorbar off
 
@@ -139,7 +139,7 @@ for Indx_B = 1:2
         if all(isnan(Data))
             continue
         end
-        subfigure([], Grid, [Indx_TT, Indx_W], [], false, '', PlotProps);
+        chART.sub_plot([], Grid, [Indx_TT, Indx_W], [], false, '', PlotProps);
         topoDiff(Baseline, Data, Chanlocs, CLims, StatsP, PlotProps);
         colorbar off
 
@@ -149,7 +149,7 @@ for Indx_B = 1:2
 
     end
     
-    subfigure([], Grid, [Indx_TT, Indx_W], [], false, '', PlotProps);
+    chART.sub_plot([], Grid, [Indx_TT, Indx_W], [], false, '', PlotProps);
     plotColorbar('Divergent', CLims, 't-values', PlotProps)
         saveFig([TitleTag, '_Probof_raw_', BandLabels{Indx_B}], Paths.PaperResults, PlotProps)
 end

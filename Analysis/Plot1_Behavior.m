@@ -18,22 +18,244 @@ SessionBlocks = Parameters.Sessions.Conditions;
 SessionBlockLabels = fieldnames(SessionBlocks);
 Sessions = Parameters.Sessions;
 
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Load trial data
 
 CacheDir = fullfile(Paths.Cache, "C_Assemble_Trial_Information/");
 
 
-%%% Get PVT trial data
+% Get PVT trial data
 load(fullfile(CacheDir, 'PVT_TrialsTable.mat'), 'TrialsTable') % from script Load_Trials
 TrialsTablePVT = TrialsTable;
-OldType = Trials_PVT.Type; % TODO: remove
+OldTypesPVT = TrialsTablePVT.Type; % TODO: remove
 
 [RTStructPVT, ~, ~] = assemble_reaction_times(TrialsTablePVT, Participants, Sessions.PVT, SessionBlockLabels);
 
 
+% get LAT trial data
+load(fullfile(CacheDir, 'PVT_TrialsTable.mat'), 'TrialsTable') % from script Load_Trials
+TrialsTableLAT = TrialsTable;
+
+[RTStructLAT, MeansLAT, Quantile99LAT, Quantile01LAT] = assemble_reaction_times( ...
+    TrialsTableLAT, Participants, SessionBlocks);
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Plot
+
+clc
+
+PlotProps = Parameters.PlotProps.Manuscript;
+PlotProps.Axes.xPadding = 25;
+PlotProps.Axes.yPadding = 25;
+Grid = [2 3];
+
+figure('Units','centimeters', 'Position',[0 0  PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% PVT
+
+
+%%% A: Reaction time distributions
+XLim = [.5 2.5];
+YLim = [ 0.1  1.01];
+
+chART.sub_plot([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
+hold on
+plot([0 3], [.5 .5], 'Color', PlotProps.Color.Generic, 'LineStyle', ':', 'LineWidth', 1) % demarkation of when answer is late
+chART.plot.overlapping_distributions(RTStructPVT, PlotProps, PlotProps.Color.Participants, .15)
+ylabel('PVT reaction times (s)')
+xlim(XLim)
+ylim(YLim)
+legend off
+
+disp(['A: N=', num2str(numel(unique(TrialsTablePVT.Participant)))])
+
+
+%%% B: Proportion of trials
+
+% split into types based on RTs
+TrialsTablePVT.Type = OldTypesPVT;
+TrialsTablePVT.Type(~isnan(TrialsTablePVT.RT)) = 1; % full lapse
+TrialsTablePVT.Type(TrialsTablePVT.RT<.5) = 3; % correct
+
+% assemble trial types
+disp('B: ')
+Data = assembleLapses(TrialsTablePVT, Participants, Sessions_PVT, [], MinTrialCount);
+
+% disp EC vs 
+
+Data = squeeze(mean(Data, 1, 'omitnan')); % average, normalizing totals
+
+% assemble plot parameters
+TallyOrder = [4 1 2 3]; % order in which to have trial types
+
+YLim = [0 100];
+XLim = [0.33 2.66];
+
+Red = getColors([1 4], '', 'red'); % dark red for lapses EC
+TallyColors = [PlotProps.Color.Types; Red(1, :)];
+TallyColors = TallyColors(TallyOrder, :);
+
+AllTallyLabels = {'EO Lapses', 'Slow responses', 'Fast responses', 'EC Lapses'};
+AllTallyLabels = AllTallyLabels(TallyOrder);
+AllTallyLabels_PVT = AllTallyLabels;
+AllTallyLabels_PVT(3) = {''};
+
+Data = Data(:, TallyOrder);
+
+% plot
+chART.sub_plot([], Grid, [1, 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
+
+plotStackedBars(Data, SessionBlockLabels, YLim, AllTallyLabels_PVT, TallyColors, PlotProps)
+ylabel('% PVT trials')
+set(legend, 'location', 'northwest')
+xlim(XLim)
+
+
+%%% C: proportion of trials as lapses
+
+CheckEyes = true;
+
+% get trial subsets
+EO_Trials = TrialsTablePVT.EC_Stimulus == 0;
+EC_Trials = TrialsTablePVT.EC_Stimulus == 1;
+
+% assemble data
+Thresholds = .3:.1:1;
+LapseTally = nan(numel(Participants), numel(Thresholds));
+
+for Indx_T = 1:numel(Thresholds)
+
+    TrialsTablePVT.Type = OldTypesPVT;
+    TrialsTablePVT.Type(~isnan(TrialsTablePVT.RT)) = 1; % full lapse
+    TrialsTablePVT.Type(TrialsTablePVT.RT<Thresholds(Indx_T)) = 3; % correct
+
+    [EO_Matrix, ~] = tabulateTable(TrialsTablePVT, EO_Trials, 'Type', 'tabulate', ...
+        Participants, Sessions_PVT, [], CheckEyes); % P x SB x TT
+    [EC_Matrix, ~] = tabulateTable(TrialsTablePVT, EC_Trials, 'Type', 'tabulate', ...
+        Participants, Sessions_PVT, [], CheckEyes);
+
+
+    EO = squeeze(EO_Matrix(:, 2, 1));
+    EC = squeeze(EC_Matrix(:, 2, 1));
+    Tot = EO+EC;
+
+    LapseTally(:, Indx_T) = 100*EC./Tot;
+end
+
+% plot
+chART.sub_plot([], Grid, [1 3], [1 1], true, PlotProps.Indexes.Letters{3}, PlotProps);
+plotSpikeBalls(LapseTally, Thresholds, {}, ...
+    TallyColors(1, :), 'IQ', PlotProps)
+xlabel('Lapse threshold (s)')
+ylabel('PVT lapses with EC (% lapses)')
+
+dispDescriptive(LapseTally(:, 3), 'Proportion of PVT Lapses:', '%', 0);
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% LAT
+
+%%% D: Reaction time distributions
+XLim = [.5 2.5];
+YLim = [ 0.1  1.01];
+
+chART.sub_plot([], Grid, [2 1], [], true, PlotProps.Indexes.Letters{4}, PlotProps);
+hold on
+plot([0 3], [.5 .5], 'Color', PlotProps.Color.Generic, 'LineStyle', ':', 'LineWidth', 1) % demarkation of when answer is late
+chART.plot.overlapping_distributions(RTStructLAT, PlotProps, PlotProps.Color.Participants, .15)
+ylabel('LAT reaction times (s)')
+xlim(XLim)
+ylim(YLim)
+legend off
+
+disp(['D: N=', num2str(numel(unique(TrialsTableLAT.Participant)))])
+
+
+%%% E: Proportion of trials
+
+% assemble data
+disp('E: ')
+[Data, EO_Matrix, EC_Matrix] = assembleLapses(TrialsTableLAT, Participants, Sessions, SessionGroups, MinTrialCount);
+Data = squeeze(mean(Data, 1, 'omitnan')); % average, normalizing totals
+Data = Data(:, TallyOrder);
+
+% plot
+YLim = [0 100];
+XLim = [0.33 2.66];
+
+chART.sub_plot([], Grid, [2, 2], [], true, PlotProps.Indexes.Letters{5}, PlotProps);
+
+plotStackedBars(Data, SessionBlockLabels, YLim, AllTallyLabels, TallyColors, PlotProps)
+ylabel('% LAT trials')
+set(legend, 'location', 'northwest')
+xlim(XLim)
+
+
+%%% F: plot change in lapses with distance
+% get trial subsets
+EO = TrialsTableLAT.EC_Stimulus == 0;
+EC = TrialsTableLAT.EC_Stimulus == 1;
+Lapses = TrialsTableLAT.Type == 1;
+
+% assign a distance quantile for each trial
+qBin = 1/6; % bin size for quantiles
+Radius = TrialsTableLAT.Radius;
+Edges = quantile(Radius(:), 0:qBin:1);
+Bins = discretize(Radius, Edges);
+TrialsTableLAT.Radius_Bins = Bins;
+
+% get number of lapses for each distance quantile
+[EOLapsesTally, ~] = tabulateTable(TrialsTableLAT, EO & Lapses, 'Radius_Bins', 'tabulate', ...
+    Participants, Sessions, SessionGroups, CheckEyes);
+
+[ECLapsesTally, ~] = tabulateTable(TrialsTableLAT, EC & Lapses, 'Radius_Bins', 'tabulate', ...
+    Participants, Sessions, SessionGroups, CheckEyes);
+
+[Tots, ~] = tabulateTable(TrialsTableLAT, [], 'Radius_Bins', 'tabulate', ...
+    Participants, Sessions, SessionGroups, CheckEyes);
+
+% remove participants with too few trials
+MinTotsSplit = MinTrialCount/numel(unique(Bins));
+Tots(Tots<MinTotsSplit) = nan;
+
+LapseTally = cat(2, EOLapsesTally, ECLapsesTally);
+Tots = cat(2, Tots, Tots);
+LapseTally = 100*LapseTally./Tots; % P x SB x RB
+
+LapseTally = LapseTally(:, [1 3 2 4], :); % EO BL, EC Bl, EO SD, EC SD
+LapseTally = permute(LapseTally, [1 3 2]); % P x RB x SB
+
+% remove participants with any NaNs
+BadParticipants = any(any(isnan(LapseTally), 3), 2);
+LapseTally(BadParticipants, :, :) = nan;
+
+% plot parameters
+Colors = [flip(getColors([1 2], '', 'gray')); PlotProps.Color.Types(1, :); Red(1, :)]; % generic for BL, lapse color for SD
+YLim = [0 60];
+
+% plot
+chART.sub_plot([], Grid, [2 3], [1 1], true, PlotProps.Indexes.Letters{6}, PlotProps);
+plotSpikeBalls(LapseTally, [], {'BL, EO', 'BL, EC', 'SD, EO', 'SD, EC'}, ...
+    Colors, 'IQ', PlotProps)
+ylabel('LAT lapses (% trials)')
+ylim(YLim)
+xlabel('Distance from center (quantiles)')
+set(legend, 'Location','northwest')
+
+disp(['F: N=' num2str(nnz(~BadParticipants))])
+
+
+chART.save_figure('Figure_1', Paths.Results, PlotProps)
 
 
 
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% statistics

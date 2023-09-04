@@ -52,7 +52,7 @@ Grid = [1 2];
 
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.3])
 
-subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
+chART.sub_plot([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(zAmp_Stim(:, :, 1, :)), 2), ...
     [], Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
 ylim(Range)
@@ -60,7 +60,7 @@ ylabel('Amplitude of Theta (z-scored)')
 legend off
 
 
-subfigure([], Grid, [1 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
+chART.sub_plot([], Grid, [1 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(zAmp_Stim(:, :, 2, :)), 2),  ...
     [], Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
 ylim(Range)
@@ -80,7 +80,7 @@ Grid = [1 2];
 
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.3])
 
-subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
+chART.sub_plot([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(sAmp_Stim(:, :, 1, :)), 2), ...
     [], Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
 ylim(Range)
@@ -88,7 +88,7 @@ ylabel('Amplitude of theta')
 legend off
 
 
-subfigure([], Grid, [1 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
+chART.sub_plot([], Grid, [1 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(sAmp_Stim(:, :, 2, :)), 2), ...
     [], Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
 ylim(Range)
@@ -108,7 +108,7 @@ Grid = [1 2];
 
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.3])
 
-subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
+chART.sub_plot([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(zAmp_Resp(:, :, 1, :)), 2), ...
     [], Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
 ylim(Range)
@@ -116,7 +116,7 @@ ylabel('Amplitude of Theta (z-scored)')
 legend off
 
 
-subfigure([], Grid, [1 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
+chART.sub_plot([], Grid, [1 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(zAmp_Resp(:, :, 2, :)), 2),  ...
     [], Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
 ylim(Range)
@@ -138,14 +138,14 @@ Grid = [1 2];
 
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.3])
 
-subfigure([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
+chART.sub_plot([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(sAmp_Resp(:, :, 1, :)), 2), ...
     [], Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
 ylim(Range)
 ylabel('Amplitude of theta')
 legend off
 
-subfigure([], Grid, [1 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
+chART.sub_plot([], Grid, [1 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
 plotTimecourse(t_burst, flip(squeeze(sAmp_Resp(:, :, 2, :)), 2),  ...
     [], Range, flip(TallyLabels), '', getColors(3), StatsP, PlotProps)
 ylim(Range)

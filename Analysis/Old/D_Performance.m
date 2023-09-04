@@ -42,7 +42,7 @@ Grid = [1 2];
 
 figure('Units','centimeters', 'Position',[0 0  PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
 
-subfigure([], Grid, [1 1], [1 1], true, PlotProps.Indexes.Letters{1}, PlotProps);
+chART.sub_plot([], Grid, [1 1], [1 1], true, PlotProps.Indexes.Letters{1}, PlotProps);
 hold on
 plot([0 3], [.5 .5], 'Color', PlotProps.Color.Generic, 'LineStyle', ':', 'LineWidth', .5)
 plotFlames(FlameStruct, PlotProps.Color.Participants, .1, PlotProps)
@@ -58,7 +58,7 @@ Colors = [getColors([1 2], '', 'red'); getColors([1 2], '', 'yellow'); getColors
 % Colors = getColors([2 3], '', 'yellow');
 % Colors = reshape(permute(Colors, [1 3 2]), 6, 3);
 
-subfigure([], Grid, [1, 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
+chART.sub_plot([], Grid, [1, 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
 
 % eyes open
 Q = quantile(Trials.Radius, 0.5);

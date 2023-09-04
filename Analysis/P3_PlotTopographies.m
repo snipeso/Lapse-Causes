@@ -102,7 +102,7 @@ for Indx_B = 1:2
             PlotProps.Axes.xPadding = 5;
             PlotProps.Axes.yPadding = 5;
 
-            subfigure(Space, miniGrid, [Indx_TT, Indx_W], [], false, '', PlotProps);
+            chART.sub_plot(Space, miniGrid, [Indx_TT, Indx_W], [], false, '', PlotProps);
             PlotProps.Stats.PlotN = false;
             if Indx_W == 1
                 PlotProps.Stats.PlotN = true;
@@ -142,7 +142,7 @@ for Indx_B = 1:2
     PlotProps.Axes.xPadding = 20;
     PlotProps.Axes.yPadding = 20;
 
-    A = subfigure([], Grid, [5, Indx_B], [], false, '', PlotProps);
+    A = chART.sub_plot([], Grid, [5, Indx_B], [], false, '', PlotProps);
     A.Position(4) = A.Position(4)*2;
     A.Position(2) = A.Position(2)-.1;
     plotColorbar('Divergent', CLims, [BandLabels{Indx_B}, [' t-values', zTag]], PlotProps)

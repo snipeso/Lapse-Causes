@@ -66,7 +66,7 @@ Delta = squeeze(mean(Data(:, 1, NormBand_Indx(1):NormBand_Indx(2)), 3, 'omitnan'
 Shift = Delta - mean(Delta, 'omitnan');
 Data = Data - Shift;
 
-subfigure([], Grid, [1 1], [1 2], true, PlotProps.Indexes.Letters{1}, PlotProps);
+chART.sub_plot([], Grid, [1 1], [1 2], true, PlotProps.Indexes.Letters{1}, PlotProps);
 plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
 
 % plot also BL theta, with all bursts
@@ -93,7 +93,7 @@ Delta = squeeze(mean(Data(:, 1, NormBand_Indx(1):NormBand_Indx(2)), 3, 'omitnan'
 Shift = Delta - mean(Delta, 'omitnan');
 Data = Data - Shift;
 
-subfigure([], Grid, [1 3], [1 2], true, PlotProps.Indexes.Letters{2}, PlotProps);
+chART.sub_plot([], Grid, [1 3], [1 2], true, PlotProps.Indexes.Letters{2}, PlotProps);
 plotSpectrumMountains(Data, Freqs', xLog, xLims, PlotProps, P.Labels);
 legend({'', 'Back BL alpha burst power'}, 'location', 'southwest')
 set(legend, 'ItemTokenSize', [15 15])
@@ -112,7 +112,7 @@ disp(['B: N = ', num2str(nnz(~any(any(isnan(Data), 3), 2)))])
 %%% C: stacked bar plot for time spent
 Data = 100*squeeze(mean(TimeSpent, 1, 'omitnan'));
 
-subfigure([], Grid, [1 5], [], true, PlotProps.Indexes.Letters{3}, PlotProps);
+chART.sub_plot([], Grid, [1 5], [], true, PlotProps.Indexes.Letters{3}, PlotProps);
 plotStackedBars(Data(:, [1 3 2]), SB_Labels, YLim, Legend([1 3 2]), Colors([1 3 2], :), PlotProps);
 
 ylabel('Recording duration (%)')

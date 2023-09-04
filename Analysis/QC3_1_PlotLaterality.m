@@ -42,7 +42,7 @@ for Indx_B = 1:2
         Right = squeeze(zProbBurst(:, Indx_SB, 2, :, Indx_B));
 
 
-        subfigure([], Grid, [Indx_B, Indx_SB], [], false, '', PlotProps);
+        chART.sub_plot([], Grid, [Indx_B, Indx_SB], [], false, '', PlotProps);
         Stats = topoDiff(Left, Right, Chanlocs, CLims, StatsP, PlotProps);
         disp(Stats.N)
         % plotTopoplot(mean(Left, 1, 'omitnan'), [], Chanlocs, [], 'prob', 'Linear', PlotProps)

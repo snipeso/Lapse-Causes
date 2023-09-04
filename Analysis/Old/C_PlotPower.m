@@ -46,7 +46,7 @@ for Indx_S = 1:2
             BL = squeeze(Data(:, Indx_S, 3, :, Indx_B));
             Tr = squeeze(Data(:, Indx_S, Indx_T, :, Indx_B));
 
-            subfigure([], Grid, [Indx_T, Indx_B], [], false, '', PlotProps);
+            chART.sub_plot([], Grid, [Indx_T, Indx_B], [], false, '', PlotProps);
             Stats = topoDiff(BL, Tr, Chanlocs, CLims_Diff, StatsP, PlotProps);
             colorbar off
 
@@ -72,7 +72,7 @@ for Indx_S = 1:2
         BL = squeeze(Data(:, Indx_S, 1, :, Indx_B)); % left VHf
         Tr = squeeze(Data(:, Indx_S, 2, :, Indx_B)); % right VHf
 
-        subfigure([], Grid, [Indx_S, Indx_B], [], false, '', PlotProps);
+        chART.sub_plot([], Grid, [Indx_S, Indx_B], [], false, '', PlotProps);
         Stats = topoDiff(BL, Tr, Chanlocs, CLims_Diff, StatsP, PlotProps);
         colorbar off
 %         colormap(gca, PlotProps.Color.Maps.Divergent)
@@ -98,7 +98,7 @@ for Indx_S = 1:2
         BL = squeeze(Data(:, Indx_S, 1, :, Indx_B)); % left VHf
         Tr = squeeze(Data(:, Indx_S, 2, :, Indx_B)); % right VHf
 
-        subfigure([], Grid, [Indx_S, Indx_B], [], false, '', PlotProps);
+        chART.sub_plot([], Grid, [Indx_S, Indx_B], [], false, '', PlotProps);
         Stats = topoDiff(BL, Tr, Chanlocs, CLims_Diff, StatsP, PlotProps);
         colorbar off
         
