@@ -61,17 +61,8 @@ figure('Units','centimeters', 'Position',[0 0  PlotProps.Figure.Width, PlotProps
 
 
 %%% A: Reaction time distributions
-XLim = [.5 2.5];
-YLim = [ 0.1  1.01];
-
-chART.sub_plot([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
-hold on
-plot([0 3], [.5 .5], 'Color', PlotProps.Color.Generic, 'LineStyle', ':', 'LineWidth', 1) % demarkation of when answer is late
-chART.plot.overlapping_distributions(RTStructPVT, PlotProps, PlotProps.Color.Participants, .15)
+plot_RTs(RTStructPVT, Grid, [1 1], PlotProps.Indexes.Letters{1}, PlotProps, [.5 2.5], [ 0.1  1.01])
 ylabel('PVT reaction times (s)')
-xlim(XLim)
-ylim(YLim)
-legend off
 
 disp(['A: N=', num2str(numel(unique(TrialsTablePVT.Participant)))])
 
@@ -162,17 +153,8 @@ dispDescriptive(LapseTally(:, 3), 'Proportion of PVT Lapses:', '%', 0);
 %%% LAT
 
 %%% D: Reaction time distributions
-XLim = [.5 2.5];
-YLim = [ 0.1  1.01];
-
-chART.sub_plot([], Grid, [2 1], [], true, PlotProps.Indexes.Letters{4}, PlotProps);
-hold on
-plot([0 3], [.5 .5], 'Color', PlotProps.Color.Generic, 'LineStyle', ':', 'LineWidth', 1) % demarkation of when answer is late
-chART.plot.overlapping_distributions(RTStructLAT, PlotProps, PlotProps.Color.Participants, .15)
+plot_RTs(RTStructLAT, Grid, [2 1], PlotProps.Indexes.Letters{4}, PlotProps, [.5 2.5], [ 0.1  1.01])
 ylabel('LAT reaction times (s)')
-xlim(XLim)
-ylim(YLim)
-legend off
 
 disp(['D: N=', num2str(numel(unique(TrialsTableLAT.Participant)))])
 
@@ -259,3 +241,23 @@ chART.save_figure('Figure_1', Paths.Results, PlotProps)
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% statistics
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% functions
+
+
+%%%%%%%%%%%%%%%%%%%%%%
+%%% plots
+
+function plot_RTs(DataStruct, Grid, Position, Letter, PlotProps, XLim, YLim)
+chART.sub_plot([], Grid, Position, [], true, Letter, PlotProps);
+hold on
+plot([0 3], [.5 .5], 'Color', PlotProps.Color.Generic, 'LineStyle', ':', 'LineWidth', 1) % demarkation of when answer is late
+chART.plot.overlapping_distributions(DataStruct, PlotProps, PlotProps.Color.Participants, .15)
+xlim(XLim)
+ylim(YLim)
+legend off
+end
