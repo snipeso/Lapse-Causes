@@ -62,8 +62,8 @@ chART.sub_plot([], Grid, [1, 2], [], true, PlotProps.Indexes.Letters{2}, PlotPro
 
 % eyes open
 Q = quantile(Trials.Radius, 0.5);
-[EO_Matrix, Things] = tabulateTable(Trials(Trials.EC==0 & Trials.Radius<Q, :), 'Type', 'tabulate', Participants, Sessions, SessionGroups);
-[EC_Matrix, Things] = tabulateTable(Trials(Trials.EC==1 & Trials.Radius<Q, :), 'Type', 'tabulate', Participants, Sessions, SessionGroups);
+[EO_Matrix, Things] = assemble_matrix_from_table(Trials(Trials.EC==0 & Trials.Radius<Q, :), 'Type', 'tabulate', Participants, Sessions, SessionGroups);
+[EC_Matrix, Things] = assemble_matrix_from_table(Trials(Trials.EC==1 & Trials.Radius<Q, :), 'Type', 'tabulate', Participants, Sessions, SessionGroups);
 Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
 
 Matrix = cat(3, EO_Matrix, EC_Matrix);
@@ -90,8 +90,8 @@ plotStackedBars(Data, SB_Labels, [0 100], AllTallyLabels, Colors, PlotProps)
 
 Q = quantile(Trials.Radius, 0.5);
 
-[Closest, Things] = tabulateTable(Trials(Trials.Radius<Q, :), 'Type', 'tabulate', Participants, Sessions, SessionGroups);
-[Furthest, ~] = tabulateTable(Trials(Trials.Radius>Q, :), 'Type', 'tabulate', Participants, Sessions, SessionGroups);
+[Closest, Things] = assemble_matrix_from_table(Trials(Trials.Radius<Q, :), 'Type', 'tabulate', Participants, Sessions, SessionGroups);
+[Furthest, ~] = assemble_matrix_from_table(Trials(Trials.Radius>Q, :), 'Type', 'tabulate', Participants, Sessions, SessionGroups);
 
 ClosestProb = Closest./sum(Closest, 3, 'omitnan');
 FurthestProb = Furthest./sum(Furthest, 3, 'omitnan');
