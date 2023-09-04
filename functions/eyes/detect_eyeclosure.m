@@ -30,5 +30,6 @@ for Indx_D = 1:numel(Durations)
     end
 end
 
+EyeOpen = double(EyeOpen);
 EyeOpen(Nans) = nan;
 EyeClosed = flip_vector_with_nans(EyeOpen);

@@ -11,12 +11,12 @@ end
 
 % if no task timeline provided, just use all timepoints
 if ~exist("TaskTime", 'var') || isempty(TaskTime)
-    TaskTime = ones(size(1, Eyes.Raw, 2));
+    TaskTime = ones(size(1, Eyes));
 end
 
 %%% Go
 
-Eye = Eyes.Raw(round(DQ), :);
+Eye = Eyes(round(DQ), :);
 
 JudgeEye = Eye(TaskTime==1);
 

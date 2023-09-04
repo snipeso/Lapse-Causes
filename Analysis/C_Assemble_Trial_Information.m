@@ -26,13 +26,16 @@ ConfidenceThreshold = Parameters.EyeTracking.MinConfidenceThreshold;
 
 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Assemble trial data
 
+
 for Task = Tasks
 
-    TrialsTable = load_trials_from_cache(Task{1}, fullfile(Paths.Cache, 'TrialsTables'));
+    % if already assembled, load from cache
+    CacheDir = fullfile(Paths.Cache, mfilename);
+    CacheFilename = [Task{1}, '_TrialsTable.mat'];
+    TrialsTable = load_trials_from_cache(CacheDir, CacheFilename, RerunAnalysis);
     if ~isempty(TrialsTable)
         continue
     end
@@ -51,26 +54,25 @@ for Task = Tasks
 
 
     % save to cache for future
-    save(CachePath, 'TrialsTable')
+    save(fullfile(CacheDir, CacheFilename), 'TrialsTable')
 
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
 
-function TrialsTable = load_trials_from_cache(Task, CacheDir)
+function TrialsTable = load_trials_from_cache(CacheDir, CacheFile, RerunAnalysis)
 
-% location of cache
-CacheString = strjoin({Task, 'TrialTable.mat'}, '_');
-CachePath = fullfile(CacheDir, CacheString);
+CachePath = fullfile(CacheDir, CacheFile);
 
 % load from cache
-if exist(CachePath, 'file') && ~Refresh
+if exist(CachePath, 'file') && ~RerunAnalysis
     load(CachePath, 'TrialsTable')
     return
 end
 
 % set up cache
+
 if ~exist(CacheDir, 'dir')
     mkdir(CacheDir)
 end
@@ -87,12 +89,12 @@ Sessions = unique(TrialsTable.Session);
 
 TrialsTable.EyesClosed = nan(size(TrialsTable, 1), 1);
 
-for Participant = Participants
-    for Session = Sessions
+for Participant = Participants'
+    for Session = Sessions'
 
         % trial info for current recording
-        CurrentTrials = find(strcmp(TrialsTable.Participant, Participant{1}) & ...
-            strcmp(TrialsTable.Session, Session{1}));
+        CurrentTrials = strcmp(TrialsTable.Participant, Participant{1}) & ...
+            strcmp(TrialsTable.Session, Session{1});
         nTrials = nnz(CurrentTrials);
         if isempty(nTrials) || nTrials < 5
             warning(['Missing ', Participant{1}, Session{1}])
@@ -112,10 +114,10 @@ for Participant = Participants
             error(['missing trials for ', Participant{1}, Session{1}])
         end
 
-        DQ = EyetrackingQualityTable.(Session{1})(strcmp(DataQuality_Table.Participant, Participant{1}));
+        DQ = EyetrackingQualityTable.(Session{1})(strcmp(EyetrackingQualityTable.Participant, Participant{1}));
         TaskTime = identify_task_timepoints(EEGMetadata, Triggers);
         Eye = check_eye_dataquality(Eyes, DQ, ConfidenceThreshold, TaskTime);
-        EyeClosed = detect_eyeclosure(Eye, SampleRate, Threshold);
+        EyeClosed = detect_eyeclosure(Eye, SampleRate, ConfidenceThreshold);
 
         EyesClosedTrials = did_it_happen(Starts, Ends, EyeClosed, MinEventProportion, MaxNanProportion);
         TrialsTable.EyesClosed(CurrentTrials) = EyesClosedTrials;
@@ -133,9 +135,10 @@ Types = {EEG.event.type};
 StimLatencyIndexes = strcmp(Types, Triggers.Stim);
 StimLatencies = Latencies(StimLatencyIndexes);
 
-Starts = StimLatencies-Window(1)*SampleRate;
-Ends = StimLatencies+Window(2)*SampleRate;
+Starts = round(StimLatencies-Window(1)*SampleRate);
+Ends = round(StimLatencies+Window(2)*SampleRate);
 end
+
 
 function itHappened = did_it_happen(Starts, Ends, EventVector, MinWindow, MinNanProportion)
 itHappened = nan(size(Starts));
