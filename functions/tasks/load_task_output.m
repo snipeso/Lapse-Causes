@@ -16,7 +16,8 @@ Filename = [Task, '_AllAnswers.mat'];
 if ~exist(fullfile(TaskDataDir, Filename), 'file') || Refresh
     AllTrials = import_task_logs(Paths.Datasets, Task, TaskDataDir);
 else
-    load(fullfile(TaskDataDir, Filename), 'AllTrials')
+    load(fullfile(TaskDataDir, Filename), 'AllAnswers')
+    AllTrials = AllAnswers;
 end
 
 % make it in a nice table

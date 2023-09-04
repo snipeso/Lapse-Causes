@@ -87,7 +87,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
             % get 1s and 0s of whether eyes were open
             [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold); % not using internal microsleep identifier so that I'm flexible
-            EyeClosed = flipVector(EyeOpen);
+            EyeClosed = flip_vector_with_nans(EyeOpen);
 
             % cut out each trial
             [Trials_Stim, Trials_Resp] = ...

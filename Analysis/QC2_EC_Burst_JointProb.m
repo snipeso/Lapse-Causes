@@ -65,7 +65,7 @@ for Indx_P = 1:numel(Participants)
 
             Eye = round(Eyes.DQ); % which eye
             [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), fs, ConfidenceThreshold);
-            EyeClosed = flipVector(EyeOpen);
+            EyeClosed = flip_vector_with_nans(EyeOpen);
             EyeClosed = EyeClosed==1 & ValidTime;
 
             % save overall EC time

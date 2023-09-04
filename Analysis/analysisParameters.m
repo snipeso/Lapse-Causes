@@ -81,6 +81,7 @@ Paths.AnalyzedData  = fullfile(Core, 'Final'); % where data gets saved once its 
 % Paths.PooledData = fullfile(Paths.AnalyzedData, 'PooledData', 'Lapse-Causes');
 Paths.Cache = fullfile(Core, 'Cache', 'Lapse-Causes');
 Paths.Results = fullfile(Core, 'Results', 'Lapse-Causes');
+Paths.QualityCheck = fullfile(Core, 'QualityCheck');
 
 if ~exist(Paths.Results, 'dir')
     mkdir(Paths.Results)

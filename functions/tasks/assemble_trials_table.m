@@ -7,20 +7,7 @@ function TrialsTable = assemble_trials_table(Task, Participants, Sessions, ...
 CacheDir = fullfile(Paths.Cache, 'TrialsTables');
 MicrosleepPath = fullfile(Paths.AnalyzedData,  ['Pupils_', num2str(SampleRate)], Task);
 
-%%% cache
-% location of cache
-CacheString = strjoin({Task, 'TrialTable.mat'}, '_');
-CachePath = fullfile(CacheDir, CacheString);
 
-% load from cache
-if exist(CachePath, 'file') && ~Refresh
-    load(CachePath, 'TrialsTable')
-    return
-end
-
-if ~exist(CacheDir, 'dir')
-    mkdir(CacheDir)
-end
 
 %%% get trial information
 TrialsTable = load_task_output(Participants, Sessions, Task, Paths, false);

@@ -1,4 +1,4 @@
-function Eye = checkEyes(Eyes, DQ, ConfidenceThreshold, TaskTime)
+function Eye = check_eye_dataquality(Eyes, DQ, ConfidenceThreshold, TaskTime)
 % checks that the data quality for the chosen eye meets acceptable criteria
 % returns a blank if it's not ok
 
