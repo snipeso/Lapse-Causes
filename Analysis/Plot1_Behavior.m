@@ -25,15 +25,24 @@ Sessions = Parameters.Sessions;
 CacheDir = fullfile(Paths.Cache, "C_Assemble_Trial_Information/");
 
 
-% Get PVT trial data
+%%% Get PVT trial data
 load(fullfile(CacheDir, 'PVT_TrialsTable.mat'), 'TrialsTable') % from script Load_Trials
 TrialsTablePVT = TrialsTable;
-OldTypesPVT = TrialsTablePVT.Type; % TODO: remove
+TraditionalOutcomePVT = TrialsTablePVT.Type;
 
+% for violin plots of reaction times by session
 [RTStructPVT, ~, ~] = assemble_reaction_times(TrialsTablePVT, Participants, Sessions.PVT, SessionBlockLabels);
 
+% assign LAT trial outcome criteria to PVT
+TrialsTablePVT.Type = TraditionalOutcomePVT;
+TrialsTablePVT.Type(~isnan(TrialsTablePVT.RT)) = 1; % full lapse
+TrialsTablePVT.Type(TrialsTablePVT.RT<.5) = 3; % correct
 
-% get LAT trial data
+% for tally of trial outcomes by eyeclosure
+OutcomeCountPVT = assemble_trial_outcome_count(TrialsTablePVT, Participants, Sessions.PVT, [], MinTrialCount);
+
+
+%%% get LAT trial data
 load(fullfile(CacheDir, 'PVT_TrialsTable.mat'), 'TrialsTable') % from script Load_Trials
 TrialsTableLAT = TrialsTable;
 
@@ -53,6 +62,9 @@ PlotProps.Axes.xPadding = 25;
 PlotProps.Axes.yPadding = 25;
 Grid = [2 3];
 
+Legend = {'EC Lapses', 'EO Lapses', 'Slow responses', 'Fast responses'};
+
+
 figure('Units','centimeters', 'Position',[0 0  PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
 
 
@@ -68,44 +80,13 @@ disp(['A: N=', num2str(numel(unique(TrialsTablePVT.Participant)))])
 
 %%% B: Proportion of trials
 
-% split into types based on RTs
-TrialsTablePVT.Type = OldTypesPVT;
-TrialsTablePVT.Type(~isnan(TrialsTablePVT.RT)) = 1; % full lapse
-TrialsTablePVT.Type(TrialsTablePVT.RT<.5) = 3; % correct
-
 % assemble trial types
 disp('B: ')
-Data = assembleLapses(TrialsTablePVT, Participants, Sessions.PVT, [], MinTrialCount);
-
-% disp EC vs 
-
-Data = squeeze(mean(Data, 1, 'omitnan')); % average, normalizing totals
-
-% assemble plot parameters
-TallyOrder = [4 1 2 3]; % order in which to have trial types
-
-YLim = [0 100];
-XLim = [0.33 2.66];
-
-Red = chART.color_picker([1 4], '', 'red'); % dark red for lapses EC
-TallyColors = [chART.color_picker(3); Red];
-TallyColors = TallyColors(TallyOrder, :);
-
-AllTallyLabels = {'EO Lapses', 'Slow responses', 'Fast responses', 'EC Lapses'};
-AllTallyLabels = AllTallyLabels(TallyOrder);
-AllTallyLabels_PVT = AllTallyLabels;
-AllTallyLabels_PVT(3) = {''};
-
-Data = Data(:, TallyOrder);
-
-% plot
-chART.sub_plot([], Grid, [1, 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
-
-chART.plot.plotStackedBars(Data, SessionBlockLabels, YLim, AllTallyLabels_PVT, TallyColors, PlotProps)
+% LegendPVT = Legend;
+% LegendPVT(3) = '';
+plot_trial_outcome(OutcomeCountPVT, Grid, [1, 2], PlotProps.Indexes.Letters{2}, Legend, PlotProps)
 ylabel('% PVT trials')
-set(legend, 'location', 'northwest')
-xlim(XLim)
-
+legend off
 
 %%% C: proportion of trials as lapses
 
@@ -121,7 +102,7 @@ LapseTally = nan(numel(Participants), numel(Thresholds));
 
 for Indx_T = 1:numel(Thresholds)
 
-    TrialsTablePVT.Type = OldTypesPVT;
+    TrialsTablePVT.Type = TraditionalOutcomePVT;
     TrialsTablePVT.Type(~isnan(TrialsTablePVT.RT)) = 1; % full lapse
     TrialsTablePVT.Type(TrialsTablePVT.RT<Thresholds(Indx_T)) = 3; % correct
 
@@ -248,6 +229,51 @@ chART.save_figure('Figure_1', Paths.Results, PlotProps)
 %%% functions
 
 
+function NormalizedOutcomeCount = assemble_trial_outcome_count(TrialsTable, Participants, Sessions, SessionGroups, MinTrialCount)
+% Gather data as matrix of P x SB x TT as percent of trials
+
+[EyesOpenOutcomeCount, EyesClosedOutcomeCount] = count_trials_by_eye_status( ...
+    TrialsTable, Participants, Sessions, SessionGroups);
+
+OutcomeCount = cat(3, EyesOpenOutcomeCount, EyesClosedOutcomeCount); % EO Lapses, EO Late, EO Fast, EC Lapses, EC Late, EC Fast
+% TotalTrialsCount = sum(EyesOpenOutcomeCount, 3)+sum(EyesClosedOutcomeCount, 3);
+
+[OutcomeCount, TotalTrialsCount] = remove_participants_missing_data(OutcomeCount, MinTrialCount);
+
+% normalize by total trials
+NormalizedOutcomeCount = 100*OutcomeCount./TotalTrialsCount;
+end
+
+
+function [EyesOpenOutcomeCount, EyesClosedOutcomeCount] = count_trials_by_eye_status( ...
+    TrialsTable, Participants, Sessions, SessionGroups)
+
+% get trial subsets
+EO = TrialsTable.EyesClosed == 0;
+EC = TrialsTable.EyesClosed == 1;
+
+CheckEyes = true;
+
+[EyesOpenOutcomeCount, ~] = assemble_matrix_from_table(TrialsTable, EO, 'Type', 'tabulate', ...
+    Participants, Sessions, SessionGroups, CheckEyes); % P x SB x TT
+[EyesClosedOutcomeCount, ~] = assemble_matrix_from_table(TrialsTable, EC, 'Type', 'tabulate', ...
+    Participants, Sessions, SessionGroups, CheckEyes);
+end
+
+
+function [OutcomeCount, TotalTrialsCount] = remove_participants_missing_data(OutcomeCount, MinTrialCount)
+
+TotalTrialsCount = sum(OutcomeCount, 3);
+
+% remove participants who dont have enough trials
+BadParticipants = TotalTrialsCount<MinTrialCount;
+TotalTrialsCount(BadParticipants) = nan;
+
+BadParticipants = any(any(isnan(OutcomeCount), 3), 2); % remove anyone missing any data at any point
+OutcomeCount(BadParticipants, :, :) = nan;
+end
+
+
 %%%%%%%%%%%%%%%%%%%%%%
 %%% plots
 
@@ -259,4 +285,22 @@ chART.plot.overlapping_distributions(DataStruct, PlotProps, PlotProps.Color.Part
 xlim(XLim)
 ylim(YLim)
 legend off
+end
+
+function plot_trial_outcome(OutcomeCount, Grid, Position, Letter, Legend, PlotProps)
+% OutcomeCount should be a P x S (BL, SD) x O (EO Lapse, EO Late, EO F, EC L, EC L, EC F)
+
+OutcomeCount = OutcomeCount(:, :, [4, 1, 2, 3]); % only look at EC Lapses, EO lapses, EO late, EO fast
+OutcomeCountMeans = squeeze(mean(OutcomeCount, 1, 'omitnan'));
+
+Red = chART.color_picker([1 4], '', 'red'); % dark red for lapses EC
+TallyColors = [Red(1, :); flip(chART.color_picker(3))];
+
+
+chART.sub_plot([], Grid, Position, [], true, Letter, PlotProps);
+chART.plot.stacked_bars(OutcomeCountMeans, {'BL', 'SD'}, [0 100], Legend, ...
+   PlotProps, TallyColors)
+
+set(legend, 'location', 'northwest')
+xlim([0.33 2.66])
 end

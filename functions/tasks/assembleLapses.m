@@ -1,35 +1,34 @@
-function [Data, EO_Matrix, EC_Matrix] = assembleLapses(Trials, Participants, Sessions, SessionGroups, MinTots)
+function [LapsesCount, EyesOpenOutcomeCount, EyesClosedOutcomeCount] = assembleLapses(TrialsTable, Participants, Sessions, SessionGroups, MinTrialCount)
 % Gather data as matrix of P x SB x TT as percent of trials
 
 % get trial subsets
-EO = Trials.EyesClosed == 0;
-EC = Trials.EyesClosed == 1;
+EO = TrialsTable.EyesClosed == 0;
+EC = TrialsTable.EyesClosed == 1;
 
 CheckEyes = true;
 
-[EO_Matrix, ~] = assemble_matrix_from_table(Trials, EO, 'Type', 'tabulate', ...
+[EyesOpenOutcomeCount, ~] = assemble_matrix_from_table(TrialsTable, EO, 'Type', 'tabulate', ...
     Participants, Sessions, SessionGroups, CheckEyes); % P x SB x TT
-[EC_Matrix, ~] = assemble_matrix_from_table(Trials, EC, 'Type', 'tabulate', ...
+[EyesClosedOutcomeCount, ~] = assemble_matrix_from_table(TrialsTable, EC, 'Type', 'tabulate', ...
     Participants, Sessions, SessionGroups, CheckEyes);
 
-Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
+TotalTrialsCount = sum(EyesOpenOutcomeCount, 3)+sum(EyesClosedOutcomeCount, 3);
+OutcomeCount = cat(3, EyesOpenOutcomeCount, EyesClosedOutcomeCount(:, :, 1));
 
 % remove participants who dont have enough trials
-BadParticipants = Tots<MinTots;
-Tots(BadParticipants) = nan;
+BadParticipants = TotalTrialsCount<MinTrialCount;
+TotalTrialsCount(BadParticipants) = nan;
 
-Matrix = cat(3, EO_Matrix, EC_Matrix(:, :, 1));
-
-BadParticipants = any(any(isnan(Matrix), 3), 2); % remove anyone missing any data at any point
-Matrix(BadParticipants, :, :) = nan;
+BadParticipants = any(any(isnan(OutcomeCount), 3), 2); % remove anyone missing any data at any point
+OutcomeCount(BadParticipants, :, :) = nan;
 
 
 % normalize by total trials
-Data = 100*Matrix./Tots;
+LapsesCount = 100*OutcomeCount./TotalTrialsCount;
 
 
 % display how much data is in not-plotted task types
-NotPlotted = 100*mean(sum(EC_Matrix(:, :, 2:3), 3)./Tots, 'omitnan');
+NotPlotted = 100*mean(sum(EyesClosedOutcomeCount(:, :, 2:3), 3)./TotalTrialsCount, 'omitnan');
 
 % indicate how much data was removed
 disp(['N=', num2str(numel(BadParticipants) - nnz(BadParticipants))])
@@ -37,17 +36,17 @@ disp(['Not plotted data: ', num2str(NotPlotted(2), '%.2f'), '%'])
 
 
 % indicate proportion of lapses that are eyes-closed
-EOL = squeeze(Data(:, 2, 1));
-ECL = squeeze(Data(:, 2, 4));
+EOL = squeeze(LapsesCount(:, 2, 1));
+ECL = squeeze(LapsesCount(:, 2, 4));
 
 disp_stats_descriptive( 100*ECL./(EOL+ECL), 'EC lapses:', '% lapses', 0);
 disp_stats_descriptive(ECL, 'EC lapses:', '% tot', 0);
 
 
 % total number of lapses
-Matrix(:, :, 1) =  Matrix(:, :, 1) + Matrix(:, :, 4);
-Matrix = Matrix(:, :, 1:3);
+OutcomeCount(:, :, 1) =  OutcomeCount(:, :, 1) + OutcomeCount(:, :, 4);
+OutcomeCount = OutcomeCount(:, :, 1:3);
 
-D = 100*Matrix./Tots;
+D = 100*OutcomeCount./TotalTrialsCount;
 disp_stats_descriptive(squeeze(D(:, 1, 1)), 'BL lapses:', '% tot', 0);
 disp_stats_descriptive(squeeze(D(:, 2, 1)), 'SD lapses:', '% tot', 0);
