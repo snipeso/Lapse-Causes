@@ -87,8 +87,8 @@ TallyOrder = [4 1 2 3]; % order in which to have trial types
 YLim = [0 100];
 XLim = [0.33 2.66];
 
-Red = getColors([1 4], '', 'red'); % dark red for lapses EC
-TallyColors = [PlotProps.Color.Types; Red(1, :)];
+Red = chART.color_picker([1 4], '', 'red'); % dark red for lapses EC
+TallyColors = [chART.color_picker(3); Red];
 TallyColors = TallyColors(TallyOrder, :);
 
 AllTallyLabels = {'EO Lapses', 'Slow responses', 'Fast responses', 'EC Lapses'};
@@ -101,7 +101,7 @@ Data = Data(:, TallyOrder);
 % plot
 chART.sub_plot([], Grid, [1, 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
 
-plotStackedBars(Data, SessionBlockLabels, YLim, AllTallyLabels_PVT, TallyColors, PlotProps)
+chART.plot.plotStackedBars(Data, SessionBlockLabels, YLim, AllTallyLabels_PVT, TallyColors, PlotProps)
 ylabel('% PVT trials')
 set(legend, 'location', 'northwest')
 xlim(XLim)
