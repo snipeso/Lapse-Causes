@@ -41,6 +41,8 @@ TrialsTablePVT.Type(TrialsTablePVT.RT<.5) = 3; % correct
 % for tally of trial outcomes by eyeclosure
 OutcomeCountPVT = assemble_trial_outcome_count(TrialsTablePVT, Participants, Sessions.PVT, [], MinTrialCount);
 
+Thresholds = .3:.1:1; % plot number of eyes closed trials with different RT thresholds
+LapseCountPVT = lapse_count_by_threshold(TrialsTable, Participants, Sessions.PVT, TraditionalOutcomePVT, Thresholds);
 
 %%% get LAT trial data
 load(fullfile(CacheDir, 'LAT_TrialsTable.mat'), 'TrialsTable') % from script Load_Trials
@@ -91,43 +93,13 @@ legend off
 
 %%% C: proportion of trials as lapses
 
-CheckEyes = true;
-
-% get trial subsets
-EO_Trials = TrialsTablePVT.EyesClosed == 0;
-EC_Trials = TrialsTablePVT.EyesClosed == 1;
-
-% assemble data
-Thresholds = .3:.1:1;
-LapseTally = nan(numel(Participants), numel(Thresholds));
-
-for Indx_T = 1:numel(Thresholds)
-
-    TrialsTablePVT.Type = TraditionalOutcomePVT;
-    TrialsTablePVT.Type(~isnan(TrialsTablePVT.RT)) = 1; % full lapse
-    TrialsTablePVT.Type(TrialsTablePVT.RT<Thresholds(Indx_T)) = 3; % correct
-
-    [EO_Matrix, ~] = assemble_matrix_from_table(TrialsTablePVT, EO_Trials, 'Type', 'tabulate', ...
-        Participants, Sessions_PVT, [], CheckEyes); % P x SB x TT
-    [EC_Matrix, ~] = assemble_matrix_from_table(TrialsTablePVT, EC_Trials, 'Type', 'tabulate', ...
-        Participants, Sessions_PVT, [], CheckEyes);
-
-
-    EO = squeeze(EO_Matrix(:, 2, 1));
-    EC = squeeze(EC_Matrix(:, 2, 1));
-    Tot = EO+EC;
-
-    LapseTally(:, Indx_T) = 100*EC./Tot;
-end
-
 % plot
 chART.sub_plot([], Grid, [1 3], [1 1], true, PlotProps.Indexes.Letters{3}, PlotProps);
-plotSpikeBalls(LapseTally, Thresholds, {}, ...
-    TallyColors(1, :), 'IQ', PlotProps)
+chART.plot.plotSpikeBalls(LapseCountPVT, Thresholds, {}, chART.color_picker(1, '', 'red'), 'IQ', PlotProps)
 xlabel('Lapse threshold (s)')
 ylabel('PVT lapses with EC (% lapses)')
 
-disp_stats_descriptive(LapseTally(:, 3), 'Proportion of PVT Lapses:', '%', 0);
+disp_stats_descriptive(LapseCountPVT(:, 3), 'Proportion of PVT Lapses:', '%', 0);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%
@@ -264,6 +236,34 @@ BadParticipants = any(any(isnan(OutcomeCount), 3), 2); % remove anyone missing a
 OutcomeCount(BadParticipants, :, :) = nan;
 end
 
+
+function LapseCount = lapse_count_by_threshold(TrialsTable, Participants, Sessions, Types, Thresholds)
+
+CheckEyes = true;
+
+% get trial subsets
+EyesOpenTrials = TrialsTable.EyesClosed == 0;
+EyesClosedTrials = TrialsTable.EyesClosed == 1;
+
+LapseCount = nan(numel(Participants), numel(Thresholds));
+
+for Indx_T = 1:numel(Thresholds)
+
+    TrialsTable.Type = Types;
+    TrialsTable.Type(~isnan(TrialsTable.RT)) = 1; % full lapse
+    TrialsTable.Type(TrialsTable.RT<Thresholds(Indx_T)) = 3; % correct
+
+    [EyesOpenCount, ~] = assemble_matrix_from_table(TrialsTable, EyesOpenTrials, ...
+        'Type', 'tabulate', Participants, Sessions, [], CheckEyes); % P x SB x TT
+    [EyesClosedCount, ~] = assemble_matrix_from_table(TrialsTable, EyesClosedTrials, ...
+        'Type', 'tabulate', Participants, Sessions, [], CheckEyes);
+
+    EyesOpenLapses = squeeze(EyesOpenCount(:, 2, 1));
+    EyesClosedLapses = squeeze(EyesClosedCount(:, 2, 1));
+
+    LapseCount(:, Indx_T) = 100*EyesClosedLapses./(EyesOpenLapses+EyesClosedLapses);
+end
+end
 
 %%%%%%%%%%%%%%%%%%%%%%
 %%% plots
