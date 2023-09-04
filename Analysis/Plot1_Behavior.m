@@ -95,7 +95,7 @@ legend off
 
 % plot
 chART.sub_plot([], Grid, [1 3], [1 1], true, PlotProps.Indexes.Letters{3}, PlotProps);
-chART.plot.plotSpikeBalls(LapseCountPVT, Thresholds, {}, chART.color_picker(1, '', 'red'), 'IQ', PlotProps)
+chART.plot.average_rows(LapseCountPVT, Thresholds, {}, chART.color_picker(1, '', 'red'), 'IQ', PlotProps)
 xlabel('Lapse threshold (s)')
 ylabel('PVT lapses with EC (% lapses)')
 
@@ -265,6 +265,7 @@ for Indx_T = 1:numel(Thresholds)
 end
 end
 
+
 %%%%%%%%%%%%%%%%%%%%%%
 %%% plots
 
@@ -277,6 +278,7 @@ xlim(XLim)
 ylim(YLim)
 legend off
 end
+
 
 function plot_trial_outcome(OutcomeCount, Grid, Position, Letter, Legend, PlotProps)
 % OutcomeCount should be a P x S (BL, SD) x O (EO Lapse, EO Late, EO F, EC L, EC L, EC F)
