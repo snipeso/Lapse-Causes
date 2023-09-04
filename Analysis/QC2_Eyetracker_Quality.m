@@ -1,3 +1,4 @@
+
 % plots the distribution of confidence values for each eye and each
 % participant so I can chose which eye to use for each recording. 
 clear

@@ -18,3 +18,9 @@
 5. (env Powershell) install fooof package `pip install fooof`
 6. (MATLAB) set up the python enviroment for your current session `pyenv('Version', 'C:\Users\colas\Code\Lapse-Causes\.env\Scripts\python', 'ExecutionMode','OutOfProcess')`
 7. (MATLAB) Add the fooof scripts to matlab path `C:\Users\colas\Code\fooof_mat\fooof_mat`
+
+
+## How to run
+
+1. Detect bursts with [A_Detect_Bursts.m](./Analysis/A_Detect_Bursts.m).
+2. Assemble and synchronize eyetracking data to EEG data with[B_Synchronize_Eyeclosures.m](./Analysis/B_Synchronize_Eyeclosures.m).
