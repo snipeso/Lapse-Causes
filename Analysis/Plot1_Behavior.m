@@ -145,7 +145,7 @@ plotSpikeBalls(LapseTally, Thresholds, {}, ...
 xlabel('Lapse threshold (s)')
 ylabel('PVT lapses with EC (% lapses)')
 
-dispDescriptive(LapseTally(:, 3), 'Proportion of PVT Lapses:', '%', 0);
+disp_stats_descriptive(LapseTally(:, 3), 'Proportion of PVT Lapses:', '%', 0);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%

@@ -62,10 +62,10 @@ for Indx_S = 1:2
             StatsTable(Indx).Session = Sessions{Indx_S};
             StatsTable(Indx).Event = Columns{Indx_C};
             StatsTable(Indx).Window = Window;
-            StatsTable(Indx).Proportion = dispDescriptive(ProbType(:, 1), '', '', 2);
-            StatsTable(Indx).LapseProp = dispDescriptive(ProbType(:, 2), '', '', 2);
-            StatsTable(Indx).Expected = dispDescriptive(ProbType(:, 1).*ProbType(:, 2), '', '', 2);
-            StatsTable(Indx).Observed = dispDescriptive(ProbType(:, 3), '', '', 2);
+            StatsTable(Indx).Proportion = disp_stats_descriptive(ProbType(:, 1), '', '', 2);
+            StatsTable(Indx).LapseProp = disp_stats_descriptive(ProbType(:, 2), '', '', 2);
+            StatsTable(Indx).Expected = disp_stats_descriptive(ProbType(:, 1).*ProbType(:, 2), '', '', 2);
+            StatsTable(Indx).Observed = disp_stats_descriptive(ProbType(:, 3), '', '', 2);
 
             StatsTable(Indx).p = Stats.p;
             StatsTable(Indx).N = Stats.N;

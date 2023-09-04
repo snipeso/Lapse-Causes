@@ -40,8 +40,8 @@ disp(['Not plotted data: ', num2str(NotPlotted(2), '%.2f'), '%'])
 EOL = squeeze(Data(:, 2, 1));
 ECL = squeeze(Data(:, 2, 4));
 
-dispDescriptive( 100*ECL./(EOL+ECL), 'EC lapses:', '% lapses', 0);
-dispDescriptive(ECL, 'EC lapses:', '% tot', 0);
+disp_stats_descriptive( 100*ECL./(EOL+ECL), 'EC lapses:', '% lapses', 0);
+disp_stats_descriptive(ECL, 'EC lapses:', '% tot', 0);
 
 
 % total number of lapses
@@ -49,5 +49,5 @@ Matrix(:, :, 1) =  Matrix(:, :, 1) + Matrix(:, :, 4);
 Matrix = Matrix(:, :, 1:3);
 
 D = 100*Matrix./Tots;
-dispDescriptive(squeeze(D(:, 1, 1)), 'BL lapses:', '% tot', 0);
-dispDescriptive(squeeze(D(:, 2, 1)), 'SD lapses:', '% tot', 0);
+disp_stats_descriptive(squeeze(D(:, 1, 1)), 'BL lapses:', '% tot', 0);
+disp_stats_descriptive(squeeze(D(:, 2, 1)), 'SD lapses:', '% tot', 0);

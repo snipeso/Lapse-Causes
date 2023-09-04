@@ -147,23 +147,23 @@ clc
 % percentage of periodic power reduction
 % intact periodic power - burstless periodic power / intact periodic power
 ThetaPercentReduction = 100*(ThetaPowerIntact - ThetaPowerBurstless)./ThetaPowerIntact;
-descriptive_distribution(ThetaPercentReduction, 'Theta percent reduction', '%', 0);
+disp_stats_descriptive(ThetaPercentReduction, 'Theta percent reduction', '%', 0);
 
 ThetaPercentReductionTop50 = ThetaPercentReduction(ThetaPowerIntact>quantile(ThetaPowerIntact, 0.5));
-descriptive_distribution(ThetaPercentReductionTop50, 'Theta percent reduction for participants with high theta', '%', 0);
+disp_stats_descriptive(ThetaPercentReductionTop50, 'Theta percent reduction for participants with high theta', '%', 0);
 
 
 
 AlphaPercentReduction = 100*(AlphaPowerIntact - AlphaPowerBurstless)./AlphaPowerIntact;
-descriptive_distribution(AlphaPercentReduction, 'Alpha percent reduction', '%', 0);
+disp_stats_descriptive(AlphaPercentReduction, 'Alpha percent reduction', '%', 0);
 
 % power redistribution ratio power
 % burstless periodic power / burst periodic power
 ThetaBurstRedistributionRatio = 1-ThetaPowerBurstless./ThetaPowerBursts;
-descriptive_distribution(ThetaBurstRedistributionRatio, 'Theta burst power ratio', '', 2);
+disp_stats_descriptive(ThetaBurstRedistributionRatio, 'Theta burst power ratio', '', 2);
 
 AlphaBurstRedistributionRatio = 1-AlphaPowerBurstless./AlphaPowerBursts;
-descriptive_distribution(AlphaBurstRedistributionRatio, 'Alpha burst power ratio', '', 2);
+disp_stats_descriptive(AlphaBurstRedistributionRatio, 'Alpha burst power ratio', '', 2);
 
 
 

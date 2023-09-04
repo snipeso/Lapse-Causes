@@ -110,10 +110,10 @@ end
 
 %% display general prop of things
 
-dispDescriptive(100*GenProbMicrosleep, 'EC gen prop', '%', 0);
+disp_stats_descriptive(100*GenProbMicrosleep, 'EC gen prop', '%', 0);
 
-dispDescriptive(100*GenProbBurst_Pooled(:, 1), 'Theta gen prop', '%', 0);
-dispDescriptive(100*GenProbBurst_Pooled(:, 2), 'Alpha gen prop', '%', 0);
+disp_stats_descriptive(100*GenProbBurst_Pooled(:, 1), 'Theta gen prop', '%', 0);
+disp_stats_descriptive(100*GenProbBurst_Pooled(:, 2), 'Alpha gen prop', '%', 0);
 
 %% Figure 1
 
@@ -229,9 +229,9 @@ end
 % mean values
 Window = dsearchn(t_microsleep', Windows(2, :)'); % stim window
 Prob = squeeze(mean(ProbMicrosleep_Stim(:, :, Window(1):Window(2)), 3, 'omitnan')); % P x TT
-dispDescriptive(100*Prob(:, 3), 'Correct EC Proportion', '%', 0);
-dispDescriptive(100*Prob(:, 2), 'late EC Proportion', '%', 0);
-dispDescriptive(100*Prob(:, 1), 'lapse EC Proportion', '%', 0);
+disp_stats_descriptive(100*Prob(:, 3), 'Correct EC Proportion', '%', 0);
+disp_stats_descriptive(100*Prob(:, 2), 'late EC Proportion', '%', 0);
+disp_stats_descriptive(100*Prob(:, 1), 'lapse EC Proportion', '%', 0);
 
 disp('*')
 

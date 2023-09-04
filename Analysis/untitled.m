@@ -167,7 +167,7 @@ PrcntSDTheta = 100*(sdBurst-blBurst)./sdTheta;
 % remove participants for which there's not enough of a theta increase
 % (if sdTheta is too small, the percent change baloons)
 PrcntSDTheta(sdTheta<.01) = nan;
-dispDescriptive(PrcntSDTheta, 'Theta power removed:', '%', 0);
+disp_stats_descriptive(PrcntSDTheta, 'Theta power removed:', '%', 0);
 
 Stats = paired_ttest(blTheta_Intact, sdTheta_Intact, StatsP);
 disp_stats(Stats, [1 1], 'Intact change from BL:');
@@ -184,10 +184,10 @@ clc
 
 % theta
 Data_BL = 100*squeeze(sum(TimeSpent(:, 1, [1 3]), 3));
-dispDescriptive(Data_BL, 'BL Theta', '%', 0);
+disp_stats_descriptive(Data_BL, 'BL Theta', '%', 0);
 
 Data_SD = 100*squeeze(sum(TimeSpent(:, 2, [1 3]), 3));
-dispDescriptive(Data_SD, 'SD Theta', '%', 0);
+disp_stats_descriptive(Data_SD, 'SD Theta', '%', 0);
 
 Stats = paired_ttest(Data_BL, Data_SD, StatsP);
 disp_stats(Stats, [1 1], 'Theta bursts BLvsSD:');
@@ -196,10 +196,10 @@ disp('   ')
 
 % alpha
 Data_BL = 100*squeeze(sum(TimeSpent(:, 1, [2 3]), 3));
-dispDescriptive(Data_BL, 'BL alpha', '%', 0);
+disp_stats_descriptive(Data_BL, 'BL alpha', '%', 0);
 
 Data_SD = 100*squeeze(sum(TimeSpent(:, 2, [2 3]), 3));
-dispDescriptive(Data_SD, 'SD alpha', '%', 0);
+disp_stats_descriptive(Data_SD, 'SD alpha', '%', 0);
 
 Stats = paired_ttest(Data_BL, Data_SD, StatsP);
 disp_stats(Stats, [1 1], 'alpha BLvsSD:');

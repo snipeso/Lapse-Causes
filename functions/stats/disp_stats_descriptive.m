@@ -1,5 +1,5 @@
-function String = descriptive_distribution(Data, String, Unit, Roundedness)
-% String = dispDescriptive(Data, String, Unit, Roundedness)
+function String = disp_stats_descriptive(Data, String, Unit, Roundedness)
+% String = disp_stats_descriptive(Data, String, Unit, Roundedness)
 % Roundedness is precision of numbers ('%.0f')
 % Data is P x 1 matrix.
 
