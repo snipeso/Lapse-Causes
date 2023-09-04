@@ -25,10 +25,8 @@ SampleRate = Parameters.SampleRate;
 ConfidenceThreshold = Parameters.EyeTracking.MinConfidenceThreshold;
 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Assemble trial data
-
 
 for Task = Tasks
 
@@ -114,21 +112,21 @@ for Participant = Participants'
             error(['missing trials for ', Participant{1}, Session{1}])
         end
 
+        % detrmine if eyes were closed during trial
         DQ = EyetrackingQualityTable.(Session{1})(strcmp(EyetrackingQualityTable.Participant, Participant{1}));
-        TaskTime = identify_task_timepoints(EEGMetadata, Triggers);
+        TaskTime = identify_task_timepoints(EEGMetadata, Triggers); % for data quality, it needs to see if there's enough clean data during the task
         Eye = check_eye_dataquality(Eyes, DQ, ConfidenceThreshold, TaskTime);
         EyeClosed = detect_eyeclosure(Eye, SampleRate, ConfidenceThreshold);
-
         EyesClosedTrials = did_it_happen(Starts, Ends, EyeClosed, MinEventProportion, MaxNanProportion);
         TrialsTable.EyesClosed(CurrentTrials) = EyesClosedTrials;
     end
-    disp(['Finished syncing eye data for ', Participant{1}, Session{1}])
+
+    disp(['Finished syncing eye data for ', Participant{1}])
 end
 end
 
 
 function [Starts, Ends] = window_timepoints(EEG, Triggers, Window)
-
 SampleRate = EEG.srate;
 Latencies = [EEG.event.latency];
 Types = {EEG.event.type};
