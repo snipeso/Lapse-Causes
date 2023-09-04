@@ -40,7 +40,7 @@ else
 end
 chART.plot.increases_from_baseline(Data1, Data2, X, 'pos', PlotMean, PlotProps, PlotProps.Color.Participants)
 
-set(gca,'FontName', PlotProps.Text.FontName, 'FontSize', PlotProps.Text.AxisSize, 'XGrid', 'on')
+set(gca, 'XGrid', 'on')
 h=gca; h.XAxis.TickLength = [0 0];
 
 if ~isempty(xLims)

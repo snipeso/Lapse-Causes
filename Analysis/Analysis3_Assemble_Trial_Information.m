@@ -15,7 +15,6 @@ Parameters = analysisParameters();
 Paths = Parameters.Paths;
 StatParameters = Parameters.Stats;
 Participants = Parameters.Participants;
-MinTrialCount = Parameters.Trials.MinTotalCount;
 Sessions = Parameters.Sessions;
 TrialWindow = Parameters.Trials.SubWindows(2, :);
 MinEventProportion = Parameters.Trials.MinEventProportion;
@@ -38,6 +37,7 @@ for Task = Tasks
         continue
     end
 
+    % load output from raw data (or intermediate cache)
     TrialsTable = load_task_output(Participants, Sessions.(Task{1}), Task{1}, Paths, false);
 
 
@@ -47,39 +47,37 @@ for Task = Tasks
 
     EyetrackingDir = fullfile(Paths.Data, 'Pupils', ['Raw_', num2str(SampleRate), 'Hz'], Task{1});
 
-    TrialsTable = were_eyes_closed(TrialsTable, EyetrackingQualityTable, EyetrackingDir, ...
+    TrialsTable = eyes_closed_trials(TrialsTable, EyetrackingQualityTable, EyetrackingDir, ...
         TrialWindow, MinEventProportion,  MaxNanProportion, ConfidenceThreshold, Triggers);
 
 
     % save to cache for future
     save(fullfile(CacheDir, CacheFilename), 'TrialsTable')
-
 end
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
 
 function TrialsTable = load_trials_from_cache(CacheDir, CacheFile, RerunAnalysis)
-
 CachePath = fullfile(CacheDir, CacheFile);
 
 % load from cache
 if exist(CachePath, 'file') && ~RerunAnalysis
     load(CachePath, 'TrialsTable')
     return
+else
+    TrialsTable = table();
 end
 
 % set up cache
-
 if ~exist(CacheDir, 'dir')
     mkdir(CacheDir)
 end
-
-TrialsTable = table();
 end
 
 
-function TrialsTable = were_eyes_closed(TrialsTable, EyetrackingQualityTable, EyetrackingDir, ...
+function TrialsTable = eyes_closed_trials(TrialsTable, EyetrackingQualityTable, EyetrackingDir, ...
     TrialWindow, MinEventProportion, MaxNanProportion, ConfidenceThreshold, Triggers)
 
 Participants = unique(TrialsTable.Participant);

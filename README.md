@@ -24,3 +24,4 @@
 
 1. Detect bursts with [A_Detect_Bursts.m](./Analysis/A_Detect_Bursts.m).
 2. Assemble and synchronize eyetracking data to EEG data with[B_Synchronize_Eyeclosures.m](./Analysis/B_Synchronize_Eyeclosures.m).
+3. Assemble trial information.

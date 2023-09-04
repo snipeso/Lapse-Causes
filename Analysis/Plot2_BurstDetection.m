@@ -18,6 +18,7 @@ Parameters = analysisParameters();
 Paths = Parameters.Paths;
 Task = Parameters.Task;
 Participants = Parameters.Participants;
+Participants = Participants(1:16); % TEMP
 Channels = Parameters.Channels.PreROI;
 Bands = Parameters.Bands;
 SessionBlocks = Parameters.Sessions.Conditions;
@@ -96,7 +97,6 @@ Data = 100*AlphaTimeSpent;
 
 chART.sub_plot([], Grid, [1 2], [1 1], true, '', PlotProps);
 Stats = plot_change_in_time(Data, XLabels, [], [0 100], Colors, StatParameters, PlotProps);
-ylabel('% recording')
 title('Alpha bursts')
 
 disp_stats(Stats, [1 2], 'Change in alphs bursts with time awake');
@@ -264,7 +264,6 @@ save(CachePath, 'PowerIntactSpectrum', 'PowerBurstsSpectrum', 'PowerBurstlessSpe
 end
 
 
-
 function [EEGIntactAllSessions, EEGBurstsAllSessions, EEGBurstlessAllSessions] = chop_EEG_by_bursts( ...
     EEGAllSessions, BurstsAllSessions, Band, MinDuration, SampleRate)
 
@@ -347,6 +346,7 @@ FreqRes = Frequencies(2)-Frequencies(1);
 SmoothPoints = round(SmoothSpan/FreqRes);
 SmoothData = smooth(Power, SmoothPoints, 'lowess');
 end
+
 
 function [PowerIntact, PowerBursts, PowerBurstless] = ...
     average_band(PowerIntactSpectrum, PowerBurstsSpectrum, PowerBurstlessSpectrum, ...

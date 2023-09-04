@@ -1,4 +1,4 @@
-function [FlameStruct, MEANS, Q99, Q01] = assembleRTs(Trials, Participants, Sessions, SessionLabels)
+function [FlameStruct, MEANS, Q99, Q01] = assemble_reaction_times(Trials, Participants, Sessions, SessionLabels)
 % from a table of all trials, gets reaction times into struct needed for
 % overlapping flame plot.
 % Sessions can be either a structure, like Struct.BL = {'BaselinePre',
