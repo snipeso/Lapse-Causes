@@ -12,13 +12,12 @@ WelchWindow = 8;
 Overlap = .75;
 MinDuration = 60;
 FooofFittingFrequencyRange = [2 40]; % some low-frequency noise
-Refresh = true; % if analysis has already been run, set to false if you want to use the cache
+Refresh = false; % if analysis has already been run, set to false if you want to use the cache
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
 Task = Parameters.Task;
 Participants = Parameters.Participants;
-Participants = Participants(1:16);
 Channels = Parameters.Channels.PreROI;
 Bands = Parameters.Bands;
 SessionBlocks = Parameters.Sessions.Conditions;
@@ -58,33 +57,6 @@ BandIndex = 2;
 [AlphaPowerIntact, AlphaPowerBursts, AlphaPowerBurstless] = ...
     average_band(AlphaPowerIntactSpectrum, AlphaPowerBurstsSpectrum, AlphaPowerBurstlessSpectrum, ...
     Frequencies, Bands, BandIndex);
-
-
-%% Statistics
-%%%%%%%%%%%%%
-
-clc
-
-% percentage of periodic power reduction
-% intact periodic power - burstless periodic power / intact periodic power
-ThetaPercentReduction = 100*(ThetaPowerIntact - ThetaPowerBurstless)./ThetaPowerIntact;
-descriptive_distribution(ThetaPercentReduction, 'Theta percent reduction', '%', 0);
-
-ThetaPercentReductionTop50 = ThetaPercentReduction(ThetaPowerIntact>quantile(ThetaPowerIntact, 0.5));
-descriptive_distribution(ThetaPercentReductionTop50, 'Theta percent reduction for participants with high theta', '%', 0);
-
-
-
-AlphaPercentReduction = 100*(AlphaPowerIntact - AlphaPowerBurstless)./AlphaPowerIntact;
-descriptive_distribution(AlphaPercentReduction, 'Alpha percent reduction', '%', 0);
-
-% power redistribution ratio power
-% burstless periodic power / burst periodic power
-ThetaBurstRedistributionRatio = 1-ThetaPowerBurstless./ThetaPowerBursts;
-descriptive_distribution(ThetaBurstRedistributionRatio, 'Theta burst power ratio', '', 2);
-
-AlphaBurstRedistributionRatio = 1-AlphaPowerBurstless./AlphaPowerBursts;
-descriptive_distribution(AlphaBurstRedistributionRatio, 'Alpha burst power ratio', '', 2);
 
 
 
@@ -140,6 +112,7 @@ chART.sub_plot([], Grid, [1 3], [1 2], true, PlotProps.Indexes.Letters{2}, PlotP
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
 title('Theta periodic power')
 ylabel('Whitened Power (\muV^2/Hz)')
+ylim([-0.5 18])
 
 % alpha
 Data = cat(2, permute(AlphaPowerBurstlessSpectrum, [1 3 2]), permute(AlphaPowerIntactSpectrum, [1 3 2]));
@@ -148,6 +121,7 @@ chART.sub_plot([], Grid, [1 5], [1 2], true, PlotProps.Indexes.Letters{3}, PlotP
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
 title('Alpha periodic power')
 ylabel('Whitened Power (\muV^2/Hz)')
+ylim([-0.2 5.5])
 
 chART.save_figure('Figure_2', Paths.Results, PlotProps)
 
@@ -161,6 +135,37 @@ for idxParticipant = 1:numel(Participants)
     title(Participants{idxParticipant})
     xlim([2 20])
 end
+
+
+
+
+%% Statistics
+%%%%%%%%%%%%%
+
+clc
+
+% percentage of periodic power reduction
+% intact periodic power - burstless periodic power / intact periodic power
+ThetaPercentReduction = 100*(ThetaPowerIntact - ThetaPowerBurstless)./ThetaPowerIntact;
+descriptive_distribution(ThetaPercentReduction, 'Theta percent reduction', '%', 0);
+
+ThetaPercentReductionTop50 = ThetaPercentReduction(ThetaPowerIntact>quantile(ThetaPowerIntact, 0.5));
+descriptive_distribution(ThetaPercentReductionTop50, 'Theta percent reduction for participants with high theta', '%', 0);
+
+
+
+AlphaPercentReduction = 100*(AlphaPowerIntact - AlphaPowerBurstless)./AlphaPowerIntact;
+descriptive_distribution(AlphaPercentReduction, 'Alpha percent reduction', '%', 0);
+
+% power redistribution ratio power
+% burstless periodic power / burst periodic power
+ThetaBurstRedistributionRatio = 1-ThetaPowerBurstless./ThetaPowerBursts;
+descriptive_distribution(ThetaBurstRedistributionRatio, 'Theta burst power ratio', '', 2);
+
+AlphaBurstRedistributionRatio = 1-AlphaPowerBurstless./AlphaPowerBursts;
+descriptive_distribution(AlphaBurstRedistributionRatio, 'Alpha burst power ratio', '', 2);
+
+
 
 %%
 
