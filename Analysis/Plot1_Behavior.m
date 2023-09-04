@@ -316,3 +316,140 @@ ylim(YLim)
 xlabel('Distance from center (quantiles)')
 set(legend, 'Location','northwest')
 end
+
+
+
+%%%%%%%%%%%%%%%%%%%%
+%%% statistics
+
+function describe_reaction_times()
+
+%%% RTs
+% change in mean RTs from BL to SD
+dispDescriptive(1000*MeansLAT(:, 1),'BL RT', ' ms', '%.0f');
+dispDescriptive(1000*MeansLAT(:, 2),'SD RT', ' ms', '%.0f');
+
+Stats = paired_ttest(MeansLAT(:, 1), MeansLAT(:, 2), StatsP);
+disp_stats(Stats, [1 1], 'SD effect on RTs:');
+
+% distribution of RTs to show that they don't go over 1s
+SB_Indx = 2;
+dispDescriptive(1000*Quantile99LAT(:, SB_Indx), 'RT for 99% of SD data:', ' ms', 0);
+end
+
+
+function display_lapse_outcome()
+% TODO
+
+% display how much data is in not-plotted task types
+NotPlotted = 100*mean(sum(EyesClosedOutcomeCount(:, :, 2:3), 3)./TotalTrialsCount, 'omitnan');
+
+% indicate how much data was removed
+disp(['N=', num2str(numel(BadParticipants) - nnz(BadParticipants))])
+disp(['Not plotted data: ', num2str(NotPlotted(2), '%.2f'), '%'])
+
+
+% indicate proportion of lapses that are eyes-closed
+EOL = squeeze(LapsesCount(:, 2, 1));
+ECL = squeeze(LapsesCount(:, 2, 4));
+
+disp_stats_descriptive( 100*ECL./(EOL+ECL), 'EC lapses:', '% lapses', 0);
+disp_stats_descriptive(ECL, 'EC lapses:', '% tot', 0);
+
+
+% total number of lapses
+OutcomeCount(:, :, 1) =  OutcomeCount(:, :, 1) + OutcomeCount(:, :, 4);
+OutcomeCount = OutcomeCount(:, :, 1:3);
+
+D = 100*OutcomeCount./TotalTrialsCount;
+disp_stats_descriptive(squeeze(D(:, 1, 1)), 'BL lapses:', '% tot', 0);
+disp_stats_descriptive(squeeze(D(:, 2, 1)), 'SD lapses:', '% tot', 0);
+
+end
+
+
+function describe_lapses()
+
+
+
+%%% LAT
+disp('---LAT---')
+[Data, EO_Matrix, EC_Matrix] = assembleLapses(TrialsTableLAT, Participants, Sessions, SessionGroups, MinTrialCount);
+
+% just lapses
+Tots = EO_Matrix(:, :, 1) + EC_Matrix(:, :, 1);
+ECvEO_Lapses = 100*EO_Matrix(:, :, 1)./Tots;
+
+% all
+Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
+EOvAll_Matrix = 100*EO_Matrix(:, :, 1)./Tots; % Matrix is EO lapses, late, correct, EC lapses
+
+
+% proportion of EC lapses out of overall lapses
+dispDescriptive(squeeze(ECvEO_Lapses(:, 2)), 'SD EO vs All Lapses', '%', '%.0f');
+dispDescriptive(squeeze(EOvAll_Matrix(:, 1)), 'BL EO vs All Trials', '%', '%.0f');
+dispDescriptive(squeeze(EOvAll_Matrix(:, 2)), 'SD EO vs All Trials', '%', '%.0f');
+
+Stats = paired_ttest(EOvAll_Matrix(:, 1), EOvAll_Matrix(:, 2), StatsP);
+disp_stats(Stats, [1 1], 'SD effect on EO lapses:');
+disp('*')
+
+
+%%% PVT
+disp('---PVT---')
+    TrialsTablePVT.Type = OldTypesPVT;
+[Data, EO_Matrix, EC_Matrix] = assembleLapses(TrialsTablePVT, Participants, [Sessions_PVT(2), Sessions_PVT(2)], [],  MinTrialCount);
+
+% just lapses
+Tots = EO_Matrix(:, :, 1) + EC_Matrix(:, :, 1);
+ECvEO_Lapses = 100*EO_Matrix(:, :, 1)./Tots;
+
+% all
+Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
+EOvAll_Matrix = 100*EO_Matrix(:, :, 1)./Tots; % Matrix is EO lapses, late, correct, EC lapses
+
+
+% proportion of EC lapses out of overall lapses
+dispDescriptive(squeeze(ECvEO_Lapses(:, 2)), 'SD EO vs All Lapses', '%', '%.0f');
+dispDescriptive(squeeze(EOvAll_Matrix(:, 2)), 'SD EO vs All Trials', '%', '%.0f');
+disp('*')
+end
+
+
+function anova_radius_sleep()
+
+% all radii
+Stats_Radius = anova2way(LapseTally(:, :, [1 3]), {'Distance', 'Time'}, string(1:numel(unique(Bins))), ...
+    {'BL', 'SD'}, StatsP);
+
+% exluding last two radii
+Stats_Radius_Redux = anova2way(LapseTally(:, 1:3, [1 3]), {'Distance', 'Time'}, string(1:numel(unique(Bins))), ...
+    {'BL', 'SD'}, StatsP);
+
+
+end
+
+
+function lapses_by_quantile()
+% close lapses
+dispDescriptive(squeeze(LapseTally(:, 1, 1)), 'BL EO close lapses', '%', '%.1f');
+
+% far lapses
+dispDescriptive(squeeze(LapseTally(:, end, 1)), 'BL EO far lapses', '%', '%.1f');
+disp('*')
+
+% each distance
+for Indx_Q = 1:size(LapseTally, 2)
+    dispDescriptive(squeeze(LapseTally(:, Indx_Q, 3)-LapseTally(:, Indx_Q, 1)), ... ...
+        ['BL v SD EO lapses Q', num2str(Indx_Q)], '%', '%.1f');
+end
+disp('*')
+
+
+% all distance
+disp_stats(Stats_Radius, {'Distance', 'Time', 'Interaction'}, 'Distance vs Time:');
+disp_stats(Stats_Radius_Redux, {'Distance', 'Time', 'Interaction'}, 'Distance vs Time, first 3 quantiles:');
+
+
+
+end
