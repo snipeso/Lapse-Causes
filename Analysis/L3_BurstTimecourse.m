@@ -55,7 +55,7 @@ t_window = linspace(TrialWindow(1), TrialWindow(2), fs*(TrialWindow(2)-TrialWind
 TitleTag = '';
 if CheckEyes
     TitleTag = [TitleTag, '_EO'];
-    EO = Trials.EC_Stimulus == 0;
+    EO = Trials.EyesClosed == 0;
 else
     EO = true(size(Trials, 1), 1);
 end

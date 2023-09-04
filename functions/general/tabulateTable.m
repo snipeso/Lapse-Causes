@@ -49,7 +49,7 @@ for Indx_P = 1:numel(Participants)
             continue
         end
 
-        if exist('CheckEyes', 'var') && CheckEyes && all(isnan(Trials.EC_Stimulus(CurrentTrials)))
+        if exist('CheckEyes', 'var') && CheckEyes && all(isnan(Trials.EyesClosed(CurrentTrials)))
             continue
         end
 

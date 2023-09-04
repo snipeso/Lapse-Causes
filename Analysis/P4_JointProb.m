@@ -40,8 +40,8 @@ for Indx_S = 1:2
             Window = Windows{Indx_W};
 
             % trial subsets
-            EO = Trials.EC_Stimulus == 0;
-            NanEyes = isnan(Trials.EC_Stimulus); % only ignore trials with EC during stimulus
+            EO = Trials.EyesClosed == 0;
+            NanEyes = isnan(Trials.EyesClosed); % only ignore trials with EC during stimulus
             NanEEG = isnan(Trials.(['Theta_', Window])); % ignore trials depending on window of interest
             Session = ismember(Trials.Session, SessionBlocks.(Sessions{Indx_S}));
 

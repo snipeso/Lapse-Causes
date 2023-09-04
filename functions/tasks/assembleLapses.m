@@ -2,8 +2,8 @@ function [Data, EO_Matrix, EC_Matrix] = assembleLapses(Trials, Participants, Ses
 % Gather data as matrix of P x SB x TT as percent of trials
 
 % get trial subsets
-EO = Trials.EC_Stimulus == 0;
-EC = Trials.EC_Stimulus == 1;
+EO = Trials.EyesClosed == 0;
+EC = Trials.EyesClosed == 1;
 
 CheckEyes = true;
 

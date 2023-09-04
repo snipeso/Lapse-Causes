@@ -59,7 +59,6 @@ figure('Units','centimeters', 'Position',[0 0  PlotProps.Figure.Width, PlotProps
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %%% PVT
 
-
 %%% A: Reaction time distributions
 plot_RTs(RTStructPVT, Grid, [1 1], PlotProps.Indexes.Letters{1}, PlotProps, [.5 2.5], [ 0.1  1.01])
 ylabel('PVT reaction times (s)')
@@ -76,7 +75,7 @@ TrialsTablePVT.Type(TrialsTablePVT.RT<.5) = 3; % correct
 
 % assemble trial types
 disp('B: ')
-Data = assembleLapses(TrialsTablePVT, Participants, Sessions_PVT, [], MinTrialCount);
+Data = assembleLapses(TrialsTablePVT, Participants, Sessions.PVT, [], MinTrialCount);
 
 % disp EC vs 
 
@@ -113,8 +112,8 @@ xlim(XLim)
 CheckEyes = true;
 
 % get trial subsets
-EO_Trials = TrialsTablePVT.EC_Stimulus == 0;
-EC_Trials = TrialsTablePVT.EC_Stimulus == 1;
+EO_Trials = TrialsTablePVT.EyesClosed == 0;
+EC_Trials = TrialsTablePVT.EyesClosed == 1;
 
 % assemble data
 Thresholds = .3:.1:1;
@@ -181,8 +180,8 @@ xlim(XLim)
 
 %%% F: plot change in lapses with distance
 % get trial subsets
-EO = TrialsTableLAT.EC_Stimulus == 0;
-EC = TrialsTableLAT.EC_Stimulus == 1;
+EO = TrialsTableLAT.EyesClosed == 0;
+EC = TrialsTableLAT.EyesClosed == 1;
 Lapses = TrialsTableLAT.Type == 1;
 
 % assign a distance quantile for each trial
