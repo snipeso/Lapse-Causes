@@ -52,8 +52,12 @@ TrialsTableLAT = TrialsTable;
     TrialsTableLAT, Participants, SessionBlocks);
 
 
-OutcomeCountLAT = assemble_trial_outcome_count(TrialsTableLAT, Participants, [SessionBlocks.BL, SessionBlocks.SD], {1:3, 4:6}, MinTrialCount);
+OutcomeCountLAT = assemble_trial_outcome_count(TrialsTableLAT, Participants, ...
+   Sessions.LAT, {1:3, 4:6}, MinTrialCount);
 
+RadiusQuantile = 1/6; % bin size for quantiles
+LapseCountLAT = lapse_count_by_radius(TrialsTableLAT, RadiusQuantile, Participants, ...
+    Sessions.LAT, {1:3, 4:6}, MinTrialCount);
 
 
 
@@ -86,7 +90,6 @@ disp(['A: N=', num2str(numel(unique(TrialsTablePVT.Participant)))])
 %%% B: Proportion of trials
 
 % assemble trial types
-disp('B: ')
 plot_trial_outcome(OutcomeCountPVT, Grid, [1, 2], PlotProps.Indexes.Letters{2}, Legend, PlotProps)
 ylabel('% PVT trials')
 legend off
@@ -94,9 +97,7 @@ legend off
 %%% C: proportion of trials as lapses
 
 % plot
-chART.sub_plot([], Grid, [1 3], [1 1], true, PlotProps.Indexes.Letters{3}, PlotProps);
-chART.plot.average_rows(LapseCountPVT, Thresholds, {}, chART.color_picker(1, '', 'red'), 'IQ', PlotProps)
-xlabel('Lapse threshold (s)')
+ plot_lapses_by_threshold(LapseCountPVT, Thresholds, Grid, [1 3], PlotProps.Indexes.Letters{3}, PlotProps)
 ylabel('PVT lapses with EC (% lapses)')
 
 disp_stats_descriptive(LapseCountPVT(:, 3), 'Proportion of PVT Lapses:', '%', 0);
@@ -123,63 +124,16 @@ ylabel('% LAT trials')
 
 
 %%% F: plot change in lapses with distance
-% get trial subsets
-EO = TrialsTableLAT.EyesClosed == 0;
-EC = TrialsTableLAT.EyesClosed == 1;
-Lapses = TrialsTableLAT.Type == 1;
-
-% assign a distance quantile for each trial
-qBin = 1/6; % bin size for quantiles
-Radius = TrialsTableLAT.Radius;
-Edges = quantile(Radius(:), 0:qBin:1);
-Bins = discretize(Radius, Edges);
-TrialsTableLAT.Radius_Bins = Bins;
-
-% get number of lapses for each distance quantile
-[EOLapsesTally, ~] = assemble_matrix_from_table(TrialsTableLAT, EO & Lapses, 'Radius_Bins', 'tabulate', ...
-    Participants, Sessions, SessionGroups, CheckEyes);
-
-[ECLapsesTally, ~] = assemble_matrix_from_table(TrialsTableLAT, EC & Lapses, 'Radius_Bins', 'tabulate', ...
-    Participants, Sessions, SessionGroups, CheckEyes);
-
-[Tots, ~] = assemble_matrix_from_table(TrialsTableLAT, [], 'Radius_Bins', 'tabulate', ...
-    Participants, Sessions, SessionGroups, CheckEyes);
-
-% remove participants with too few trials
-MinTotsSplit = MinTrialCount/numel(unique(Bins));
-Tots(Tots<MinTotsSplit) = nan;
-
-LapseTally = cat(2, EOLapsesTally, ECLapsesTally);
-Tots = cat(2, Tots, Tots);
-LapseTally = 100*LapseTally./Tots; % P x SB x RB
-
-LapseTally = LapseTally(:, [1 3 2 4], :); % EO BL, EC Bl, EO SD, EC SD
-LapseTally = permute(LapseTally, [1 3 2]); % P x RB x SB
-
-% remove participants with any NaNs
-BadParticipants = any(any(isnan(LapseTally), 3), 2);
-LapseTally(BadParticipants, :, :) = nan;
 
 % plot parameters
-Colors = [flip(getColors([1 2], '', 'gray')); PlotProps.Color.Types(1, :); Red(1, :)]; % generic for BL, lapse color for SD
-YLim = [0 60];
-
-% plot
-chART.sub_plot([], Grid, [2 3], [1 1], true, PlotProps.Indexes.Letters{6}, PlotProps);
-plotSpikeBalls(LapseTally, [], {'BL, EO', 'BL, EC', 'SD, EO', 'SD, EC'}, ...
-    Colors, 'IQ', PlotProps)
+% disp(['F: N=' num2str(nnz(~BadParticipants))])
+LegendRadius = {'BL, EO', 'BL, EC', 'SD, EO', 'SD, EC'};
+plot_radius_lapses(LapseCountLAT, Grid, [2 3], PlotProps.Indexes.Letters{6}, ...
+    LegendRadius, [0 60], PlotProps)
 ylabel('LAT lapses (% trials)')
-ylim(YLim)
-xlabel('Distance from center (quantiles)')
-set(legend, 'Location','northwest')
-
-disp(['F: N=' num2str(nnz(~BadParticipants))])
 
 
 chART.save_figure('Figure_1', Paths.Results, PlotProps)
-
-
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -266,6 +220,48 @@ end
 end
 
 
+function LapseCount = lapse_count_by_radius(TrialsTable, RadiusQuantile, Participants, Sessions, SessionGroups, MinTrialCount)
+
+CheckEyes = true;
+
+% get trial subsets
+EO = TrialsTable.EyesClosed == 0;
+EC = TrialsTable.EyesClosed == 1;
+Lapses = TrialsTable.Type == 1;
+
+% assign a distance quantile for each trial
+Radius = TrialsTable.Radius;
+Edges = quantile(Radius(:), 0:RadiusQuantile:1);
+Bins = discretize(Radius, Edges);
+TrialsTable.Radius_Bins = Bins;
+
+% get number of lapses for each distance quantile
+[EyesOpenLapsesCount, ~] = assemble_matrix_from_table(TrialsTable, EO & Lapses, 'Radius_Bins', 'tabulate', ...
+    Participants, Sessions, SessionGroups, CheckEyes);
+
+[EyesClosedLapsesCount, ~] = assemble_matrix_from_table(TrialsTable, EC & Lapses, 'Radius_Bins', 'tabulate', ...
+    Participants, Sessions, SessionGroups, CheckEyes);
+
+[TrialsCount, ~] = assemble_matrix_from_table(TrialsTable, [], 'Radius_Bins', 'tabulate', ...
+    Participants, Sessions, SessionGroups, CheckEyes);
+
+% remove participants with too few trials
+MinTrialsSplit = MinTrialCount/numel(unique(Bins));
+TrialsCount(TrialsCount<MinTrialsSplit) = nan;
+
+LapseCount = cat(2, EyesOpenLapsesCount, EyesClosedLapsesCount);
+TrialsCount = cat(2, TrialsCount, TrialsCount);
+LapseCount = 100*LapseCount./TrialsCount; % P x SB x RB
+
+LapseCount = LapseCount(:, [1 3 2 4], :); % EO BL, EC Bl, EO SD, EC SD
+LapseCount = permute(LapseCount, [1 3 2]); % P x RB x SB
+
+% remove participants with any NaNs
+BadParticipants = any(any(isnan(LapseCount), 3), 2);
+LapseCount(BadParticipants, :, :) = nan;
+end
+
+
 %%%%%%%%%%%%%%%%%%%%%%
 %%% plots
 
@@ -296,4 +292,27 @@ chART.plot.stacked_bars(OutcomeCountMeans, {'BL', 'SD'}, [0 100], Legend, ...
 
 set(legend, 'location', 'northwest')
 xlim([0.33 2.66])
+end
+
+
+function plot_lapses_by_threshold(LapseCount, Thresholds, Grid, Position, Letter, PlotProps)
+chART.sub_plot([], Grid, Position, [1 1], true, Letter, PlotProps);
+Red = chART.color_picker([1 4], '', 'red'); % dark red for lapses EC
+chART.plot.average_rows(LapseCount, Thresholds, {}, 'IQ', PlotProps, Red(1, :))
+xlabel('Lapse threshold (s)')
+end
+
+
+function plot_radius_lapses(LapseCount, Grid, Position, Letter, Legend, YLim, PlotProps)
+
+Red = chART.color_picker([1 4], '', 'red'); % dark red for lapses EC
+Colors = [flip(chART.color_picker([1 2], '', 'gray'));
+    chART.color_picker(1, '', 'red');
+    Red(1, :)]; % generic for BL, lapse color for SD
+
+chART.sub_plot([], Grid, Position, [1 1], true, Letter, PlotProps);
+chART.plot.average_rows(LapseCount, [], Legend, 'IQ', PlotProps, Colors)
+ylim(YLim)
+xlabel('Distance from center (quantiles)')
+set(legend, 'Location','northwest')
 end

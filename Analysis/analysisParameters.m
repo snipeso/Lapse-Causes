@@ -11,10 +11,10 @@ Parameters = struct();
 % Who, what, when
 Parameters.Task = 'LAT'; % main analysis is done on LAT, but some parts use PVT
 
-Parameters.Sessions.LAT = {'BaselineBeam', 'MainPre', 'MainPost', ...
-    'Session2Beam1', 'Session2Beam2', 'Session2Beam3'};
+
 Parameters.Sessions.Conditions.BL = {'BaselineBeam',  'MainPre', 'MainPost'};
 Parameters.Sessions.Conditions.SD = { 'Session2Beam1', 'Session2Beam2', 'Session2Beam3'};
+Parameters.Sessions.LAT = [Parameters.Sessions.Conditions.BL, Parameters.Sessions.Conditions.SD];
 
 Parameters.Sessions.PVT = {'BaselineBeam', 'Session2Beam'};
 
