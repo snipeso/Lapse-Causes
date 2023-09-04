@@ -43,11 +43,14 @@ OutcomeCountPVT = assemble_trial_outcome_count(TrialsTablePVT, Participants, Ses
 
 
 %%% get LAT trial data
-load(fullfile(CacheDir, 'PVT_TrialsTable.mat'), 'TrialsTable') % from script Load_Trials
+load(fullfile(CacheDir, 'LAT_TrialsTable.mat'), 'TrialsTable') % from script Load_Trials
 TrialsTableLAT = TrialsTable;
 
 [RTStructLAT, MeansLAT, Quantile99LAT, Quantile01LAT] = assemble_reaction_times( ...
     TrialsTableLAT, Participants, SessionBlocks);
+
+
+OutcomeCountLAT = assemble_trial_outcome_count(TrialsTableLAT, Participants, [SessionBlocks.BL, SessionBlocks.SD], {1:3, 4:6}, MinTrialCount);
 
 
 
@@ -82,8 +85,6 @@ disp(['A: N=', num2str(numel(unique(TrialsTablePVT.Participant)))])
 
 % assemble trial types
 disp('B: ')
-% LegendPVT = Legend;
-% LegendPVT(3) = '';
 plot_trial_outcome(OutcomeCountPVT, Grid, [1, 2], PlotProps.Indexes.Letters{2}, Legend, PlotProps)
 ylabel('% PVT trials')
 legend off
@@ -143,20 +144,10 @@ disp(['D: N=', num2str(numel(unique(TrialsTableLAT.Participant)))])
 
 % assemble data
 disp('E: ')
-[Data, EO_Matrix, EC_Matrix] = assembleLapses(TrialsTableLAT, Participants, Sessions, SessionGroups, MinTrialCount);
-Data = squeeze(mean(Data, 1, 'omitnan')); % average, normalizing totals
-Data = Data(:, TallyOrder);
 
-% plot
-YLim = [0 100];
-XLim = [0.33 2.66];
-
-chART.sub_plot([], Grid, [2, 2], [], true, PlotProps.Indexes.Letters{5}, PlotProps);
-
-plotStackedBars(Data, SessionBlockLabels, YLim, AllTallyLabels, TallyColors, PlotProps)
+plot_trial_outcome(OutcomeCountLAT, Grid, [2, 2], PlotProps.Indexes.Letters{5}, ...
+    Legend, PlotProps)
 ylabel('% LAT trials')
-set(legend, 'location', 'northwest')
-xlim(XLim)
 
 
 %%% F: plot change in lapses with distance
