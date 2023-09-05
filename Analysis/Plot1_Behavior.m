@@ -1,10 +1,7 @@
-% plot outcome of tasks, to compare PVT and LAT
-
-
+% plot outcome of task performance, to compare PVT and LAT
 clear
 clc
 close all
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% parameters
@@ -50,9 +47,8 @@ TrialsTableLAT = TrialsTable;
 [RTStructLAT, MeansLAT, Quantile99LAT, Quantile01LAT] = assemble_reaction_times( ...
     TrialsTableLAT, Participants, SessionBlocks);
 
-
 OutcomeCountLAT = assemble_trial_outcome_count(TrialsTableLAT, Participants, ...
-   Sessions.LAT, {1:3, 4:6}, MinTrialCount);
+    Sessions.LAT, {1:3, 4:6}, MinTrialCount);
 
 RadiusQuantile = 1/6; % bin size for quantiles
 LapseCountLAT = lapse_count_by_radius(TrialsTableLAT, RadiusQuantile, Participants, ...
@@ -86,7 +82,7 @@ ylabel('% PVT trials')
 legend off
 
 % C: proportion of trials as lapses
- plot_lapses_by_threshold(LapseCountPVT, Thresholds, Grid, [1 3], PlotProps.Indexes.Letters{3}, PlotProps)
+plot_lapses_by_threshold(LapseCountPVT, Thresholds, Grid, [1 3], PlotProps.Indexes.Letters{3}, PlotProps)
 ylabel('PVT lapses with EC (% lapses)')
 
 
@@ -270,7 +266,7 @@ TallyColors = [Red(1, :); flip(chART.color_picker(3))];
 
 chART.sub_plot([], Grid, Position, [], true, Letter, PlotProps);
 chART.plot.stacked_bars(OutcomeCountMeans, {'BL', 'SD'}, [0 100], Legend, ...
-   PlotProps, TallyColors)
+    PlotProps, TallyColors)
 
 set(legend, 'location', 'northwest')
 xlim([0.33 2.66])
@@ -385,7 +381,7 @@ disp('*')
 
 %%% PVT
 disp('---PVT---')
-    TrialsTablePVT.Type = OldTypesPVT;
+TrialsTablePVT.Type = OldTypesPVT;
 [Data, EO_Matrix, EC_Matrix] = assembleLapses(TrialsTablePVT, Participants, [Sessions_PVT(2), Sessions_PVT(2)], [],  MinTrialCount);
 
 % just lapses
