@@ -18,7 +18,6 @@ SessionBlocks = Parameters.Sessions.Conditions;
 SessionBlockLabels = fieldnames(SessionBlocks);
 Sessions = Parameters.Sessions;
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Load trial data
 
@@ -80,68 +79,66 @@ figure('Units','centimeters', 'Position',[0 0  PlotProps.Figure.Width, PlotProps
 %%%%%%%%%%%%%%%%%%%%%%%%%
 %%% PVT
 
-%%% A: Reaction time distributions
+% A: Reaction time distributions
 plot_RTs(RTStructPVT, Grid, [1 1], PlotProps.Indexes.Letters{1}, PlotProps, [.5 2.5], [ 0.1  1.01])
 ylabel('PVT reaction times (s)')
 
-disp(['A: N=', num2str(numel(unique(TrialsTablePVT.Participant)))])
+disp(['A: N=', num2str(numel(fieldnames(RTStructPVT.BL)))])
 
-
-%%% B: Proportion of trials
-
-% assemble trial types
+% B: Proportion of trials
 plot_trial_outcome(OutcomeCountPVT, Grid, [1, 2], PlotProps.Indexes.Letters{2}, Legend, PlotProps)
 ylabel('% PVT trials')
 legend off
 
-%%% C: proportion of trials as lapses
+disp(['B: N=' num2str(sum(~isnan(mean(mean(OutcomeCountPVT, 2), 3))))])
 
-% plot
+% C: proportion of trials as lapses
  plot_lapses_by_threshold(LapseCountPVT, Thresholds, Grid, [1 3], PlotProps.Indexes.Letters{3}, PlotProps)
 ylabel('PVT lapses with EC (% lapses)')
 
-disp_stats_descriptive(LapseCountPVT(:, 3), 'Proportion of PVT Lapses:', '%', 0);
+disp(['C: N=', num2str(nnz(~isnan(mean(LapseCountPVT, 2))))])
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% LAT
 
-%%% D: Reaction time distributions
+% D: Reaction time distributions
 plot_RTs(RTStructLAT, Grid, [2 1], PlotProps.Indexes.Letters{4}, PlotProps, [.5 2.5], [ 0.1  1.01])
 ylabel('LAT reaction times (s)')
 
-disp(['D: N=', num2str(numel(unique(TrialsTableLAT.Participant)))])
+disp(['D: N=', num2str(numel(fieldnames(RTStructLAT.BL)))])
 
 
-%%% E: Proportion of trials
-
-% assemble data
-disp('E: ')
-
+% E: Proportion of trials
 plot_trial_outcome(OutcomeCountLAT, Grid, [2, 2], PlotProps.Indexes.Letters{5}, ...
     Legend, PlotProps)
 ylabel('% LAT trials')
 
+disp(['E: N=' num2str(sum(~isnan(mean(mean(OutcomeCountLAT, 2), 3))))])
 
-%%% F: plot change in lapses with distance
 
-% plot parameters
-% disp(['F: N=' num2str(nnz(~BadParticipants))])
+% F: plot change in lapses with distance
 LegendRadius = {'BL, EO', 'BL, EC', 'SD, EO', 'SD, EC'};
 plot_radius_lapses(LapseCountLAT, Grid, [2 3], PlotProps.Indexes.Letters{6}, ...
     LegendRadius, [0 60], PlotProps)
 ylabel('LAT lapses (% trials)')
 
+disp(['F: N=', num2str(nnz(~isnan(mean(mean(LapseCountLAT, 2), 3))))])
 
 chART.save_figure('Figure_1', Paths.Results, PlotProps)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% statistics
+%% statistics
+
+
+
+disp_stats_descriptive(LapseCountPVT(:, 3), 'Proportion of PVT Lapses:', '%', 0);
 
 
 
 
+
+%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
 
