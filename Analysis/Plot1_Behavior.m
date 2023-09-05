@@ -21,7 +21,6 @@ StatParameters = Parameters.Stats;
 
 CacheDir = fullfile(Paths.Cache, "C_Assemble_Trial_Information/");
 
-
 %%% Get PVT trial data
 load(fullfile(CacheDir, 'PVT_TrialsTable.mat'), 'TrialsTable') % from script Load_Trials
 TrialsTablePVT = TrialsTable;
@@ -124,6 +123,7 @@ describe_reaction_times(MeansLAT, Quantile99LAT, StatParameters)
 disp('---LAT---')
 describe_lapses(EyesOpenOutcomeCount, EyesClosedOutcomeCount, StatParameters)
 
+describe_lapses_by_radius(LapseCountLAT)
 
 %%% PVT
 [EyesOpenOutcomeCount, EyesClosedOutcomeCount] = count_trials_by_eye_status( ...
@@ -414,17 +414,17 @@ disp('______________________')
 end
 
 
-function lapses_by_quantile()
+function describe_lapses_by_radius(LapseCount)
 % close lapses
-disp_stats_descriptive(squeeze(LapseTally(:, 1, 1)), 'BL EO close lapses', '%', '%.1f');
+disp_stats_descriptive(squeeze(LapseCount(:, 1, 1)), 'BL EO close lapses', '%', '%.1f');
 
 % far lapses
-disp_stats_descriptive(squeeze(LapseTally(:, end, 1)), 'BL EO far lapses', '%', '%.1f');
+disp_stats_descriptive(squeeze(LapseCount(:, end, 1)), 'BL EO far lapses', '%', '%.1f');
 disp('*')
 
 % each distance
-for Indx_Q = 1:size(LapseTally, 2)
-    disp_stats_descriptive(squeeze(LapseTally(:, Indx_Q, 3)-LapseTally(:, Indx_Q, 1)), ... ...
+for Indx_Q = 1:size(LapseCount, 2)
+    disp_stats_descriptive(squeeze(LapseCount(:, Indx_Q, 3)-LapseCount(:, Indx_Q, 1)), ... ...
         ['BL v SD EO lapses Q', num2str(Indx_Q)], '%', '%.1f');
 end
 disp('*')
