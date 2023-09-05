@@ -14,6 +14,7 @@ MinTrialCount = Parameters.Trials.MinTotalCount;
 SessionBlocks = Parameters.Sessions.Conditions;
 SessionBlockLabels = fieldnames(SessionBlocks);
 Sessions = Parameters.Sessions;
+StatParameters = Parameters.Stats;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Load trial data
@@ -50,8 +51,9 @@ TrialsTableLAT = TrialsTable;
 OutcomeCountLAT = assemble_trial_outcome_count(TrialsTableLAT, Participants, ...
     Sessions.LAT, {1:3, 4:6}, MinTrialCount);
 
+
 RadiusQuantile = 1/6; % bin size for quantiles
-LapseCountLAT = lapse_count_by_radius(TrialsTableLAT, RadiusQuantile, Participants, ...
+[LapseCountLAT, RadiusBinsLAT] = lapse_count_by_radius(TrialsTableLAT, RadiusQuantile, Participants, ...
     Sessions.LAT, {1:3, 4:6}, MinTrialCount);
 
 
@@ -92,8 +94,7 @@ plot_RTs(RTStructLAT, Grid, [2 1], PlotProps.Indexes.Letters{4}, PlotProps, [.5 
 ylabel('LAT reaction times (s)')
 
 % E: Proportion of trials
-plot_trial_outcome(OutcomeCountLAT, Grid, [2, 2], PlotProps.Indexes.Letters{5}, ...
-    Legend, PlotProps)
+plot_trial_outcome(OutcomeCountLAT, Grid, [2, 2], PlotProps.Indexes.Letters{5}, Legend, PlotProps)
 ylabel('% LAT trials')
 
 % F: plot change in lapses with distance
@@ -109,12 +110,32 @@ chART.save_figure('Figure_1', Paths.Results, PlotProps)
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% statistics
 
+clc
+
+describe_reaction_times(MeansLAT, Quantile99LAT, StatParameters)
+
+% disp_stats_descriptive(LapseCountPVT(:, 3), 'Proportion of PVT Lapses:', '%', 0);
+
+%%% LAT
+% determine proportion of lapses with eyes opened and closed
+[EyesOpenOutcomeCount, EyesClosedOutcomeCount] = count_trials_by_eye_status( ...
+    TrialsTableLAT, Participants,  Sessions.LAT, {1:3, 4:6});
+
+disp('---LAT---')
+describe_lapses(EyesOpenOutcomeCount, EyesClosedOutcomeCount, StatParameters)
 
 
-disp_stats_descriptive(LapseCountPVT(:, 3), 'Proportion of PVT Lapses:', '%', 0);
+%%% PVT
+[EyesOpenOutcomeCount, EyesClosedOutcomeCount] = count_trials_by_eye_status( ...
+    TrialsTablePVT, Participants,  Sessions.PVT, []);
+
+disp('---PVT---')
+describe_lapses(EyesOpenOutcomeCount, EyesClosedOutcomeCount, StatParameters)
 
 
+%%
 
+anova_radius_sleep(LapseCountLAT, RadiusBinsLAT, StatParameters)
 
 
 %%
@@ -196,7 +217,7 @@ end
 end
 
 
-function LapseCount = lapse_count_by_radius(TrialsTable, RadiusQuantile, Participants, Sessions, SessionGroups, MinTrialCount)
+function [LapseCount, RadiusBins] = lapse_count_by_radius(TrialsTable, RadiusQuantile, Participants, Sessions, SessionGroups, MinTrialCount)
 
 CheckEyes = true;
 
@@ -208,8 +229,8 @@ Lapses = TrialsTable.Type == 1;
 % assign a distance quantile for each trial
 Radius = TrialsTable.Radius;
 Edges = quantile(Radius(:), 0:RadiusQuantile:1);
-Bins = discretize(Radius, Edges);
-TrialsTable.Radius_Bins = Bins;
+RadiusBins = discretize(Radius, Edges);
+TrialsTable.Radius_Bins = RadiusBins;
 
 % get number of lapses for each distance quantile
 [EyesOpenLapsesCount, ~] = assemble_matrix_from_table(TrialsTable, EO & Lapses, 'Radius_Bins', 'tabulate', ...
@@ -222,7 +243,7 @@ TrialsTable.Radius_Bins = Bins;
     Participants, Sessions, SessionGroups, CheckEyes);
 
 % remove participants with too few trials
-MinTrialsSplit = MinTrialCount/numel(unique(Bins));
+MinTrialsSplit = MinTrialCount/numel(unique(RadiusBins));
 TrialsCount(TrialsCount<MinTrialsSplit) = nan;
 
 LapseCount = cat(2, EyesOpenLapsesCount, EyesClosedLapsesCount);
@@ -306,134 +327,107 @@ end
 %%%%%%%%%%%%%%%%%%%%
 %%% statistics
 
-function describe_reaction_times()
+function describe_reaction_times(Means, Quantile99, StatParameters)
 
 %%% RTs
 % change in mean RTs from BL to SD
-dispDescriptive(1000*MeansLAT(:, 1),'BL RT', ' ms', '%.0f');
-dispDescriptive(1000*MeansLAT(:, 2),'SD RT', ' ms', '%.0f');
+disp_stats_descriptive(1000*Means(:, 1),'BL RT', ' ms', '%.0f');
+disp_stats_descriptive(1000*Means(:, 2),'SD RT', ' ms', '%.0f');
 
-Stats = paired_ttest(MeansLAT(:, 1), MeansLAT(:, 2), StatsP);
+Stats = paired_ttest(Means(:, 1), Means(:, 2), StatParameters);
 disp_stats(Stats, [1 1], 'SD effect on RTs:');
 
 % distribution of RTs to show that they don't go over 1s
 SB_Indx = 2;
-dispDescriptive(1000*Quantile99LAT(:, SB_Indx), 'RT for 99% of SD data:', ' ms', 0);
+disp_stats_descriptive(1000*Quantile99(:, SB_Indx), 'RT for 99% of SD data:', ' ms', 0);
+disp('______________________')
 end
 
 
-function display_lapse_outcome()
-% TODO
-
-% display how much data is in not-plotted task types
-NotPlotted = 100*mean(sum(EyesClosedOutcomeCount(:, :, 2:3), 3)./TotalTrialsCount, 'omitnan');
-
-% indicate how much data was removed
-disp(['N=', num2str(numel(BadParticipants) - nnz(BadParticipants))])
-disp(['Not plotted data: ', num2str(NotPlotted(2), '%.2f'), '%'])
-
-
-% indicate proportion of lapses that are eyes-closed
-EOL = squeeze(LapsesCount(:, 2, 1));
-ECL = squeeze(LapsesCount(:, 2, 4));
-
-disp_stats_descriptive( 100*ECL./(EOL+ECL), 'EC lapses:', '% lapses', 0);
-disp_stats_descriptive(ECL, 'EC lapses:', '% tot', 0);
-
-
-% total number of lapses
-OutcomeCount(:, :, 1) =  OutcomeCount(:, :, 1) + OutcomeCount(:, :, 4);
-OutcomeCount = OutcomeCount(:, :, 1:3);
-
-D = 100*OutcomeCount./TotalTrialsCount;
-disp_stats_descriptive(squeeze(D(:, 1, 1)), 'BL lapses:', '% tot', 0);
-disp_stats_descriptive(squeeze(D(:, 2, 1)), 'SD lapses:', '% tot', 0);
-
-end
+% function display_lapse_outcome()
+% % TODO
+%
+% % display how much data is in not-plotted task types
+% % NotPlotted = 100*mean(sum(EyesClosedOutcomeCount(:, :, 2:3), 3)./TotalTrialsCount, 'omitnan');
+% %
+% % disp(['Not plotted data: ', num2str(NotPlotted(2), '%.2f'), '%'])
+%
+%
+% % indicate proportion of lapses that are eyes-closed
+% EOL = squeeze(LapsesCount(:, 2, 1));
+% ECL = squeeze(LapsesCount(:, 2, 4));
+%
+% disp_stats_descriptive( 100*ECL./(EOL+ECL), 'EC lapses:', '% lapses', 0);
+% disp_stats_descriptive(ECL, 'EC lapses:', '% tot', 0);
+%
+%
+% % total number of lapses
+% OutcomeCount(:, :, 1) =  OutcomeCount(:, :, 1) + OutcomeCount(:, :, 4);
+% OutcomeCount = OutcomeCount(:, :, 1:3);
+%
+% D = 100*OutcomeCount./TotalTrialsCount;
+% disp_stats_descriptive(squeeze(D(:, 1, 1)), 'BL lapses:', '% tot', 0);
+% disp_stats_descriptive(squeeze(D(:, 2, 1)), 'SD lapses:', '% tot', 0);
+% disp('______________________')
+% end
 
 
-function describe_lapses()
-
-
-
-%%% LAT
-disp('---LAT---')
-[Data, EO_Matrix, EC_Matrix] = assembleLapses(TrialsTableLAT, Participants, Sessions, SessionGroups, MinTrialCount);
+function describe_lapses(EyesOpenOutcomeCount, EyesClosedOutcomeCount, StatParameters)
 
 % just lapses
-Tots = EO_Matrix(:, :, 1) + EC_Matrix(:, :, 1);
-ECvEO_Lapses = 100*EO_Matrix(:, :, 1)./Tots;
+TrialCount = EyesOpenOutcomeCount(:, :, 1) + EyesClosedOutcomeCount(:, :, 1);
+ECvEOLapses = 100*EyesOpenOutcomeCount(:, :, 1)./TrialCount;
 
 % all
-Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
-EOvAll_Matrix = 100*EO_Matrix(:, :, 1)./Tots; % Matrix is EO lapses, late, correct, EC lapses
+TrialCount = sum(EyesOpenOutcomeCount, 3)+sum(EyesClosedOutcomeCount, 3);
+EOvAllTrialsMatrix = 100*EyesOpenOutcomeCount(:, :, 1)./TrialCount; % Matrix is EO lapses, late, correct, EC lapses
 
 
 % proportion of EC lapses out of overall lapses
-dispDescriptive(squeeze(ECvEO_Lapses(:, 2)), 'SD EO vs All Lapses', '%', '%.0f');
-dispDescriptive(squeeze(EOvAll_Matrix(:, 1)), 'BL EO vs All Trials', '%', '%.0f');
-dispDescriptive(squeeze(EOvAll_Matrix(:, 2)), 'SD EO vs All Trials', '%', '%.0f');
+disp_stats_descriptive(squeeze(ECvEOLapses(:, 2)), 'SD EO vs All Lapses', '%', '%.0f');
+disp_stats_descriptive(squeeze(EOvAllTrialsMatrix(:, 1)), 'BL EO vs All Trials', '%', '%.0f');
+disp_stats_descriptive(squeeze(EOvAllTrialsMatrix(:, 2)), 'SD EO vs All Trials', '%', '%.0f');
 
-Stats = paired_ttest(EOvAll_Matrix(:, 1), EOvAll_Matrix(:, 2), StatsP);
+Stats = paired_ttest(EOvAllTrialsMatrix(:, 1), EOvAllTrialsMatrix(:, 2), StatParameters);
 disp_stats(Stats, [1 1], 'SD effect on EO lapses:');
-disp('*')
 
-
-%%% PVT
-disp('---PVT---')
-TrialsTablePVT.Type = OldTypesPVT;
-[Data, EO_Matrix, EC_Matrix] = assembleLapses(TrialsTablePVT, Participants, [Sessions_PVT(2), Sessions_PVT(2)], [],  MinTrialCount);
-
-% just lapses
-Tots = EO_Matrix(:, :, 1) + EC_Matrix(:, :, 1);
-ECvEO_Lapses = 100*EO_Matrix(:, :, 1)./Tots;
-
-% all
-Tots = sum(EO_Matrix, 3)+sum(EC_Matrix, 3);
-EOvAll_Matrix = 100*EO_Matrix(:, :, 1)./Tots; % Matrix is EO lapses, late, correct, EC lapses
-
-
-% proportion of EC lapses out of overall lapses
-dispDescriptive(squeeze(ECvEO_Lapses(:, 2)), 'SD EO vs All Lapses', '%', '%.0f');
-dispDescriptive(squeeze(EOvAll_Matrix(:, 2)), 'SD EO vs All Trials', '%', '%.0f');
-disp('*')
+disp('______________________')
 end
 
 
-function anova_radius_sleep()
+function anova_radius_sleep(LapseCount, RadiusBins, StatParameters)
 
 % all radii
-Stats_Radius = anova2way(LapseTally(:, :, [1 3]), {'Distance', 'Time'}, string(1:numel(unique(Bins))), ...
-    {'BL', 'SD'}, StatsP);
+StatsRadius = anova2way(LapseCount(:, :, [1 3]), {'Distance', 'Time'}, string(1:numel(unique(RadiusBins))), ...
+    {'BL', 'SD'}, StatParameters);
 
 % exluding last two radii
-Stats_Radius_Redux = anova2way(LapseTally(:, 1:3, [1 3]), {'Distance', 'Time'}, string(1:numel(unique(Bins))), ...
-    {'BL', 'SD'}, StatsP);
+StatsRadiusRedux = anova2way(LapseCount(:, 1:3, [1 3]), {'Distance', 'Time'}, string(1:numel(unique(RadiusBins))), ...
+    {'BL', 'SD'}, StatParameters);
+
+% all distance
+disp_stats(StatsRadius, {'Distance', 'Time', 'Interaction'}, 'Distance vs Time:');
+disp_stats(StatsRadiusRedux, {'Distance', 'Time', 'Interaction'}, 'Distance vs Time, first 3 quantiles:');
 
 
+disp('______________________')
 end
 
 
 function lapses_by_quantile()
 % close lapses
-dispDescriptive(squeeze(LapseTally(:, 1, 1)), 'BL EO close lapses', '%', '%.1f');
+disp_stats_descriptive(squeeze(LapseTally(:, 1, 1)), 'BL EO close lapses', '%', '%.1f');
 
 % far lapses
-dispDescriptive(squeeze(LapseTally(:, end, 1)), 'BL EO far lapses', '%', '%.1f');
+disp_stats_descriptive(squeeze(LapseTally(:, end, 1)), 'BL EO far lapses', '%', '%.1f');
 disp('*')
 
 % each distance
 for Indx_Q = 1:size(LapseTally, 2)
-    dispDescriptive(squeeze(LapseTally(:, Indx_Q, 3)-LapseTally(:, Indx_Q, 1)), ... ...
+    disp_stats_descriptive(squeeze(LapseTally(:, Indx_Q, 3)-LapseTally(:, Indx_Q, 1)), ... ...
         ['BL v SD EO lapses Q', num2str(Indx_Q)], '%', '%.1f');
 end
 disp('*')
 
-
-% all distance
-disp_stats(Stats_Radius, {'Distance', 'Time', 'Interaction'}, 'Distance vs Time:');
-disp_stats(Stats_Radius_Redux, {'Distance', 'Time', 'Interaction'}, 'Distance vs Time, first 3 quantiles:');
-
-
-
+disp('______________________')
 end
