@@ -75,46 +75,30 @@ Legend = {'EC Lapses', 'EO Lapses', 'Slow responses', 'Fast responses'};
 
 figure('Units','centimeters', 'Position',[0 0  PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
 
-
-%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% PVT
-
 % A: Reaction time distributions
 plot_RTs(RTStructPVT, Grid, [1 1], PlotProps.Indexes.Letters{1}, PlotProps, [.5 2.5], [ 0.1  1.01])
 ylabel('PVT reaction times (s)')
-
-disp(['A: N=', num2str(numel(fieldnames(RTStructPVT.BL)))])
 
 % B: Proportion of trials
 plot_trial_outcome(OutcomeCountPVT, Grid, [1, 2], PlotProps.Indexes.Letters{2}, Legend, PlotProps)
 ylabel('% PVT trials')
 legend off
 
-disp(['B: N=' num2str(sum(~isnan(mean(mean(OutcomeCountPVT, 2), 3))))])
-
 % C: proportion of trials as lapses
  plot_lapses_by_threshold(LapseCountPVT, Thresholds, Grid, [1 3], PlotProps.Indexes.Letters{3}, PlotProps)
 ylabel('PVT lapses with EC (% lapses)')
 
-disp(['C: N=', num2str(nnz(~isnan(mean(LapseCountPVT, 2))))])
-
 
 %%% LAT
-
 % D: Reaction time distributions
 plot_RTs(RTStructLAT, Grid, [2 1], PlotProps.Indexes.Letters{4}, PlotProps, [.5 2.5], [ 0.1  1.01])
 ylabel('LAT reaction times (s)')
-
-disp(['D: N=', num2str(numel(fieldnames(RTStructLAT.BL)))])
-
 
 % E: Proportion of trials
 plot_trial_outcome(OutcomeCountLAT, Grid, [2, 2], PlotProps.Indexes.Letters{5}, ...
     Legend, PlotProps)
 ylabel('% LAT trials')
-
-disp(['E: N=' num2str(sum(~isnan(mean(mean(OutcomeCountLAT, 2), 3))))])
-
 
 % F: plot change in lapses with distance
 LegendRadius = {'BL, EO', 'BL, EC', 'SD, EO', 'SD, EC'};
@@ -122,7 +106,6 @@ plot_radius_lapses(LapseCountLAT, Grid, [2 3], PlotProps.Indexes.Letters{6}, ...
     LegendRadius, [0 60], PlotProps)
 ylabel('LAT lapses (% trials)')
 
-disp(['F: N=', num2str(nnz(~isnan(mean(mean(LapseCountLAT, 2), 3))))])
 
 chART.save_figure('Figure_1', Paths.Results, PlotProps)
 
@@ -270,6 +253,8 @@ chART.plot.overlapping_distributions(DataStruct, PlotProps, PlotProps.Color.Part
 xlim(XLim)
 ylim(YLim)
 legend off
+
+disp([Letter, ': N=', num2str(numel(fieldnames(DataStruct.BL)))])
 end
 
 
@@ -289,6 +274,8 @@ chART.plot.stacked_bars(OutcomeCountMeans, {'BL', 'SD'}, [0 100], Legend, ...
 
 set(legend, 'location', 'northwest')
 xlim([0.33 2.66])
+
+disp([Letter, ': N=' num2str(sum(~isnan(mean(mean(OutcomeCount, 2), 3))))])
 end
 
 
@@ -297,6 +284,8 @@ chART.sub_plot([], Grid, Position, [1 1], true, Letter, PlotProps);
 Red = chART.color_picker([1 4], '', 'red'); % dark red for lapses EC
 chART.plot.average_rows(LapseCount, Thresholds, {}, 'IQ', PlotProps, Red(1, :))
 xlabel('Lapse threshold (s)')
+
+disp([Letter, ': N=', num2str(nnz(~isnan(mean(LapseCount, 2))))])
 end
 
 
@@ -312,6 +301,8 @@ chART.plot.average_rows(LapseCount, [], Legend, 'IQ', PlotProps, Colors)
 ylim(YLim)
 xlabel('Distance from center (quantiles)')
 set(legend, 'Location','northwest')
+
+disp([Letter, ': N=', num2str(nnz(~isnan(mean(mean(LapseCount, 2), 3))))])
 end
 
 
