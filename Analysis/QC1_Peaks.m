@@ -42,19 +42,19 @@ for Indx_P = 1:numel(Participants)
         for Indx_S = 1:numel(Sessions)  % gather information for all the sessions in the block
 
             % load burst data
-            Bursts = loadMATFile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'Bursts');
+            Bursts = load_datafile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'Bursts');
             if isempty(Bursts); continue; end
 
            
 
             % load peak data
-            Peaks = loadMATFile(PeakPath, Participants{Indx_P}, Sessions{Indx_S}, 'TopPeaks');
+            Peaks = load_datafile(PeakPath, Participants{Indx_P}, Sessions{Indx_S}, 'TopPeaks');
             if isempty(Peaks); continue; end
 
             TotPeaks(Indx_P, Indx_SB) = numel(Peaks);
 
             % load in EEG data
-            EEG = loadMATFile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'EEG');
+            EEG = load_datafile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'EEG');
             Pnts = EEG.pnts;
             ValidTime = EEG.valid_t; % vector of 1s of all the time in which the task was active, and there wasn't noise
 

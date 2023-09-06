@@ -33,10 +33,10 @@ for Indx_P = 1:numel(Participants)
         nTrials = nnz(CurrentTrials);
 
         % load in burst data
-        Bursts = loadMATFile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'Bursts');
+        Bursts = load_datafile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'Bursts');
         if isempty(Bursts); continue; end
 
-        EEG = loadMATFile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'EEG');
+        EEG = load_datafile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'EEG');
         Pnts = EEG.pnts;
         t_valid = EEG.valid_t; % has info of what timepoints were noise
 

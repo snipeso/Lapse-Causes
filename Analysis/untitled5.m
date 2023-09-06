@@ -64,23 +64,23 @@ for Indx_P = 1:numel(Participants)
             %%% load data
 
             % load EEG data
-            EEG = loadMATFile(EEGPath, Participants{Indx_P}, Sessions{Indx_S}, 'EEG');
+            EEG = load_datafile(EEGPath, Participants{Indx_P}, Sessions{Indx_S}, 'EEG');
             if isempty(EEG); continue; end
             Data = EEG.data;
 
             % load bursts
-            Bursts = loadMATFile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'Bursts');
+            Bursts = load_datafile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'Bursts');
             if isempty(Bursts); continue; end
 
             % load in EEG metadata
-            EEG = loadMATFile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'EEG');
+            EEG = load_datafile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'EEG');
 
             Pnts = EEG.pnts;
             ValidTime = EEG.valid_t; % vector of 1s of all the time in which the task was active, and there wasn't noise
 
 
             % load eye-data
-            Eyes = loadMATFile(EyePath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
+            Eyes = load_datafile(EyePath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
             if isempty(Eyes); continue; end
 
             if isnan(Eyes.DQ) || Eyes.DQ == 0

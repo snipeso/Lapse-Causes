@@ -75,7 +75,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
                 strcmp(Trials.Session, Sessions{idxSession}) & Trials.Radius < MaxStimulusDistance);
 
             % load in eye data
-            Eyes = loadMATFile(EyetrackingPath, Participants{idxParticipant}, Sessions{idxSession}, 'Eyes');
+            Eyes = load_datafile(EyetrackingPath, Participants{idxParticipant}, Sessions{idxSession}, 'Eyes');
             if isempty(Eyes); continue; end
 
             if isnan(Eyes.DQ) || Eyes.DQ == 0

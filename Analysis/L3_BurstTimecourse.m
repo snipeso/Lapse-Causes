@@ -96,10 +96,10 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
 
             %%% load in burst data
-            Bursts = loadMATFile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'AllBursts');
+            Bursts = load_datafile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'AllBursts');
             if isempty(Bursts); continue; end
 
-            EEG = loadMATFile(WholeBurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'EEG');
+            EEG = load_datafile(WholeBurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'EEG');
             Pnts = EEG.pnts;
             t_valid = EEG.valid_t;
             Chanlocs = EEG.chanlocs;
@@ -114,7 +114,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
             if CheckEyes
 
                 % load in eye data
-                Eyes = loadMATFile(EyePath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
+                Eyes = load_datafile(EyePath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
                 if isempty(Eyes); continue; end
 
                 if isnan(Eyes.DQ) || Eyes.DQ == 0

@@ -23,7 +23,7 @@ for Indx_P = 1:numel(Participants)
         Indx = Indx+1;
 
         Path = fullfile(Paths.Data, 'Pupils', Task);
-        Pupil = loadMATFile(Path, Participants{Indx_P}, Sessions{Indx_S}, 'Pupil');
+        Pupil = load_datafile(Path, Participants{Indx_P}, Sessions{Indx_S}, 'Pupil');
         if isempty(Pupil); continue; end
 
         subplot(5, numel(Sessions), Indx);

@@ -29,7 +29,7 @@ for Indx_P = 1:numel(Participants)
             strcmp(TrialsTable.Session, Sessions{Indx_S}));
 
         % load in eye data
-        Eyes = loadMATFile(EyePath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
+        Eyes = load_datafile(EyePath, Participants{Indx_P}, Sessions{Indx_S}, 'Eyes');
         if isempty(Eyes);continue;end
 
         % only consider time of task (so that it ignores bad data from

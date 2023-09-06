@@ -14,6 +14,7 @@ OnlyClosestStimuli = true; % only use closest trials
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
 Task = Parameters.Task;
+Participants = Parameters.Participants;
 TrialWindow = Parameters.Trials.Window;
 SampleRate = Parameters.SampleRate;
 ConfidenceThreshold = Parameters.EyeTracking.MinConfidenceThreshold;
@@ -76,15 +77,13 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
                 strcmp(TrialsTable.Session, Sessions{idxSession}) & TrialsTable.Radius < MaxStimulusDistance);
 
             % load in eye data
-            Eyes = loadMATFile(EyetrackingPath, Participants{idxParticipant}, Sessions{idxSession}, 'Eyes');
+            Eyes = load_datafile(EyetrackingPath, Participants{idxParticipant}, Sessions{idxSession}, 'Eyes');
             if isempty(Eyes); continue; end
-            EEGMetadata = loadMATFile(EyetrackingPath, Participants{idxParticipant}, Sessions{idxSession}, 'EEGMetadata');
+            EEGMetadata = load_datafile(EyetrackingPath, Participants{idxParticipant}, Sessions{idxSession}, 'EEGMetadata');
 
             CleanEyeIndex = EyetrackingQualityTable.(Sessions{idxSession})(strcmp(EyetrackingQualityTable.Participant, Participants{idxParticipant}));
-
             EyeClosed = clean_eyeclosure_data(Eyes, EEGMetadata, Triggers, CleanEyeIndex, SampleRate, ConfidenceThreshold);
-
-            [Starts, Ends] = window_timepoints(EEGMetadata, Triggers, TrialWindow);
+TrialData = chop_trials(Data, SampleRate, EEGMetadata.events, Trigger, TrialWindow);
 
 
             % cut out each trial

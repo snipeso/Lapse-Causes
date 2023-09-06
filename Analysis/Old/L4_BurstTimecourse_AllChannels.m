@@ -59,10 +59,10 @@ for Indx_P = 1:numel(Participants)
         nTrials = nnz(CurrentTrials);
 
         % load in eye data
-        Bursts = loadMATFile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'AllBursts');
+        Bursts = load_datafile(BurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'AllBursts');
         if isempty(Bursts); continue; end
 
-        EEG = loadMATFile(WholeBurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'EEG');
+        EEG = load_datafile(WholeBurstPath, Participants{Indx_P}, Sessions{Indx_S}, 'EEG');
         Pnts = EEG.pnts;
         t_valid = EEG.valid_t;
                 Chanlocs = EEG.chanlocs;
