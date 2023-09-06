@@ -10,7 +10,6 @@ close all
 
 OnlyClosestStimuli = true; % only use closest trials
 
-
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
 Task = Parameters.Task;
@@ -24,14 +23,11 @@ SessionBlocks = Parameters.Sessions.Conditions;
 Triggers = Parameters.Triggers;
 MinTrials = Parameters.Trials.MinPerSubGroupCount;
 
-
-
 EyetrackingPath = fullfile(Paths.Data, 'Pupils', ['Raw_', num2str(SampleRate), 'Hz'], Task);
 CacheDir = fullfile(Paths.Cache, 'Trial_Information');
 CacheFilename = [Task, '_TrialsTable.mat'];
 
 SessionBlockLabels = fieldnames(SessionBlocks);
-
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -68,7 +64,8 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
         [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, EyeclosureTimepointCount] = ...
             pool_eyeclosure_trials(TrialsTable, EyetrackingQualityTable, EyetrackingPath, ...
-            Participants{idxParticipant}, Sessions, MaxStimulusDistance, TrialWindow, Triggers, SampleRate);
+            Participants{idxParticipant}, Sessions, MaxStimulusDistance, TrialWindow, ...
+            Triggers, SampleRate, ConfidenceThreshold);
 
         if isempty(PooledTrialsTable)
             warning('empty table')
@@ -88,10 +85,8 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
     end
 
     %%% save
-    save(fullfile(Pool, ['ProbMicrosleep_', SessionBlockLabels{Indx_SB}, TitleTag, '.mat']), 'ProbEyesClosedStimLocked', 'ProbEyesClosedRespLocked', 'TrialTime', 'ProbabilityEyesClosed')
-
-
-
+    save(fullfile(Pool, ['ProbMicrosleep_', SessionBlockLabels{Indx_SB}, TitleTag, '.mat']), ...
+        'ProbEyesClosedStimLocked', 'ProbEyesClosedRespLocked', 'TrialTime', 'ProbabilityEyesClosed')
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -99,7 +94,7 @@ end
 
 function [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, EyeclosureTimepointCount] = ...
     pool_eyeclosure_trials(TrialsTable, EyetrackingQualityTable, EyetrackingPath, ...
-    Participant, Sessions, MaxStimulusDistance, TrialWindow, Triggers, SampleRate)
+    Participant, Sessions, MaxStimulusDistance, TrialWindow, Triggers, SampleRate, ConfidenceThreshold)
 % EyeclosureTimepointCount is a 1 x 2 array indicating the total number of 
 % points in the pooled sessions that has eyes closed and the total number of 
 % points.
