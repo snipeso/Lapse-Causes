@@ -105,16 +105,18 @@ for Participant = Participants'
         EEGMetadata = load_datafile(EyetrackingDir, Participant{1}, Session{1}, 'EEGMetadata');
         SampleRate = EEGMetadata.srate;
 
-        [Starts, Ends] = window_timepoints(EEGMetadata, Triggers, TrialWindow);
-        if numel(Starts) ~=nTrials
+        % detrmine if eyes were closed during trial
+        CleanEyeIndx = EyetrackingQualityTable.(Session{1})(strcmp(EyetrackingQualityTable.Participant, Participant{1}));
+        EyeClosed = clean_eyeclosure_data(Eyes, EEGMetadata, Triggers, CleanEyeIndx, SampleRate, ConfidenceThreshold);
+
+        EyesClosedTrials = chop_trials(EyeClosed, SampleRate, EEGMetadata.event, Triggers.Stim, TrialWindow);
+
+        if size(EyesClosedTrials, 1) ~=nTrials
             error(['missing trials for ', Participant{1}, Session{1}])
         end
 
-        % detrmine if eyes were closed during trial
-        CleanEyeIndx = EyetrackingQualityTable.(Session{1})(strcmp(EyetrackingQualityTable.Participant, Participant{1}));
- EyeClosed = clean_eyeclosure_data(Eyes, EEGMetadata, Triggers, CleanEyeIndx, SampleRate, ConfidenceThreshold);
-        EyesClosedTrials = did_it_happen(Starts, Ends, EyeClosed, MinEventProportion, MaxNanProportion);
-        TrialsTable.EyesClosed(CurrentTrials) = EyesClosedTrials;
+        EyesWereClosed = did_it_happen(EyesClosedTrials, MinEventProportion, MaxNanProportion);
+        TrialsTable.EyesClosed(CurrentTrials) = EyesWereClosed;
     end
 
     disp(['Finished syncing eye data for ', Participant{1}])
@@ -122,24 +124,12 @@ end
 end
 
 
-function [Starts, Ends] = window_timepoints(EEG, Triggers, Window)
-SampleRate = EEG.srate;
-Latencies = [EEG.event.latency];
-Types = {EEG.event.type};
-StimLatencyIndexes = strcmp(Types, Triggers.Stim);
-StimLatencies = Latencies(StimLatencyIndexes);
-
-Starts = round(StimLatencies-Window(1)*SampleRate);
-Ends = round(StimLatencies+Window(2)*SampleRate);
-end
-
-
-function itHappened = did_it_happen(Starts, Ends, EventVector, MinWindow, MinNanProportion)
-itHappened = nan(size(Starts));
-for idxTrial = 1:numel(Starts)
-    V = EventVector(Starts(idxTrial):Ends(idxTrial));
+function itHappened = did_it_happen(TrialData, MinWindow, MinNanProportion)
+TrialCount = size(TrialData, 1);
+itHappened = nan(TrialCount, 1);
+for idxTrial = 1:TrialCount
+    V = TrialData(idxTrial, :);
     Pnts = numel(V);
-
     if nnz(isnan(V))/Pnts > MinNanProportion
         itHappened(idxTrial) = nan;
     elseif nnz(V==1)/Pnts > MinWindow

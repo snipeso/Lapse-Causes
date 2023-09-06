@@ -38,8 +38,8 @@ SessionBlockLabels = fieldnames(SessionBlocks);
 % get trial information
 load(fullfile(CacheDir, CacheFilename), 'TrialsTable')
 
-    EyetrackingQualityTable = readtable(fullfile(Paths.QualityCheck, 'EyeTracking', ...
-        ['DataQuality_', Task, '_Pupils.csv']));
+EyetrackingQualityTable = readtable(fullfile(Paths.QualityCheck, 'EyeTracking', ...
+    ['DataQuality_', Task, '_Pupils.csv']));
 
 TrialTime = linspace(TrialWindow(1), TrialWindow(2), SampleRate*(TrialWindow(2)-TrialWindow(1))); % time vector
 
@@ -78,14 +78,13 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
             % load in eye data
             Eyes = loadMATFile(EyetrackingPath, Participants{idxParticipant}, Sessions{idxSession}, 'Eyes');
             if isempty(Eyes); continue; end
-                        EEGMetadata = loadMATFile(EyetrackingPath, Participants{idxParticipant}, Sessions{idxSession}, 'EEGMetadata');
+            EEGMetadata = loadMATFile(EyetrackingPath, Participants{idxParticipant}, Sessions{idxSession}, 'EEGMetadata');
 
+            CleanEyeIndex = EyetrackingQualityTable.(Sessions{idxSession})(strcmp(EyetrackingQualityTable.Participant, Participants{idxParticipant}));
 
-           CleanEyeIndex = EyetrackingQualityTable.(Sessions{idxSession})(strcmp(EyetrackingQualityTable.Participant, Participants{idxParticipant}));
+            EyeClosed = clean_eyeclosure_data(Eyes, EEGMetadata, Triggers, CleanEyeIndex, SampleRate, ConfidenceThreshold);
 
-           EyeClosed = clean_eyeclosure_data(Eyes, EEGMetadata, Triggers, CleanEyeIndx, SampleRate, ConfidenceThreshold);
-
-                [Starts, Ends] = window_timepoints(EEGMetadata, Triggers, TrialWindow);
+            [Starts, Ends] = window_timepoints(EEGMetadata, Triggers, TrialWindow);
 
 
             % cut out each trial
