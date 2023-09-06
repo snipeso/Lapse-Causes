@@ -60,8 +60,6 @@ BandIndex = 2;
     Frequencies, Bands, BandIndex);
 
 
-
-
 %%% Plot
 %%%%%%%%%%%%%
 %%
@@ -124,18 +122,6 @@ ylabel('Whitened Power (\muV^2/Hz)')
 ylim([-0.2 5.5])
 
 chART.save_figure('Figure_2', Paths.Results, PlotProps)
-
-
-%% plot theta burstless all participants
-
-figure('units', 'normalized', 'outerposition', [0 0 1 1])
-for idxParticipant = 1:numel(Participants)
-    subplot(4, 5, idxParticipant)
-    plot(Frequencies, squeeze(ThetaPowerBurstlessSpectrum(idxParticipant, :)))
-    title(Participants{idxParticipant})
-    xlim([2 20])
-end
-
 
 
 
