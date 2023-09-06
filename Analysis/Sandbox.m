@@ -10,9 +10,9 @@ BandLabels = fieldnames(Bands);
 %%%% Choose a file
 %%%%
 %%%%
-Task = 'LAT'; % Game, Standing, Fixation
-Session = 'Session2Beam1';
-Participant = 'P14'; % P03 has almost no oscillations, P15 has tons
+Task = 'PVT'; % Game, Standing, Fixation
+Session = 'Session2Beam';
+Participant = 'P04'; % P03 has almost no oscillations, P15 has tons
 %%%%
 %%%%
 %%%%
@@ -36,26 +36,27 @@ EEGNarrowbands = cycy.filter_eeg_narrowbands(EEG, Bands);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% irregular shaped bursts
-Idx = 1; % use this when de-selecting a criteria set
+%%% criteria to find bursts in single channels
+% irregular shaped bursts, few criteria, but needs more cycles
+Idx = 1; % this is to make it easier to skip some
 CriteriaSets = struct();
 CriteriaSets(Idx).PeriodConsistency = .6;
 CriteriaSets(Idx).MonotonicityInAmplitude = .6;
-CriteriaSets(Idx).FlankConsistency = 0.6;
-CriteriaSets(Idx).AmplitudeConsistency = 0.6;
-CriteriaSets(Idx).MinCyclesPerBurst = 4;
+CriteriaSets(Idx).FlankConsistency = .6;
+CriteriaSets(Idx).AmplitudeConsistency = .6;
+CriteriaSets(Idx).MinCyclesPerBurst = 5;
 % % without periodneg, to capture bursts that accelerate/decelerate
 
-% short bursts
-Idx = 2;
+% short bursts, strict monotonicity requirements
+Idx = Idx+1;
 CriteriaSets(Idx).PeriodConsistency = .7;
 CriteriaSets(Idx).MonotonicityInAmplitude = .9;
 CriteriaSets(Idx).PeriodNeg = true;
 CriteriaSets(Idx).FlankConsistency = 0.3;
 CriteriaSets(Idx).MinCyclesPerBurst = 3;
 
-% dirty bursts
-Idx = 3; 
+% relies on shape but low other criteria; gets most of the bursts
+Idx = Idx+1;
 CriteriaSets(Idx).PeriodConsistency = .5;
 CriteriaSets(Idx).MonotonicityInTime = .4;
 CriteriaSets(Idx).MonotonicityInAmplitude = .4;
@@ -78,7 +79,7 @@ close all
 %%%% Choose a channel
 %%%%
 %%%%
-Channel = labels2indexes(11, EEG.chanlocs);
+Channel = labels2indexes(10, EEG.chanlocs);
 %%%%
 %%%%
 %%%%

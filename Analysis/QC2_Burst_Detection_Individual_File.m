@@ -12,8 +12,8 @@ Paths = Info.Paths;
 %%%%
 %%%%
 Task = 'LAT'; % Game, Standing, Fixation
-Session = 'BaselineBeam';
-Participant = 'P11'; % P03 has almost no oscillations, P15 has tons
+Session = 'Session2Beam1';
+Participant = 'P04'; % P03 has almost no oscillations, P15 has tons
 %%%%
 %%%%
 %%%%
@@ -26,13 +26,15 @@ SampleRate = EEG.srate;
 
 BurstClusters = load_datafile(Source_Bursts, Participant, Session, 'BurstClusters');
 
+EEGMetadata = load_datafile(Source_Bursts, Participant, Session, 'EEGMetadata');
 
 %%
 
-cycy.plot.plot_all_bursts(EEG, 20, BurstClusters, 'CriteriaSetIndex');
+cycy.plot.plot_all_bursts(EEG, 15, BurstClusters, 'CriteriaSetIndex');
 
 
 %%
 figure
-Channel = labels2indexes(70, EEG.chanlocs);
-cycy.plot.power_without_bursts(EEG.data(Channel, :), SampleRate, BurstClusters);
+Channel = labels2indexes(3, EEG.chanlocs);
+BurstSubset = BurstClusters([BurstClusters.ChannelIndex]==Channel);
+cycy.plot.power_without_bursts(EEG.data(Channel, :), SampleRate, BurstSubset, EEGMetadata.CleanTaskTimepoints);
