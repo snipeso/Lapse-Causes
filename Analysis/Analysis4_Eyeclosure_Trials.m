@@ -22,6 +22,7 @@ MaxNaNProportion = Parameters.Trials.MaxNaNProportion;
 MaxStimulusDistance = Parameters.Stimuli.MaxDistance;
 SessionBlocks = Parameters.Sessions.Conditions;
 Triggers = Parameters.Triggers;
+MinTrials = Parameters.Trials.MinPerSubGroupCount;
 
 
 
@@ -66,7 +67,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
     for idxParticipant = 1:numel(Participants)
 
         [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, EyeclosureTimepointCount] = ...
-            pool_eyeclosures(TrialsTable, EyetrackingQualityTable, EyetrackingPath, ...
+            pool_eyeclosure_trials(TrialsTable, EyetrackingQualityTable, EyetrackingPath, ...
             Participants{idxParticipant}, Sessions, MaxStimulusDistance, TrialWindow, Triggers, SampleRate);
 
         if isempty(PooledTrialsTable)
@@ -76,7 +77,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
         % get probability of microsleep (in time) for each trial type
         [EyesClosedStim(idxParticipant, :, :), EyesClosedResp(idxParticipant, :, :)] = ...
-            getProbTrialType(AllTrials_Stim, AllTrials_Resp, AllTrials_Table, MaxNaNProportion, minTrials);
+            getProbTrialType(PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, MaxNaNProportion, MinTrials);
 
 
         % calculate general probability of a microsleep
@@ -95,7 +96,7 @@ end
 %%% functions
 
 function [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, EyeclosureTimepointCount] = ...
-    pool_eyeclosures(TrialsTable, EyetrackingQualityTable, EyetrackingPath, ...
+    pool_eyeclosure_trials(TrialsTable, EyetrackingQualityTable, EyetrackingPath, ...
     Participant, Sessions, MaxStimulusDistance, TrialWindow, Triggers, SampleRate)
 
 % initialize variables
