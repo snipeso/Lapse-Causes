@@ -30,7 +30,7 @@ ConfidenceThreshold = Parameters.EyeTracking.MinConfidenceThreshold;
 for Task = Tasks
 
     % if already assembled, load from cache
-    CacheDir = fullfile(Paths.Cache, mfilename);
+    CacheDir = fullfile(Paths.Cache, 'Trial_Information');
     CacheFilename = [Task{1}, '_TrialsTable.mat'];
     TrialsTable = load_trials_from_cache(CacheDir, CacheFilename, RerunAnalysis);
     if ~isempty(TrialsTable)
