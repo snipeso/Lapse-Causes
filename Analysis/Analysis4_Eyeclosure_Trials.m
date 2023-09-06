@@ -60,8 +60,8 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
     Sessions = SessionBlocks.(SessionBlockLabels{Indx_SB});
 
     % initialize variables
-    EyesClosedStim = nan(numel(Participants), 3, numel(TrialTime)); % P x TT x t matrix with final probabilities
-    EyesClosedResp = EyesClosedStim;
+    ProbEyesClosedStimLocked = nan(numel(Participants), 3, numel(TrialTime)); % P x TT x t matrix with final probabilities
+    ProbEyesClosedRespLocked = ProbEyesClosedStimLocked;
     ProbabilityEyesClosed = nan(numel(Participants), 1); % get general probability of a microsleep for a given session block (to control for when z-scoring)
 
     for idxParticipant = 1:numel(Participants)
@@ -76,17 +76,19 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
         end
 
         % get probability of microsleep (in time) for each trial type
-        [EyesClosedStim(idxParticipant, :, :), EyesClosedResp(idxParticipant, :, :)] = ...
-            getProbTrialType(PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, MaxNaNProportion, MinTrials);
+        ProbEyesClosedStimLocked(idxParticipant, :, :) = probability_of_event_by_outcome( ...
+            PooledTrialsStim, PooledTrialsTable, MaxNaNProportion, MinTrials, false);
 
+        ProbEyesClosedRespLocked(idxParticipant, :, :) = probability_of_event_by_outcome( ...
+            PooledTrialsResp, PooledTrialsTable, MaxNaNProportion, MinTrials, true);
 
         % calculate general probability of a microsleep
-        ProbabilityEyesClosed(idxParticipant) =  MicrosleepTimepoints(1)./MicrosleepTimepoints(2);
+        ProbabilityEyesClosed(idxParticipant) =  EyeclosureTimepointCount(1)/EyeclosureTimepointCount(2);
         disp(['Finished ', Participants{idxParticipant}])
     end
 
     %%% save
-    save(fullfile(Pool, ['ProbMicrosleep_', SessionBlockLabels{Indx_SB}, TitleTag, '.mat']), 'EyesClosedStim', 'EyesClosedResp', 'TrialTime', 'ProbabilityEyesClosed')
+    save(fullfile(Pool, ['ProbMicrosleep_', SessionBlockLabels{Indx_SB}, TitleTag, '.mat']), 'ProbEyesClosedStimLocked', 'ProbEyesClosedRespLocked', 'TrialTime', 'ProbabilityEyesClosed')
 
 
 
@@ -98,9 +100,12 @@ end
 function [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, EyeclosureTimepointCount] = ...
     pool_eyeclosure_trials(TrialsTable, EyetrackingQualityTable, EyetrackingPath, ...
     Participant, Sessions, MaxStimulusDistance, TrialWindow, Triggers, SampleRate)
+% EyeclosureTimepointCount is a 1 x 2 array indicating the total number of 
+% points in the pooled sessions that has eyes closed and the total number of 
+% points.
 
 % initialize variables
-PooledTrialsStim = []; % need to pool all trials across sessions in a given session block
+PooledTrialsStim = [];
 PooledTrialsResp = [];
 PooledTrialsTable = table();
 EyeclosureTimepointCount = [0 0]; % total number of points in recording that is a microsleep; total number of points, pooling sessions

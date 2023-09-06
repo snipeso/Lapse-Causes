@@ -1,7 +1,10 @@
-function ProbEvent = probability_of_event_by_outcome(TrialData, TrialsTable, MaxNaNProportion, MinTrials, onlyResponses)
+function ProbEvents = probability_of_event_by_outcome(TrialData, TrialsTable, MaxNaNProportion, MinTrials, onlyResponses)
+% TrialData is a T x time matrix
 
-Dims = size(TrialData);
-ProbEvent = nan(3, Dims(2)); % Lapses, Late, Fast
+MaxGapProportion = .2;
+
+TimepointsCount = size(TrialData, 2);
+ProbEvents = nan(3, TimepointsCount); % Lapses, Late, Fast
 
 if onlyResponses
     TrialTypes = 2:3; % skip lapses
@@ -11,52 +14,43 @@ end
 
 for idxType = TrialTypes
 
+    % select subset of trials
     Trial_Indexes = TrialsTable.Type==idxType;
     TypeTrialData = TrialData(Trial_Indexes, :);
 
-    ProbEvent(idxType, :) = probability_event(TypeTrialData, MaxNaNProportion, MinTrials);
-end
-end
+    TypeTrialData = remove_trials_too_much_nan(TypeTrialData, MaxNaNProportion);
 
+    ProbEvent = event_probability(TypeTrialData, MinTrials);
 
+    % event probability has NaNs when there weren't enough trials; if it's
+    % just a small gap, then this is interpolated.
+    ProbEvent = close_gaps(ProbEvent, numel(ProbEvent)*MaxGapProportion);
 
-function Prob = probability_event(TypeTrialData, MaxNaNProportion, MinTrials)
-% gets the probability of an event.
-% AllTrials is a Trials x time matrix of ones and zeros and nans
-% MinTrials is the minimum number of trials to keep, otherwise Prob is just
-% nans.
-% minNanProportion is the minimum timepoints that can be nans before
-% removing that trial from the batch
-
-TrialsCount = size(TypeTrialData, 1);
-Pnts = size(TypeTrialData);
-MaxSize = Pnts*.2;
-
-% make all trial nan if there's not much of it
-NanProportion = sum(isnan(TypeTrialData), 2)/Pnts;
-TypeTrialData(NanProportion>MaxNaNProportion, :) = nan;
-
-% check if there's enough data
-Nans = sum(isnan(TypeTrialData), 1);
-if isempty(TypeTrialData) || TrialsCount < MinTrials || nnz(TrialsCount - Nans < MinTrials)/Pnts > MaxNaNProportion % makes sure every timepoint had at least 10 trials
-    Prob = nan(1, Pnts);
-    return
-end
-
-% average trials
-nTrialsPoints = sum(TypeTrialData==1)+sum(TypeTrialData==0); % for each timepoint
-Prob = sum(TypeTrialData, 1, 'omitnan')./nTrialsPoints;
-
-% remove timepoints with not enough trials involved
-Gaps = TrialsCount - Nans < MinTrials;
-if any(Gaps)
-    Prob(Gaps) = nan;
-
-    Prob = close_gaps(Prob, MaxSize);
-    if any(isnan(Prob))
-        Prob = nan(size(Prob));
+    if isempty(ProbEvent) || any(isnan(ProbEvent))
+        ProbEvents(idxType, :) = nan(1, TimepointsCount);
+    else
+        ProbEvents(idxType, :) = ProbEvent;
     end
 end
+end
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% functions
+
+function TypeTrialData = remove_trials_too_much_nan(TypeTrialData, MaxNaNProportion)
+Pnts = size(TypeTrialData);
+NanProportion = sum(isnan(TypeTrialData), 2)/Pnts;
+TypeTrialData(NanProportion>MaxNaNProportion, :) = [];
+end
+
+
+function Prob = event_probability(TypeTrialData, MinTrials)
+TrialCount = size(TypeTrialData, 1)-sum(isnan(TypeTrialData), 1); % only normalize by valid timepoints
+Prob = sum(TypeTrialData, 1, 'omitnan')./TrialCount;
+
+% set to nan all timepoints that came from an average with too few trials
+Prob(TrialCount<MinTrials) = nan;
 end
 
 
@@ -64,30 +58,23 @@ function NewData = close_gaps(Data, MaxSize)
 % in an array with nan's, provides interpolated values for smaller gaps
 
 [Starts, Ends] = data2windows(isnan(Data));
-
 Gaps = (Ends-Starts);
 
+if any(Gaps)>MaxSize
+    NewData = nan(size(Data));
+    return
+end
 
-
-% fill edges with last result to avoid any edge artefacts
+% if starts with a gap, fill the gap with just the first value
 if Starts(1)==1
     Data(1:Ends(1)) = Data(Ends(1)+1);
 end
 
+% likewise for if it ends with a gap
 if Ends(end) == numel(Data)
     Data(Starts(end):Ends(end)) = Data(Starts(end)-1);
 end
 
-    % keep list of only larger gaps
-SmallGaps = Gaps<MaxSize;
-    Starts(SmallGaps) = [];
-Ends(SmallGaps) = [];
-
 % interpolate all missing data
 NewData = fillmissing(Data, 'linear');
-
-% restore nans for the larger gaps
-for Indx_G = 1:numel(Starts)
-    NewData(Starts(Indx_G):Ends(Indx_G)) = nan;
-end
 end
