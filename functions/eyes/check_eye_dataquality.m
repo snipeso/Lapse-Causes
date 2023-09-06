@@ -30,7 +30,7 @@ end
 
 
 % has to have at least SOME eye closure
-if nnz(JudgeEye<ConfidenceThreshold) ==0
+if nnz(JudgeEye<ConfidenceThreshold) == 0
     warning('No EC')
     Eye = [];
     return

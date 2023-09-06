@@ -30,7 +30,7 @@ ConfidenceThreshold = Parameters.EyeTracking.MinConfidenceThreshold;
 for Task = Tasks
 
     % if already assembled, load from cache
-    CacheDir = fullfile(Paths.Cache, mfilename);
+    CacheDir = fullfile(Paths.Cache, 'Trial_Information');
     CacheFilename = [Task{1}, '_TrialsTable.mat'];
     TrialsTable = load_trials_from_cache(CacheDir, CacheFilename, RerunAnalysis);
     if ~isempty(TrialsTable)
@@ -111,10 +111,8 @@ for Participant = Participants'
         end
 
         % detrmine if eyes were closed during trial
-        DQ = EyetrackingQualityTable.(Session{1})(strcmp(EyetrackingQualityTable.Participant, Participant{1}));
-        TaskTime = identify_task_timepoints(EEGMetadata, Triggers); % for data quality, it needs to see if there's enough clean data during the task
-        Eye = check_eye_dataquality(Eyes, DQ, ConfidenceThreshold, TaskTime);
-        EyeClosed = detect_eyeclosure(Eye, SampleRate, ConfidenceThreshold);
+        CleanEyeIndx = EyetrackingQualityTable.(Session{1})(strcmp(EyetrackingQualityTable.Participant, Participant{1}));
+ EyeClosed = clean_eyeclosure_data(Eyes, EEGMetadata, Triggers, CleanEyeIndx, SampleRate, ConfidenceThreshold);
         EyesClosedTrials = did_it_happen(Starts, Ends, EyeClosed, MinEventProportion, MaxNanProportion);
         TrialsTable.EyesClosed(CurrentTrials) = EyesClosedTrials;
     end

@@ -11,7 +11,6 @@ Parameters = struct();
 % Who, what, when
 Parameters.Task = 'LAT'; % main analysis is done on LAT, but some parts use PVT
 
-
 Parameters.Sessions.Conditions.BL = {'BaselineBeam',  'MainPre', 'MainPost'};
 Parameters.Sessions.Conditions.SD = { 'Session2Beam1', 'Session2Beam2', 'Session2Beam3'};
 Parameters.Sessions.LAT = [Parameters.Sessions.Conditions.BL, Parameters.Sessions.Conditions.SD];
@@ -61,6 +60,7 @@ if exist( 'D:\LSM\Preprocessed', 'dir') % KISPI desktop
     addpath('H:\Code\chART')
     addpath('H:\Code\Matcycle')
     addpath('H:\Code\fooof_mat\fooof_mat')
+    addpath('\\nausers01\user\sniso\Dokumente\MATLAB\eeglab2022.0')
 elseif exist( 'D:\Data\Raw', 'dir')
     Core = 'D:\Data\';
 elseif exist( 'F:\Data\Raw', 'dir')
