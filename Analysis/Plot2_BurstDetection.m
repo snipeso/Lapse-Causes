@@ -12,13 +12,12 @@ WelchWindow = 8;
 Overlap = .75;
 MinDuration = 60;
 FooofFittingFrequencyRange = [2 40]; % some low-frequency noise
-RerunAnalysis = false; % if analysis has already been run, set to false if you want to use the cache
+RerunAnalysis = true; % if analysis has already been run, set to false if you want to use the cache
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
 Task = Parameters.Task;
 Participants = Parameters.Participants;
-Participants = Participants(1:16); % TEMP
 Channels = Parameters.Channels.PreROI;
 Bands = Parameters.Bands;
 SessionBlocks = Parameters.Sessions.Conditions;
@@ -28,7 +27,8 @@ SampleRate = Parameters.SampleRate;
 
 Source_EEG = fullfile(Paths.Data, 'Clean', 'Waves', Task);
 Source_Bursts = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_New', Task);
-CacheDir = fullfile(Paths.Cache, mfilename);
+ScriptName = 'Plot2_BurstDetection';
+CacheDir = fullfile(Paths.Cache, ScriptName);
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
