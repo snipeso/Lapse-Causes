@@ -162,7 +162,7 @@ for Participant = Participants'
         CleanEyeIndx = EyetrackingQualityTable.(Session{1})(strcmp(EyetrackingQualityTable.Participant, Participant{1}));
         EyeClosed = clean_eyeclosure_data(Eyes, EEGMetadata, Triggers, CleanEyeIndx, SampleRate, ConfidenceThreshold);
 
-        EyesClosedTrials = chop_trials(EyeClosed, SampleRate, EEGMetadata.event, Triggers.Stim, TrialWindow);
+        EyesClosedTrials = chop_trials(EyeClosed, SampleRate, TrialsTable.StimTimepoint(CurrentTrials), TrialWindow);
 
         if size(EyesClosedTrials, 1) ~=nTrials
             error(['missing trials for ', Participant{1}, Session{1}])
