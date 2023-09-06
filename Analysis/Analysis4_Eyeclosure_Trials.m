@@ -20,6 +20,7 @@ ConfidenceThreshold = Parameters.EyeTracking.MinConfidenceThreshold;
 MaxNaNProportion = Parameters.Trials.MaxNaNProportion;
 MaxStimulusDistance = Parameters.Stimuli.MaxDistance;
 SessionBlocks = Parameters.Sessions.Conditions;
+Triggers = Parameters.Triggers;
 
 
 
@@ -29,14 +30,6 @@ CacheFilename = [Task, '_TrialsTable.mat'];
 
 SessionBlockLabels = fieldnames(SessionBlocks);
 
-% specify only close trials, or all trials
-TitleTag = '';
-if OnlyClosestStimuli
-    TitleTag = [ TitleTag, '_Close'];
-    MaxStimulusDistance = quantile(TrialsTable.Radius, MaxStimulusDistance);
-else
-    MaxStimulusDistance = max(TrialsTable.Radius);
-end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -49,6 +42,15 @@ load(fullfile(CacheDir, CacheFilename), 'TrialsTable')
         ['DataQuality_', Task, '_Pupils.csv']));
 
 TrialTime = linspace(TrialWindow(1), TrialWindow(2), SampleRate*(TrialWindow(2)-TrialWindow(1))); % time vector
+
+% specify only close trials, or all trials
+TitleTag = '';
+if OnlyClosestStimuli
+    TitleTag = [ TitleTag, '_Close'];
+    MaxStimulusDistance = quantile(TrialsTable.Radius, MaxStimulusDistance);
+else
+    MaxStimulusDistance = max(TrialsTable.Radius);
+end
 
 
 for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
@@ -76,17 +78,15 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
             % load in eye data
             Eyes = loadMATFile(EyetrackingPath, Participants{idxParticipant}, Sessions{idxSession}, 'Eyes');
             if isempty(Eyes); continue; end
+                        EEGMetadata = loadMATFile(EyetrackingPath, Participants{idxParticipant}, Sessions{idxSession}, 'EEGMetadata');
 
-            if isnan(Eyes.DQ) || Eyes.DQ == 0
-                warning(['Bad data in ', Participants{idxParticipant}, Sessions{idxSession}])
-                continue
-            end
 
-            Eye = round(Eyes.DQ); % which eye
+           CleanEyeIndex = EyetrackingQualityTable.(Sessions{idxSession})(strcmp(EyetrackingQualityTable.Participant, Participants{idxParticipant}));
 
-            % get 1s and 0s of whether eyes were open
-            [EyeOpen, ~] = classifyEye(Eyes.Raw(Eye, :), SampleRate, ConfidenceThreshold); % not using internal microsleep identifier so that I'm flexible
-            EyeClosed = flip_vector_with_nans(EyeOpen);
+           EyeClosed = clean_eyeclosure_data(Eyes, EEGMetadata, Triggers, CleanEyeIndx, SampleRate, ConfidenceThreshold);
+
+                [Starts, Ends] = window_timepoints(EEGMetadata, Triggers, TrialWindow);
+
 
             % cut out each trial
             [Trials_Stim, Trials_Resp] = ...
