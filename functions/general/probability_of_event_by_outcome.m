@@ -39,8 +39,8 @@ end
 %%% functions
 
 function TypeTrialData = remove_trials_too_much_nan(TypeTrialData, MaxNaNProportion)
-Pnts = size(TypeTrialData);
-NanProportion = sum(isnan(TypeTrialData), 2)/Pnts;
+TrialsCount = size(TypeTrialData, 1);
+NanProportion = sum(isnan(TypeTrialData), 2)./TrialsCount;
 TypeTrialData(NanProportion>MaxNaNProportion, :) = [];
 end
 
@@ -58,6 +58,11 @@ function NewData = close_gaps(Data, MaxSize)
 % in an array with nan's, provides interpolated values for smaller gaps
 
 [Starts, Ends] = data2windows(isnan(Data));
+if isempty(Starts)
+    NewData = Data;
+    return
+end
+
 Gaps = (Ends-Starts);
 
 if any(Gaps)>MaxSize

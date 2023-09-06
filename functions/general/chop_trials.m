@@ -1,9 +1,16 @@
 function TrialData = chop_trials(Data, SampleRate, TriggerLatencies, Window)
 
+TriggerLatencies(isnan(TriggerLatencies)) = [];
+
 ChannelCount = size(Data, 1);
 
-Starts = round(TriggerLatencies-Window(1)*SampleRate);
+Starts = round(TriggerLatencies+Window(1)*SampleRate);
 Ends = round(TriggerLatencies+Window(2)*SampleRate);
+
+if isempty(Starts) || numel(Starts)<1
+    TrialData = [];
+    return
+end
 
 TrialData = nan(numel(Starts), ChannelCount, Ends(1)-Starts(1)+1);
 for idxTrials = 1:numel(Starts)

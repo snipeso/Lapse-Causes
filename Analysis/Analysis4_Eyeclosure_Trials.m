@@ -121,8 +121,8 @@ for idxSession = 1:numel(Sessions)
     EyeClosed = clean_eyeclosure_data(Eyes, EEGMetadata, Triggers, CleanEyeIndex, SampleRate, ConfidenceThreshold);
 
     % chop into trials
-    EyeClosedStimLocked = chop_trials(EyeClosed, SampleRate, EEGMetadata.event, Triggers.Stim, TrialWindow);
-    EyeClosedRespLocked = chop_trials(EyeClosed, SampleRate, EEGMetadata.event, Triggers.Resp, TrialWindow);
+    EyeClosedStimLocked = chop_trials(EyeClosed, SampleRate, TrialsTable.StimTimepoint(CurrentTrials), TrialWindow);
+    EyeClosedRespLocked = chop_trials(EyeClosed, SampleRate, TrialsTable.RespTimepoint(CurrentTrials & TrialsTable.Type~=1), TrialWindow);
 
     % pool sessions
     PooledTrialsStim = cat(1, PooledTrialsStim,  EyeClosedStimLocked);
