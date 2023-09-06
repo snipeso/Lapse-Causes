@@ -1,4 +1,4 @@
-function Tally = tallyTimepoints(Tally, Vector)
+function Tally = tally_timepoints(Tally, Vector)
 % Tally is a Ch x 2 array, the first column indicating the total number of
 % 1s, and the second column the total number of points in Vector.
 

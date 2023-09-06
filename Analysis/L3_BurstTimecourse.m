@@ -150,12 +150,12 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
                 % get general probability of bursts by band
                 GenProbBurst(Indx_P, :, Indx_B, :) = ...
-                    tallyTimepoints(squeeze(GenProbBurst(Indx_P, :, Indx_B, :)), BT);
+                    tally_timepoints(squeeze(GenProbBurst(Indx_P, :, Indx_B, :)), BT);
 
                 BT_Pooled = double(squeeze(any(BT==1, 1)));
                 BT_Pooled(isnan(BT(1, :))) = nan;
                 GenProbBurst_Pooled(Indx_P, Indx_B, :) = ...
-                    tallyTimepoints(squeeze(GenProbBurst_Pooled(Indx_P, Indx_B, :))', BT_Pooled);
+                    tally_timepoints(squeeze(GenProbBurst_Pooled(Indx_P, Indx_B, :))', BT_Pooled);
             end
 
             % pool sessions

@@ -99,7 +99,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
             % save info
             AllTrials_Table = cat(1, AllTrials_Table, Trials(CurrentTrials, :)); % important that it be in the same order!
-            MicrosleepTimepoints = tallyTimepoints(MicrosleepTimepoints, EyeClosed);
+            MicrosleepTimepoints = tally_timepoints(MicrosleepTimepoints, EyeClosed);
         end
 
         if isempty(AllTrials_Table)

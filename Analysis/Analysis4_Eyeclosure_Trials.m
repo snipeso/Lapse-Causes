@@ -65,41 +65,11 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
 
     for idxParticipant = 1:numel(Participants)
 
-        AllTrials_Stim = []; % need to pool all trials across sessions in a given session block
-        AllTrials_Resp = [];
-        AllTrials_Table = table();
-        MicrosleepTimepoints = [0 0]; % total number of points in recording that is a microsleep; total number of points, pooling sessions
+        [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, EyeclosureTimepointCount] = ...
+            pool_eyeclosures(TrialsTable, EyetrackingQualityTable, EyetrackingPath, ...
+            Participants{idxParticipant}, Sessions, MaxStimulusDistance, TrialWindow, Triggers, SampleRate);
 
-        for idxSession = 1:numel(Sessions)
-
-            % trial info for current recording
-            CurrentTrials = find(strcmp(TrialsTable.Participant, Participants{idxParticipant}) & ...
-                strcmp(TrialsTable.Session, Sessions{idxSession}) & TrialsTable.Radius < MaxStimulusDistance);
-
-            % load in eye data
-            Eyes = load_datafile(EyetrackingPath, Participants{idxParticipant}, Sessions{idxSession}, 'Eyes');
-            if isempty(Eyes); continue; end
-            EEGMetadata = load_datafile(EyetrackingPath, Participants{idxParticipant}, Sessions{idxSession}, 'EEGMetadata');
-
-            CleanEyeIndex = EyetrackingQualityTable.(Sessions{idxSession})(strcmp(EyetrackingQualityTable.Participant, Participants{idxParticipant}));
-            EyeClosed = clean_eyeclosure_data(Eyes, EEGMetadata, Triggers, CleanEyeIndex, SampleRate, ConfidenceThreshold);
-TrialData = chop_trials(Data, SampleRate, EEGMetadata.events, Trigger, TrialWindow);
-
-
-            % cut out each trial
-            [Trials_Stim, Trials_Resp] = ...
-                chopTrials(EyeClosed, TrialsTable(CurrentTrials, :), TrialWindow, SampleRate);
-
-            % pool sessions
-            AllTrials_Stim = cat(1, AllTrials_Stim, Trials_Stim);
-            AllTrials_Resp = cat(1, AllTrials_Resp, Trials_Resp);
-
-            % save info
-            AllTrials_Table = cat(1, AllTrials_Table, TrialsTable(CurrentTrials, :)); % important that it be in the same order!
-            MicrosleepTimepoints = tallyTimepoints(MicrosleepTimepoints, EyeClosed);
-        end
-
-        if isempty(AllTrials_Table)
+        if isempty(PooledTrialsTable)
             warning('empty table')
             continue
         end
@@ -121,6 +91,46 @@ TrialData = chop_trials(Data, SampleRate, EEGMetadata.events, Trigger, TrialWind
 
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% functions
 
+function [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, EyeclosureTimepointCount] = ...
+    pool_eyeclosures(TrialsTable, EyetrackingQualityTable, EyetrackingPath, ...
+    Participant, Sessions, MaxStimulusDistance, TrialWindow, Triggers, SampleRate)
+
+% initialize variables
+PooledTrialsStim = []; % need to pool all trials across sessions in a given session block
+PooledTrialsResp = [];
+PooledTrialsTable = table();
+EyeclosureTimepointCount = [0 0]; % total number of points in recording that is a microsleep; total number of points, pooling sessions
+
+for idxSession = 1:numel(Sessions)
+
+    % trial info for current recording
+    CurrentTrials = strcmp(TrialsTable.Participant, Participant) & ...
+        strcmp(TrialsTable.Session, Sessions{idxSession}) & TrialsTable.Radius < MaxStimulusDistance;
+
+    % load in eye data
+    Eyes = load_datafile(EyetrackingPath, Participant, Sessions{idxSession}, 'Eyes');
+    if isempty(Eyes); continue; end
+    EEGMetadata = load_datafile(EyetrackingPath, Participant, Sessions{idxSession}, 'EEGMetadata');
+
+    % identify eyes closed timepoints
+    CleanEyeIndex = EyetrackingQualityTable.(Sessions{idxSession})(strcmp(EyetrackingQualityTable.Participant, Participant));
+    EyeClosed = clean_eyeclosure_data(Eyes, EEGMetadata, Triggers, CleanEyeIndex, SampleRate, ConfidenceThreshold);
+
+    % chop into trials
+    EyeClosedStimLocked = chop_trials(EyeClosed, SampleRate, EEGMetadata.event, Triggers.Stim, TrialWindow);
+    EyeClosedRespLocked = chop_trials(EyeClosed, SampleRate, EEGMetadata.event, Triggers.Resp, TrialWindow);
+
+    % pool sessions
+    PooledTrialsStim = cat(1, PooledTrialsStim,  EyeClosedStimLocked);
+    PooledTrialsResp = cat(1, PooledTrialsResp, EyeClosedRespLocked);
+
+    % pool info
+    PooledTrialsTable = cat(1, PooledTrialsTable, TrialsTable(CurrentTrials, :)); % important that it be in the same order!
+    EyeclosureTimepointCount = tally_timepoints(EyeclosureTimepointCount, EyeClosed);
+end
+end
 
 

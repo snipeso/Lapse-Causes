@@ -80,7 +80,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
                     BT(:, ~HemiPoints) = nan; % nan other hemifield, so isn't included in count
 
                     ProbBurst(Indx_P, Indx_H, :, Indx_B, :) = ...
-                        tallyTimepoints(squeeze(ProbBurst(Indx_P, Indx_H, :, Indx_B, :)), BT);
+                        tally_timepoints(squeeze(ProbBurst(Indx_P, Indx_H, :, Indx_B, :)), BT);
                 end
             end
         end
