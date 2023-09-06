@@ -19,7 +19,7 @@ Task = P.Labels.Task;
 Triggers = P.Triggers;
 RemoveCh = P.Channels.Remove;
 
-Refresh = false;
+RerunAnalysis = false;
 StartTime = .5; % relative to stim trigger
 EndTime = 1; % relative to stim trigger
 WelchWindow = .5;
@@ -49,7 +49,7 @@ for Indx_F = 1:numel(Files)
     Filename = [Filename_Core, '_Welch.mat'];
     
     % skip if already done
-    if ~Refresh && exist(fullfile(Destination, Filename), 'file')
+    if ~RerunAnalysis && exist(fullfile(Destination, Filename), 'file')
         disp(['**************already did ',Filename, '*************'])
         continue
     end

@@ -19,7 +19,7 @@ Paths = P.Paths;
 Task = P.Labels.Task;
 Bands = P.Bands;
 Channels = P.Channels;
-RefreshTrials = false;
+RerunAnalysisTrials = false;
 Parameters = P.Parameters;
 
 StartTime = -2;

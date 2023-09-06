@@ -15,9 +15,9 @@ Paths = P.Paths;
 Task = P.Labels.Task;
 Bands = P.Bands;
 Channels = P.Channels;
-RefreshTrials = true;
+RerunAnalysisTrials = true;
 
-Refresh = false;
+RerunAnalysis = false;
 StartTime = -.5;
 EndTime = 1.5;
 WelchWindow = 2;
@@ -44,9 +44,9 @@ Pool = fullfile(Paths.Pool, 'Tasks'); % place to save matrices so they can be pl
 
 Source =  fullfile(P.Paths.Data, 'EEG', 'Locked', Task, Tag);
 
-if RefreshTrials || ~exist(fullfile(Paths.Pool, 'Tasks', 'AllTrials.mat'), 'file')
+if RerunAnalysisTrials || ~exist(fullfile(Paths.Pool, 'Tasks', 'AllTrials.mat'), 'file')
 
-    disp('refreshing trials')
+    disp('RerunAnalysising trials')
 
     %%% get trial information
     Trials = loadBehavior(Participants, Sessions, Task, Paths, false);

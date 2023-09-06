@@ -1,4 +1,4 @@
-function AllData = loadLATmeta(P, Sessions, Refresh)
+function AllData = loadLATmeta(P, Sessions, RerunAnalysis)
 % script for loading metadata about the LAT sessions (P x S x T) Provides:
 % - RT: reaction times (0-2s)
 % - Tally: whether a trial is classified as a lapse, a correct response or
@@ -22,7 +22,7 @@ Filename_Table = 'LAT_AllAnswers.mat';
 AllData = struct();
 
 % get behavior data
-if ~exist(fullfile(Filepath_Table, Filename_Table), 'file') || Refresh
+if ~exist(fullfile(Filepath_Table, Filename_Table), 'file') || RerunAnalysis
     AllAnswers = importTask(Paths.Datasets, 'LAT', Filepath_Table);
 else
     load(fullfile(Filepath_Table, Filename_Table), 'AllAnswers')

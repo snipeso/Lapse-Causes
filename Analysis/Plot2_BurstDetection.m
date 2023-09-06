@@ -12,7 +12,7 @@ WelchWindow = 8;
 Overlap = .75;
 MinDuration = 60;
 FooofFittingFrequencyRange = [2 40]; % some low-frequency noise
-Refresh = false; % if analysis has already been run, set to false if you want to use the cache
+RerunAnalysis = false; % if analysis has already been run, set to false if you want to use the cache
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
@@ -37,7 +37,7 @@ CacheDir = fullfile(Paths.Cache, mfilename);
 %%% Theta
 [ThetaPowerIntactSpectrum, ThetaPowerBurstsSpectrum, ThetaPowerBurstlessSpectrum, Frequencies, ThetaTimeSpent] = ...
     whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, 2, Channels, 'Front', ...
-    Bands, 'Theta', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, SampleRate, CacheDir, Refresh);
+    Bands, 'Theta', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, SampleRate, CacheDir, RerunAnalysis);
 
 
 % average theta power
@@ -50,7 +50,7 @@ BandIndex = 1;
 
 [AlphaPowerIntactSpectrum, AlphaPowerBurstsSpectrum, AlphaPowerBurstlessSpectrum, ~, AlphaTimeSpent] = ...
     whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, 1, Channels, 'Back', ...
-    Bands, 'Alpha', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, SampleRate, CacheDir, Refresh);
+    Bands, 'Alpha', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, SampleRate, CacheDir, RerunAnalysis);
 
 
 % average alpha power
@@ -165,7 +165,7 @@ function [PowerIntactSpectrum, PowerBurstsSpectrum, PowerBurstlessSpectrum, ...
     Frequencies, TimeSpent] = whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, ...
     Participants, SessionBlocks, SessionIndex, Channels, ChannelFieldname, ...
     Bands, BandFieldname, WelchWindow, Overlap, MinDuration, ...
-    FooofFittingFrequencyRange, SampleRate, CacheDir, Refresh)
+    FooofFittingFrequencyRange, SampleRate, CacheDir, RerunAnalysis)
 
 Band = Bands.(BandFieldname);
 SessionBlockLabels = fieldnames(SessionBlocks);
@@ -184,7 +184,7 @@ CacheString = [replace(CacheString, '.', '-'), '.mat'];
 CachePath = fullfile(CacheDir, CacheString);
 
 % load from cache
-if exist(CachePath, 'file') && ~Refresh
+if exist(CachePath, 'file') && ~RerunAnalysis
     load(CachePath, 'PowerIntactSpectrum', 'PowerBurstsSpectrum', 'PowerBurstlessSpectrum', 'Frequencies', 'TimeSpent')
     return
 end

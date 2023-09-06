@@ -1,4 +1,4 @@
-function Trials = load_task_output(Participants, Sessions, Task, Paths, Refresh)
+function Trials = load_task_output(Participants, Sessions, Task, Paths, RerunAnalysis)
 % single function to load main outcomes for PVT and LAT.
 % LAT types are Lapses, Late, and Correct Responses.
 % PVT types are Lapses (<.5), Correct Responses and Bugs.
@@ -13,7 +13,7 @@ end
 Filename = [Task, '_AllAnswers.mat'];
 
 % get behavior data from RAW data structure if table doesn't already exist
-if ~exist(fullfile(TaskDataDir, Filename), 'file') || Refresh
+if ~exist(fullfile(TaskDataDir, Filename), 'file') || RerunAnalysis
     AllTrials = import_task_logs(Paths.Datasets, Task, TaskDataDir);
 else
     load(fullfile(TaskDataDir, Filename), 'AllAnswers')
