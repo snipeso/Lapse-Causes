@@ -3,9 +3,9 @@ function Time = bursts2time(Bursts, Pnts)
 % theres a burst.
 % t is in datapoints, and will be the same length as Time
 
-if isfield(Bursts, 'All_Start')
-    Starts = [Bursts.All_Start];
-    Ends = [Bursts.All_End];
+if isfield(Bursts, 'ClusterStart')
+    Starts = [Bursts.ClusterStart];
+    Ends = [Bursts.ClusterEnd];
 else
     Starts = [Bursts.Start];
     Ends = [Bursts.End];
@@ -15,4 +15,5 @@ Time = zeros(1, Pnts);
 
 for Indx_B = 1:numel(Starts)
     Time(Starts(Indx_B):Ends(Indx_B)) = 1;
+end
 end
