@@ -91,10 +91,10 @@ for FilenameSource = Filenames'
     SampleRate = EEG.srate;
 
     % get timepoints without noise
- CleanTimepoints = identify_clean_timepoints(fullfile(EEGSourceCuts, FilenameCuts), EEG);
+    CleanTimepoints = identify_clean_timepoints(fullfile(EEGSourceCuts, FilenameCuts), EEG);
 
     % get timepoints of the task
-   TaskPoints = identify_task_timepoints(EEG, Triggers);
+    TaskPoints = identify_task_timepoints(EEG, Triggers);
 
     % only use clean task timepoints
     KeepTimepoints = CleanTimepoints & TaskPoints;
@@ -109,13 +109,17 @@ for FilenameSource = Filenames'
     % aggregate bursts into clusters across channels
     BurstClusters = cycy.aggregate_bursts_into_clusters(Bursts, EEG, MinClusteringFrequencyRange);
 
+    % remove from Bursts all bursts that didn't make it into a cluster (means it was only in one channel)
+    ClusteredBurstIndexes = unique([BurstClusters.ClusterBurstsIdx]);
+    Bursts = Bursts(ClusteredBurstIndexes);
+
     % keep track of how much data is being used
     EEGMetadata = EEG;
     EEGMetadata.data = [];
     EEGMetadata.pnts = size(EEG.data, 2); % just making sure its correct
-     EEGMetadata.CleanTaskTimepoints = KeepTimepoints;
-     EEGMetadata.CleanTaskTimepointsCount = nnz(KeepTimepoints);
-     EEGMetadata.data = []; % only save the metadata
+    EEGMetadata.CleanTaskTimepoints = KeepTimepoints;
+    EEGMetadata.CleanTaskTimepointsCount = nnz(KeepTimepoints);
+    EEGMetadata.data = []; % only save the metadata
 
     % save
     save(fullfile(Destination, FilenameDestination), 'Bursts', 'BurstClusters', 'EEGMetadata')
