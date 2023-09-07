@@ -1,4 +1,10 @@
 function Eye = check_eye_dataquality(Eyes, DQ, ConfidenceThreshold, TaskTime)
+arguments
+    Eyes
+    DQ
+    ConfidenceThreshold = 0.5;
+    TaskTime = ones(size(1, Eyes));
+end
 % checks that the data quality for the chosen eye meets acceptable criteria
 % returns a blank if it's not ok
 
@@ -9,10 +15,6 @@ if isempty(DQ) || isnan(DQ) || DQ==0
     return
 end
 
-% if no task timeline provided, just use all timepoints
-if ~exist("TaskTime", 'var') || isempty(TaskTime)
-    TaskTime = ones(size(1, Eyes));
-end
 
 %%% Go
 
