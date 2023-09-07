@@ -113,7 +113,9 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
 
     %%% save
     save(fullfile(EyeclosureCacheDir, ['Bursts_', SessionBlockLabels{idxSessionBlock}, TitleTag, '.mat']), ...
-        'ProbEyesClosedStimLocked', 'ProbEyesClosedRespLocked', 'TrialTime', 'ProbabilityBurst', 'ProbabilityBurstTopography')
+        'ProbBurstRespLockedTopography', 'ProbBurstStimLockedTopography', ...
+        'ProbBurstStimLocked', 'ProbBurstRespLocked', ...
+        'TrialTime', 'ProbabilityBurst', 'ProbabilityBurstTopography')
 end
 
 
