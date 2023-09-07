@@ -24,8 +24,13 @@ Triggers = Parameters.Triggers;
 MinTrials = Parameters.Trials.MinPerSubGroupCount;
 
 EyetrackingPath = fullfile(Paths.Data, 'Pupils', ['Raw_', num2str(SampleRate), 'Hz'], Task);
-CacheDir = fullfile(Paths.Cache, 'Trial_Information');
+TrialCacheDir = fullfile(Paths.Cache, 'Trial_Information');
 CacheFilename = [Task, '_TrialsTable.mat'];
+
+EyeclosureCacheDir = fullfile(Paths.Cache, 'Data_Figures');
+if ~exist(EyeclosureCacheDir, 'dir')
+    mkdir(EyeclosureCacheDir)
+end
 
 SessionBlockLabels = fieldnames(SessionBlocks);
 
@@ -34,7 +39,7 @@ SessionBlockLabels = fieldnames(SessionBlocks);
 %%% Run
 
 % get trial information
-load(fullfile(CacheDir, CacheFilename), 'TrialsTable')
+load(fullfile(TrialCacheDir, CacheFilename), 'TrialsTable')
 
 EyetrackingQualityTable = readtable(fullfile(Paths.QualityCheck, 'EyeTracking', ...
     ['DataQuality_', Task, '_Pupils.csv']));
@@ -51,9 +56,9 @@ else
 end
 
 
-for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
+for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
 
-    Sessions = SessionBlocks.(SessionBlockLabels{Indx_SB});
+    Sessions = SessionBlocks.(SessionBlockLabels{idxSessionBlock});
 
     % initialize variables
     ProbEyesClosedStimLocked = nan(numel(Participants), 3, numel(TrialTime)); % P x TT x t matrix with final probabilities
@@ -77,7 +82,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
             PooledTrialsStim, PooledTrialsTable, MaxNaNProportion, MinTrials, false);
 
         ProbEyesClosedRespLocked(idxParticipant, :, :) = probability_of_event_by_outcome( ...
-            PooledTrialsResp, PooledTrialsTable, MaxNaNProportion, MinTrials, true);
+            PooledTrialsResp, PooledTrialsTable(PooledTrialsTable.Type~=1, :), MaxNaNProportion, MinTrials, true);
 
         % calculate general probability of a microsleep
         ProbabilityEyesClosed(idxParticipant) =  EyeclosureTimepointCount(1)/EyeclosureTimepointCount(2);
@@ -85,7 +90,7 @@ for Indx_SB = 1:numel(SessionBlockLabels) % loop through BL and SD
     end
 
     %%% save
-    save(fullfile(Pool, ['ProbMicrosleep_', SessionBlockLabels{Indx_SB}, TitleTag, '.mat']), ...
+    save(fullfile(EyeclosureCacheDir, ['Eyeclosures_', SessionBlockLabels{idxSessionBlock}, TitleTag, '.mat']), ...
         'ProbEyesClosedStimLocked', 'ProbEyesClosedRespLocked', 'TrialTime', 'ProbabilityEyesClosed')
 end
 
