@@ -13,7 +13,7 @@ else
 end
 
 for idxType = TrialTypes
-
+    
     % select subset of trials
     Trial_Indexes = TrialsTable.Type==idxType;
     TypeTrialData = TrialData(Trial_Indexes, :);
@@ -58,7 +58,7 @@ function NewData = close_gaps(Data, MaxSize)
 % in an array with nan's, provides interpolated values for smaller gaps
 
 [Starts, Ends] = data2windows(isnan(Data));
-if isempty(Starts)
+if isempty(Starts) || all(isnan(Data))
     NewData = Data;
     return
 end

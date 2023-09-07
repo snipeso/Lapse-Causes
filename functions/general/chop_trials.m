@@ -5,7 +5,7 @@ TriggerLatencies(isnan(TriggerLatencies)) = [];
 ChannelCount = size(Data, 1);
 
 Starts = round(TriggerLatencies+Window(1)*SampleRate);
-Ends = round(TriggerLatencies+Window(2)*SampleRate);
+Ends = round(TriggerLatencies+Window(2)*SampleRate)-1;
 
 if isempty(Starts) || numel(Starts)<1
     TrialData = [];
