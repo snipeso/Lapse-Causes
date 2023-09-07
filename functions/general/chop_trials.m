@@ -1,4 +1,5 @@
 function TrialData = chop_trials(Data, SampleRate, TriggerLatencies, Window)
+% Data is a ch x t matrix
 
 TriggerLatencies(isnan(TriggerLatencies)) = [];
 

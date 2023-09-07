@@ -23,7 +23,7 @@ SessionBlocks = Parameters.Sessions.Conditions;
 Triggers = Parameters.Triggers;
 MinTrials = Parameters.Trials.MinPerSubGroupCount;
 
-EyetrackingPath = fullfile(Paths.Data, 'Pupils', ['Raw_', num2str(SampleRate), 'Hz'], Task);
+EyetrackingDir = fullfile(Paths.Data, 'Pupils', ['Raw_', num2str(SampleRate), 'Hz'], Task);
 TrialCacheDir = fullfile(Paths.Cache, 'Trial_Information');
 CacheFilename = [Task, '_TrialsTable.mat'];
 
@@ -68,7 +68,7 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
     for idxParticipant = 1:numel(Participants)
 
         [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, EyeclosureTimepointCount] = ...
-            pool_eyeclosure_trials(TrialsTable, EyetrackingQualityTable, EyetrackingPath, ...
+            pool_eyeclosure_trials(TrialsTable, EyetrackingQualityTable, EyetrackingDir, ...
             Participants{idxParticipant}, Sessions, MaxStimulusDistance, TrialWindow, ...
             Triggers, SampleRate, ConfidenceThreshold);
 
@@ -84,7 +84,7 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
         ProbEyesClosedRespLocked(idxParticipant, :, :) = probability_of_event_by_outcome( ...
             PooledTrialsResp, PooledTrialsTable(PooledTrialsTable.Type~=1, :), MaxNaNProportion, MinTrials, true);
 
-        % calculate general probability of a microsleep
+        % calculate general probability of a eyeclosure
         ProbabilityEyesClosed(idxParticipant) =  EyeclosureTimepointCount(1)/EyeclosureTimepointCount(2);
         disp(['Finished ', Participants{idxParticipant}])
     end
@@ -103,6 +103,8 @@ function [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, EyeclosureTimep
 % EyeclosureTimepointCount is a 1 x 2 array indicating the total number of 
 % points in the pooled sessions that has eyes closed and the total number of 
 % points.
+
+% TODO: don't really need triggers anymore?
 
 % initialize variables
 PooledTrialsStim = [];

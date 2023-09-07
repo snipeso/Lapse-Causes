@@ -1,5 +1,6 @@
 function ProbEvents = probability_of_event_by_outcome(TrialData, TrialsTable, MaxNaNProportion, MinTrials, onlyResponses)
 % TrialData is a T x time matrix
+% ProbEvents is a 3 x t matrix
 
 MaxGapProportion = .2;
 
