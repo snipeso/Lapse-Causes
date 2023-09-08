@@ -50,10 +50,10 @@ ProbEyesClosedRespLockedSmooth = smooth_frequencies(ProbEyesClosedRespLocked, ..
     TrialTime, 'last', SmoothFactor);
 
 % center data to recording average
-    [ProbEyesClosedStimLockedSmooth, ProbabilityEyesClosed] = ...
-        meanscoreTimecourse(ProbEyesClosedStimLockedSmooth, ProbabilityEyesClosed, []);
-    [ProbEyesClosedRespLockedSmooth, ~] = ...
-        meanscoreTimecourse(ProbEyesClosedRespLockedSmooth, ProbabilityEyesClosed, []);
+[ProbEyesClosedStimLockedDiff, ProbabilityEyesClosedDiff] = ...
+    meanscoreTimecourse(ProbEyesClosedStimLockedSmooth, ProbabilityEyesClosed, []);
+[ProbEyesClosedRespLockedSmooth, ~] = ...
+    meanscoreTimecourse(ProbEyesClosedRespLockedSmooth, ProbabilityEyesClosed, []);
 
 
 
@@ -61,6 +61,7 @@ ProbEyesClosedRespLockedSmooth = smooth_frequencies(ProbEyesClosedRespLocked, ..
 %%% plot
 
 %%
+clc
 YLim = [-.35 .35];
 
 Grid = [2 3];
@@ -76,10 +77,22 @@ DispN = true;
 DispStats = true;
 
 % eyeclosure
-chART.sub_plot([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
-Stats = plot_timecourse(TrialTime, flip(ProbEyesClosedStimLockedSmooth, 2), ProbabilityEyesClosed, ...
-    YLim, flip(TallyLabels), 'Stimulus', Colors, StatParameters, DispN, DispStats, PlotProps);
-ylabel(['\Delta likelihood eyeclosure'])
+plot_timecourse(TrialTime, flip(ProbEyesClosedStimLockedDiff, 2), ProbabilityEyesClosedDiff, ...
+    YLim, flip(TallyLabels), 'Stimulus', Colors, StatParameters, DispN, DispStats, PlotProps, ...
+    Grid, [1 1], PlotProps.Indexes.Letters{1});
+ylabel('\Delta likelihood eyeclosure')
+
+
+
+%%% response locked
+DispStats = false;
+
+% eyeclosure
+plot_timecourse(TrialTime, flip(ProbEyesClosedRespLockedSmooth, 2), ProbabilityEyesClosedDiff, ...
+    YLim, flip(TallyLabels), 'Stimulus', Colors, StatParameters, DispN, DispStats, PlotProps, ...
+    Grid, [2 1], PlotProps.Indexes.Letters{4});
+ylabel('\Delta likelihood eyeclosure')
+legend off
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -88,7 +101,7 @@ ylabel(['\Delta likelihood eyeclosure'])
 
 %% display general prop of things
 
-disp_stats_descriptive(100*ProbabilityEyesClosed, 'EC gen prop', '%', 0);
+disp_stats_descriptive(100*ProbabilityEyesClosedDiff, 'EC gen prop', '%', 0);
 
 disp_stats_descriptive(100*ProbabilityBurst(:, 1), 'Theta gen prop', '%', 0);
 disp_stats_descriptive(100*ProbabilityBurst(:, 2), 'Alpha gen prop', '%', 0);
@@ -108,23 +121,23 @@ zGenProb = nan(size(GenProb));
 
 if isempty(PreserveDim) % microsleeps
     for Indx_P = 1:Dims(1)
-%         zProb(Indx_P, :, :) = 100*(ProbAll(Indx_P, :, :) - GenProb(Indx_P))./GenProb(Indx_P);
-zProb(Indx_P, :, :) = (ProbAll(Indx_P, :, :) - GenProb(Indx_P));
+        %         zProb(Indx_P, :, :) = 100*(ProbAll(Indx_P, :, :) - GenProb(Indx_P))./GenProb(Indx_P);
+        zProb(Indx_P, :, :) = (ProbAll(Indx_P, :, :) - GenProb(Indx_P));
         zGenProb(Indx_P) = 0;
     end
 
 elseif PreserveDim == 3 % bursts on 3rd dimention
     for Indx_P = 1:Dims(1)
-            for Indx_B = 1:Dims(3)
-%                 zProb(Indx_P, :, Indx_B, :) = ...
-%                     100*(ProbAll(Indx_P, :, Indx_B, :) - ...
-%                     GenProb(Indx_P, Indx_B))./GenProb(Indx_P, Indx_B);
-                zProb(Indx_P, :, Indx_B, :) = ...
-                    (ProbAll(Indx_P, :, Indx_B, :) - ...
-                    GenProb(Indx_P, Indx_B));
+        for Indx_B = 1:Dims(3)
+            %                 zProb(Indx_P, :, Indx_B, :) = ...
+            %                     100*(ProbAll(Indx_P, :, Indx_B, :) - ...
+            %                     GenProb(Indx_P, Indx_B))./GenProb(Indx_P, Indx_B);
+            zProb(Indx_P, :, Indx_B, :) = ...
+                (ProbAll(Indx_P, :, Indx_B, :) - ...
+                GenProb(Indx_P, Indx_B));
 
-                zGenProb(Indx_P, Indx_B) = 0;
-            end
+            zGenProb(Indx_P, Indx_B) = 0;
+        end
     end
 elseif PreserveDim == 4 % bursts on 4th dimention
     for Indx_P = 1:Dims(1)
@@ -145,7 +158,8 @@ end
 %%% plots
 
 function Stats = plot_timecourse(TrialTime, ProbabilityByOutput, BaselineProbability, ...
-    YLims, LineLabels, Time0Label, Colors, StatParameters, DispN, DispStats, PlotProps)
+    YLims, LineLabels, Time0Label, Colors, StatParameters, DispN, DispStats, PlotProps, ...
+    Grid, Position, Letter)
 % plots the timecourse locked to stimulus onset.
 % Data is a P x TT x t matrix
 
@@ -171,11 +185,13 @@ else
     Range = [min(ProbabilityByOutput(:)), max(ProbabilityByOutput(:))];
 end
 
+chART.sub_plot([], Grid,Position, [], true, Letter, PlotProps);
+
 % plot vertical 0 line
 hold on
 plot([0 0], Range, 'Color', 'k', 'LineWidth',PlotProps.Line.Width/2, 'HandleVisibility', 'off')
 
- % plot stim patch
+% plot stim patch
 if ~all(isnan(ProbabilityByOutput(:, end, :)))
     rectangle('position', [0 Range(1) 0.5, diff(Range)], 'EdgeColor','none', ...
         'FaceColor', [PlotProps.Color.Generic, .15],'HandleVisibility','off')
@@ -193,7 +209,7 @@ PlotProps.HandleVisibility = 'off';
 chART.plot.individual_rows_by_group(TrialTime, ProbabilityByOutput, Colors, [], PlotProps)
 chART.plot.highlighted_segments(ProbabilityMeans, CI, TrialTime, 15, logical(Sig), Colors, PlotProps)
 
-
+% labels
 if ~isempty(LineLabels)
     legend([LineLabels, 'p<.05'])
     set(legend, 'ItemTokenSize', [10 10], 'location', 'northeast')
@@ -201,51 +217,62 @@ end
 
 xlabel('Time (s)')
 
+% indicate what the plot is timelocked to
 YShift = .05*diff(Range);
 if ~isempty(Time0Label)
     text(.1, Range(2)-YShift, Time0Label, 'FontName', PlotProps.Text.FontName, 'FontSize', PlotProps.Text.LegendSize)
 end
 
 if ~isempty(YLims)
-ylim(YLims)
+    ylim(YLims)
 end
 
 if DispN
+    plot_samplesize(Stats, TrialTime, PlotProps, Colors, Range, YShift)
+end
 
-    for Indx_TT = 1:size(Colors, 1)
-        N = num2str(Stats.N(Indx_TT, 1));
-        if N=='0'
-            continue
-        end
-        text(min(TrialTime)+(max(TrialTime)-min(TrialTime))*.01, Range(2)-YShift*Indx_TT, ['N=', N], ...
-            'FontName', PlotProps.Text.FontName, 'FontSize', PlotProps.Text.LegendSize,...
-            'Color',Colors(Indx_TT, :))
+if DispStats
+    disp_stats_timecourses(Stats, LineLabels, TrialTime)
+end
+end
+
+
+function plot_samplesize(Stats, TrialTime, PlotProps, Colors, Range, YShift)
+% letters in corner of the plot
+for Indx_TT = 1:size(Colors, 1)
+    N = num2str(Stats.N(Indx_TT, 1));
+    if N=='0'
+        continue
     end
+    text(min(TrialTime)+(max(TrialTime)-min(TrialTime))*.01, Range(2)-YShift*Indx_TT, ['N=', N], ...
+        'FontName', PlotProps.Text.FontName, 'FontSize', PlotProps.Text.LegendSize,...
+        'Color',Colors(Indx_TT, :))
+end
 end
 
 
 
-%%% display
-if DispStats
-    Windows = [-2 -0.5;
-        -0.5 .3;
-        0.3, 1.5;
-        1.5 4];
+function disp_stats_timecourses(Stats, LineLabels, TrialTime)
+% print in command window the most significant values
 
-    for Indx_L = 1:numel(LineLabels)
-        disp(LineLabels{Indx_L})
-        for Indx_W = 1:size(Windows, 1)
+Windows = [-2 -0.5;
+    -0.5 .3;
+    0.3, 1.5;
+    1.5 4];
 
-            S = abs(Stats.t(Indx_L, :));
-            S(TrialTime<Windows(Indx_W, 1) | TrialTime>Windows(Indx_W, 2)) = nan;
-            [~, Indx] = max(S);
+for Indx_L = 1:numel(LineLabels)
+    disp(LineLabels{Indx_L})
+    for Indx_W = 1:size(Windows, 1)
 
-            % if Sig(Indx_L, Indx)
-            disp_stats(Stats, [Indx_L, Indx], ['max t: ', num2str(TrialTime(Indx), '%.1f'), ' s']);
-            % end
+        S = abs(Stats.t(Indx_L, :));
+        S(TrialTime<Windows(Indx_W, 1) | TrialTime>Windows(Indx_W, 2)) = nan;
+        [~, Indx] = max(S);
 
-        end
-        disp('_____________')
+        % if Sig(Indx_L, Indx)
+        disp_stats(Stats, [Indx_L, Indx], [num2str(Windows(Indx_W, :)), 'max t: ', num2str(TrialTime(Indx), '%.1f'), ' s']);
+        % end
+
     end
+    disp('_____________')
 end
 end
