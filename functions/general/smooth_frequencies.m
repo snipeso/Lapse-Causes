@@ -60,6 +60,7 @@ switch FrequencyDimention
     otherwise
         error('dont know this dimention for smoothing')
 end
+end
 
 
 function SmoothData = smoothF(Data, Freqs, SmoothSpan)
@@ -69,4 +70,5 @@ function SmoothData = smoothF(Data, Freqs, SmoothSpan)
 FreqRes = Freqs(2)-Freqs(1);
 SmoothPoints = round(SmoothSpan/FreqRes);
 
-SmoothData = smooth_frequencies(Data, SmoothPoints, 'lowess');
+SmoothData = smooth(Data, SmoothPoints, 'lowess');
+end

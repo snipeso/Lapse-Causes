@@ -38,3 +38,4 @@ elseif PreserveDim == 4 % bursts on 4th dimention
         end
     end
 end
+end
