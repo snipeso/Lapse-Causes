@@ -144,51 +144,54 @@ end
 %%%%%%%%%%%%%%
 %%% plots
 
-function Stats = plot_timecourse(t, Data, Baseline, YLims, LineLabels, Text, Colors, StatsP, DispN, DispStats, PlotProps)
+function Stats = plot_timecourse(TrialTime, ProbabilityByOutput, BaselineProbability, ...
+    YLims, LineLabels, Time0Label, Colors, StatParameters, DispN, DispStats, PlotProps)
 % plots the timecourse locked to stimulus onset.
 % Data is a P x TT x t matrix
 
-% BadParticipants = any(all(isnan(Data(:, [1, 2], :)), 3), 2);
-% Data(BadParticipants, :, :) = nan;
-StatsP.ANOVA.nBoot = 1;
+StatParameters.ANOVA.nBoot = 1; % to speed things up
 
 %%% Get stats
-if ~isempty(StatsP) && ~isempty(Baseline)
-    %     Baseline(BadParticipants) = nan;
-    Data1 = repmat(Baseline, 1, size(Data, 3)); % baseline
-    Data2 = Data;
-    Stats = paired_ttest(Data1, Data2, StatsP);
-    Stats.timepoints = t;
+if ~isempty(StatParameters) && ~isempty(BaselineProbability)
+    Data1 = repmat(BaselineProbability, 1, size(ProbabilityByOutput, 3)); % baseline
+    Data2 = ProbabilityByOutput;
+    Stats = paired_ttest(Data1, Data2, StatParameters);
+    Stats.timepoints = TrialTime;
     Stats.lines = LineLabels;
 
-    Sig = Stats.p_fdr <= StatsP.Alpha;
+    Sig = Stats.p_fdr <= StatParameters.Alpha;
 else
-    Dims = size(Data);
+    Dims = size(ProbabilityByOutput);
     Sig = zeros(Dims(2), Dims(3));
 end
 
 if ~isempty(YLims)
     Range = YLims;
 else
-    Range = [min(Data(:)), max(Data(:))];
+    Range = [min(ProbabilityByOutput(:)), max(ProbabilityByOutput(:))];
 end
 
+% plot vertical 0 line
 hold on
 plot([0 0], Range, 'Color', 'k', 'LineWidth',PlotProps.Line.Width/2, 'HandleVisibility', 'off')
-if ~all(isnan(Data(:, end, :))) % plot stim patch
+
+ % plot stim patch
+if ~all(isnan(ProbabilityByOutput(:, end, :)))
     rectangle('position', [0 Range(1) 0.5, diff(Range)], 'EdgeColor','none', ...
         'FaceColor', [PlotProps.Color.Generic, .15],'HandleVisibility','off')
 end
 
-plot([min(t), max(t)], [mean(Baseline, 'omitnan'), mean(Baseline, 'omitnan')], ...
+% plot horizontal 0 line
+plot([min(TrialTime), max(TrialTime)], [mean(BaselineProbability, 'omitnan'), mean(BaselineProbability, 'omitnan')], ...
     ':', 'Color', PlotProps.Color.Generic, 'LineWidth', PlotProps.Line.Width/2, 'HandleVisibility', 'off')
 
-Data_Means = squeeze(mean(Data, 1, 'omitnan'));
-CI = nan(2, size(Data, 2), size(Data, 3));
+% plot data
+ProbabilityMeans = squeeze(mean(ProbabilityByOutput, 1, 'omitnan'));
+CI = nan(2, size(ProbabilityByOutput, 2), size(ProbabilityByOutput, 3));
 
 PlotProps.HandleVisibility = 'off';
-chART.plot.plotAngelHair(t, Data, Colors, [], PlotProps)
-chART.plot.plotFuzzyCaterpillars(Data_Means, CI, t, 15, logical(Sig), Colors, PlotProps)
+chART.plot.individual_rows_by_group(TrialTime, ProbabilityByOutput, Colors, [], PlotProps)
+chART.plot.highlighted_segments(ProbabilityMeans, CI, TrialTime, 15, logical(Sig), Colors, PlotProps)
 
 
 if ~isempty(LineLabels)
@@ -199,8 +202,8 @@ end
 xlabel('Time (s)')
 
 YShift = .05*diff(Range);
-if ~isempty(Text)
-    text(.1, Range(2)-YShift, Text, 'FontName', PlotProps.Text.FontName, 'FontSize', PlotProps.Text.LegendSize)
+if ~isempty(Time0Label)
+    text(.1, Range(2)-YShift, Time0Label, 'FontName', PlotProps.Text.FontName, 'FontSize', PlotProps.Text.LegendSize)
 end
 
 if ~isempty(YLims)
@@ -214,7 +217,7 @@ if DispN
         if N=='0'
             continue
         end
-        text(min(t)+(max(t)-min(t))*.01, Range(2)-YShift*Indx_TT, ['N=', N], ...
+        text(min(TrialTime)+(max(TrialTime)-min(TrialTime))*.01, Range(2)-YShift*Indx_TT, ['N=', N], ...
             'FontName', PlotProps.Text.FontName, 'FontSize', PlotProps.Text.LegendSize,...
             'Color',Colors(Indx_TT, :))
     end
@@ -234,11 +237,11 @@ if DispStats
         for Indx_W = 1:size(Windows, 1)
 
             S = abs(Stats.t(Indx_L, :));
-            S(t<Windows(Indx_W, 1) | t>Windows(Indx_W, 2)) = nan;
+            S(TrialTime<Windows(Indx_W, 1) | TrialTime>Windows(Indx_W, 2)) = nan;
             [~, Indx] = max(S);
 
             % if Sig(Indx_L, Indx)
-            disp_stats(Stats, [Indx_L, Indx], ['max t: ', num2str(t(Indx), '%.1f'), ' s']);
+            disp_stats(Stats, [Indx_L, Indx], ['max t: ', num2str(TrialTime(Indx), '%.1f'), ' s']);
             % end
 
         end
