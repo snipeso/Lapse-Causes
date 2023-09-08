@@ -91,8 +91,10 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
 
     %%% save
     save(fullfile(EyeclosureCacheDir, ['Eyeclosures_', SessionBlockLabels{idxSessionBlock}, TitleTag, '.mat']), ...
-        'ProbEyesClosedStimLocked', 'ProbEyesClosedRespLocked', 'TrialTime', 'ProbabilityEyesClosed')
+        'ProbEyesClosedStimLocked', 'ProbEyesClosedRespLocked', ...
+        'TrialTime', 'ProbabilityEyesClosed')
 end
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions

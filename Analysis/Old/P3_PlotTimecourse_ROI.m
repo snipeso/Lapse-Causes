@@ -31,12 +31,12 @@ TitleTag = strjoin({'Timecourse'}, '_');
 % burst data
 load(fullfile(Paths.Pool, 'EEG', 'ProbBurst_ROI.mat'), 'ProbBurst_Stim', 'ProbBurst_Resp', 't',  'GenProbBurst')
 t_burst = t;
-sProbBurst_Stim = smoothFreqs(ProbBurst_Stim, t_burst, 'last', SmoothFactor);
+sProbBurst_Stim = smooth_frequencies(ProbBurst_Stim, t_burst, 'last', SmoothFactor);
 [zProbBurst_Stim, zGenProbBurst_Stim] = ...
     zscoreTimecourse(sProbBurst_Stim, GenProbBurst, 3);
 
 
-sProbBurst_Resp = smoothFreqs(ProbBurst_Resp, t_burst, 'last', SmoothFactor);
+sProbBurst_Resp = smooth_frequencies(ProbBurst_Resp, t_burst, 'last', SmoothFactor);
 [zProbBurst_Resp, zGenProbBurst_Resp] = ...
     zscoreTimecourse(sProbBurst_Resp, GenProbBurst, 3);
 

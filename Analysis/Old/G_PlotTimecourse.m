@@ -7,13 +7,13 @@ TitleTag = 'Timecourses';
 
 load(fullfile(Paths.Pool, 'Eyes', 'ProbMicrosleep.mat'), 'ProbMicrosleep', 't', 'GenProbMicrosleep')
 t_microsleep = t;
-sProbMicrosleep =  smoothFreqs(ProbMicrosleep, t_microsleep, 'last', .5);
+sProbMicrosleep =  smooth_frequencies(ProbMicrosleep, t_microsleep, 'last', .5);
 zProbMicrosleep = zScoreData(sProbMicrosleep, 'first');
 
 
 load(fullfile(Paths.Pool, 'EEG', 'ProbBurst.mat'), 'ProbBurst', 't',  'GenProbBurst')
 t_burst = t;
-sProbBurst =  smoothFreqs(ProbBurst, t_burst, 'last', .5);
+sProbBurst =  smooth_frequencies(ProbBurst, t_burst, 'last', .5);
 zProbBurst = zScoreData(permute(sProbBurst, [1 2 4 3]), 'last');
 zProbBurst = permute(zProbBurst, [1 2 4 3]);
 
@@ -95,7 +95,7 @@ PlotProps = P.Manuscript;
 TitleTag = 'Timecourses';
 
 
-sHemiProbBurst =  smoothFreqs(ProbBurstHemifield, t, 'last', .5);
+sHemiProbBurst =  smooth_frequencies(ProbBurstHemifield, t, 'last', .5);
 
 %%
 Range = [];

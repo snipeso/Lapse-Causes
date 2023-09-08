@@ -142,7 +142,7 @@ for Indx_P = 1:numel(Participants)
     disp(['Finished ', Participants{Indx_P}])
 end
 
-sData = smoothFreqs(AllData, Freqs, 'last', 2);
+sData = smooth_frequencies(AllData, Freqs, 'last', 2);
 ChData =  meanChData(sData, Chanlocs, Channels.preROI, 4);
 
 save(fullfile(Pool, strjoin({TitleTag, 'bChData.mat'}, '_')), 'ChData', 'sData', 'AllFields', 'Chanlocs', 'Freqs')

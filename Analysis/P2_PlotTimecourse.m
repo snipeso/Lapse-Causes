@@ -44,9 +44,9 @@ load(fullfile(Paths.Pool, 'Eyes', ['ProbMicrosleep_', SessionGroup, MicrosleepTa
 t_microsleep = t_window;
 
 % smooth and z-score data
-sProbMicrosleep_Stim = smoothFreqs(ProbMicrosleep_Stim, t_microsleep, 'last', SmoothFactor);
+sProbMicrosleep_Stim = smooth_frequencies(ProbMicrosleep_Stim, t_microsleep, 'last', SmoothFactor);
 
-sProbMicrosleep_Resp = smoothFreqs(ProbMicrosleep_Resp, t_microsleep, 'last', SmoothFactor);
+sProbMicrosleep_Resp = smooth_frequencies(ProbMicrosleep_Resp, t_microsleep, 'last', SmoothFactor);
 
 %%% burst data
 load(fullfile(Paths.Pool, 'EEG', ['ProbBurst_', TitleTag, '.mat']), 'ProbBurst_Stim_Pooled', ...
@@ -55,8 +55,8 @@ t_burst = t_window;
 
 
 % smooth signals
-% sProbBurst_Stim = smoothFreqs(ProbBurst_Stim_Pooled, t_burst, 'last', SmoothFactor); % P x TT x B x t
-% sProbBurst_Resp = smoothFreqs(ProbBurst_Resp_Pooled, t_burst, 'last', SmoothFactor);
+% sProbBurst_Stim = smooth_frequencies(ProbBurst_Stim_Pooled, t_burst, 'last', SmoothFactor); % P x TT x B x t
+% sProbBurst_Resp = smooth_frequencies(ProbBurst_Resp_Pooled, t_burst, 'last', SmoothFactor);
 
 sProbBurst_Stim = ProbBurst_Stim_Pooled;
 sProbBurst_Resp = ProbBurst_Resp_Pooled;

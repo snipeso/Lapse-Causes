@@ -26,12 +26,12 @@ TitleTag = strjoin({'Timecourse'}, '_');
 
 load(fullfile(Paths.Pool, 'EEG', 'Amplitudes.mat'), 'Amplitudes_Stim', 'Amplitudes_Resp', 't')
 t_burst = t;
-sAmp_Stim =  smoothFreqs(Amplitudes_Stim, t_burst, 'last', .5);
+sAmp_Stim =  smooth_frequencies(Amplitudes_Stim, t_burst, 'last', .5);
 sAmp_temp_Stim = permute(sAmp_Stim, [1 2 4 3]);
 zAmp_Stim = zScoreData(sAmp_temp_Stim, 'last');
 zAmp_Stim = permute(zAmp_Stim, [1 2 4 3]);
 
-sAmp_Resp =  smoothFreqs(Amplitudes_Resp, t_burst, 'last', .5);
+sAmp_Resp =  smooth_frequencies(Amplitudes_Resp, t_burst, 'last', .5);
 sAmp_temp_Resp = permute(sAmp_Resp, [1 2 4 3]);
 zAmp_Resp = zScoreData(sAmp_temp_Resp, 'last');
 zAmp_Resp = permute(zAmp_Resp, [1 2 4 3]);
