@@ -45,16 +45,16 @@ load(fullfile(CacheDir, ['Eyeclosures_', SessionBlockLabel, EyeclosureTag, '.mat
     'ProbEyesClosedStimLocked', 'ProbEyesClosedRespLocked', 'TrialTime', 'ProbabilityEyesClosed')
 
 [ProbEyesClosedStimLockedDiff, ProbEyesClosedRespLockedDiff, ProbabilityEyesClosedDiff] = ...
-process_data(ProbEyesClosedStimLocked, ProbEyesClosedRespLocked, ProbabilityEyesClosed, ...
-TrialTime, SmoothFactor);
+    process_data(ProbEyesClosedStimLocked, ProbEyesClosedRespLocked, ProbabilityEyesClosed, ...
+    TrialTime, SmoothFactor);
 
 
 % burst data
 load(fullfile(CacheDir, ['Bursts_', TitleTag, '.mat']), ...
-      'ProbBurstStimLocked', 'ProbBurstRespLocked', 'ProbabilityBurst')
+    'ProbBurstStimLocked', 'ProbBurstRespLocked', 'ProbabilityBurst')
 
 [ProbBurstsStimLockedDiff, ProbBurstsRespLockedDiff, ProbabilityBurstsDiff] = ...
-process_data(ProbBurstStimLocked, ProbBurstRespLocked, ProbabilityBurst, TrialTime, SmoothFactor);
+    process_data(ProbBurstStimLocked, ProbBurstRespLocked, ProbabilityBurst, TrialTime, SmoothFactor);
 
 
 
@@ -137,7 +137,7 @@ disp_stats_descriptive(100*ProbabilityBurst(:, 2), 'Alpha gen prop', '%', 0);
 %%% functions
 
 function [ProbStimProcessed, ProbRespProcessed, ProbEventProcessed] = ...
-process_data(ProbStimLocked, ProbRespLocked, ProbEvent, TrialTime, SmoothFactor)
+    process_data(ProbStimLocked, ProbRespLocked, ProbEvent, TrialTime, SmoothFactor)
 
 % smooth data
 ProbStimSmooth = smooth_frequencies(ProbStimLocked, TrialTime, 'last', SmoothFactor);
