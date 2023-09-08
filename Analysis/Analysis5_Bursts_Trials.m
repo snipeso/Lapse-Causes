@@ -8,7 +8,7 @@ close all
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
 
-OnlyClosestStimuli = true; % only use closest trials
+OnlyClosestStimuli = false; % only use closest trials
 CheckEyes = true; % only used eyes-open trials
 ChannelsCount = 123;
 

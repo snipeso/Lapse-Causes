@@ -39,21 +39,22 @@ CacheDir = fullfile(Paths.Cache, 'Data_Figures');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% load data
 
-%%% microsleep data
+
+% eyeclosure data
 load(fullfile(CacheDir, ['Eyeclosures_', SessionBlockLabel, EyeclosureTag, '.mat']), ...
     'ProbEyesClosedStimLocked', 'ProbEyesClosedRespLocked', 'TrialTime', 'ProbabilityEyesClosed')
 
-% smooth data
-ProbEyesClosedStimLockedSmooth = smooth_frequencies(ProbEyesClosedStimLocked, ...
-    TrialTime, 'last', SmoothFactor);
-ProbEyesClosedRespLockedSmooth = smooth_frequencies(ProbEyesClosedRespLocked, ...
-    TrialTime, 'last', SmoothFactor);
+[ProbEyesClosedStimLockedDiff, ProbEyesClosedRespLockedDiff, ProbabilityEyesClosedDiff] = ...
+process_data(ProbEyesClosedStimLocked, ProbEyesClosedRespLocked, ProbabilityEyesClosed, ...
+TrialTime, SmoothFactor);
 
-% center data to recording average
-[ProbEyesClosedStimLockedDiff, ProbabilityEyesClosedDiff] = ...
-    meanscoreTimecourse(ProbEyesClosedStimLockedSmooth, ProbabilityEyesClosed, []);
-[ProbEyesClosedRespLockedSmooth, ~] = ...
-    meanscoreTimecourse(ProbEyesClosedRespLockedSmooth, ProbabilityEyesClosed, []);
+
+% burst data
+load(fullfile(CacheDir, ['Bursts_', TitleTag, '.mat']), ...
+      'ProbBurstStimLocked', 'ProbBurstRespLocked', 'ProbabilityBurst')
+
+[ProbBurstsStimLockedDiff, ProbBurstsRespLockedDiff, ProbabilityBurstsDiff] = ...
+process_data(ProbBurstStimLocked, ProbBurstRespLocked, ProbabilityBurst, TrialTime, SmoothFactor);
 
 
 
@@ -82,6 +83,17 @@ plot_timecourse(TrialTime, flip(ProbEyesClosedStimLockedDiff, 2), ProbabilityEye
     Grid, [1 1], PlotProps.Indexes.Letters{1});
 ylabel('\Delta likelihood eyeclosure')
 
+% theta
+plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 1, :)), 2), ...
+    ProbabilityBurstsDiff, YLim, flip(TallyLabels), 'Stimulus', Colors, ...
+    StatParameters, DispN, DispStats, PlotProps, Grid, [1 2], PlotProps.Indexes.Letters{2});
+ylabel('\Delta likelihood theta burst')
+
+% alpha
+plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 2, :)), 2), ...
+    ProbabilityBurstsDiff, YLim, flip(TallyLabels), 'Stimulus', Colors, ...
+    StatParameters, DispN, DispStats, PlotProps, Grid, [1 3], PlotProps.Indexes.Letters{3});
+ylabel('\Delta likelihood alpha burst')
 
 
 %%% response locked
@@ -93,6 +105,18 @@ plot_timecourse(TrialTime, flip(ProbEyesClosedRespLockedSmooth, 2), ProbabilityE
     Grid, [2 1], PlotProps.Indexes.Letters{4});
 ylabel('\Delta likelihood eyeclosure')
 legend off
+
+% theta
+plot_timecourse(TrialTime, flip(squeeze(ProbBurstsRespLockedDiff(:, :, 1, :)), 2), ...
+    ProbabilityBurstsDiff, YLim, flip(TallyLabels), 'Stimulus', Colors, ...
+    StatParameters, DispN, DispStats, PlotProps, Grid, [1 2], PlotProps.Indexes.Letters{2});
+ylabel('\Delta likelihood theta burst')
+
+% alpha
+plot_timecourse(TrialTime, flip(squeeze(ProbBurstsRespLockedDiff(:, :, 2, :)), 2), ...
+    ProbabilityBurstsDiff, YLim, flip(TallyLabels), 'Stimulus', Colors, ...
+    StatParameters, DispN, DispStats, PlotProps, Grid, [1 3], PlotProps.Indexes.Letters{3});
+ylabel('\Delta likelihood alpha burst')
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -108,45 +132,53 @@ disp_stats_descriptive(100*ProbabilityBurst(:, 2), 'Alpha gen prop', '%', 0);
 
 
 
+%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
 
-function [zProb, zGenProb] = meanscoreTimecourse(ProbAll, GenProb, PreserveDim)
+function [ProbStimProcessed, ProbRespProcessed, ProbEventProcessed] = ...
+process_data(ProbStimLocked, ProbRespLocked, ProbEvent, TrialTime, SmoothFactor)
+
+% smooth data
+ProbStimSmooth = smooth_frequencies(ProbStimLocked, TrialTime, 'last', SmoothFactor);
+ProbRespSmooth = smooth_frequencies(ProbRespLocked, TrialTime, 'last', SmoothFactor);
+
+% center data to recording average
+[ProbStimProcessed, ProbEventProcessed] = mean_center_timescore(ProbStimSmooth, ProbEvent, []);
+[ProbRespProcessed, ~] = mean_center_timescore(ProbRespSmooth, ProbEvent, []);
+end
+
+
+function [zProb, zGenProb] = mean_center_timescore(ProbAll, GenProb, PreserveDim)
 
 Dims = size(ProbAll);
-
-
 zProb = nan(Dims);
 zGenProb = nan(size(GenProb));
 
 if isempty(PreserveDim) % microsleeps
-    for Indx_P = 1:Dims(1)
-        %         zProb(Indx_P, :, :) = 100*(ProbAll(Indx_P, :, :) - GenProb(Indx_P))./GenProb(Indx_P);
-        zProb(Indx_P, :, :) = (ProbAll(Indx_P, :, :) - GenProb(Indx_P));
-        zGenProb(Indx_P) = 0;
+    for idxParticipant = 1:Dims(1)
+        zProb(idxParticipant, :, :) = (ProbAll(idxParticipant, :, :) - GenProb(idxParticipant));
+        zGenProb(idxParticipant) = 0;
     end
 
 elseif PreserveDim == 3 % bursts on 3rd dimention
-    for Indx_P = 1:Dims(1)
-        for Indx_B = 1:Dims(3)
-            %                 zProb(Indx_P, :, Indx_B, :) = ...
-            %                     100*(ProbAll(Indx_P, :, Indx_B, :) - ...
-            %                     GenProb(Indx_P, Indx_B))./GenProb(Indx_P, Indx_B);
-            zProb(Indx_P, :, Indx_B, :) = ...
-                (ProbAll(Indx_P, :, Indx_B, :) - ...
-                GenProb(Indx_P, Indx_B));
+    for idxParticipant = 1:Dims(1)
+        for idxBand = 1:Dims(3)
+            zProb(idxParticipant, :, idxBand, :) = ...
+                (ProbAll(idxParticipant, :, idxBand, :) - ...
+                GenProb(idxParticipant, idxBand));
 
-            zGenProb(Indx_P, Indx_B) = 0;
+            zGenProb(idxParticipant, idxBand) = 0;
         end
     end
 elseif PreserveDim == 4 % bursts on 4th dimention
-    for Indx_P = 1:Dims(1)
-        for Indx_Ch = 1:Dims(3)
-            for Indx_B = 1:Dims(4)
-                zProb(Indx_P, :, Indx_Ch, Indx_B, :) = ...
-                    100*(ProbAll(Indx_P, :, Indx_Ch, Indx_B, :) - ...
-                    GenProb(Indx_P, Indx_Ch, Indx_B))./GenProb(Indx_P, Indx_Ch, Indx_B);
-                zGenProb(Indx_P, Indx_Ch, Indx_B) = 0;
+    for idxParticipant = 1:Dims(1)
+        for idxChannel = 1:Dims(3)
+            for idxBand = 1:Dims(4)
+                zProb(idxParticipant, :, idxChannel, idxBand, :) = ...
+                    100*(ProbAll(idxParticipant, :, idxChannel, idxBand, :) - ...
+                    GenProb(idxParticipant, idxChannel, idxBand))./GenProb(idxParticipant, idxChannel, idxBand);
+                zGenProb(idxParticipant, idxChannel, idxBand) = 0;
             end
         end
     end
@@ -161,7 +193,7 @@ function Stats = plot_timecourse(TrialTime, ProbabilityByOutput, BaselineProbabi
     YLims, LineLabels, Time0Label, Colors, StatParameters, DispN, DispStats, PlotProps, ...
     Grid, Position, Letter)
 % plots the timecourse locked to stimulus onset.
-% Data is a P x TT x t matrix
+% ProbabilityByOutput is a P x TrialOutput x t matrix
 
 StatParameters.ANOVA.nBoot = 1; % to speed things up
 
@@ -185,7 +217,7 @@ else
     Range = [min(ProbabilityByOutput(:)), max(ProbabilityByOutput(:))];
 end
 
-chART.sub_plot([], Grid,Position, [], true, Letter, PlotProps);
+chART.sub_plot([], Grid, Position, [], true, Letter, PlotProps);
 
 % plot vertical 0 line
 hold on
@@ -238,40 +270,38 @@ end
 
 
 function plot_samplesize(Stats, TrialTime, PlotProps, Colors, Range, YShift)
-% letters in corner of the plot
-for Indx_TT = 1:size(Colors, 1)
-    N = num2str(Stats.N(Indx_TT, 1));
+% in corner of plot, indicate sample size per trial outcome
+
+for indxTrialOutcome = 1:size(Colors, 1)
+    N = num2str(Stats.N(indxTrialOutcome, 1));
     if N=='0'
         continue
     end
-    text(min(TrialTime)+(max(TrialTime)-min(TrialTime))*.01, Range(2)-YShift*Indx_TT, ['N=', N], ...
+    text(min(TrialTime)+(max(TrialTime)-min(TrialTime))*.01, ...
+        Range(2)-YShift*indxTrialOutcome, ['N=', N], ...
         'FontName', PlotProps.Text.FontName, 'FontSize', PlotProps.Text.LegendSize,...
-        'Color',Colors(Indx_TT, :))
+        'Color',Colors(indxTrialOutcome, :))
 end
 end
-
 
 
 function disp_stats_timecourses(Stats, LineLabels, TrialTime)
 % print in command window the most significant values
 
+% from these windows, find largest values
 Windows = [-2 -0.5;
     -0.5 .3;
     0.3, 1.5;
     1.5 4];
 
-for Indx_L = 1:numel(LineLabels)
-    disp(LineLabels{Indx_L})
+for idxLine = 1:numel(LineLabels)
+    disp(LineLabels{idxLine})
     for Indx_W = 1:size(Windows, 1)
-
-        S = abs(Stats.t(Indx_L, :));
-        S(TrialTime<Windows(Indx_W, 1) | TrialTime>Windows(Indx_W, 2)) = nan;
-        [~, Indx] = max(S);
-
-        % if Sig(Indx_L, Indx)
-        disp_stats(Stats, [Indx_L, Indx], [num2str(Windows(Indx_W, :)), 'max t: ', num2str(TrialTime(Indx), '%.1f'), ' s']);
-        % end
-
+        TValues = abs(Stats.t(idxLine, :));
+        TValues(TrialTime<Windows(Indx_W, 1) | TrialTime>Windows(Indx_W, 2)) = nan;
+        [~, IndxMaxT] = max(TValues);
+        disp_stats(Stats, [idxLine, IndxMaxT], [num2str(Windows(Indx_W, 1)), ':' num2str(Windows(Indx_W, 2))...
+            'max t: ', num2str(TrialTime(IndxMaxT), '%.1f'), ' s']);
     end
     disp('_____________')
 end
