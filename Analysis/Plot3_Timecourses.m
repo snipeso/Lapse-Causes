@@ -11,7 +11,7 @@ close all
 SmoothFactor = 0.3; % in seconds, smooth signal to be visually pleasing
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionBlockLabel = 'BL';
+SessionBlockLabel = 'SD';
 SmoothSignal = true;
 
 Parameters = analysisParameters();
@@ -69,8 +69,6 @@ Grid = [2 3];
 PlotProps = Parameters.PlotProps.Manuscript;
 PlotProps.Axes.xPadding = 25;
 
-Colors = chART.color_picker(3);
-
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*1.2, PlotProps.Figure.Height*.5])
 
 %%% stimulus locked
@@ -79,19 +77,19 @@ DispStats = true;
 
 % eyeclosure
 plot_timecourse(TrialTime, flip(ProbEyesClosedStimLockedDiff, 2), ProbabilityEyesClosedDiff, ...
-    YLim, flip(TallyLabels), 'Stimulus', Colors, StatParameters, DispN, DispStats, PlotProps, ...
+    YLim, flip(TallyLabels), 'Stimulus', StatParameters, DispN, DispStats, PlotProps, ...
     Grid, [1 1], PlotProps.Indexes.Letters{1});
 ylabel('\Delta likelihood eyeclosure')
 
 % theta
 plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 1, :)), 2), ...
-    ProbabilityBurstsDiff, YLim, flip(TallyLabels), 'Stimulus', Colors, ...
+    ProbabilityBurstsDiff(:, 1), YLim, flip(TallyLabels), 'Stimulus', ...
     StatParameters, DispN, DispStats, PlotProps, Grid, [1 2], PlotProps.Indexes.Letters{2});
 ylabel('\Delta likelihood theta burst')
 
 % alpha
 plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 2, :)), 2), ...
-    ProbabilityBurstsDiff, YLim, flip(TallyLabels), 'Stimulus', Colors, ...
+    ProbabilityBurstsDiff(:, 2), YLim, flip(TallyLabels), 'Stimulus', ...
     StatParameters, DispN, DispStats, PlotProps, Grid, [1 3], PlotProps.Indexes.Letters{3});
 ylabel('\Delta likelihood alpha burst')
 
@@ -100,22 +98,22 @@ ylabel('\Delta likelihood alpha burst')
 DispStats = false;
 
 % eyeclosure
-plot_timecourse(TrialTime, flip(ProbEyesClosedRespLockedSmooth, 2), ProbabilityEyesClosedDiff, ...
-    YLim, flip(TallyLabels), 'Stimulus', Colors, StatParameters, DispN, DispStats, PlotProps, ...
+plot_timecourse(TrialTime, flip(ProbEyesClosedRespLockedDiff, 2), ProbabilityEyesClosedDiff, ...
+    YLim, flip(TallyLabels), 'Stimulus', StatParameters, DispN, DispStats, PlotProps, ...
     Grid, [2 1], PlotProps.Indexes.Letters{4});
 ylabel('\Delta likelihood eyeclosure')
 legend off
 
 % theta
 plot_timecourse(TrialTime, flip(squeeze(ProbBurstsRespLockedDiff(:, :, 1, :)), 2), ...
-    ProbabilityBurstsDiff, YLim, flip(TallyLabels), 'Stimulus', Colors, ...
-    StatParameters, DispN, DispStats, PlotProps, Grid, [1 2], PlotProps.Indexes.Letters{2});
+    ProbabilityBurstsDiff(:, 1), YLim, flip(TallyLabels), 'Stimulus', ...
+    StatParameters, DispN, DispStats, PlotProps, Grid, [2 2], PlotProps.Indexes.Letters{2});
 ylabel('\Delta likelihood theta burst')
 
 % alpha
 plot_timecourse(TrialTime, flip(squeeze(ProbBurstsRespLockedDiff(:, :, 2, :)), 2), ...
-    ProbabilityBurstsDiff, YLim, flip(TallyLabels), 'Stimulus', Colors, ...
-    StatParameters, DispN, DispStats, PlotProps, Grid, [1 3], PlotProps.Indexes.Letters{3});
+    ProbabilityBurstsDiff(:, 2), YLim, flip(TallyLabels), 'Stimulus', ...
+    StatParameters, DispN, DispStats, PlotProps, Grid, [2 3], PlotProps.Indexes.Letters{3});
 ylabel('\Delta likelihood alpha burst')
 
 
@@ -190,11 +188,12 @@ end
 %%% plots
 
 function Stats = plot_timecourse(TrialTime, ProbabilityByOutput, BaselineProbability, ...
-    YLims, LineLabels, Time0Label, Colors, StatParameters, DispN, DispStats, PlotProps, ...
+    YLims, LineLabels, Time0Label, StatParameters, DispN, DispStats, PlotProps, ...
     Grid, Position, Letter)
 % plots the timecourse locked to stimulus onset.
 % ProbabilityByOutput is a P x TrialOutput x t matrix
 
+Colors = chART.color_picker(3);
 StatParameters.ANOVA.nBoot = 1; % to speed things up
 
 %%% Get stats
