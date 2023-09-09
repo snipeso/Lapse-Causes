@@ -11,7 +11,7 @@ close all
 SmoothFactor = 0.3; % in seconds, smooth signal to be visually pleasing
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionBlockLabel = 'BL';
+SessionBlockLabel = 'SD';
 SmoothSignal = true;
 
 Parameters = analysisParameters();
@@ -115,6 +115,8 @@ plot_timecourse(TrialTime, flip(squeeze(ProbBurstsRespLockedDiff(:, :, 2, :)), 2
     ProbabilityBurstsDiff(:, 2), YLim, flip(TallyLabels), '', ...
     StatParameters, DispN, DispStats, PlotProps, Grid, [2 3], PlotProps.Indexes.Letters{3});
 ylabel('\Delta likelihood alpha burst')
+
+chART.save_figure(['Figure_',TitleTag], Paths.Results, PlotProps)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

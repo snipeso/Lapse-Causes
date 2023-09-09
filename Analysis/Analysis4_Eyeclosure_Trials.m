@@ -8,7 +8,7 @@ close all
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
 
-OnlyClosestStimuli = false; % only use closest trials
+OnlyClosestStimuli = true; % only use closest trials
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
@@ -65,7 +65,7 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
     ProbEyesClosedRespLocked = ProbEyesClosedStimLocked;
     ProbabilityEyesClosed = nan(numel(Participants), 1); % get general probability of a microsleep for a given session block (to control for when z-scoring)
 
-    for idxParticipant = 13:numel(Participants)
+    for idxParticipant = 1:numel(Participants)
 
         [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, EyeclosureTimepointCount] = ...
             pool_eyeclosure_trials(TrialsTable, EyetrackingQualityTable, EyetrackingDir, ...
