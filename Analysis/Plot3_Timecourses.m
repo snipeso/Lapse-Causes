@@ -9,9 +9,9 @@ close all
 
 
 SmoothFactor = 0.3; % in seconds, smooth signal to be visually pleasing
-CheckEyes = false; % check if person had eyes open or closed
+CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionBlockLabel = 'BL';
+SessionBlockLabel = 'SD';
 SmoothSignal = true;
 
 Parameters = analysisParameters();
@@ -46,7 +46,7 @@ load(fullfile(CacheDir, ['Eyeclosures_', SessionBlockLabel, EyeclosureTag, '.mat
 
 [ProbEyesClosedStimLockedDiff, ProbEyesClosedRespLockedDiff, ProbabilityEyesClosedDiff] = ...
     process_data(ProbEyesClosedStimLocked, ProbEyesClosedRespLocked, ProbabilityEyesClosed, ...
-    TrialTime, SmoothFactor);
+    TrialTime, SmoothFactor, []);
 
 
 % burst data
@@ -54,7 +54,8 @@ load(fullfile(CacheDir, ['Bursts_', TitleTag, '.mat']), ...
     'ProbBurstStimLocked', 'ProbBurstRespLocked', 'ProbabilityBurst')
 
 [ProbBurstsStimLockedDiff, ProbBurstsRespLockedDiff, ProbabilityBurstsDiff] = ...
-    process_data(ProbBurstStimLocked, ProbBurstRespLocked, ProbabilityBurst, TrialTime, SmoothFactor);
+    process_data(ProbBurstStimLocked, ProbBurstRespLocked, ProbabilityBurst, ...
+    TrialTime, SmoothFactor, 3);
 
 
 
@@ -63,7 +64,9 @@ load(fullfile(CacheDir, ['Bursts_', TitleTag, '.mat']), ...
 
 %%
 clc
-YLim = [-.35 .35];
+YLimEyesClosed = [-.35 .35];
+YLimAlpha = [-.15 .15];
+YLimTheta = [-.05 .05];
 
 Grid = [2 3];
 PlotProps = Parameters.PlotProps.Manuscript;
@@ -77,19 +80,19 @@ DispStats = true;
 
 % eyeclosure
 plot_timecourse(TrialTime, flip(ProbEyesClosedStimLockedDiff, 2), ProbabilityEyesClosedDiff, ...
-    YLim, flip(TallyLabels), 'Stimulus', StatParameters, DispN, DispStats, PlotProps, ...
+    YLimEyesClosed, flip(TallyLabels), 'Stimulus', StatParameters, DispN, DispStats, PlotProps, ...
     Grid, [1 1], PlotProps.Indexes.Letters{1});
 ylabel('\Delta likelihood eyeclosure')
 
 % theta
 plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 1, :)), 2), ...
-    ProbabilityBurstsDiff(:, 1), YLim, flip(TallyLabels), '', ...
+    ProbabilityBurstsDiff(:, 1), YLimTheta, flip(TallyLabels), '', ...
     StatParameters, DispN, DispStats, PlotProps, Grid, [1 2], PlotProps.Indexes.Letters{2});
 ylabel('\Delta likelihood theta burst')
 
 % alpha
 plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 2, :)), 2), ...
-    ProbabilityBurstsDiff(:, 2), YLim, flip(TallyLabels), '', ...
+    ProbabilityBurstsDiff(:, 2), YLimAlpha, flip(TallyLabels), '', ...
     StatParameters, DispN, DispStats, PlotProps, Grid, [1 3], PlotProps.Indexes.Letters{3});
 ylabel('\Delta likelihood alpha burst')
 
@@ -99,20 +102,20 @@ DispStats = false;
 
 % eyeclosure
 plot_timecourse(TrialTime, flip(ProbEyesClosedRespLockedDiff, 2), ProbabilityEyesClosedDiff, ...
-    YLim, flip(TallyLabels), 'Response', StatParameters, DispN, DispStats, PlotProps, ...
+    YLimEyesClosed, flip(TallyLabels), 'Response', StatParameters, DispN, DispStats, PlotProps, ...
     Grid, [2 1], PlotProps.Indexes.Letters{4});
 ylabel('\Delta likelihood eyeclosure')
 legend off
 
 % theta
 plot_timecourse(TrialTime, flip(squeeze(ProbBurstsRespLockedDiff(:, :, 1, :)), 2), ...
-    ProbabilityBurstsDiff(:, 1), YLim, flip(TallyLabels), '', ...
+    ProbabilityBurstsDiff(:, 1), YLimTheta, flip(TallyLabels), '', ...
     StatParameters, DispN, DispStats, PlotProps, Grid, [2 2], PlotProps.Indexes.Letters{2});
 ylabel('\Delta likelihood theta burst')
 
 % alpha
 plot_timecourse(TrialTime, flip(squeeze(ProbBurstsRespLockedDiff(:, :, 2, :)), 2), ...
-    ProbabilityBurstsDiff(:, 2), YLim, flip(TallyLabels), '', ...
+    ProbabilityBurstsDiff(:, 2), YLimAlpha, flip(TallyLabels), '', ...
     StatParameters, DispN, DispStats, PlotProps, Grid, [2 3], PlotProps.Indexes.Letters{3});
 ylabel('\Delta likelihood alpha burst')
 
@@ -137,53 +140,18 @@ disp_stats_descriptive(100*ProbabilityBurst(:, 2), 'Alpha gen prop', '%', 0);
 %%% functions
 
 function [ProbStimProcessed, ProbRespProcessed, ProbEventProcessed] = ...
-    process_data(ProbStimLocked, ProbRespLocked, ProbEvent, TrialTime, SmoothFactor)
+    process_data(ProbStimLocked, ProbRespLocked, ProbEvent, TrialTime, SmoothFactor, BandDimention)
 
 % smooth data
 ProbStimSmooth = smooth_frequencies(ProbStimLocked, TrialTime, 'last', SmoothFactor);
 ProbRespSmooth = smooth_frequencies(ProbRespLocked, TrialTime, 'last', SmoothFactor);
 
 % center data to recording average
-[ProbStimProcessed, ProbEventProcessed] = mean_center_timescore(ProbStimSmooth, ProbEvent, []);
-[ProbRespProcessed, ~] = mean_center_timescore(ProbRespSmooth, ProbEvent, []);
+[ProbStimProcessed, ProbEventProcessed] = mean_center_timescore(ProbStimSmooth, ProbEvent, BandDimention);
+[ProbRespProcessed, ~] = mean_center_timescore(ProbRespSmooth, ProbEvent, BandDimention);
 end
 
 
-function [zProb, zGenProb] = mean_center_timescore(ProbAll, GenProb, PreserveDim)
-
-Dims = size(ProbAll);
-zProb = nan(Dims);
-zGenProb = nan(size(GenProb));
-
-if isempty(PreserveDim) % microsleeps
-    for idxParticipant = 1:Dims(1)
-        zProb(idxParticipant, :, :) = (ProbAll(idxParticipant, :, :) - GenProb(idxParticipant));
-        zGenProb(idxParticipant) = 0;
-    end
-
-elseif PreserveDim == 3 % bursts on 3rd dimention
-    for idxParticipant = 1:Dims(1)
-        for idxBand = 1:Dims(3)
-            zProb(idxParticipant, :, idxBand, :) = ...
-                (ProbAll(idxParticipant, :, idxBand, :) - ...
-                GenProb(idxParticipant, idxBand));
-
-            zGenProb(idxParticipant, idxBand) = 0;
-        end
-    end
-elseif PreserveDim == 4 % bursts on 4th dimention
-    for idxParticipant = 1:Dims(1)
-        for idxChannel = 1:Dims(3)
-            for idxBand = 1:Dims(4)
-                zProb(idxParticipant, :, idxChannel, idxBand, :) = ...
-                    100*(ProbAll(idxParticipant, :, idxChannel, idxBand, :) - ...
-                    GenProb(idxParticipant, idxChannel, idxBand))./GenProb(idxParticipant, idxChannel, idxBand);
-                zGenProb(idxParticipant, idxChannel, idxBand) = 0;
-            end
-        end
-    end
-end
-end
 
 
 %%%%%%%%%%%%%%

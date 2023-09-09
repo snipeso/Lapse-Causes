@@ -9,7 +9,7 @@ close all
 %%% Parameters
 
 OnlyClosestStimuli = false; % only use closest trials
-CheckEyes = false; % only used eyes-open trials
+CheckEyes = true; % only used eyes-open trials
 ChannelsCount = 123;
 
 Parameters = analysisParameters();
@@ -55,7 +55,7 @@ if CheckEyes
     TitleTag = [TitleTag, '_EO'];
     EyesOpenTrials = TrialsTable.EyesClosed == 0;
     EyetrackingQualityTable = readtable(fullfile(Paths.QualityCheck, 'EyeTracking', ...
-    ['DataQuality_', Task, '_Pupils.csv']));
+        ['DataQuality_', Task, '_Pupils.csv']));
 else
     EyesOpenTrials = true(size(TrialsTable, 1), 1);
     EyetrackingQualityTable = [];
@@ -95,7 +95,7 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
             warning('empty table')
             continue
         end
-        
+
         [ProbBurstStimLocked(idxParticipant, :, :, :), ProbBurstStimLockedTopography(idxParticipant, :, :, :, :)] = ...
             probability_burst_by_outcome(PooledTrialsStim, PooledTrialsTable, MaxNaNProportion, MinTrials, false);
 
@@ -113,7 +113,7 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
     %%% save
     save(fullfile(EyeclosureCacheDir, ['Bursts_', SessionBlockLabels{idxSessionBlock}, TitleTag, '.mat']), ...
         'ProbBurstRespLockedTopography', 'ProbBurstStimLockedTopography', ...
-        'ProbBurstStimLocked', 'ProbBurstRespLocked', ...
+        'ProbBurstStimLocked', 'ProbBurstRespLocked', 'Chanlocs', ...
         'TrialTime', 'ProbabilityBurst', 'ProbabilityBurstTopography')
 end
 
@@ -155,8 +155,8 @@ for idxSession = 1:numel(Sessions)
     CleanTimepoints = EEGMetadata.CleanTaskTimepoints;
 
     if ~isempty(EyetrackingQualityTable)
-    CleanTimepoints = check_eyes_open(CleanTimepoints, EyetrackingDir, ...
-        EyetrackingQualityTable, ConfidenceThreshold, Participant, Sessions{idxSession}, SampleRate);
+        CleanTimepoints = check_eyes_open(CleanTimepoints, EyetrackingDir, ...
+            EyetrackingQualityTable, ConfidenceThreshold, Participant, Sessions{idxSession}, SampleRate);
     end
 
     % determine when there is a burst
@@ -250,6 +250,9 @@ end
 
 
 function [ProbBurstTopography, ProbBurst] = overall_burst_probability(BurstTimes, ProbBurstTopography, ProbBurst)
+
+ChannelCount = size(BurstTimes,1);
+
 for idxBand = 1:size(BurstTimes, 2)
     SingleBandTimes = squeeze(BurstTimes(:, idxBand, :));
     NaNs = isnan(SingleBandTimes(1, :));
@@ -258,7 +261,9 @@ for idxBand = 1:size(BurstTimes, 2)
     ProbBurstTopography(:, idxBand, :) = ...
         tally_timepoints(squeeze(ProbBurstTopography(:, idxBand, :)), SingleBandTimes);
 
-    SingleBandTimesPooled = double(squeeze(any(SingleBandTimes==1, 1))); % TODO: sum
+    % SingleBandTimesPooled = double(squeeze(any(SingleBandTimes==1, 1))); % TODO: sum
+    SingleBandTimesPooled = squeeze(sum(SingleBandTimes==1, 1)./ChannelCount);
+
     SingleBandTimesPooled(NaNs) = nan; % make sure that artefacts are nans and not 0s
     ProbBurst(idxBand, :) = tally_timepoints(ProbBurst(idxBand, :), SingleBandTimesPooled);
 end
@@ -282,7 +287,7 @@ for idxBand = 1:BandsCount
             squeeze(Trials(:, idxChannel, idxBand, :)), TrialsTable, MaxNaNProportion, MinTrials, onlyResponses);
     end
 
-    TrialsPooled = pool_trials(squeeze(Trials(:, :, idxBand, :)));
+    TrialsPooled = pool_channels(squeeze(Trials(:, :, idxBand, :)));
 
     % run on pooled data
     ProbabilityBurst(:, idxBand, :) = probability_of_event_by_outcome( ...
@@ -291,10 +296,12 @@ end
 end
 
 
-function PooledTrials = pool_trials(Trials)
+function PooledTrials = pool_channels(Trials)
 % Trials is a Tr x Ch x t boolean, returns a Tr x t boolean, with nans
 
-PooledTrials = double(squeeze(any(Trials==1, 2))); % TODO: instead of any, sum
+ChannelCount = size(Trials, 2);
+% PooledTrials = double(squeeze(any(Trials==1, 2)));
+PooledTrials = squeeze(sum(Trials==1, 2)./ChannelCount);
 Nans = squeeze(isnan(Trials(:, 1, :)));
 
 PooledTrials(Nans) = nan;
