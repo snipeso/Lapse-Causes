@@ -9,9 +9,9 @@ close all
 
 
 SmoothFactor = 0.3; % in seconds, smooth signal to be visually pleasing
-CheckEyes = true; % check if person had eyes open or closed
+CheckEyes = false; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionBlockLabel = 'SD';
+SessionBlockLabel = 'BL';
 SmoothSignal = true;
 
 Parameters = analysisParameters();
