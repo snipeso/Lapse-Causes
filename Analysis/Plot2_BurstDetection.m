@@ -135,15 +135,15 @@ clc
 ThetaPercentReduction = 100*(ThetaPowerIntact - ThetaPowerBurstless)./ThetaPowerIntact;
 disp_stats_descriptive(ThetaPercentReduction, 'Theta percent reduction', '%', 0);
 
-ThetaPercentReductionTop50 = ThetaPercentReduction(ThetaPowerIntact>quantile(ThetaPowerIntact, 0.5));
-disp_stats_descriptive(ThetaPercentReductionTop50, 'Theta percent reduction for participants with high theta', '%', 0);
-
 AlphaPercentReduction = 100*(AlphaPowerIntact - AlphaPowerBurstless)./AlphaPowerIntact;
 disp_stats_descriptive(AlphaPercentReduction, 'Alpha percent reduction', '%', 0);
 
 % percent power reduction from total power
 ThetaPercentReduction = 100*(sum(ThetaPowerIntact) - sum(ThetaPowerBurstless))./sum(ThetaPowerIntact);
 disp_stats_descriptive(ThetaPercentReduction, 'Theta percent reduction, sum', '%', 0);
+
+AlphaPercentReduction = 100*(sum(AlphaPowerIntact) - sum(AlphaPowerBurstless))./sum(AlphaPowerIntact);
+disp_stats_descriptive(AlphaPercentReduction, 'Alpha percent reduction, sum', '%', 0);
 
 
 % power redistribution ratio power
