@@ -95,7 +95,6 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
             warning('empty table')
             continue
         end
-
         
         [ProbBurstStimLocked(idxParticipant, :, :, :), ProbBurstStimLockedTopography(idxParticipant, :, :, :, :)] = ...
             probability_burst_by_outcome(PooledTrialsStim, PooledTrialsTable, MaxNaNProportion, MinTrials, false);

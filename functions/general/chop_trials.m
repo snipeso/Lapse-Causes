@@ -16,7 +16,6 @@ end
 TrialData = nan(numel(Starts), ChannelCount, Ends(1)-Starts(1)+1);
 for idxTrials = 1:numel(Starts)
     TrialData(idxTrials, :, :) = Data(:, Starts(idxTrials):Ends(idxTrials));
-
 end
 
 % if only 1 channel, remove extra dimention

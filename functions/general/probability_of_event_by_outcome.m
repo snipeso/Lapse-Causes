@@ -16,8 +16,8 @@ end
 for idxType = TrialTypes
     
     % select subset of trials
-    Trial_Indexes = TrialsTable.Type==idxType;
-    TypeTrialData = TrialData(Trial_Indexes, :);
+    TrialIndexes = TrialsTable.Type==idxType;
+    TypeTrialData = TrialData(TrialIndexes, :);
 
     TypeTrialData = remove_trials_too_much_nan(TypeTrialData, MaxNaNProportion);
 
@@ -40,8 +40,8 @@ end
 %%% functions
 
 function TypeTrialData = remove_trials_too_much_nan(TypeTrialData, MaxNaNProportion)
-TrialsCount = size(TypeTrialData, 1);
-NanProportion = sum(isnan(TypeTrialData), 2)./TrialsCount;
+TrialsTime = size(TypeTrialData, 2);
+NanProportion = sum(isnan(TypeTrialData), 2)./TrialsTime;
 TypeTrialData(NanProportion>MaxNaNProportion, :) = [];
 end
 

@@ -14,9 +14,9 @@ EyeOpen = Eye > Threshold;
 [Starts, Ends] = data2windows(EyeOpen);
 Durations = (Ends - Starts)/SampleRate;
 
-for Indx_D = 1:numel(Durations)
-    if Durations(Indx_D) < MinEO
-        EyeOpen(Starts(Indx_D):Ends(Indx_D)) = 0;
+for idxGap = 1:numel(Durations)
+    if Durations(idxGap) < MinEO
+        EyeOpen(Starts(idxGap):Ends(idxGap)) = 0;
     end
 end
 
@@ -24,9 +24,9 @@ end
 [Starts, Ends] = data2windows(not(EyeOpen));
 Durations = (Ends - Starts)/SampleRate;
 
-for Indx_D = 1:numel(Durations)
-    if Durations(Indx_D) < MinEO
-        EyeOpen(Starts(Indx_D):Ends(Indx_D)) = 1;
+for idxGap = 1:numel(Durations)
+    if Durations(idxGap) < MinEO
+        EyeOpen(Starts(idxGap):Ends(idxGap)) = 1;
     end
 end
 
