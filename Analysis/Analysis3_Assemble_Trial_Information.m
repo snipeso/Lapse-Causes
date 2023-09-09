@@ -8,7 +8,7 @@ close all
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
 
-Tasks = {'PVT', 'LAT'};
+Tasks = {'LAT', 'PVT'};
 RerunAnalysis = true;
 
 Parameters = analysisParameters();
@@ -41,13 +41,13 @@ for Task = Tasks
     TrialsTable = load_task_output(Participants, Sessions.(Task{1}), Task{1}, Paths, false);
 
     % determine stimulus trigger times
-    EyetrackingDir = fullfile(Paths.Data, 'Pupils', ['Raw_', num2str(SampleRate), 'Hz'], Task{1});
-    TrialsTable = trigger_times(TrialsTable, EyetrackingDir, Triggers);
+    EEGDir = fullfile(Paths.Data, 'Clean', 'Waves', Task{1});
+    TrialsTable = trigger_times(TrialsTable, EEGDir, Triggers);
 
     %%% determine whether eyes were open or closed
     EyetrackingQualityTable = readtable(fullfile(Paths.QualityCheck, 'EyeTracking', ...
         ['DataQuality_', Task{1}, '_Pupils.csv']));
-
+    EyetrackingDir = fullfile(Paths.Data, 'Pupils', ['Raw_', num2str(SampleRate), 'Hz'], Task{1});
     TrialsTable = eyes_closed_trials(TrialsTable, EyetrackingQualityTable, EyetrackingDir, ...
         TrialWindow, MinEventProportion,  MaxNanProportion, ConfidenceThreshold, Triggers);
 
@@ -78,7 +78,7 @@ end
 end
 
 
-function TrialsTable = trigger_times(TrialsTable, MetadataDir, Triggers)
+function TrialsTable = trigger_times(TrialsTable, EEGDir, Triggers)
 
 Participants = unique(TrialsTable.Participant);
 Sessions = unique(TrialsTable.Session);
@@ -98,7 +98,7 @@ for Participant = Participants'
             warning(['Missing ', Participant{1}, Session{1}])
             continue
         end
-        EEGMetadata = load_datafile(MetadataDir, Participant{1}, Session{1}, 'EEGMetadata');
+        EEGMetadata = load_datafile(EEGDir, Participant{1}, Session{1}, 'EEG');
         if isempty(EEGMetadata);continue;end
 
         Events = EEGMetadata.event;

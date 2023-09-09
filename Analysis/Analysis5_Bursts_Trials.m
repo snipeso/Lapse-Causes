@@ -45,9 +45,6 @@ SessionBlockLabels = fieldnames(SessionBlocks);
 % get trial information
 load(fullfile(TrialCacheDir, CacheFilename), 'TrialsTable')
 
-EyetrackingQualityTable = readtable(fullfile(Paths.QualityCheck, 'EyeTracking', ...
-    ['DataQuality_', Task, '_Pupils.csv']));
-
 TrialTime = linspace(TrialWindow(1), TrialWindow(2), SampleRate*(TrialWindow(2)-TrialWindow(1))); % time vector
 TotBands = numel(fieldnames(Bands));
 
@@ -57,8 +54,11 @@ TitleTag = '';
 if CheckEyes
     TitleTag = [TitleTag, '_EO'];
     EyesOpenTrials = TrialsTable.EyesClosed == 0;
+    EyetrackingQualityTable = readtable(fullfile(Paths.QualityCheck, 'EyeTracking', ...
+    ['DataQuality_', Task, '_Pupils.csv']));
 else
     EyesOpenTrials = true(size(TrialsTable, 1), 1);
+    EyetrackingQualityTable = [];
 end
 
 if OnlyClosestStimuli
@@ -153,8 +153,11 @@ for idxSession = 1:numel(Sessions)
     % identify task, artifact free, eyes open timepoints
     EEGMetadata = load_datafile(BurstDir, Participant, Sessions{idxSession}, 'EEGMetadata');
     CleanTimepoints = EEGMetadata.CleanTaskTimepoints;
+
+    if ~isempty(EyetrackingQualityTable)
     CleanTimepoints = check_eyes_open(CleanTimepoints, EyetrackingDir, ...
         EyetrackingQualityTable, ConfidenceThreshold, Participant, Sessions{idxSession}, SampleRate);
+    end
 
     % determine when there is a burst
     TotChannels = numel(EEGMetadata.chanlocs);
@@ -239,6 +242,7 @@ for idxBand = 1:BandCount
 
     TrialsStim(:, :, idxBand, :) = chop_trials(SingleBandTimes, SampleRate, ...
         TrialsTable.StimTimepoint(CurrentTrials), TrialWindow);
+
     TrialsResp(:, :, idxBand, :) = chop_trials(SingleBandTimes, SampleRate, ...
         TrialsTable.RespTimepoint(CurrentTrials & TrialsTable.Type~=1), TrialWindow);
 end
