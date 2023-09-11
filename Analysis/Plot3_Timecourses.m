@@ -8,11 +8,10 @@ close all
 %%% Parameters
 
 
-SmoothFactor = 0.3; % in seconds, smooth signal to be visually pleasing
-CheckEyes = false; % check if person had eyes open or closed
+SmoothFactor = 0.2; % in seconds, smooth signal to be visually pleasing
+CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionBlockLabel = 'BL';
-SmoothSignal = true;
+SessionBlockLabel = 'SD';
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
@@ -65,8 +64,8 @@ load(fullfile(CacheDir, ['Bursts_', TitleTag, '.mat']), ...
 %%
 clc
 YLimEyesClosed = [-.35 .35];
-YLimAlpha = [-.15 .15];
-YLimTheta = [-.05 .05];
+YLimAlpha = [-1 1];
+YLimTheta = [-1 1];
 
 Grid = [2 3];
 PlotProps = Parameters.PlotProps.Manuscript;

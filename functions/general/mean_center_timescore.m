@@ -18,7 +18,7 @@ elseif PreserveDim == 3 % bursts on 3rd dimention
 
             Prob = ProbAll(idxParticipant, :, idxBand, :);
             zProb(idxParticipant, :, idxBand, :) = ...
-                (ProbAll(idxParticipant, :, idxBand, :) - GenProb(idxParticipant, idxBand));
+                ((ProbAll(idxParticipant, :, idxBand, :) - GenProb(idxParticipant, idxBand, 1)))./GenProb(idxParticipant, idxBand, 2);
 
             zGenProb(idxParticipant, idxBand) = 0;
         end

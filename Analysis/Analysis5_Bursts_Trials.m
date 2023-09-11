@@ -3,13 +3,13 @@
 
 clear
 clc
-close all
+% close all
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
 
 OnlyClosestStimuli = false; % only use closest trials
-CheckEyes = false; % only used eyes-open trials
+CheckEyes = true; % only used eyes-open trials
 ChannelsCount = 123;
 
 Parameters = analysisParameters();
@@ -81,14 +81,14 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
     ProbBurstStimLocked =  nan(numel(Participants), 3, TotBands, numel(TrialTime));  % P x TT x B x t
     ProbBurstRespLocked = ProbBurstStimLocked;
 
-    ProbabilityBurstTopography = zeros(numel(Participants), ChannelsCount, TotBands); % get general probability of a burst for a given session block (to control for when z-scoring)
-    ProbabilityBurst = zeros(numel(Participants), TotBands);
+    ProbabilityBurstTopography = zeros(numel(Participants), ChannelsCount, TotBands, 2); % get general probability of a burst for a given session block (to control for when z-scoring)
+    ProbabilityBurst = zeros(numel(Participants), TotBands, 2);
 
     for idxParticipant = 1:numel(Participants)
-        [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, BurstCountTopography, BurstCount, Chanlocs] = ...
+        [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, BurstProbability, Chanlocs] = ...
             pool_burst_trials(TrialsTable, EyetrackingQualityTable, BurstDir, ...
             Bands, EyesOpenTrials, EyetrackingDir, Participants{idxParticipant}, Sessions, MaxStimulusDistance, ...
-            TrialWindow, SampleRate, ConfidenceThreshold, ChannelsCount);
+            TrialWindow, SampleRate, ConfidenceThreshold);
 
 
         if isempty(PooledTrialsTable)
@@ -102,10 +102,8 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
         [ProbBurstRespLocked(idxParticipant, :, :, :), ProbBurstRespLockedTopography(idxParticipant, :, :, :, :)] = ...
             probability_burst_by_outcome(PooledTrialsResp, PooledTrialsTable(PooledTrialsTable.Type~=1, :), MaxNaNProportion, MinTrials, true);
 
-
         % calculate general probability of a burst
-        ProbabilityBurst(idxParticipant, :) = BurstCount(:, 1)./BurstCount(:, 2);
-        ProbabilityBurstTopography(idxParticipant, :, :) = BurstCountTopography(:, :, 1)./BurstCountTopography(:, :, 2);
+        ProbabilityBurst(idxParticipant, :, :) = BurstProbability; % TODO RENAME
 
         disp(['Finished ', Participants{idxParticipant}])
     end
@@ -122,10 +120,10 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
 
-function [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, BurstCountTopography, BurstCount, Chanlocs] = ...
+function [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, BurstProbability, Chanlocs] = ...
     pool_burst_trials(TrialsTable, EyetrackingQualityTable, BurstDir, ...
     Bands, EyesOpenTrials, EyetrackingDir, Participant, Sessions, MaxStimulusDistance, ...
-    TrialWindow, SampleRate, ConfidenceThreshold, ChannelsCount)
+    TrialWindow, SampleRate, ConfidenceThreshold)
 % EyeclosureTimepointCount is a 1 x 2 array indicating the total number of
 % points in the pooled sessions that has eyes closed and the total number of
 % points.
@@ -134,10 +132,8 @@ function [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, BurstCountTopog
 PooledTrialsStim = [];
 PooledTrialsResp = [];
 PooledTrialsTable = table();
-BandsCount = numel(fieldnames(Bands));
 
-BurstCountTopography = zeros(ChannelsCount, BandsCount, 2); % get general probability of a burst for a given session block (to control for when z-scoring)
-BurstCount = zeros(BandsCount, 2);
+AllBurstTimes = [];
 
 for idxSession = 1:numel(Sessions)
 
@@ -162,6 +158,7 @@ for idxSession = 1:numel(Sessions)
     % determine when there is a burst
     TotChannels = numel(EEGMetadata.chanlocs);
     BurstTimes = bursts2time_all_channels(Bursts, Bands, TotChannels, CleanTimepoints);
+    AllBurstTimes = cat(3, AllBurstTimes, BurstTimes);
 
     % cut into trials
     [TrialsStim, TrialsResp] = chop_bands_trials(BurstTimes, TrialsTable, CurrentTrials, TrialWindow, SampleRate);
@@ -171,11 +168,25 @@ for idxSession = 1:numel(Sessions)
     PooledTrialsResp = cat(1, PooledTrialsResp, TrialsResp);
 
     % pool info
-    [BurstCountTopography, BurstCount] = overall_burst_probability(BurstTimes, BurstCountTopography, BurstCount);
+    % [BurstCountTopography, BurstCount] = overall_burst_probability(BurstTimes, BurstCountTopography, BurstCount);
     PooledTrialsTable = cat(1, PooledTrialsTable, TrialsTable(CurrentTrials, :));
 end
 
+BurstProbability = overall_burst_probability2(AllBurstTimes);
+
 Chanlocs = EEGMetadata.chanlocs;
+
+end
+
+function BurstProbability = overall_burst_probability2(AllBurstTimes)
+
+
+ChannelCount = size(AllBurstTimes, 1);
+% NaNs = isnan(AllBurstTimes(1, 1, :));
+
+BurstGlobality = squeeze(sum(AllBurstTimes, 1)./ChannelCount);
+
+BurstProbability = cat(2, mean(BurstGlobality, 2, 'omitnan'), std(BurstGlobality, [], 2, 'omitnan')); % rename to burstprob
 end
 
 
