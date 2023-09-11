@@ -66,7 +66,7 @@ end
 
 Gaps = (Ends-Starts);
 
-if any(Gaps)>MaxSize
+if any(Gaps>MaxSize)
     NewData = nan(size(Data));
     return
 end

@@ -11,7 +11,7 @@ close all
 SmoothFactor = 0.2; % in seconds, smooth signal to be visually pleasing
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionBlockLabel = 'SD';
+SessionBlockLabel = 'BL';
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
