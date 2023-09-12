@@ -1,5 +1,3 @@
-
-
 clear
 clc
 close all
@@ -15,6 +13,7 @@ Windows = Parameters.Trials.SubWindows;
 WindowTitles = {["Pre", "[-2, 0]"], ["Stimulus", "[0, 0.3]"], ["Response", "[0.3 1]"], ["Post", "[2 4]"]};
 Bands = Parameters.Bands;
 BandLabels = fieldnames(Bands);
+SessionGroup = 'BL';
 
 CacheDir = fullfile(Paths.Cache, 'Data_Figures');
 
@@ -48,27 +47,34 @@ WindowCount = size(Windows, 1);
 
 PlotProps = Parameters.PlotProps.Manuscript;
 PlotProps.Figure.Padding = 15;
+CLims = [-7 7];
 
 PlotProps.Colorbar.Location = 'north';
 Grid = [5 2];
-miniGrid = [3 nWindows];
+miniGrid = [3 WindowCount];
 
 Types = [3 2 1];
 
 figure('Units','centimeters', 'Position',[0 0 PlotProps.Figure.Width*1.3, PlotProps.Figure.Height*.43])
 for idxBand = 1:2 % subplot A and B
-    
-    Space = set_sub_figure(Grid, PlotProps, PlotProps.Indexes.Letters{idxBand});
+
+    Space = set_sub_figure(Grid, [4 idxBand], PlotProps, PlotProps.Indexes.Letters{idxBand});
     for idxOutcome = 1:3 % rows
         for idxWindow = 1:WindowCount % columns
             Data = squeeze(WindowedStim(:, Types(idxOutcome), :, idxBand, idxWindow));
             Baseline = squeeze(ProbabilityBurstTopography(:, :, idxBand));
 
-          Stats = plot_burst_probability_change_topoplot(Data, Baseline, ...
-              StatParameters, Chanlocs, Space, miniGrid, [idxOutcome, idxWindow], ...
-              CLims, PlotProps);
+            if idxWindow == 1
+                PlotProps.Stats.PlotN = true;
+            else
+                PlotProps.Stats.PlotN = false;
+            end
+
+            Stats = plot_burst_probability_change_topoplot(Data, Baseline, ...
+                StatParameters, Chanlocs, Space, miniGrid, [idxOutcome, idxWindow], ...
+                CLims, PlotProps);
             write_titles(idxWindow, idxOutcome, WindowTitles, TallyLabels, Types, PlotProps)
-        
+
             disp_topo_stats(Stats, Chanlocs, TallyLabels{Types(idxOutcome)}, BandLabels{idxBand}, WindowTitles{idxWindow})
         end
         disp('__________')
@@ -102,10 +108,10 @@ end
 %%%%%%%%%%%%
 %%% plots
 
-function Space = set_sub_figure(Grid, PlotProps, Letter)
+function Space = set_sub_figure(Grid, Position, PlotProps, Letter)
 PlotProps.Axes.xPadding = 20;
 PlotProps.Axes.yPadding = 20;
-Space = chART.sub_figure(Grid, [4 idxBand], [4 1], Letter, PlotProps);
+Space = chART.sub_figure(Grid, Position, [4 1], Letter, PlotProps);
 Space(2) = Space(2)-Space(4)*.05;
 end
 
@@ -117,9 +123,6 @@ PlotProps.Axes.yPadding = 5;
 
 chART.sub_plot(Space, miniGrid, Position, [], false, '', PlotProps);
 PlotProps.Stats.PlotN = false;
-if idxWindow == 1
-    PlotProps.Stats.PlotN = true;
-end
 Stats = paired_ttest_topography(Baseline, Data, Chanlocs, CLims, StatParameters, PlotProps);
 colorbar off
 end
@@ -130,7 +133,7 @@ function disp_topo_stats(Stats, Chanlocs, OutcomeType, BandLabel, WindowTitle)
 String = strjoin({BandLabel, OutcomeType, ...
     '; tot ch:' num2str(round(100*nnz(Stats.sig)/numel(Stats.sig))), '%', ...
     'max Ch:', char(WindowTitle(1))}, ' ');
-dispMaxTChanlocs(Stats, Chanlocs, String);
+disp_highest_tvalue(Stats, Chanlocs, String);
 end
 
 function write_titles(idxWindow, idxOutcome, WindowTitles, TallyLabels, Types, PlotProps)
@@ -157,7 +160,7 @@ PlotProps.Axes.yPadding = 20;
 A = chART.sub_plot([], Grid, Position, [], false, '', PlotProps);
 A.Position(4) = A.Position(4)*2;
 A.Position(2) = A.Position(2)-.1;
-plotColorbar('Divergent', CLims, [BandLabel, [' t-values', zTag]], PlotProps)
+chART.plot.pretty_colorbar('Divergent', CLims, [BandLabel, 't-values'], PlotProps)
 end
 
 
