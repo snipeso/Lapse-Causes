@@ -63,7 +63,7 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
     % initialize variables
     ProbEyesClosedStimLocked = nan(numel(Participants), 3, numel(TrialTime)); % P x TT x t matrix with final probabilities
     ProbEyesClosedRespLocked = ProbEyesClosedStimLocked;
-    ProbabilityEyesClosed = nan(numel(Participants), 1); % get general probability of a microsleep for a given session block (to control for when z-scoring)
+    ProbabilityEyesClosed = nan(numel(Participants), 2); % get general probability of a microsleep for a given session block (to control for when z-scoring)
 
     for idxParticipant = 1:numel(Participants)
 
@@ -84,8 +84,7 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
         ProbEyesClosedRespLocked(idxParticipant, :, :) = probability_of_event_by_outcome( ...
             PooledTrialsResp, PooledTrialsTable(PooledTrialsTable.Type~=1, :), MaxNaNProportion, MinTrials, true);
 
-        % calculate general probability of a eyeclosure
-        ProbabilityEyesClosed(idxParticipant) =  EyeclosureTimepointCount(1)/EyeclosureTimepointCount(2);
+        ProbabilityEyesClosed(idxParticipant, :) =  EyeclosureTimepointCount;
         disp(['Finished ', Participants{idxParticipant}])
     end
 
@@ -112,7 +111,8 @@ function [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, EyeclosureTimep
 PooledTrialsStim = [];
 PooledTrialsResp = [];
 PooledTrialsTable = table();
-EyeclosureTimepointCount = [0 0]; % total number of points in recording that is a microsleep; total number of points, pooling sessions
+% EyeclosureTimepointCount = [0 0]; % total number of points in recording that is a microsleep; total number of points, pooling sessions
+AllEyeClosed = [];
 
 for idxSession = 1:numel(Sessions)
 
@@ -139,8 +139,11 @@ for idxSession = 1:numel(Sessions)
 
     % pool info
     PooledTrialsTable = cat(1, PooledTrialsTable, TrialsTable(CurrentTrials, :)); % important that it be in the same order!
-    EyeclosureTimepointCount = tally_timepoints(EyeclosureTimepointCount, EyeClosed);
+    % EyeclosureTimepointCount = tally_timepoints(EyeclosureTimepointCount, EyeClosed);
+    AllEyeClosed = cat(2, AllEyeClosed, EyeClosed);
 end
+
+EyeclosureTimepointCount = cat(2, mean(AllEyeClosed, 2, 'omitnan'), std(AllEyeClosed, [], 2, 'omitnan'));
 end
 
 
