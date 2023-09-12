@@ -7,7 +7,7 @@ close all
 
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionGroup = 'BL';
+SessionGroup = 'SD';
 
 
 Parameters = analysisParameters();
@@ -84,7 +84,7 @@ for idxBand = 1:2 % subplot A and B
     end
     plot_colorbar(PlotProps, Grid, [5, idxBand], CLims, BandLabels{idxBand})
 end
-chART.save_figure(['Figure_',TitleTag], Paths.Results, PlotProps)
+chART.save_figure(['Figure_',TitleTag, '_Topography'], Paths.Results, PlotProps)
 
 
 

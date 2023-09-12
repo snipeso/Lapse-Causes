@@ -9,9 +9,9 @@ close all
 
 
 SmoothFactor = 0.2; % in seconds, smooth signal to be visually pleasing
-CheckEyes = false; % check if person had eyes open or closed
+CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionBlockLabel = 'BL';
+SessionBlockLabel = 'SD';
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
@@ -63,7 +63,7 @@ load(fullfile(CacheDir, ['Bursts_', TitleTag, '.mat']), ...
 
 %%
 clc
-YLimEyesClosed = [-.3 .35];
+YLimEyesClosed = [-.6 1.6];
 YLimAlpha = [-1 1];
 YLimTheta = [-1 1];
 
@@ -78,45 +78,45 @@ DispN = true;
 DispStats = true;
 
 % eyeclosure
-plot_timecourse(TrialTime, flip(ProbEyesClosedStimLockedDiff, 2), ProbabilityEyesClosedDiff, ...
+plot_timecourse(TrialTime, flip(ProbEyesClosedStimLockedDiff, 2), ProbabilityEyesClosedDiff(:, 1), ...
     YLimEyesClosed, flip(TallyLabels), 'Stimulus', StatParameters, DispN, DispStats, PlotProps, ...
     Grid, [1 1], PlotProps.Indexes.Letters{1});
-ylabel('\Delta likelihood eyeclosure')
+ylabel('Likelihood eyeclosure (z-score)')
 
 % theta
 plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 1, :)), 2), ...
     ProbabilityBurstsDiff(:, 1), YLimTheta, flip(TallyLabels), '', ...
     StatParameters, DispN, DispStats, PlotProps, Grid, [1 2], PlotProps.Indexes.Letters{2});
-ylabel('\Delta likelihood theta burst')
+ylabel('Likelihood theta burst (z-score)')
 
 % alpha
 plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 2, :)), 2), ...
     ProbabilityBurstsDiff(:, 2), YLimAlpha, flip(TallyLabels), '', ...
     StatParameters, DispN, DispStats, PlotProps, Grid, [1 3], PlotProps.Indexes.Letters{3});
-ylabel('\Delta likelihood alpha burst')
+ylabel('Likelihood alpha burst (z-score)')
 
 
 %%% response locked
 DispStats = false;
 
 % eyeclosure
-plot_timecourse(TrialTime, flip(ProbEyesClosedRespLockedDiff, 2), ProbabilityEyesClosedDiff, ...
+plot_timecourse(TrialTime, flip(ProbEyesClosedRespLockedDiff, 2), ProbabilityEyesClosedDiff(:, 1), ...
     YLimEyesClosed, flip(TallyLabels), 'Response', StatParameters, DispN, DispStats, PlotProps, ...
     Grid, [2 1], PlotProps.Indexes.Letters{4});
-ylabel('\Delta likelihood eyeclosure')
+ylabel('Likelihood eyeclosure (z-score)')
 legend off
 
 % theta
 plot_timecourse(TrialTime, flip(squeeze(ProbBurstsRespLockedDiff(:, :, 1, :)), 2), ...
     ProbabilityBurstsDiff(:, 1), YLimTheta, flip(TallyLabels), '', ...
-    StatParameters, DispN, DispStats, PlotProps, Grid, [2 2], PlotProps.Indexes.Letters{2});
-ylabel('\Delta likelihood theta burst')
+    StatParameters, DispN, DispStats, PlotProps, Grid, [2 2], PlotProps.Indexes.Letters{5});
+ylabel('Likelihood theta burst (z-score)')
 
 % alpha
 plot_timecourse(TrialTime, flip(squeeze(ProbBurstsRespLockedDiff(:, :, 2, :)), 2), ...
     ProbabilityBurstsDiff(:, 2), YLimAlpha, flip(TallyLabels), '', ...
-    StatParameters, DispN, DispStats, PlotProps, Grid, [2 3], PlotProps.Indexes.Letters{3});
-ylabel('\Delta likelihood alpha burst')
+    StatParameters, DispN, DispStats, PlotProps, Grid, [2 3], PlotProps.Indexes.Letters{6});
+ylabel('Likelihood alpha burst (z-score)')
 
 chART.save_figure(['Figure_',TitleTag], Paths.Results, PlotProps)
 
@@ -127,10 +127,12 @@ chART.save_figure(['Figure_',TitleTag], Paths.Results, PlotProps)
 
 %% display general prop of things
 
-disp_stats_descriptive(100*ProbabilityEyesClosedDiff, 'EC gen prop', '%', 0);
+clc
 
-disp_stats_descriptive(100*ProbabilityBurst(:, 1), 'Theta gen prop', '%', 0);
-disp_stats_descriptive(100*ProbabilityBurst(:, 2), 'Alpha gen prop', '%', 0);
+disp_stats_descriptive(100*ProbabilityEyesClosed(:, 1), 'EC gen prop', '%', 0);
+
+disp_stats_descriptive(100*ProbabilityBurst(:, 1, 1), 'Theta gen prop', '%', 0);
+disp_stats_descriptive(100*ProbabilityBurst(:, 2, 1), 'Alpha gen prop', '%', 0);
 
 
 
