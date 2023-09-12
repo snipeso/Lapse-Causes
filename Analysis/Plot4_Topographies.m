@@ -4,6 +4,12 @@ close all
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
+
+CheckEyes = true; % check if person had eyes open or closed
+Closest = false; % only use closest trials
+SessionGroup = 'BL';
+
+
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
 Task = Parameters.Task;
@@ -13,12 +19,8 @@ Windows = Parameters.Trials.SubWindows;
 WindowTitles = {["Pre", "[-2, 0]"], ["Stimulus", "[0, 0.3]"], ["Response", "[0.3 1]"], ["Post", "[2 4]"]};
 Bands = Parameters.Bands;
 BandLabels = fieldnames(Bands);
-SessionGroup = 'SD';
-
 CacheDir = fullfile(Paths.Cache, 'Data_Figures');
 
-CheckEyes = false; % check if person had eyes open or closed
-Closest = false; % only use closest trials
 
 
 TitleTag = SessionGroup;
@@ -160,7 +162,7 @@ PlotProps.Axes.yPadding = 20;
 A = chART.sub_plot([], Grid, Position, [], false, '', PlotProps);
 A.Position(4) = A.Position(4)*2;
 A.Position(2) = A.Position(2)-.1;
-chART.plot.pretty_colorbar('Divergent', CLims, [BandLabel, 't-values'], PlotProps)
+chART.plot.pretty_colorbar('Divergent', CLims, [BandLabel, ' t-values'], PlotProps)
 end
 
 
