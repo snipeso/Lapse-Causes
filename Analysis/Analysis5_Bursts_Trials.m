@@ -3,13 +3,13 @@
 
 clear
 clc
-% close all
+close all
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
 
 OnlyClosestStimuli = false; % only use closest trials
-CheckEyes = false; % only used eyes-open trials
+CheckEyes = true; % only used eyes-open trials
 ChannelsCount = 123;
 
 Parameters = analysisParameters();

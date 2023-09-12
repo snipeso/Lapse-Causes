@@ -13,11 +13,11 @@ Windows = Parameters.Trials.SubWindows;
 WindowTitles = {["Pre", "[-2, 0]"], ["Stimulus", "[0, 0.3]"], ["Response", "[0.3 1]"], ["Post", "[2 4]"]};
 Bands = Parameters.Bands;
 BandLabels = fieldnames(Bands);
-SessionGroup = 'BL';
+SessionGroup = 'SD';
 
 CacheDir = fullfile(Paths.Cache, 'Data_Figures');
 
-CheckEyes = true; % check if person had eyes open or closed
+CheckEyes = false; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 
 
@@ -75,7 +75,8 @@ for idxBand = 1:2 % subplot A and B
                 CLims, PlotProps);
             write_titles(idxWindow, idxOutcome, WindowTitles, TallyLabels, Types, PlotProps)
 
-            disp_topo_stats(Stats, Chanlocs, TallyLabels{Types(idxOutcome)}, BandLabels{idxBand}, WindowTitles{idxWindow})
+            disp_topo_stats(Stats, Chanlocs, TallyLabels{Types(idxOutcome)}, ...
+                BandLabels{idxBand}, WindowTitles{idxWindow})
         end
         disp('__________')
     end
@@ -122,7 +123,6 @@ PlotProps.Axes.xPadding = 5;
 PlotProps.Axes.yPadding = 5;
 
 chART.sub_plot(Space, miniGrid, Position, [], false, '', PlotProps);
-PlotProps.Stats.PlotN = false;
 Stats = paired_ttest_topography(Baseline, Data, Chanlocs, CLims, StatParameters, PlotProps);
 colorbar off
 end
