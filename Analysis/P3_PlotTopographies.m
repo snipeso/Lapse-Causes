@@ -57,15 +57,15 @@ else
 end
 
 %%% reduce to windows
-nWindows = size(Windows_Stim, 1);
+WindowCount = size(Windows_Stim, 1);
 
-wProbBurst_Stim = nan(numel(Participants), 3, TotChannels, 2, nWindows);
+wProbBurst_Stim = nan(numel(Participants), 3, TotChannels, 2, WindowCount);
 for Indx_P = 1:numel(Participants)
-    for Indx_TT = 1:3
+    for idxOutcome = 1:3
         for Indx_Ch = 1:TotChannels
-            for Indx_B = 1:2
-                wProbBurst_Stim(Indx_P, Indx_TT, Indx_Ch, Indx_B, :) = ...
-                    reduxProbEvent(squeeze(zProbBurst_Stim(Indx_P, Indx_TT, Indx_Ch, Indx_B, :))',...
+            for idxBand = 1:2
+                wProbBurst_Stim(Indx_P, idxOutcome, Indx_Ch, idxBand, :) = ...
+                    reduxProbEvent(squeeze(zProbBurst_Stim(Indx_P, idxOutcome, Indx_Ch, idxBand, :))',...
                     t_window, Windows_Stim);
             end
         end
@@ -81,50 +81,50 @@ PlotProps.Figure.Padding = 15;
 
 PlotProps.Colorbar.Location = 'north';
 Grid = [5 2];
-miniGrid = [3 nWindows];
+miniGrid = [3 WindowCount];
 
 Types = [3 2 1];
 % 
 figure('Units','centimeters', 'Position',[0 0 PlotProps.Figure.Width*1.3, PlotProps.Figure.Height*.43])
-for Indx_B = 1:2
+for idxBand = 1:2
 
     PlotProps.Axes.xPadding = 20;
     PlotProps.Axes.yPadding = 20;
-    Space = subaxis(Grid, [4 Indx_B], [4 1], PlotProps.Indexes.Letters{Indx_B}, PlotProps);
+    Space = subaxis(Grid, [4 idxBand], [4 1], PlotProps.Indexes.Letters{idxBand}, PlotProps);
     Space(2) = Space(2)-Space(4)*.05;
-    for Indx_TT = 1:3
+    for idxOutcome = 1:3
 
         % stim windows
-        for Indx_W = 1:nWindows
-            Data = squeeze(wProbBurst_Stim(:, Types(Indx_TT), :, Indx_B, Indx_W));
-            Baseline = squeeze(zGenProbBurst(:, :, Indx_B));
+        for idxWindow = 1:WindowCount
+            Data = squeeze(wProbBurst_Stim(:, Types(idxOutcome), :, idxBand, idxWindow));
+            Baseline = squeeze(zGenProbBurst(:, :, idxBand));
 
             PlotProps.Axes.xPadding = 5;
             PlotProps.Axes.yPadding = 5;
 
-            chART.sub_plot(Space, miniGrid, [Indx_TT, Indx_W], [], false, '', PlotProps);
+            chART.sub_plot(Space, miniGrid, [idxOutcome, idxWindow], [], false, '', PlotProps);
             PlotProps.Stats.PlotN = false;
-            if Indx_W == 1
+            if idxWindow == 1
                 PlotProps.Stats.PlotN = true;
             end
             Stats = topoDiff(Baseline, Data, Chanlocs, CLims, StatsP, PlotProps);
             colorbar off
 
-            W= WindowTitles{Indx_W};
-            String = strjoin({BandLabels{Indx_B}, TallyLabels{Types(Indx_TT)}, ...
+            W= WindowTitles{idxWindow};
+            String = strjoin({BandLabels{idxBand}, TallyLabels{Types(idxOutcome)}, ...
                   '; tot ch:' num2str(round(100*nnz(Stats.sig)/numel(Stats.sig))), '%', ...
                 'max Ch:', char(W(1))}, ' ');
             dispMaxTChanlocs(Stats, Chanlocs, String);
 
-            if Indx_TT ==1
-                title(WindowTitles{Indx_W})
+            if idxOutcome ==1
+                title(WindowTitles{idxWindow})
             end
 
             % plot horizontal text
-            if Indx_W == 1
+            if idxWindow == 1
                 X = get(gca, 'XLim');
                 Y = get(gca, 'YLim');
-                text(X(1)-diff(X)*.2, Y(1)+diff(Y)*.5, TallyLabels{Types(Indx_TT)}, ...
+                text(X(1)-diff(X)*.2, Y(1)+diff(Y)*.5, TallyLabels{Types(idxOutcome)}, ...
                     'FontSize', PlotProps.Text.TitleSize, 'FontName', PlotProps.Text.FontName, ...
                     'FontWeight', 'Bold', 'HorizontalAlignment', 'Center', 'Rotation', 90);
             end
@@ -132,8 +132,8 @@ for Indx_B = 1:2
            
         end
  disp('__________')
-        if Indx_TT ==1
-            title(WindowTitles{Indx_W})
+        if idxOutcome ==1
+            title(WindowTitles{idxWindow})
         end
 
     end
@@ -142,10 +142,10 @@ for Indx_B = 1:2
     PlotProps.Axes.xPadding = 20;
     PlotProps.Axes.yPadding = 20;
 
-    A = chART.sub_plot([], Grid, [5, Indx_B], [], false, '', PlotProps);
+    A = chART.sub_plot([], Grid, [5, idxBand], [], false, '', PlotProps);
     A.Position(4) = A.Position(4)*2;
     A.Position(2) = A.Position(2)-.1;
-    plotColorbar('Divergent', CLims, [BandLabels{Indx_B}, [' t-values', zTag]], PlotProps)
+    plotColorbar('Divergent', CLims, [BandLabels{idxBand}, [' t-values', zTag]], PlotProps)
 end
 saveFig(['Figure_4_', TitleTag], Paths.PaperResults, PlotProps)
 
