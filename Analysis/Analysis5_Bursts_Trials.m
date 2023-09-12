@@ -9,7 +9,7 @@ clc
 %%% Parameters
 
 OnlyClosestStimuli = false; % only use closest trials
-CheckEyes = true; % only used eyes-open trials
+CheckEyes = false; % only used eyes-open trials
 ChannelsCount = 123;
 
 Parameters = analysisParameters();
@@ -85,10 +85,11 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
     ProbabilityBurst = zeros(numel(Participants), TotBands, 2);
 
     for idxParticipant = 1:numel(Participants)
-        [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, BurstProbability, Chanlocs] = ...
+        [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, ...
+            BurstProbability, BurstProbabilityTopography, Chanlocs] = ...
             pool_burst_trials(TrialsTable, EyetrackingQualityTable, BurstDir, ...
-            Bands, EyesOpenTrials, EyetrackingDir, Participants{idxParticipant}, Sessions, MaxStimulusDistance, ...
-            TrialWindow, SampleRate, ConfidenceThreshold);
+            Bands, EyesOpenTrials, EyetrackingDir, Participants{idxParticipant}, ...
+            Sessions, MaxStimulusDistance, TrialWindow, SampleRate, ConfidenceThreshold);
 
 
         if isempty(PooledTrialsTable)
@@ -96,14 +97,19 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
             continue
         end
 
-        [ProbBurstStimLocked(idxParticipant, :, :, :), ProbBurstStimLockedTopography(idxParticipant, :, :, :, :)] = ...
-            probability_burst_by_outcome(PooledTrialsStim, PooledTrialsTable, MaxNaNProportion, MinTrials, false);
+        [ProbBurstStimLocked(idxParticipant, :, :, :), ...
+            ProbBurstStimLockedTopography(idxParticipant, :, :, :, :)] = ...
+            probability_burst_by_outcome(PooledTrialsStim, PooledTrialsTable, ...
+            MaxNaNProportion, MinTrials, false);
 
-        [ProbBurstRespLocked(idxParticipant, :, :, :), ProbBurstRespLockedTopography(idxParticipant, :, :, :, :)] = ...
-            probability_burst_by_outcome(PooledTrialsResp, PooledTrialsTable(PooledTrialsTable.Type~=1, :), MaxNaNProportion, MinTrials, true);
+        [ProbBurstRespLocked(idxParticipant, :, :, :), ...
+            ProbBurstRespLockedTopography(idxParticipant, :, :, :, :)] = ...
+            probability_burst_by_outcome(PooledTrialsResp, PooledTrialsTable(PooledTrialsTable.Type~=1, :), ...
+            MaxNaNProportion, MinTrials, true);
 
         % calculate general probability of a burst
         ProbabilityBurst(idxParticipant, :, :) = BurstProbability; % TODO RENAME
+ProbabilityBurstTopography(idxParticipant, :, :, :) = BurstProbabilityTopography;
 
         disp(['Finished ', Participants{idxParticipant}])
     end
@@ -120,7 +126,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
 
-function [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, BurstProbability, Chanlocs] = ...
+function [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, ...
+    BurstProbability, BurstProbabilityTopography, Chanlocs] = ...
     pool_burst_trials(TrialsTable, EyetrackingQualityTable, BurstDir, ...
     Bands, EyesOpenTrials, EyetrackingDir, Participant, Sessions, MaxStimulusDistance, ...
     TrialWindow, SampleRate, ConfidenceThreshold)
@@ -172,21 +179,25 @@ for idxSession = 1:numel(Sessions)
     PooledTrialsTable = cat(1, PooledTrialsTable, TrialsTable(CurrentTrials, :));
 end
 
-BurstProbability = overall_burst_probability2(AllBurstTimes);
+[BurstProbability, BurstProbabilityTopography] = overall_burst_probability2(AllBurstTimes);
 
 Chanlocs = EEGMetadata.chanlocs;
 
 end
 
-function BurstProbability = overall_burst_probability2(AllBurstTimes)
+function [BurstProbability, BurstProbabilityTopography] = overall_burst_probability2(AllBurstTimes)
+% AllBurstTimes is a ch x b x t matrix
 
-
+% for timecourses
 ChannelCount = size(AllBurstTimes, 1);
-% NaNs = isnan(AllBurstTimes(1, 1, :));
-
 BurstGlobality = squeeze(sum(AllBurstTimes, 1)./ChannelCount);
+BurstProbability = cat(2, mean(BurstGlobality, 2, 'omitnan'), ...
+    std(BurstGlobality, [], 2, 'omitnan')); % rename to burstprob
 
-BurstProbability = cat(2, mean(BurstGlobality, 2, 'omitnan'), std(BurstGlobality, [], 2, 'omitnan')); % rename to burstprob
+
+% for topography
+BurstProbabilityTopography = cat(3, mean(AllBurstTimes, 3, 'omitnan'), ...
+    std(AllBurstTimes, [], 3, 'omitnan')); % ch x b x 2
 end
 
 

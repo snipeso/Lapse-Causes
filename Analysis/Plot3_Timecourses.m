@@ -9,7 +9,7 @@ close all
 
 
 SmoothFactor = 0.2; % in seconds, smooth signal to be visually pleasing
-CheckEyes = true; % check if person had eyes open or closed
+CheckEyes = false; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 SessionBlockLabel = 'BL';
 
@@ -63,7 +63,7 @@ load(fullfile(CacheDir, ['Bursts_', TitleTag, '.mat']), ...
 
 %%
 clc
-YLimEyesClosed = [-.35 .35];
+YLimEyesClosed = [-.3 .35];
 YLimAlpha = [-1 1];
 YLimTheta = [-1 1];
 
