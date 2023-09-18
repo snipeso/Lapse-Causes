@@ -9,7 +9,7 @@ close all
 
 % set parameters for how you want to run the script this time
 RunParallelBurstDetection = true; % true for faster processing
-RerunAnalysis = false; % false to skip files already analyzed
+RerunAnalysis = true; % false to skip files already analyzed
 
 %%% criteria to find bursts in single channels
 % irregular shaped bursts, few criteria, but needs more cycles
@@ -27,7 +27,7 @@ Idx = Idx+1;
 CriteriaSets(Idx).PeriodConsistency = .7;
 CriteriaSets(Idx).MonotonicityInAmplitude = .9;
 CriteriaSets(Idx).PeriodNeg = true;
-CriteriaSets(Idx).FlankConsistency = 0.3;
+CriteriaSets(Idx).FlankConsistency = .3;
 CriteriaSets(Idx).MinCyclesPerBurst = 3;
 
 % relies on shape but low other criteria; gets most of the bursts
@@ -35,7 +35,7 @@ Idx = Idx+1;
 CriteriaSets(Idx).PeriodConsistency = .5;
 CriteriaSets(Idx).MonotonicityInTime = .4;
 CriteriaSets(Idx).MonotonicityInAmplitude = .4;
-CriteriaSets(Idx).ReversalRatio = 0.6;
+CriteriaSets(Idx).ReversalRatio = .6;
 CriteriaSets(Idx).ShapeConsistency = .2;
 CriteriaSets(Idx).FlankConsistency = .5;
 CriteriaSets(Idx).MinCyclesPerBurst = 3;
@@ -62,7 +62,7 @@ Triggers = Parameters.Triggers;
 % set paths and files
 EEGSource = fullfile(Paths.CleanEEG, Task);
 EEGSourceCuts = fullfile(Paths.Data, 'Cutting', 'Cuts', Task); % timepoints marked as artefacts
-Destination = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_New', Task);
+Destination = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_Lapse-Causes', Task);
 if ~exist(Destination, 'dir')
     mkdir(Destination)
 end

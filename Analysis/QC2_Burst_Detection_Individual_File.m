@@ -19,7 +19,7 @@ Participant = 'P04'; % P03 has almost no oscillations, P15 has tons
 %%%%
 
 Source_EEG = fullfile(Paths.Data, 'Clean', 'Waves', Task); % normal data
-Source_Bursts = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_New', Task);
+Source_Bursts = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_Lapse-Causes', Task);
 
 EEG = load_datafile(Source_EEG, Participant, Session, 'EEG');
 SampleRate = EEG.srate;

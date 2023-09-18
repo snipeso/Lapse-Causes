@@ -27,7 +27,7 @@ MinTrials = Parameters.Trials.MinPerSubGroupCount;
 Bands = Parameters.Bands;
 
 EyetrackingDir = fullfile(Paths.Data, 'Pupils', ['Raw_', num2str(SampleRate), 'Hz'], Task);
-BurstDir = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_New', Task);
+BurstDir = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_Lapse-Causes', Task);
 TrialCacheDir = fullfile(Paths.Cache, 'Trial_Information');
 CacheFilename = [Task, '_TrialsTable.mat'];
 

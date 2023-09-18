@@ -8,7 +8,7 @@ Participants = Parameters.Participants;
 Sessions = Parameters.Sessions.LAT;
 Sessions = {'Session2Beam1'};
 
-Source_Bursts = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_New', Task);
+Source_Bursts = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_Lapse-Causes', Task);
 
 for idxParticipant = 1:numel(Participants)
 for idxSession = 1 %:numel(Sessions)

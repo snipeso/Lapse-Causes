@@ -26,7 +26,7 @@ StatParameters = Parameters.Stats;
 SampleRate = Parameters.SampleRate;
 
 Source_EEG = fullfile(Paths.Data, 'Clean', 'Waves', Task);
-Source_Bursts = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_New', Task);
+Source_Bursts = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_Lapse-Causes', Task);
 ScriptName = 'Plot2_BurstDetection';
 CacheDir = fullfile(Paths.Cache, ScriptName);
 
