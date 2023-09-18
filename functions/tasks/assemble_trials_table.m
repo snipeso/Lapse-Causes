@@ -14,7 +14,7 @@ TrialsTable = load_task_output(Participants, Sessions, Task, Paths, false);
 
 % TODO
 % get time of stim and response trigger
-% TrialsTable = getTrialLatencies(TrialsTable, BurstPath, Triggers);
+% TrialsTable = trial_latencies(TrialsTable, BurstPath, Triggers);
 % get eyes-closed info
 % TrialsTable = getECtrials(TrialsTable, MicrosleepPath, DataQuality_Table, ...
 %     SampleRate, TrialWindows, MinEventProportion, WindowLabels);
