@@ -174,15 +174,19 @@ end
 end
 
 
-function itHappened = did_it_happen(TrialData, MinWindow, MinNanProportion)
+function itHappened = did_it_happen(TrialData, MinEventWindow, MinNanProportion)
+% TrialData is a Trial x time matrix of ones, zeros and nans, and this
+% checks how much of the event occured in the trial to classify the trial
+% as having that event or not. Excludes trials with too much missing data.
+
 TrialCount = size(TrialData, 1);
 itHappened = nan(TrialCount, 1);
 for idxTrial = 1:TrialCount
-    V = TrialData(idxTrial, :);
-    Pnts = numel(V);
-    if nnz(isnan(V))/Pnts > MinNanProportion
+    Trial = TrialData(idxTrial, :);
+    Pnts = numel(Trial);
+    if nnz(isnan(Trial))/Pnts > MinNanProportion
         itHappened(idxTrial) = nan;
-    elseif nnz(V==1)/Pnts > MinWindow
+    elseif nnz(Trial==1)/Pnts > MinEventWindow
         itHappened(idxTrial) = 1;
     else
         itHappened(idxTrial) = 0;
