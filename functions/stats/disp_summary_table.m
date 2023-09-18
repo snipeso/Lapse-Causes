@@ -1,4 +1,4 @@
-function Summary = summaryTable(Data, ColNames)
+function Summary = disp_summary_table(Data, ColNames)
 % gives summary table of means and so on
 
 Dims = size(Data);

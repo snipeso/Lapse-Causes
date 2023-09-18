@@ -50,7 +50,7 @@ Stats.ranovatbl = ranovatbl;
 
 % save summary statistics: table of means, std, for each combo
 Titles = strcat(Factor1Labels(Within.(FactorLabels{1}))', Factor2Labels(Within.(FactorLabels{2}))');
-Summary = summaryTable(Between, Titles);
+Summary = disp_summary_table(Between, Titles);
 Stats.summary = Summary;
 
 % check if normally distributed (ks test or shapiro
