@@ -136,7 +136,7 @@ for Indx_B = 1:numel(BandNames)
 
     fEEG = AllEEG;
     fEEG.data = fSignals;
-    AllfEEG = catStruct(AllfEEG, fEEG);
+    AllfEEG = cat_struct(AllfEEG, fEEG);
 end
 
 

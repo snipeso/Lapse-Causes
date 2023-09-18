@@ -1,4 +1,4 @@
-function Struct = catStruct(Struct1, Struct2)
+function Struct = cat_struct(Struct1, Struct2)
 % concatente structures, also when potentially empty.
 
 if numel(fieldnames(Struct1)) == 0 || isempty(Struct1)
