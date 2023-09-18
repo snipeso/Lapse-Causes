@@ -13,7 +13,6 @@ RerunAnalysis = true;
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
-StatParameters = Parameters.Stats;
 Participants = Parameters.Participants;
 Sessions = Parameters.Sessions;
 TrialWindow = Parameters.Trials.SubWindows(2, :);
@@ -50,7 +49,6 @@ for Task = Tasks
     EyetrackingDir = fullfile(Paths.Data, 'Pupils', ['Raw_', num2str(SampleRate), 'Hz'], Task{1});
     TrialsTable = eyes_closed_trials(TrialsTable, EyetrackingQualityTable, EyetrackingDir, ...
         TrialWindow, MinEventProportion,  MaxNanProportion, ConfidenceThreshold, Triggers);
-
 
     % save to cache for future
     save(fullfile(CacheDir, CacheFilename), 'TrialsTable')
@@ -115,14 +113,13 @@ for Participant = Participants'
         TrialsTable.StimTimepoint(CurrentTrials) = StimLatencies;
 
         % gather response latencies
-
         RespLatencyIndexes = StimLatencyIndexes+1; % only responses immediately after a stimulus
         NextTriggerType = Types(RespLatencyIndexes);
         NotResponses = ~strcmp(NextTriggerType, Triggers.Resp);
         RespLatencyIndexes(NotResponses) = [];
         RespLatencies = Latencies(RespLatencyIndexes);
-        ResponseCurrentTrials = CurrentTrials; % skip lapses
-        ResponseCurrentTrials(NotResponses) = [];
+        ResponseCurrentTrials = CurrentTrials; 
+        ResponseCurrentTrials(NotResponses) = []; % skip lapses, which dont have a response
 
         TrialsTable.RespTimepoint(ResponseCurrentTrials) = RespLatencies;
     end

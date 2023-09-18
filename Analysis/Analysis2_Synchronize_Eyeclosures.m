@@ -9,7 +9,7 @@ close all
 %%% load in and set parameters for analysis
 
 Tasks = {'PVT', 'LAT'};
-RerunAnalysis = false;
+RerunAnalysis = true;
 PupilDetectionMethodType = '2d c++'; % either 2D or 3D; 3D is not as good
 
 Parameters = analysisParameters();
@@ -50,10 +50,13 @@ for Task = Tasks
 
             check_trigger_annotations_match(EEG, Annotations);
 
-            % select only one method type
+            % select only one pupil detection method type
             Pupil = Pupil(strcmp(Pupil.method, PupilDetectionMethodType), :);
 
-            EEG = adjust_triggers_PVT(Task{1}, EEG, Triggers);
+            if strcmp(Task, 'PVT')
+                EEG = adjust_triggers_PVT(EEG, Triggers);
+            end
+
             [Eyes, ~] = sync_eyes(EEG, Triggers.SyncEyes, Pupil, 'confidence', Annotations);
 
             % save
@@ -90,9 +93,9 @@ if nnz(strcmp(TriggerTypes, {'S  3'})) ~= nnz(strcmp(Annotations.label, 'Stim'))
     EEGITI = diff(TriggerTimes(First2StimEEG)/EEG.srate);
 
     if abs(EyesITI-EEGITI) < 0.1
-        warning([' EEG vs annotations asynchronized length in ', EEG.filename])
+        warning(['EEG vs annotations asynchronized length in ', EEG.filename])
     elseif size(Annotations, 1)==1
-        warning(['Usin manual synchronization in ', EEG.filename])
+        warning(['Using manual synchronization in ', EEG.filename])
     else
         error(['Something REALLY wrong with EEG vs annotations synchronization in ', EEG.filename])
     end
@@ -100,11 +103,9 @@ end
 end
 
 
-function EEG = adjust_triggers_PVT(Task, EEG, Triggers)
-if strcmp(Task, 'PVT')
-    StartTrialIndx = find(strcmp({EEG.event.type}, Triggers.SyncEyes), 1, 'first');
-    StartStimIndx = find(strcmp({EEG.event.type}, 'S  3'), 1, 'first');
-    EEG.event(StartTrialIndx).latency = EEG.event(StartStimIndx).latency;
-end
+function EEG = adjust_triggers_PVT(EEG, Triggers)
+StartTrialIndx = find(strcmp({EEG.event.type}, Triggers.SyncEyes), 1, 'first');
+StartStimIndx = find(strcmp({EEG.event.type}, 'S  3'), 1, 'first');
+EEG.event(StartTrialIndx).latency = EEG.event(StartStimIndx).latency;
 end
 
