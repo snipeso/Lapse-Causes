@@ -23,7 +23,7 @@ Parameters.Participants = {'P01', 'P02', 'P03', 'P04', 'P05', 'P06', 'P07', 'P08
 % time-course and trial related information
 Parameters.SampleRate = 250; % ideally this would be extracted from the EEG, but sometimes pre-allocating before loading makes the code cleaner
 
-Parameters.Stimuli.MaxDistance = 4/6; % exclude outermost stimuli, since lapses are likely just not seeing the thing
+Parameters.Stimuli.MaxDistance = 4/6; % exclude outermost stimuli, since lapses are likely just not seeing the thing (not used in main analysis, just a quality check)
 
 Parameters.Trials.Window = [-2, 4]; % time around stimulus to plot
 Parameters.Trials.SubWindows = [-2 0; 0 0.3; 0.3 1; 2 4]; % windows in which to average values for topographies
@@ -38,7 +38,6 @@ Parameters.EyeTracking.MinConfidenceThreshold = 0.5; % pupil model confidence th
 
 %%% labels
 Parameters.Labels.TrialOutcome = {'Lapses', 'Slow', 'Fast'};
-% Labels.EyeType = [0 1]; %???
 Parameters.Labels.logBands = [1 2 4 8 16 32]; % x markers for plot on log scale
 Parameters.Labels.Bands = [1 4 8 15 25 35 40]; % normal scale
 Parameters.Labels.FreqLimits = [1 40];
@@ -78,7 +77,6 @@ Paths.Core = Core;
 
 Paths.RawData = 'G:\LSM\Data\Raw';
 Paths.AnalyzedData  = fullfile(Core, 'Final'); % where data gets saved once its been turned into something else
-% Paths.PooledData = fullfile(Paths.AnalyzedData, 'PooledData', 'Lapse-Causes');
 Paths.Cache = fullfile(Core, 'Cache', 'Lapse-Causes');
 Paths.Results = fullfile(Core, 'Results', 'Lapse-Causes');
 Paths.QualityCheck = fullfile(Core, 'QualityCheck');
@@ -140,13 +138,6 @@ Triggers.Alarm = 'S  8';
 Triggers.LeftBlock = 'S 10';
 Triggers.RightBlock = 'S 11';
 Triggers.Tones = 'S 12';
-
-% Triggers.Extras = {'boundary', Triggers.Start, Triggers.End, Triggers.Resp, ...
-%     Triggers.FA, Triggers.StartBlank, Triggers.EndBlank, Triggers.Alarm, ...
-%     Triggers.LeftBlock, Triggers.RightBlock, Tones}; TODO see if needs
-%     removing
-
-
 Parameters.Triggers = Triggers;
 
 Parameters.PlotProps.Manuscript = chART.load_plot_properties({'LSM', 'Manuscript'});
@@ -175,7 +166,6 @@ Parameters.Channels = Channels;
 Stats = struct();
 
 Stats.ANOVA.ES = 'eta2';
-% Stats.ANOVA.ES_lims = [0 1];
 Stats.ANOVA.nBoot = 2000;
 Stats.ANOVA.pValue = 'pValueGG';
 Stats.ttest.nBoot = 2000;
@@ -183,10 +173,4 @@ Stats.ttest.dep = 'pdep'; % use 'dep' for ERPs, pdep for power
 Stats.Alpha = .05;
 Stats.Trend = .1;
 Stats.Paired.ES = 'hedgesg';
-% Stats.Paired.Benchmarks = -2:.5:2;
-% Stats.FreqBin = 1; % # of frequencies to bool in spectrums stats
-% Stats.minProminence = .1; % minimum prominence for when finding clusters of g values
 Parameters.Stats = Stats;
-
-
-
