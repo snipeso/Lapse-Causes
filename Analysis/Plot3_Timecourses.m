@@ -87,13 +87,13 @@ ylabel('Likelihood eyeclosure (z-score)')
 plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 1, :)), 2), ...
     ProbabilityBurstsDiff(:, 1), YLimTheta, flip(TallyLabels), '', ...
     StatParameters, DispN, DispStats, PlotProps, Grid, [1 2], PlotProps.Indexes.Letters{2});
-ylabel('Likelihood theta burst (z-score)')
+ylabel('Globality theta burst (z-score)')
 
 % alpha
 plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 2, :)), 2), ...
     ProbabilityBurstsDiff(:, 2), YLimAlpha, flip(TallyLabels), '', ...
     StatParameters, DispN, DispStats, PlotProps, Grid, [1 3], PlotProps.Indexes.Letters{3});
-ylabel('Likelihood alpha burst (z-score)')
+ylabel('Globality alpha burst (z-score)')
 
 
 %%% response locked

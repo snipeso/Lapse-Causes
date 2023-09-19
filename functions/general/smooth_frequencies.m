@@ -6,21 +6,26 @@ function sData = smooth_frequencies(Data, Frequencies, FrequencyDimention, Smoot
 
 Dims = size(Data);
 
+if SmoothSpan == 0
+    sData = Data;
+    return
+else
+    sData = nan(Dims);
+end
 
-sData = nan(Dims);
 switch FrequencyDimention
     case 'last'
         switch numel(Dims)
             case 2
-                   for Indx_P = 1:Dims(1)
-                            sData(Indx_P, :) = smoothF(Data(Indx_P, :), Frequencies, SmoothSpan);
+                for Indx_P = 1:Dims(1)
+                    sData(Indx_P, :) = smoothF(Data(Indx_P, :), Frequencies, SmoothSpan);
                 end
 
             case 3
-                  for Indx_P = 1:Dims(1)
+                for Indx_P = 1:Dims(1)
                     for Indx_S = 1:Dims(2)
-                            sData(Indx_P, Indx_S, :) = smoothF(Data(Indx_P, Indx_S, :), Frequencies, SmoothSpan);
-                        
+                        sData(Indx_P, Indx_S, :) = smoothF(Data(Indx_P, Indx_S, :), Frequencies, SmoothSpan);
+
                     end
                 end
             case 4
@@ -31,7 +36,7 @@ switch FrequencyDimention
                         end
                     end
                 end
-                
+
             case 5
                 for Indx_P = 1:Dims(1)
                     for Indx_S = 1:Dims(2)

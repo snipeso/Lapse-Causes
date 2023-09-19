@@ -16,32 +16,31 @@ RerunAnalysis = true; % false to skip files already analyzed
 Idx = 1; % this is to make it easier to skip some
 CriteriaSets = struct();
 CriteriaSets(Idx).PeriodConsistency = .6;
+CriteriaSets(Idx).AmplitudeConsistency = .6;
 CriteriaSets(Idx).MonotonicityInAmplitude = .6;
 CriteriaSets(Idx).FlankConsistency = .6;
-CriteriaSets(Idx).AmplitudeConsistency = .6;
 CriteriaSets(Idx).MinCyclesPerBurst = 5;
 % % without periodneg, to capture bursts that accelerate/decelerate
 
 % short bursts, strict monotonicity requirements
 Idx = Idx+1;
-CriteriaSets(Idx).PeriodConsistency = .7;
-CriteriaSets(Idx).MonotonicityInAmplitude = .9;
 CriteriaSets(Idx).PeriodNeg = true;
+CriteriaSets(Idx).PeriodConsistency = .7;
 CriteriaSets(Idx).FlankConsistency = .3;
+CriteriaSets(Idx).MonotonicityInAmplitude = .9;
 CriteriaSets(Idx).MinCyclesPerBurst = 3;
 
 % relies on shape but low other criteria; gets most of the bursts
 Idx = Idx+1;
+CriteriaSets(Idx).PeriodNeg = true;
 CriteriaSets(Idx).PeriodConsistency = .5;
+CriteriaSets(Idx).AmplitudeConsistency = .4;
+CriteriaSets(Idx).FlankConsistency = .5;
+CriteriaSets(Idx).ShapeConsistency = .2;
 CriteriaSets(Idx).MonotonicityInTime = .4;
 CriteriaSets(Idx).MonotonicityInAmplitude = .4;
 CriteriaSets(Idx).ReversalRatio = .6;
-CriteriaSets(Idx).ShapeConsistency = .2;
-CriteriaSets(Idx).FlankConsistency = .5;
-CriteriaSets(Idx).MinCyclesPerBurst = 3;
-CriteriaSets(Idx).AmplitudeConsistency = .4;
 CriteriaSets(Idx).MinCyclesPerBurst = 4;
-CriteriaSets(Idx).PeriodNeg = true;
 
 MinClusteringFrequencyRange = 1; % to cluster bursts across channels
 
@@ -106,7 +105,7 @@ for FilenameSource = Filenames'
     Bursts = cycy.detect_bursts_all_channels(EEG, EEGNarrowbands, Bands, ...
         CriteriaSets, RunParallelBurstDetection, KeepTimepoints);
 
-    % aggregate bursts into clusters across channels
+    % aggregate bursts into clusters across channels (not really used)
     BurstClusters = cycy.aggregate_bursts_into_clusters(Bursts, EEG, MinClusteringFrequencyRange);
 
     % remove from Bursts all bursts that didn't make it into a cluster (means it was only in one channel)
