@@ -164,7 +164,7 @@ SessionLabels = fieldnames(SessionBlocks);
 for idxBand = 1:2
     for idxSessionBlock = 1:2
         disp_stats_descriptive(squeeze(BurstAmplitudes(:, idxSessionBlock, idxBand)), ...
-            [BandLabels{idxBand}, ' ', SessionLabels{idxSessionBlock}], '\muV', 1);
+            [BandLabels{idxBand}, ' ', SessionLabels{idxSessionBlock}], ' miV', 1);
 
         disp_stats_descriptive(squeeze(BurstDurations(:, idxSessionBlock, idxBand)), ...
             [BandLabels{idxBand}, ' ', SessionLabels{idxSessionBlock}], 's', 1);
