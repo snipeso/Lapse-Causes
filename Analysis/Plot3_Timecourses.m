@@ -41,19 +41,19 @@ CacheDir = fullfile(Paths.Cache, 'Data_Figures');
 
 % eyeclosure data
 load(fullfile(CacheDir, ['Eyeclosures_', SessionBlockLabel, EyeclosureTag, '.mat']), ...
-    'ProbEyesClosedStimLocked', 'ProbEyesClosedRespLocked', 'TrialTime', 'ProbabilityEyesClosed')
+    'EyesClosedStimLocked', 'EyesClosedRespLocked', 'TrialTime', 'EyeclosureDescriptives')
 
 [ProbEyesClosedStimLockedDiff, ProbEyesClosedRespLockedDiff, ProbabilityEyesClosedDiff] = ...
-    process_data(ProbEyesClosedStimLocked, ProbEyesClosedRespLocked, ProbabilityEyesClosed, ...
+    process_data(EyesClosedStimLocked, EyesClosedRespLocked, EyeclosureDescriptives, ...
     TrialTime, SmoothFactor, []);
 
 
 % burst data
 load(fullfile(CacheDir, ['Bursts_', TitleTag, '.mat']), ...
-    'ProbBurstStimLocked', 'ProbBurstRespLocked', 'ProbabilityBurst')
+    'BurstStimLocked', 'BurstRespLocked', 'BurstDescriptives')
 
 [ProbBurstsStimLockedDiff, ProbBurstsRespLockedDiff, ProbabilityBurstsDiff] = ...
-    process_data(ProbBurstStimLocked, ProbBurstRespLocked, ProbabilityBurst, ...
+    process_data(BurstStimLocked, BurstRespLocked, BurstDescriptives, ...
     TrialTime, SmoothFactor, 3);
 
 
@@ -129,10 +129,10 @@ chART.save_figure(['Figure_',TitleTag], Paths.Results, PlotProps)
 
 clc
 
-disp_stats_descriptive(100*ProbabilityEyesClosed(:, 1), 'EC gen prop', '%', 0);
+disp_stats_descriptive(100*EyeclosureDescriptives(:, 1), 'EC gen prop', '%', 0);
 
-disp_stats_descriptive(100*ProbabilityBurst(:, 1, 1), 'Theta gen prop', '%', 0);
-disp_stats_descriptive(100*ProbabilityBurst(:, 2, 1), 'Alpha gen prop', '%', 0);
+disp_stats_descriptive(100*BurstDescriptives(:, 1, 1), 'Theta gen prop', '%', 0);
+disp_stats_descriptive(100*BurstDescriptives(:, 2, 1), 'Alpha gen prop', '%', 0);
 
 
 

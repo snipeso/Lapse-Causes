@@ -94,7 +94,7 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
             MaxNaNProportion, MinTrials, true);
 
         % calculate general probability of a burst
-        BurstDescriptives(idxParticipant, :, :) = PooledBurstDescriptives; % TODO RENAME
+        BurstDescriptives(idxParticipant, :, :) = PooledBurstDescriptives;
         BurstDescriptivesTopography(idxParticipant, :, :, :) = PooledBurstDescriptivesTopography;
 
         disp(['Finished ', Participants{idxParticipant}])

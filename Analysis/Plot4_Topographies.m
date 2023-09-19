@@ -36,9 +36,9 @@ end
 %%% assemble data
 
 load(fullfile(CacheDir, ['Bursts_', TitleTag, '.mat']), 'Chanlocs','TrialTime', ...
-    'ProbBurstStimLockedTopography', 'ProbabilityBurstTopography')
+    'BurstStimLockedTopography', 'BurstDescriptivesTopography')
 
-WindowedStim = average_windows(ProbBurstStimLockedTopography, TrialTime, Windows);
+WindowedStim = average_windows(BurstStimLockedTopography, TrialTime, Windows);
 WindowCount = size(Windows, 1);
 
 
@@ -64,7 +64,7 @@ for idxBand = 1:2 % subplot A and B
     for idxOutcome = 1:3 % rows
         for idxWindow = 1:WindowCount % columns
             Data = squeeze(WindowedStim(:, Types(idxOutcome), :, idxBand, idxWindow));
-            Baseline = squeeze(ProbabilityBurstTopography(:, :, idxBand));
+            Baseline = squeeze(BurstDescriptivesTopography(:, :, idxBand));
 
             if idxWindow == 1
                 PlotProps.Stats.PlotN = true;
