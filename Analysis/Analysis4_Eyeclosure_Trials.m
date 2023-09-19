@@ -20,9 +20,11 @@ ConfidenceThreshold = Parameters.EyeTracking.MinConfidenceThreshold;
 MaxNaNProportion = Parameters.Trials.MaxNaNProportion;
 MaxStimulusDistanceProportion = Parameters.Stimuli.MaxDistance;
 SessionBlocks = Parameters.Sessions.Conditions;
+SessionBlockLabels = fieldnames(SessionBlocks);
 Triggers = Parameters.Triggers;
 MinTrials = Parameters.Trials.MinPerSubGroupCount;
 
+% locations
 EyetrackingDir = fullfile(Paths.Data, 'Pupils', ['Raw_', num2str(SampleRate), 'Hz'], Task);
 TrialCacheDir = fullfile(Paths.Cache, 'Trial_Information');
 CacheFilename = [Task, '_TrialsTable.mat'];
@@ -32,13 +34,11 @@ if ~exist(EyeclosureCacheDir, 'dir')
     mkdir(EyeclosureCacheDir)
 end
 
-SessionBlockLabels = fieldnames(SessionBlocks);
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Run
 
-% get trial information
+%%% get trial information
 load(fullfile(TrialCacheDir, CacheFilename), 'TrialsTable')
 
 EyetrackingQualityTable = readtable(fullfile(Paths.QualityCheck, 'EyeTracking', ...
@@ -46,16 +46,19 @@ EyetrackingQualityTable = readtable(fullfile(Paths.QualityCheck, 'EyeTracking', 
 
 TrialTime = linspace(TrialWindow(1), TrialWindow(2), SampleRate*(TrialWindow(2)-TrialWindow(1))); % time vector
 
- [MaxStimulusDistance, TitleTag] = max_stimulus_distance(OnlyClosestStimuli, ...
-     MaxStimulusDistanceProportion);
+ [MaxStimulusDistance, TitleTag] = max_stimulus_distance(TrialsTable, ...
+     OnlyClosestStimuli, MaxStimulusDistanceProportion);
+
+ 
+ %%% get eyes closued information
 
 for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
 
     Sessions = SessionBlocks.(SessionBlockLabels{idxSessionBlock});
 
     % initialize variables
-    ProbEyesClosedStimLocked = nan(numel(Participants), 3, numel(TrialTime)); % P x TT x t matrix with final probabilities
-    ProbEyesClosedRespLocked = ProbEyesClosedStimLocked;
+    EyesClosedStimLocked = nan(numel(Participants), 3, numel(TrialTime)); % P x TT x t matrix with final probabilities
+    EyesClosedRespLocked = EyesClosedStimLocked;
     EyeclosureDescriptives = nan(numel(Participants), 2); 
 
     for idxParticipant = 1:numel(Participants)
@@ -70,11 +73,11 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
             continue
         end
 
-        % get probability of microsleep (in time) for each trial type
-        ProbEyesClosedStimLocked(idxParticipant, :, :) = probability_of_event_by_outcome( ...
+        % get probability of eyesclosed (in time) for each trial type
+        EyesClosedStimLocked(idxParticipant, :, :) = probability_of_event_by_outcome( ...
             PooledTrialsStim, PooledTrialsTable, MaxNaNProportion, MinTrials, false);
 
-        ProbEyesClosedRespLocked(idxParticipant, :, :) = probability_of_event_by_outcome( ...
+        EyesClosedRespLocked(idxParticipant, :, :) = probability_of_event_by_outcome( ...
             PooledTrialsResp, PooledTrialsTable(PooledTrialsTable.Type~=1, :), ...
             MaxNaNProportion, MinTrials, true);
 
@@ -82,9 +85,9 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
         disp(['Finished ', Participants{idxParticipant}])
     end
 
-    %%% save
+    % save
     save(fullfile(EyeclosureCacheDir, ['Eyeclosures_', SessionBlockLabels{idxSessionBlock}, TitleTag, '.mat']), ...
-        'ProbEyesClosedStimLocked', 'ProbEyesClosedRespLocked', ...
+        'EyesClosedStimLocked', 'EyesClosedRespLocked', ...
         'TrialTime', 'EyeclosureDescriptives')
 end
 
@@ -92,7 +95,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
 
-function [MaxStimulusDistance, TitleTag] = max_stimulus_distance(OnlyClosestStimuli, MaxStimulusDistanceProportion)
+function [MaxStimulusDistance, TitleTag] = max_stimulus_distance(TrialsTable, ...
+    OnlyClosestStimuli, MaxStimulusDistanceProportion)
 % specify only close trials, or all trials
 TitleTag = '';
 if OnlyClosestStimuli

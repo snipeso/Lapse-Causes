@@ -1,4 +1,6 @@
 function TrialData = chop_trials(Data, SampleRate, TriggerLatencies, Window)
+% chop up Data into trials, based on TriggerLatencies, centering Windows to
+% cut out. Window is in seconds.  
 % Data is a ch x t matrix
 
 TriggerLatencies(isnan(TriggerLatencies)) = [];
