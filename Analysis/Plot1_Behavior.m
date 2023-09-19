@@ -19,7 +19,7 @@ StatParameters = Parameters.Stats;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Load trial data
 
-CacheDir = fullfile(Paths.Cache, "C_Assemble_Trial_Information/");
+CacheDir = fullfile(Paths.Cache, "Trial_Information");
 
 %%% Get PVT trial data
 load(fullfile(CacheDir, 'PVT_TrialsTable.mat'), 'TrialsTable') % from script Load_Trials
