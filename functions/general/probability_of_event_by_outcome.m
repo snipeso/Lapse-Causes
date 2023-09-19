@@ -64,14 +64,16 @@ end
 
 
 function NewData = close_small_gaps(Data, MaxSize)
+
+% identify gaps
 [Starts, Ends] = data2windows(isnan(Data));
 if isempty(Starts) || all(isnan(Data))
     NewData = Data;
     return
 end
-
 Gaps = (Ends-Starts);
 
+% if any gap is too large, return only nans
 if any(Gaps>MaxSize)
     NewData = nan(size(Data));
     return
