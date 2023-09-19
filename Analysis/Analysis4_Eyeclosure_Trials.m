@@ -8,7 +8,7 @@ close all
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
 
-OnlyClosestStimuli = true; % only use closest trials
+OnlyClosestStimuli = false; % only use closest trials
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
@@ -18,7 +18,7 @@ TrialWindow = Parameters.Trials.Window;
 SampleRate = Parameters.SampleRate;
 ConfidenceThreshold = Parameters.EyeTracking.MinConfidenceThreshold;
 MaxNaNProportion = Parameters.Trials.MaxNaNProportion;
-MaxStimulusDistance = Parameters.Stimuli.MaxDistance;
+MaxStimulusDistanceProportion = Parameters.Stimuli.MaxDistance;
 SessionBlocks = Parameters.Sessions.Conditions;
 Triggers = Parameters.Triggers;
 MinTrials = Parameters.Trials.MinPerSubGroupCount;
@@ -46,15 +46,8 @@ EyetrackingQualityTable = readtable(fullfile(Paths.QualityCheck, 'EyeTracking', 
 
 TrialTime = linspace(TrialWindow(1), TrialWindow(2), SampleRate*(TrialWindow(2)-TrialWindow(1))); % time vector
 
-% specify only close trials, or all trials
-TitleTag = '';
-if OnlyClosestStimuli
-    TitleTag = [ TitleTag, '_Close'];
-    MaxStimulusDistance = quantile(TrialsTable.Radius, MaxStimulusDistance);
-else
-    MaxStimulusDistance = max(TrialsTable.Radius);
-end
-
+ [MaxStimulusDistance, TitleTag] = max_stimulus_distance(OnlyClosestStimuli, ...
+     MaxStimulusDistanceProportion);
 
 for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
 
@@ -63,11 +56,11 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
     % initialize variables
     ProbEyesClosedStimLocked = nan(numel(Participants), 3, numel(TrialTime)); % P x TT x t matrix with final probabilities
     ProbEyesClosedRespLocked = ProbEyesClosedStimLocked;
-    ProbabilityEyesClosed = nan(numel(Participants), 2); % get general probability of a microsleep for a given session block (to control for when z-scoring)
+    EyeclosureDescriptives = nan(numel(Participants), 2); 
 
     for idxParticipant = 1:numel(Participants)
 
-        [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, EyeclosureTimepointCount] = ...
+        [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, PooledEyeclosureDescriptives] = ...
             pool_eyeclosure_trials(TrialsTable, EyetrackingQualityTable, EyetrackingDir, ...
             Participants{idxParticipant}, Sessions, MaxStimulusDistance, TrialWindow, ...
             Triggers, SampleRate, ConfidenceThreshold);
@@ -82,41 +75,49 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
             PooledTrialsStim, PooledTrialsTable, MaxNaNProportion, MinTrials, false);
 
         ProbEyesClosedRespLocked(idxParticipant, :, :) = probability_of_event_by_outcome( ...
-            PooledTrialsResp, PooledTrialsTable(PooledTrialsTable.Type~=1, :), MaxNaNProportion, MinTrials, true);
+            PooledTrialsResp, PooledTrialsTable(PooledTrialsTable.Type~=1, :), ...
+            MaxNaNProportion, MinTrials, true);
 
-        ProbabilityEyesClosed(idxParticipant, :) =  EyeclosureTimepointCount;
+        EyeclosureDescriptives(idxParticipant, :) =  PooledEyeclosureDescriptives;
         disp(['Finished ', Participants{idxParticipant}])
     end
 
     %%% save
     save(fullfile(EyeclosureCacheDir, ['Eyeclosures_', SessionBlockLabels{idxSessionBlock}, TitleTag, '.mat']), ...
         'ProbEyesClosedStimLocked', 'ProbEyesClosedRespLocked', ...
-        'TrialTime', 'ProbabilityEyesClosed')
+        'TrialTime', 'EyeclosureDescriptives')
 end
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
 
-function [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, EyeclosureTimepointCount] = ...
+function [MaxStimulusDistance, TitleTag] = max_stimulus_distance(OnlyClosestStimuli, MaxStimulusDistanceProportion)
+% specify only close trials, or all trials
+TitleTag = '';
+if OnlyClosestStimuli
+    TitleTag = [ TitleTag, '_Close'];
+    MaxStimulusDistance = quantile(TrialsTable.Radius, MaxStimulusDistanceProportion);
+else
+    MaxStimulusDistance = max(TrialsTable.Radius);
+end
+end
+
+
+function [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, EyeclosureDescriptives] = ...
     pool_eyeclosure_trials(TrialsTable, EyetrackingQualityTable, EyetrackingPath, ...
     Participant, Sessions, MaxStimulusDistance, TrialWindow, Triggers, SampleRate, ConfidenceThreshold)
-% EyeclosureTimepointCount is a 1 x 2 array indicating the total number of 
-% points in the pooled sessions that has eyes closed and the total number of 
-% points.
-
-% TODO: don't really need triggers anymore?
+% pool trials from multiple sessions, into a single session block
 
 % initialize variables
 PooledTrialsStim = [];
 PooledTrialsResp = [];
 PooledTrialsTable = table();
-% EyeclosureTimepointCount = [0 0]; % total number of points in recording that is a microsleep; total number of points, pooling sessions
 AllEyeClosed = [];
 
 for idxSession = 1:numel(Sessions)
 
-    % trial info for current recording
+    % trial info subset
     CurrentTrials = strcmp(TrialsTable.Participant, Participant) & ...
         strcmp(TrialsTable.Session, Sessions{idxSession}) & TrialsTable.Radius < MaxStimulusDistance;
 
@@ -126,7 +127,8 @@ for idxSession = 1:numel(Sessions)
     EEGMetadata = load_datafile(EyetrackingPath, Participant, Sessions{idxSession}, 'EEGMetadata');
 
     % identify eyes closed timepoints
-    CleanEyeIndex = EyetrackingQualityTable.(Sessions{idxSession})(strcmp(EyetrackingQualityTable.Participant, Participant));
+    CleanEyeIndex = EyetrackingQualityTable.(Sessions{idxSession})(...
+        strcmp(EyetrackingQualityTable.Participant, Participant));
     EyeClosed = clean_eyeclosure_data(Eyes, EEGMetadata, Triggers, CleanEyeIndex, SampleRate, ConfidenceThreshold);
 
     % chop into trials
@@ -139,11 +141,13 @@ for idxSession = 1:numel(Sessions)
 
     % pool info
     PooledTrialsTable = cat(1, PooledTrialsTable, TrialsTable(CurrentTrials, :)); % important that it be in the same order!
-    % EyeclosureTimepointCount = tally_timepoints(EyeclosureTimepointCount, EyeClosed);
     AllEyeClosed = cat(2, AllEyeClosed, EyeClosed);
 end
 
-EyeclosureTimepointCount = cat(2, mean(AllEyeClosed, 2, 'omitnan'), std(AllEyeClosed, [], 2, 'omitnan'));
+EyeclosureDescriptives = cat(2, mean(AllEyeClosed, 2, 'omitnan'), std(AllEyeClosed, [], 2, 'omitnan'));
 end
+
+
+
 
 

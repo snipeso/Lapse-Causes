@@ -25,8 +25,8 @@ Labels = Parameters.Labels;
 StatParameters = Parameters.Stats;
 SampleRate = Parameters.SampleRate;
 
-Source_EEG = fullfile(Paths.Data, 'Clean', 'Waves', Task);
-Source_Bursts = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_Lapse-Causes', Task);
+SourceEEG = fullfile(Paths.Data, 'Clean', 'Waves', Task);
+SourceBursts = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_Lapse-Causes', Task);
 ScriptName = 'Plot2_BurstDetection';
 CacheDir = fullfile(Paths.Cache, ScriptName);
 
@@ -36,7 +36,7 @@ CacheDir = fullfile(Paths.Cache, ScriptName);
 
 %%% Theta
 [ThetaPowerIntactSpectrum, ThetaPowerBurstsSpectrum, ThetaPowerBurstlessSpectrum, Frequencies, ThetaTimeSpent] = ...
-    whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, 2, Channels, 'Front', ...
+    whitened_burst_power_by_ROI(SourceEEG, SourceBursts, Participants, SessionBlocks, 2, Channels, 'Front', ...
     Bands, 'Theta', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, SampleRate, CacheDir, RerunAnalysis);
 
 
@@ -46,10 +46,11 @@ BandIndex = 1;
     average_band(ThetaPowerIntactSpectrum, ThetaPowerBurstsSpectrum, ThetaPowerBurstlessSpectrum, ...
     Frequencies, Bands, BandIndex);
 
+
 %%% Alpha
 
 [AlphaPowerIntactSpectrum, AlphaPowerBurstsSpectrum, AlphaPowerBurstlessSpectrum, ~, AlphaTimeSpent] = ...
-    whitened_burst_power_by_ROI(Source_EEG, Source_Bursts, Participants, SessionBlocks, 1, Channels, 'Back', ...
+    whitened_burst_power_by_ROI(SourceEEG, SourceBursts, Participants, SessionBlocks, 1, Channels, 'Back', ...
     Bands, 'Alpha', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, SampleRate, CacheDir, RerunAnalysis);
 
 
@@ -58,6 +59,11 @@ BandIndex = 2;
 [AlphaPowerIntact, AlphaPowerBursts, AlphaPowerBurstless] = ...
     average_band(AlphaPowerIntactSpectrum, AlphaPowerBurstsSpectrum, AlphaPowerBurstlessSpectrum, ...
     Frequencies, Bands, BandIndex);
+
+
+% burst properties
+[BurstAmplitudes, BurstDurations, BurstGlobality] = burst_properties(SourceBursts, ...
+    Participants, SessionBlocks, Bands, CacheDir, RerunAnalysis);
 
 
 %%% Plot
@@ -146,15 +152,8 @@ AlphaPercentReduction = 100*(sum(AlphaPowerIntact) - sum(AlphaPowerBurstless))./
 disp_stats_descriptive(AlphaPercentReduction, 'Alpha percent reduction, sum', '%', 0);
 
 
-% power redistribution ratio power
-% burstless periodic power / burst periodic power
-ThetaBurstRedistributionRatio = 1-ThetaPowerBurstless./ThetaPowerBursts;
-disp_stats_descriptive(ThetaBurstRedistributionRatio, 'Theta burst power ratio', '', 2);
 
-AlphaBurstRedistributionRatio = 1-AlphaPowerBurstless./AlphaPowerBursts;
-disp_stats_descriptive(AlphaBurstRedistributionRatio, 'Alpha burst power ratio', '', 2);
-
-
+%% burst descriptives
 
 
 
@@ -349,4 +348,11 @@ PowerBursts = band_spectrum(PowerBurstsSpectrum, Frequencies, Bands, 'last');
 PowerBursts = PowerBursts(:, BandIndex);
 PowerBurstless = band_spectrum(PowerBurstlessSpectrum, Frequencies, Bands, 'last');
 PowerBurstless = PowerBurstless(:, BandIndex);
+end
+
+
+function [BurstAmplitudes, BurstDurations, BurstGlobality] = burst_properties(SourceBursts, ...
+    Participants, SessionBlocks, Bands, CacheDir, RerunAnalysis)
+
+
 end

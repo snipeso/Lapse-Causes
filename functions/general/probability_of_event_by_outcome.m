@@ -1,4 +1,6 @@
-function ProbEvents = probability_of_event_by_outcome(TrialData, TrialsTable, MaxNaNProportion, MinTrials, onlyResponses)
+function ProbEvents = probability_of_event_by_outcome(TrialData, TrialsTable, ...
+    MaxNaNProportion, MinTrials, onlyResponses)
+% 
 % TrialData is a T x time matrix
 % ProbEvents is a 3 x t matrix
 
@@ -21,11 +23,12 @@ for idxType = TrialTypes
 
     TypeTrialData = remove_trials_too_much_nan(TypeTrialData, MaxNaNProportion);
 
+    % averaging trials, gives event probability for 1s and 0s, and average
+    % globality otherwise
     ProbEvent = event_probability(TypeTrialData, MinTrials);
 
-    % event probability has NaNs when there weren't enough trials; if it's
-    % just a small gap, then this is interpolated.
-    ProbEvent = close_gaps(ProbEvent, numel(ProbEvent)*MaxGapProportion);
+    % some timepoints may be missing enough trials, so they are interpolated
+    ProbEvent = close_small_gaps(ProbEvent, numel(ProbEvent)*MaxGapProportion);
 
     if isempty(ProbEvent) || any(isnan(ProbEvent))
         ProbEvents(idxType, :) = nan(1, TimepointsCount);
@@ -40,6 +43,7 @@ end
 %%% functions
 
 function TypeTrialData = remove_trials_too_much_nan(TypeTrialData, MaxNaNProportion)
+% remove trials that are missing too much data in time
 TrialsTime = size(TypeTrialData, 2);
 NanProportion = sum(isnan(TypeTrialData), 2)./TrialsTime;
 TypeTrialData(NanProportion>MaxNaNProportion, :) = [];
@@ -47,7 +51,11 @@ end
 
 
 function Prob = event_probability(TypeTrialData, MinTrials)
-TrialCount = size(TypeTrialData, 1)-sum(isnan(TypeTrialData), 1); % only normalize by valid timepoints
+
+% number of trials for each timepoint, excluding NaNs
+TrialCount = size(TypeTrialData, 1)-sum(isnan(TypeTrialData), 1);
+
+% average trials for each timepoint
 Prob = sum(TypeTrialData, 1, 'omitnan')./TrialCount;
 
 % set to nan all timepoints that came from an average with too few trials
@@ -55,9 +63,7 @@ Prob(TrialCount<MinTrials) = nan;
 end
 
 
-function NewData = close_gaps(Data, MaxSize)
-% in an array with nan's, provides interpolated values for smaller gaps
-
+function NewData = close_small_gaps(Data, MaxSize)
 [Starts, Ends] = data2windows(isnan(Data));
 if isempty(Starts) || all(isnan(Data))
     NewData = Data;
