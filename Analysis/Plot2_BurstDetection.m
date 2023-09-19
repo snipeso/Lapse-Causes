@@ -42,7 +42,7 @@ CacheDir = fullfile(Paths.Cache, ScriptName);
 
 % average theta power
 BandIndex = 1;
-[ThetaPowerIntact, ThetaPowerBursts, ThetaPowerBurstless] = ...
+[ThetaPowerIntact, ~, ThetaPowerBurstless] = ...
     average_band(ThetaPowerIntactSpectrum, ThetaPowerBurstsSpectrum, ThetaPowerBurstlessSpectrum, ...
     Frequencies, Bands, BandIndex);
 
@@ -56,14 +56,15 @@ BandIndex = 1;
 
 % average alpha power
 BandIndex = 2;
-[AlphaPowerIntact, AlphaPowerBursts, AlphaPowerBurstless] = ...
+[AlphaPowerIntact, ~, AlphaPowerBurstless] = ...
     average_band(AlphaPowerIntactSpectrum, AlphaPowerBurstsSpectrum, AlphaPowerBurstlessSpectrum, ...
     Frequencies, Bands, BandIndex);
 
+%%
 
 % burst properties
-[BurstAmplitudes, BurstDurations, BurstGlobality] = burst_properties(SourceBursts, ...
-    Participants, SessionBlocks, Bands, CacheDir, RerunAnalysis);
+[BurstAmplitudes, BurstDurations] = burst_properties(SourceBursts, ...
+    Participants, SessionBlocks, Bands, SampleRate, CacheDir, RerunAnalysis);
 
 
 %%% Plot
@@ -154,8 +155,21 @@ disp_stats_descriptive(AlphaPercentReduction, 'Alpha percent reduction, sum', '%
 
 
 %% burst descriptives
+clc
+
+BandLabels = fieldnames(Bands);
+SessionLabels = fieldnames(SessionBlocks);
 
 
+for idxBand = 1:2
+    for idxSessionBlock = 1:2
+        disp_stats_descriptive(squeeze(BurstAmplitudes(:, idxSessionBlock, idxBand)), ...
+            [BandLabels{idxBand}, ' ', SessionLabels{idxSessionBlock}], '\muV', 1);
+
+        disp_stats_descriptive(squeeze(BurstDurations(:, idxSessionBlock, idxBand)), ...
+            [BandLabels{idxBand}, ' ', SessionLabels{idxSessionBlock}], 's', 1);
+    end
+end
 
 %%
 
@@ -351,8 +365,61 @@ PowerBurstless = PowerBurstless(:, BandIndex);
 end
 
 
-function [BurstAmplitudes, BurstDurations, BurstGlobality] = burst_properties(SourceBursts, ...
-    Participants, SessionBlocks, Bands, CacheDir, RerunAnalysis)
+function [BurstAmplitudes, BurstDurations] = burst_properties(SourceBursts, ...
+    Participants, SessionBlocks, Bands, SampleRate, CacheDir, RerunAnalysis)
 
+BandLabels = fieldnames(Bands);
+SessionBlockLabels = fieldnames(SessionBlocks);
 
+% location of cache
+CacheString = 'burst_properties.mat';
+CachePath = fullfile(CacheDir, CacheString);
+
+% load from cache
+if exist(CachePath, 'file') && ~RerunAnalysis
+    load(CachePath, 'BurstAmplitudes', 'BurstDurations')
+    return
 end
+
+%%% load burst data
+BurstAmplitudes = nan(numel(Participants), numel(SessionBlockLabels), 2); % P x S x B
+BurstDurations = BurstAmplitudes;
+
+for idxParticipant = 1:numel(Participants)
+    Participant = Participants{idxParticipant};
+    for idxSessionBlock = 1:numel(SessionBlockLabels)
+
+        % load in burst data
+        SessionBlock = SessionBlocks.(SessionBlockLabels{idxSessionBlock});
+        [~, BurstsAllSessions] = load_sessionblock_data(SourceBursts, [], ...
+            Participant, SessionBlock, 'Bursts');
+
+        % concatenate all data from session block
+        Bursts = struct();
+        for Session = fieldnames(BurstsAllSessions)'
+            Bursts = cat_struct(Bursts, BurstsAllSessions.(Session{1}));
+        end
+
+        Freqs = [Bursts.BurstFrequency];
+
+        for idxBand = 1:numel(BandLabels)
+
+            % select bursts of band
+            Band = Bands.(BandLabels{idxBand});
+            BurstsBand = Bursts(Freqs>=Band(1) & Freqs<Band(2));
+
+            % assemble properties of bursts
+            Amplitudes = [BurstsBand.Amplitude];
+            if isempty(Amplitudes)
+                continue
+            end
+            BurstAmplitudes(idxParticipant, idxSessionBlock, idxBand) = mean(Amplitudes);
+            BurstDurations(idxParticipant, idxSessionBlock, idxBand) = mean([BurstsBand.DurationPoints]/SampleRate);
+        end
+    end
+    disp(['Finished ', Participant])
+end
+
+save(CachePath, 'BurstAmplitudes', 'BurstDurations')
+end
+

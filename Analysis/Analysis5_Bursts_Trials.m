@@ -251,13 +251,13 @@ Pnts = numel(CleanTimepoints);
 BandLabels = fieldnames(Bands);
 BurstTimes = zeros(TotChannels, numel(BandLabels), Pnts);
 
-for Indx_B = 1:numel(BandLabels)
+for idxBand = 1:numel(BandLabels)
     for Indx_Ch = 1:TotChannels
-        Band = Bands.(BandLabels{Indx_B});
+        Band = Bands.(BandLabels{idxBand});
         BurstTimeSingleBand = bursts2time(Bursts(Freqs>=Band(1) & Freqs<Band(2) & ...
             Channels==Indx_Ch), Pnts);
         BurstTimeSingleBand(not(CleanTimepoints)) = nan;
-        BurstTimes(Indx_Ch, Indx_B, :) = BurstTimeSingleBand;
+        BurstTimes(Indx_Ch, idxBand, :) = BurstTimeSingleBand;
     end
 end
 end
