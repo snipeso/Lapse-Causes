@@ -9,7 +9,7 @@ close all
 %%% parameters
 
 WelchWindow = 8;
-Overlap = .75;
+Overlap = .5;
 MinDuration = 60;
 FooofFittingFrequencyRange = [2 40]; % some low-frequency noise
 RerunAnalysis = false; % if analysis has already been run, set to false if you want to use the cache
