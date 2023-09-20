@@ -19,7 +19,7 @@ switch fDim
                 case 2 % e.g. ch x freq
                     D = Data(:, Band(1):Band(2));
                     if ~all(isnan(D))
-                        D = sum(D, 2, 'omitnan').*FreqRes;
+                        D = sum(D, 2).*FreqRes;
                     else
                         D = nan;
                     end

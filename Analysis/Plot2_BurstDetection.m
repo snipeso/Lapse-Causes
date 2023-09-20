@@ -12,7 +12,7 @@ WelchWindow = 8;
 Overlap = .5;
 MinDuration = 60;
 FooofFittingFrequencyRange = [2 40]; % some low-frequency noise
-RerunAnalysis = true; % if analysis has already been run, set to false if you want to use the cache
+RerunAnalysis = false; % if analysis has already been run, set to false if you want to use the cache
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
@@ -34,7 +34,7 @@ CacheDir = fullfile(Paths.Cache, ScriptName);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% analysis
 
-%%
+
 %%% Theta
 [ThetaPowerIntactSpectrum, ThetaPowerBurstsSpectrum, ThetaPowerBurstlessSpectrum, Frequencies, ThetaTimeSpent] = ...
     whitened_burst_power_by_ROI(SourceEEG, SourceBursts, Participants, SessionBlocks, 2, Channels, 'Front', ...
@@ -52,6 +52,7 @@ BandIndex = 1;
     whitened_burst_power_by_ROI(SourceEEG, SourceBursts, Participants, SessionBlocks, 1, Channels, 'Back', ...
     Bands, 'Alpha', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, SampleRate, CacheDir, RerunAnalysis);
 
+
 % average alpha power
 BandIndex = 2;
 [AlphaPowerIntact, ~, AlphaPowerBurstless] = ...
@@ -59,7 +60,6 @@ BandIndex = 2;
     Frequencies, Bands, BandIndex);
 
 
-RerunAnalysis = false; % TEMP
 % burst properties
 [BurstAmplitudes, BurstDurations] = burst_properties(SourceBursts, ...
     Participants, SessionBlocks, Bands, SampleRate, CacheDir, RerunAnalysis);
@@ -114,8 +114,8 @@ Data = cat(2, permute(ThetaPowerBurstlessSpectrum, [1 3 2]), permute(ThetaPowerI
 chART.sub_plot([], Grid, [1 3], [1 2], true, PlotProps.Indexes.Letters{2}, PlotProps);
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
 title('Theta periodic power')
-ylabel('Whitened Power (\muV^2/Hz)')
-ylim([-.5 20])
+ylabel('Whitened power (\muV^2/Hz)')
+ylim([-.5 19])
 
 % alpha
 Data = cat(2, permute(AlphaPowerBurstlessSpectrum, [1 3 2]), permute(AlphaPowerIntactSpectrum, [1 3 2]));
@@ -123,8 +123,8 @@ Data = cat(2, permute(AlphaPowerBurstlessSpectrum, [1 3 2]), permute(AlphaPowerI
 chART.sub_plot([], Grid, [1 5], [1 2], true, PlotProps.Indexes.Letters{3}, PlotProps);
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
 title('Alpha periodic power')
-ylabel('Whitened Power (\muV^2/Hz)')
-ylim([0 14])
+ylabel('Whitened power (\muV^2/Hz)')
+ylim([-.5 12])
 
 chART.save_figure('Figure_2', Paths.Results, PlotProps)
 
@@ -143,14 +143,6 @@ disp_stats_descriptive(ThetaPercentReduction, 'Theta percent reduction', '%', 0)
 AlphaPercentReduction = 100*(AlphaPowerIntact - AlphaPowerBurstless)./AlphaPowerIntact;
 disp_stats_descriptive(AlphaPercentReduction, 'Alpha percent reduction', '%', 0);
 
-% percent power reduction from total power
-ThetaPercentReduction = 100*(sum(ThetaPowerIntact) - sum(ThetaPowerBurstless))./sum(ThetaPowerIntact);
-disp_stats_descriptive(ThetaPercentReduction, 'Theta percent reduction, sum', '%', 0);
-
-AlphaPercentReduction = 100*(sum(AlphaPowerIntact) - sum(AlphaPowerBurstless))./sum(AlphaPowerIntact);
-disp_stats_descriptive(AlphaPercentReduction, 'Alpha percent reduction, sum', '%', 0);
-
-
 
 %% burst descriptives
 clc
@@ -162,10 +154,10 @@ SessionLabels = fieldnames(SessionBlocks);
 for idxBand = 1:2
     for idxSessionBlock = 1:2
         disp_stats_descriptive(squeeze(BurstAmplitudes(:, idxSessionBlock, idxBand)), ...
-            [BandLabels{idxBand}, ' ', SessionLabels{idxSessionBlock}], ' miV', 2);
+            [BandLabels{idxBand}, ' ', SessionLabels{idxSessionBlock}], ' miV', 0);
 
         disp_stats_descriptive(squeeze(BurstDurations(:, idxSessionBlock, idxBand)), ...
-            [BandLabels{idxBand}, ' ', SessionLabels{idxSessionBlock}], 's', 2);
+            [BandLabels{idxBand}, ' ', SessionLabels{idxSessionBlock}], ' s', 2);
     end
 end
 
@@ -353,7 +345,6 @@ end
 function [PowerIntact, PowerBursts, PowerBurstless] = ...
     average_band(PowerIntactSpectrum, PowerBurstsSpectrum, PowerBurstlessSpectrum, ...
     Frequencies, Bands, BandIndex)
-
 PowerIntact = band_spectrum(PowerIntactSpectrum, Frequencies, Bands, 'last');
 PowerIntact = PowerIntact(:, BandIndex);
 PowerBursts = band_spectrum(PowerBurstsSpectrum, Frequencies, Bands, 'last');

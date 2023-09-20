@@ -39,7 +39,7 @@ Parameters.EyeTracking.MinConfidenceThreshold = 0.5; % pupil model confidence th
 %%% labels
 Parameters.Labels.TrialOutcome = {'Lapses', 'Slow', 'Fast'};
 Parameters.Labels.logBands = [1 2 4 8 16 32]; % x markers for plot on log scale
-Parameters.Labels.Bands = [1 4 8 15 25 35 40]; % normal scale
+Parameters.Labels.Bands = [1 4 8 14 25 35 40]; % normal scale
 Parameters.Labels.FreqLimits = [1 40];
 Parameters.Labels.zPower = 'PSD z-scored';
 Parameters.Labels.Power = 'PSD Amplitude (\muV^2/Hz)';
