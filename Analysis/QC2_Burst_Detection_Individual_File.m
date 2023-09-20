@@ -13,7 +13,7 @@ Paths = Info.Paths;
 %%%%
 Task = 'LAT'; % Game, Standing, Fixation
 Session = 'Session2Beam1';
-Participant = 'P04'; % P03 has almost no oscillations, P15 has tons
+Participant = 'P08'; % P03 has almost no oscillations, P15 has tons
 %%%%
 %%%%
 %%%%
@@ -30,7 +30,8 @@ EEGMetadata = load_datafile(Source_Bursts, Participant, Session, 'EEGMetadata');
 
 %%
 
-cycy.plot.plot_all_bursts(EEG, 15, BurstClusters, 'CriteriaSetIndex');
+BurstClusters = cycy.utils.assign_band_label(BurstClusters, Info.Bands, 'Band2');
+cycy.plot.plot_all_bursts(EEG, 15, BurstClusters, 'Band2');
 
 
 %%

@@ -110,28 +110,49 @@ chART.save_figure('Figure_1', Paths.Results, PlotProps)
 %% statistics
 
 clc
-
-describe_reaction_times(MeansLAT, Quantile99LAT, StatParameters)
-
-% disp_stats_descriptive(LapseCountPVT(:, 3), 'Proportion of PVT Lapses:', '%', 0);
-
 %%% LAT
+disp('---LAT---')
+
+% overall lapses
+Lapses = squeeze(OutcomeCountLAT(:, 1, 1)+OutcomeCountLAT(:, 1, 4));
+disp_stats_descriptive(Lapses, 'Total lapses BL:', '%', 0);
+
+Lapses = squeeze(OutcomeCountLAT(:, 2, 1)+OutcomeCountLAT(:, 2, 4));
+disp_stats_descriptive(Lapses, 'Total lapses SD:', '%', 0);
+
 % determine proportion of lapses with eyes opened and closed
 [EyesOpenOutcomeCount, EyesClosedOutcomeCount] = count_trials_by_eye_status( ...
     TrialsTableLAT, Participants,  Sessions.LAT, {1:3, 4:6});
 
-disp('---LAT---')
 describe_lapses(EyesOpenOutcomeCount, EyesClosedOutcomeCount, StatParameters)
 
+%%
+clc
 describe_lapses_by_radius(LapseCountLAT)
 
+%%
+
+clc
 %%% PVT
+disp('---PVT---')
+
+% overall lapses
+Lapses = squeeze(OutcomeCountPVT(:, 1, 1)+OutcomeCountPVT(:, 1, 4));
+disp_stats_descriptive(Lapses, 'Total lapses BL:', '%', 0);
+
+Lapses = squeeze(OutcomeCountPVT(:, 2, 1)+OutcomeCountPVT(:, 2, 4));
+disp_stats_descriptive(Lapses, 'Total lapses SD:', '%', 0);
+
+% split by eye status
 [EyesOpenOutcomeCount, EyesClosedOutcomeCount] = count_trials_by_eye_status( ...
     TrialsTablePVT, Participants,  Sessions.PVT, []);
 
-disp('---PVT---')
 describe_lapses(EyesOpenOutcomeCount, EyesClosedOutcomeCount, StatParameters)
 
+
+
+%%
+describe_reaction_times(MeansLAT, Quantile99LAT, StatParameters)
 
 %%
 
@@ -342,34 +363,6 @@ SB_Indx = 2;
 disp_stats_descriptive(1000*Quantile99(:, SB_Indx), 'RT for 99% of SD data:', ' ms', 0);
 disp('______________________')
 end
-
-
-% function display_lapse_outcome()
-% % TODO
-%
-% % display how much data is in not-plotted task types
-% % NotPlotted = 100*mean(sum(EyesClosedOutcomeCount(:, :, 2:3), 3)./TotalTrialsCount, 'omitnan');
-% %
-% % disp(['Not plotted data: ', num2str(NotPlotted(2), '%.2f'), '%'])
-%
-%
-% % indicate proportion of lapses that are eyes-closed
-% EOL = squeeze(LapsesCount(:, 2, 1));
-% ECL = squeeze(LapsesCount(:, 2, 4));
-%
-% disp_stats_descriptive( 100*ECL./(EOL+ECL), 'EC lapses:', '% lapses', 0);
-% disp_stats_descriptive(ECL, 'EC lapses:', '% tot', 0);
-%
-%
-% % total number of lapses
-% OutcomeCount(:, :, 1) =  OutcomeCount(:, :, 1) + OutcomeCount(:, :, 4);
-% OutcomeCount = OutcomeCount(:, :, 1:3);
-%
-% D = 100*OutcomeCount./TotalTrialsCount;
-% disp_stats_descriptive(squeeze(D(:, 1, 1)), 'BL lapses:', '% tot', 0);
-% disp_stats_descriptive(squeeze(D(:, 2, 1)), 'SD lapses:', '% tot', 0);
-% disp('______________________')
-% end
 
 
 function describe_lapses(EyesOpenOutcomeCount, EyesClosedOutcomeCount, StatParameters)
