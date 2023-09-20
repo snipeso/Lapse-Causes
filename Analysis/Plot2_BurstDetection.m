@@ -12,7 +12,7 @@ WelchWindow = 8;
 Overlap = .5;
 MinDuration = 60;
 FooofFittingFrequencyRange = [2 40]; % some low-frequency noise
-RerunAnalysis = false; % if analysis has already been run, set to false if you want to use the cache
+RerunAnalysis = true; % if analysis has already been run, set to false if you want to use the cache
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
@@ -34,11 +34,11 @@ CacheDir = fullfile(Paths.Cache, ScriptName);
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% analysis
 
+%%
 %%% Theta
 [ThetaPowerIntactSpectrum, ThetaPowerBurstsSpectrum, ThetaPowerBurstlessSpectrum, Frequencies, ThetaTimeSpent] = ...
     whitened_burst_power_by_ROI(SourceEEG, SourceBursts, Participants, SessionBlocks, 2, Channels, 'Front', ...
     Bands, 'Theta', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, SampleRate, CacheDir, RerunAnalysis);
-
 
 % average theta power
 BandIndex = 1;
@@ -48,11 +48,9 @@ BandIndex = 1;
 
 
 %%% Alpha
-
 [AlphaPowerIntactSpectrum, AlphaPowerBurstsSpectrum, AlphaPowerBurstlessSpectrum, ~, AlphaTimeSpent] = ...
     whitened_burst_power_by_ROI(SourceEEG, SourceBursts, Participants, SessionBlocks, 1, Channels, 'Back', ...
     Bands, 'Alpha', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, SampleRate, CacheDir, RerunAnalysis);
-
 
 % average alpha power
 BandIndex = 2;
@@ -60,8 +58,8 @@ BandIndex = 2;
     average_band(AlphaPowerIntactSpectrum, AlphaPowerBurstsSpectrum, AlphaPowerBurstlessSpectrum, ...
     Frequencies, Bands, BandIndex);
 
-%%
 
+RerunAnalysis = false; % TEMP
 % burst properties
 [BurstAmplitudes, BurstDurations] = burst_properties(SourceBursts, ...
     Participants, SessionBlocks, Bands, SampleRate, CacheDir, RerunAnalysis);
@@ -117,7 +115,7 @@ chART.sub_plot([], Grid, [1 3], [1 2], true, PlotProps.Indexes.Letters{2}, PlotP
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
 title('Theta periodic power')
 ylabel('Whitened Power (\muV^2/Hz)')
-ylim([-0.5 18])
+ylim([-.5 20])
 
 % alpha
 Data = cat(2, permute(AlphaPowerBurstlessSpectrum, [1 3 2]), permute(AlphaPowerIntactSpectrum, [1 3 2]));
@@ -126,7 +124,7 @@ chART.sub_plot([], Grid, [1 5], [1 2], true, PlotProps.Indexes.Letters{3}, PlotP
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
 title('Alpha periodic power')
 ylabel('Whitened Power (\muV^2/Hz)')
-ylim([-0.2 5.5])
+ylim([0 14])
 
 chART.save_figure('Figure_2', Paths.Results, PlotProps)
 
