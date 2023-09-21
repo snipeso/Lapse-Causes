@@ -63,7 +63,7 @@ load(fullfile(CacheDir, ['Bursts_', TitleTag, '.mat']), ...
 
 %%
 clc
-YLimEyesClosed = [-.6 1.6];
+YLimEyesClosed = [-.6 1.4];
 YLimAlpha = [-1 1];
 YLimTheta = [-1 1];
 
@@ -82,6 +82,7 @@ plot_timecourse(TrialTime, flip(ProbEyesClosedStimLockedDiff, 2), ProbabilityEye
     YLimEyesClosed, flip(TallyLabels), 'Stimulus', StatParameters, DispN, DispStats, PlotProps, ...
     Grid, [1 1], PlotProps.Indexes.Letters{1});
 ylabel('Likelihood eyeclosure (z-score)')
+
 
 % theta
 plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 1, :)), 2), ...
@@ -233,6 +234,7 @@ if DispN
     plot_samplesize(Stats, TrialTime, PlotProps, Colors, Range, YShift)
 end
 
+disp(['>>>>>>>' Letter, '<<<<<<<<<<<'])
 if DispStats
     disp_stats_timecourses(Stats, LineLabels, TrialTime)
 end
@@ -260,7 +262,8 @@ function disp_stats_timecourses(Stats, LineLabels, TrialTime)
 
 % from these windows, find largest values
 Windows = [-2 -0.5;
-    -0.5 .3;
+    -0.5, 0;
+    0, .3;
     0.3, 1.5;
     1.5 4];
 
@@ -271,7 +274,7 @@ for idxLine = 1:numel(LineLabels)
         TValues(TrialTime<Windows(Indx_W, 1) | TrialTime>Windows(Indx_W, 2)) = nan;
         [~, IndxMaxT] = max(TValues);
         disp_stats(Stats, [idxLine, IndxMaxT], [num2str(Windows(Indx_W, 1)), ':' num2str(Windows(Indx_W, 2))...
-            'max t: ', num2str(TrialTime(IndxMaxT), '%.1f'), ' s']);
+            '  max t: ', num2str(TrialTime(IndxMaxT), '%.2f'), ' s']);
     end
     disp('_____________')
 end
