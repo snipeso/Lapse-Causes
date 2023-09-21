@@ -89,6 +89,9 @@ chART.save_figure(['Figure_',TitleTag, '_Topography'], Paths.Results, PlotProps)
 
 
 %%
+close all
+
+Windows = {'Pre', 'Stim', 'Resp', 'Post'};
 
 idxOutcome = 1;
 for idxBand = 1:2
@@ -97,7 +100,7 @@ for idxBand = 1:2
         Baseline = squeeze(BurstDescriptivesTopography(:, :, idxBand));
         plot_individual_differences(Data, Baseline, Participants, Chanlocs, PlotProps)
         chART.save_figure(strjoin(['IndividualTopos',TitleTag, ...
-            BandLabels(idxBand), TallyLabels(idxOutcome)], '_'), Paths.Results, PlotProps)
+            BandLabels(idxBand), Windows(idxWindow), TallyLabels(idxOutcome)], '_'), Paths.Results, PlotProps)
     end
 end
 
@@ -187,7 +190,7 @@ for idxParticipant = 1:numel(Participants)
 Diff = Data(idxParticipant, :) - Baseline(idxParticipant, :);
 
 subplot(5, 4, idxParticipant)
-chART.plot.eeglab_topoplot(Diff, Chanlocs, [], 'minmax', '', 'Divergent', PlotProps)
+chART.plot.eeglab_topoplot(Diff, Chanlocs, [], [], '', 'Divergent', PlotProps)
 colorbar
 title(Participants{idxParticipant})
 
