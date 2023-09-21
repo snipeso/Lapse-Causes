@@ -5,14 +5,15 @@ close all
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
 
-CheckEyes = true; % check if person had eyes open or closed
+CheckEyes = false; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionGroup = 'SD';
+SessionGroup = 'BL';
 
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
 Task = Parameters.Task;
+Participants = Parameters.Participants;
 TallyLabels = Parameters.Labels.TrialOutcome; % rename to outcome labels TODO
 StatParameters = Parameters.Stats;
 Windows = Parameters.Trials.SubWindows;
@@ -86,6 +87,19 @@ for idxBand = 1:2 % subplot A and B
 end
 chART.save_figure(['Figure_',TitleTag, '_Topography'], Paths.Results, PlotProps)
 
+
+%%
+
+idxOutcome = 1;
+for idxBand = 1:2
+    for idxWindow = 1:WindowCount
+        Data = squeeze(WindowedStim(:, Types(idxOutcome), :, idxBand, idxWindow));
+        Baseline = squeeze(BurstDescriptivesTopography(:, :, idxBand));
+        plot_individual_differences(Data, Baseline, Participants, Chanlocs, PlotProps)
+        chART.save_figure(strjoin(['IndividualTopos',TitleTag, ...
+            BandLabels(idxBand), TallyLabels(idxOutcome)], '_'), Paths.Results, PlotProps)
+    end
+end
 
 
 %%
@@ -163,6 +177,21 @@ A = chART.sub_plot([], Grid, Position, [], false, '', PlotProps);
 A.Position(4) = A.Position(4)*2;
 A.Position(2) = A.Position(2)-.1;
 chART.plot.pretty_colorbar('Divergent', CLims, [BandLabel, ' t-values'], PlotProps)
+end
+
+
+function plot_individual_differences(Data, Baseline, Participants, Chanlocs, PlotProps)
+
+figure('Units','normalized', 'OuterPosition',[0 0 .5, 1])
+for idxParticipant = 1:numel(Participants)
+Diff = Data(idxParticipant, :) - Baseline(idxParticipant, :);
+
+subplot(5, 4, idxParticipant)
+chART.plot.eeglab_topoplot(Diff, Chanlocs, [], 'minmax', '', 'Divergent', PlotProps)
+colorbar
+title(Participants{idxParticipant})
+
+end
 end
 
 
