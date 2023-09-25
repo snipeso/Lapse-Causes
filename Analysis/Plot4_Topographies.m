@@ -7,7 +7,7 @@ close all
 
 CheckEyes = false; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionGroup = 'BL';
+SessionGroup = 'SD';
 
 
 Parameters = analysisParameters();
@@ -149,9 +149,9 @@ end
 
 function disp_topo_stats(Stats, Chanlocs, OutcomeType, BandLabel, WindowTitle)
 
-String = strjoin({BandLabel, OutcomeType, ...
-    '; tot ch:' num2str(round(100*nnz(Stats.sig)/numel(Stats.sig))), '%', ...
-    'max Ch:', char(WindowTitle(1))}, ' ');
+String = strjoin({BandLabel, OutcomeType, char(WindowTitle(1)), ...
+    '; globality:' [num2str(round(100*nnz(Stats.sig)/numel(Stats.sig))), '%'], ...
+    'max ch:', }, ' ');
 disp_highest_tvalue(Stats, Chanlocs, String);
 end
 
