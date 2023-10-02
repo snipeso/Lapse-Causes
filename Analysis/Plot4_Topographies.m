@@ -49,7 +49,6 @@ WindowCount = size(Windows, 1);
 %%
 
 PlotProps = Parameters.PlotProps.Manuscript;
-PlotProps.Figure.Padding = 15;
 CLims = [-7 7];
 
 PlotProps.Colorbar.Location = 'north';
@@ -109,25 +108,6 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
 
-function WindowedStim = average_windows(ProbTrialStim, TrialTime, Windows)
-
-WindowsCount = size(Windows, 1);
-ParticipantCount = size(ProbTrialStim, 1);
-ChannelCount = size(ProbTrialStim, 3);
-
-WindowedStim = nan(ParticipantCount, 3, ChannelCount, 2, WindowsCount);
-
-for idxWindow = 1:WindowsCount
-    Edges = dsearchn(TrialTime', Windows(idxWindow, :)');
-    WindowedStim(:, :, :, :, idxWindow) = mean(ProbTrialStim(:, :, :, :, Edges(1):Edges(2)), ...
-        5, 'omitnan');
-end
-end
-
-
-%%%%%%%%%%%%
-%%% plots
-
 function Space = set_sub_figure(Grid, Position, PlotProps, Letter)
 PlotProps.Axes.xPadding = 20;
 PlotProps.Axes.yPadding = 20;
@@ -180,21 +160,6 @@ A = chART.sub_plot([], Grid, Position, [], false, '', PlotProps);
 A.Position(4) = A.Position(4)*2;
 A.Position(2) = A.Position(2)-.1;
 chART.plot.pretty_colorbar('Divergent', CLims, [BandLabel, ' t-values'], PlotProps)
-end
-
-
-function plot_individual_differences(Data, Baseline, Participants, Chanlocs, PlotProps)
-
-figure('Units','normalized', 'OuterPosition',[0 0 .5, 1])
-for idxParticipant = 1:numel(Participants)
-Diff = Data(idxParticipant, :) - Baseline(idxParticipant, :);
-
-subplot(5, 4, idxParticipant)
-chART.plot.eeglab_topoplot(Diff, Chanlocs, [], [], '', 'Divergent', PlotProps)
-colorbar
-title(Participants{idxParticipant})
-
-end
 end
 
 
