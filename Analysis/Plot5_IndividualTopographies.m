@@ -16,6 +16,7 @@ WindowTitles = {["Pre", "[-2, 0]"], ["Stimulus", "[0, 0.3]"], ["Response", "[0.3
 Bands = Parameters.Bands;
 BandLabels = fieldnames(Bands);
 CacheDir = fullfile(Paths.Cache, 'Data_Figures');
+CLims = [-.18 .18];
 
 
 %%% load in data
@@ -41,16 +42,47 @@ PlotProps = Parameters.PlotProps.Manuscript;
 
 % BL
 plot_all_topos(WindowedStimBL, BurstDescriptivesTopographyBL, ...
-    Participants, Chanlocs, PlotProps, BandLabels, 'BL', Paths)
+    Participants, Chanlocs, PlotProps, BandLabels, 'BL', Paths, CLims)
 
 % SD
 plot_all_topos(WindowedStimSD, BurstDescriptivesTopographySD, ...
-    Participants, Chanlocs, PlotProps, BandLabels, 'SD', Paths)
+    Participants, Chanlocs, PlotProps, BandLabels, 'SD', Paths, CLims)
 
 
 %% example participants
 
+Grid = [2, 6];
+PlotProps = Parameters.PlotProps.Manuscript;
+PlotProps.Axes.yPadding = 10;
+PlotProps.Axes.xPadding = 10;
+PlotProps.Text.AxisSize = 22;
+PlotProps.Text.TitleSize = 22;
+ParticipantIndexes = [1 5 8 13 16];
 
+figure('Units','centimeters', 'Position',[0 0 PlotProps.Figure.Width*2, PlotProps.Figure.Height*.5])
+
+for idxSession = 1:2
+    for idxParticipant = 1:numel(ParticipantIndexes)
+
+        if idxSession == 1
+            WindowedStim = WindowedStimBL;
+            BurstDescriptivesTopography = BurstDescriptivesTopographyBL;
+        else
+            WindowedStim = WindowedStimSD;
+            BurstDescriptivesTopography = BurstDescriptivesTopographySD;
+        end
+
+        chART.sub_plot([], Grid, [idxSession idxParticipant], [1 1], false, '', PlotProps);
+        plot_individual_topos(WindowedStim, BurstDescriptivesTopography, ...
+            Participants, Chanlocs, PlotProps, ParticipantIndexes(idxParticipant), CLims)
+        title('')
+
+    end
+end
+        chART.sub_plot([], Grid, [2 6], [2 1], false, '', PlotProps);
+chART.plot.pretty_colorbar('Divergent', CLims, 'Likelihood difference', PlotProps)
+
+chART.save_figure('Figure_8', Paths.Results, PlotProps)
 
 
 %%
@@ -58,26 +90,39 @@ plot_all_topos(WindowedStimSD, BurstDescriptivesTopographySD, ...
 %%% functions
 
 
+function plot_individual_topos(WindowedStim, BurstDescriptivesTopography, ...
+    Participants, Chanlocs, PlotProps, idxParticipant, CLims)
+idxOutcome = 3;
+idxBand = 2;
+idxWindow = 3;
+
+Data = squeeze(WindowedStim(:, idxOutcome, :, idxBand, idxWindow));
+Baseline = squeeze(BurstDescriptivesTopography(:, :, idxBand));
+Diff = Data(idxParticipant, :) - Baseline(idxParticipant, :);
+chART.plot.eeglab_topoplot(Diff, Chanlocs, [], CLims, '', 'Divergent', PlotProps)
+title(Participants{idxParticipant})
+end
+
+
 function plot_all_topos(WindowedStim, BurstDescriptivesTopography, ...
-    Participants, Chanlocs, PlotProps, BandLabels, TitleTag, Paths)
+    Participants, Chanlocs, PlotProps, BandLabels, TitleTag, Paths, CLims)
 
 Windows = {'Pre', 'Stim', 'Resp', 'Post'};
 
 idxWindow = 3;
 idxOutcome = 3; % fast trials
 idxBand = 2;
-    Data = squeeze(WindowedStim(:, idxOutcome, :, idxBand, idxWindow));
-    Baseline = squeeze(BurstDescriptivesTopography(:, :, idxBand));
-    plot_individual_differences(Data, Baseline, Participants, Chanlocs, PlotProps)
-    chART.save_figure(strjoin(['IndividualTopos',TitleTag, ...
-        BandLabels(idxBand), Windows(idxWindow)], '_'), Paths.Results, PlotProps)
+Data = squeeze(WindowedStim(:, idxOutcome, :, idxBand, idxWindow));
+Baseline = squeeze(BurstDescriptivesTopography(:, :, idxBand));
+plot_all_differences(Data, Baseline, Participants, Chanlocs, PlotProps, CLims)
+chART.save_figure(strjoin(['IndividualTopos',TitleTag, ...
+    BandLabels(idxBand), Windows(idxWindow)], '_'), Paths.Results, PlotProps)
 end
 
 
 
-function plot_individual_differences(Data, Baseline, Participants, Chanlocs, PlotProps)
+function plot_all_differences(Data, Baseline, Participants, Chanlocs, PlotProps, CLims)
 
-CLims = [-.18 .18];
 figure('Units','normalized', 'OuterPosition',[0 0 .4, 1])
 for idxParticipant = 1:numel(Participants)
     Diff = Data(idxParticipant, :) - Baseline(idxParticipant, :);
@@ -90,7 +135,7 @@ end
 PlotProps.Colorbar.Location = 'south';
 PlotProps.Text.AxisSize = 15;
 subplot(5, 4, 19:20)
-chART.plot.pretty_colorbar('Divergent', CLims, 'globality difference', PlotProps)
+chART.plot.pretty_colorbar('Divergent', CLims, 'Likelihood difference', PlotProps)
 
 end
 
