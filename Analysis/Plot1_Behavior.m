@@ -70,11 +70,11 @@ Grid = [2 3];
 Legend = {'EC Lapses', 'EO Lapses', 'Slow responses', 'Fast responses'};
 
 
-figure('Units','centimeters', 'Position',[0 0  PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
+figure('Units','centimeters', 'Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
 
 %%% PVT
 % A: Reaction time distributions
-plot_RTs(RTStructPVT, Grid, [1 1], PlotProps.Indexes.Letters{1}, PlotProps, [.5 2.5], [ 0.1  1.01])
+plot_RTs(RTStructPVT, Grid, [1 1], PlotProps.Indexes.Letters{1}, PlotProps, [.5 2.5], [ 0.1 1.01])
 ylabel('PVT reaction times (s)')
 
 % B: Proportion of trials

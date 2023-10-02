@@ -70,15 +70,15 @@ BandIndex = 2;
 %%
 clc
 
-Grid = [1 6];
+Grid = [2 3];
 PlotProps = Parameters.PlotProps.Manuscript;
-PlotProps.Axes.yPadding = 18;
+PlotProps.Axes.yPadding = 30;
 PlotProps.Axes.xPadding = 18;
 PlotProps.HandleVisibility = 'on';
 xLog = false;
 xLims = [3 17];
 
-figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*1.5, PlotProps.Figure.Height*.35])
+figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*.75, PlotProps.Figure.Height*.5])
 
 %%% change in quantities of bursts
 XLabels = fieldnames(SessionBlocks);
@@ -98,9 +98,10 @@ disp_stats(Stats, [1 2], 'Change in theta bursts with time awake');
 % alpha
 Data = 100*AlphaTimeSpent;
 
-chART.sub_plot([], Grid, [1 2], [1 1], true, '', PlotProps);
+chART.sub_plot([], Grid, [2 1], [1 1], true, PlotProps.Indexes.Letters{3}, PlotProps);
 Stats = plot_change_in_time(Data, XLabels, [], [0 100], Colors, StatParameters, PlotProps);
 title('Alpha bursts')
+ylabel('% recording')
 
 disp_stats(Stats, [1 2], 'Change in alphs bursts with time awake');
 
@@ -111,7 +112,7 @@ disp_stats(Stats, [1 2], 'Change in alphs bursts with time awake');
 % theta
 Data = cat(2, permute(ThetaPowerBurstlessSpectrum, [1 3 2]), permute(ThetaPowerIntactSpectrum, [1 3 2]));
 
-chART.sub_plot([], Grid, [1 3], [1 2], true, PlotProps.Indexes.Letters{2}, PlotProps);
+chART.sub_plot([], Grid, [1 2], [1 2], true, PlotProps.Indexes.Letters{2}, PlotProps);
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
 title('Theta periodic power')
 ylabel('Whitened power (\muV^2/Hz)')
@@ -120,7 +121,7 @@ ylim([-.5 19])
 % alpha
 Data = cat(2, permute(AlphaPowerBurstlessSpectrum, [1 3 2]), permute(AlphaPowerIntactSpectrum, [1 3 2]));
 
-chART.sub_plot([], Grid, [1 5], [1 2], true, PlotProps.Indexes.Letters{3}, PlotProps);
+chART.sub_plot([], Grid, [2 2], [1 2], true, PlotProps.Indexes.Letters{4}, PlotProps);
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
 title('Alpha periodic power')
 ylabel('Whitened power (\muV^2/Hz)')
