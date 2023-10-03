@@ -73,7 +73,7 @@ clc
 Grid = [2 3];
 PlotProps = Parameters.PlotProps.Manuscript;
 PlotProps.Axes.yPadding = 30;
-PlotProps.Axes.xPadding = 18;
+PlotProps.Axes.xPadding = 30;
 PlotProps.HandleVisibility = 'on';
 xLog = false;
 xLims = [3 17];
