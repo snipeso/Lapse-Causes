@@ -329,17 +329,8 @@ Power = mean(Power, 1); % select and average ROI
 
 % smooth data, because otherwise sometimes fooof doesn't work :(
 SmoothSpan = 2;
-Power = smooth_spectrum(Power, Frequencies, SmoothSpan);
+Power = cycy.utils.smooth_spectrum(Power, Frequencies, SmoothSpan);
 [WhitenedPower, FooofFrequencies] = whiten_spectrum(Power, Frequencies, FooofFittingFrequencyRange);
-end
-
-
-function SmoothData = smooth_spectrum(Power, Frequencies, SmoothSpan)
-% function for smoothing data
-% Data is a 1 x Freqs matrix.
-FreqRes = Frequencies(2)-Frequencies(1);
-SmoothPoints = round(SmoothSpan/FreqRes);
-SmoothData = smooth(Power, SmoothPoints, 'lowess');
 end
 
 
