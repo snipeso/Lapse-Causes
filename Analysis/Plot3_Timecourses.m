@@ -11,7 +11,7 @@ close all
 SmoothFactor = 0.2; % in seconds, smooth signal to be visually pleasing
 CheckEyes = false; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionBlockLabel = 'BL';
+SessionBlockLabel = 'SD';
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
@@ -89,12 +89,14 @@ plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 1, :)), 2
     ProbabilityBurstsDiff(:, 1), YLimTheta, flip(TallyLabels), '', ...
     StatParameters, DispN, DispStats, PlotProps, Grid, [1 2], PlotProps.Indexes.Letters{2});
 ylabel('Globality theta burst (z-score)')
+legend off
 
 % alpha
 plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 2, :)), 2), ...
     ProbabilityBurstsDiff(:, 2), YLimAlpha, flip(TallyLabels), '', ...
     StatParameters, DispN, DispStats, PlotProps, Grid, [1 3], PlotProps.Indexes.Letters{3});
 ylabel('Globality alpha burst (z-score)')
+legend off
 
 
 %%% response locked
@@ -112,12 +114,14 @@ plot_timecourse(TrialTime, flip(squeeze(ProbBurstsRespLockedDiff(:, :, 1, :)), 2
     ProbabilityBurstsDiff(:, 1), YLimTheta, flip(TallyLabels), '', ...
     StatParameters, DispN, DispStats, PlotProps, Grid, [2 2], PlotProps.Indexes.Letters{5});
 ylabel('Likelihood theta burst (z-score)')
+legend off
 
 % alpha
 plot_timecourse(TrialTime, flip(squeeze(ProbBurstsRespLockedDiff(:, :, 2, :)), 2), ...
     ProbabilityBurstsDiff(:, 2), YLimAlpha, flip(TallyLabels), '', ...
     StatParameters, DispN, DispStats, PlotProps, Grid, [2 3], PlotProps.Indexes.Letters{6});
 ylabel('Likelihood alpha burst (z-score)')
+legend off
 
 chART.save_figure(['Figure_',TitleTag], Paths.Results, PlotProps)
 
