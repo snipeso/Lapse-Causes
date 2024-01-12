@@ -16,7 +16,7 @@ if nargin == 2 % if only one data matrix is provided
             D2 = squeeze(Data1(:, Indx2));
 
             if sum(nnz(not(isnan(D2)|isnan(D1)))) > 3
-                stats = mes(D2, D1, Data2.Paired.ES, 'isDep', 1, 'nBoot', Data2.ANOVA.nBoot); % bit of a hack, there's probably a nicer way to do this
+                stats = mes(D2, D1, Data2.Paired.ES, 'isDep', 1); % bit of a hack, there's probably a nicer way to do this
                 gValues(Indx1, Indx2) = stats.hedgesg;
                 CI(Indx1, Indx2, :) = stats.hedgesgCi;
 
@@ -39,7 +39,7 @@ elseif nargin == 3 % if two matrices are provided
             for Indx2 = 1:Dims1(3)
                 D1 = squeeze(Data1(:, Indx1, Indx2));
                 D2 = squeeze(Data2(:, Indx1, Indx2));
-                stats = mes(D2, D1, StatsP.Paired.ES, 'isDep', 1, 'nBoot', StatsP.ANOVA.nBoot);
+                stats = mes(D2, D1, StatsP.Paired.ES, 'isDep', 1);
                 gValues(Indx1, Indx2) = stats.hedgesg;
                 CI(Indx1, Indx2, :) = stats.hedgesgCi;
             end
@@ -54,12 +54,7 @@ elseif nargin == 3 % if two matrices are provided
             for Indx_T = 1:Dims2(3)
                 D = squeeze(Data2(:, Indx_S, Indx_T));
                 BL = squeeze(Data1(:, Indx_T));
-
-                if StatsP.ANOVA.nBoot < 100
-                    stats = mes(D, BL, StatsP.Paired.ES, 'isDep', 1);
-                else
-                stats = mes(D, BL, StatsP.Paired.ES, 'isDep', 1, 'nBoot', StatsP.ANOVA.nBoot);
-                end
+                stats = mes(D, BL, StatsP.Paired.ES, 'isDep', 1);
                 gValues(Indx_S, Indx_T) = stats.hedgesg;
                 CI(Indx_S, Indx_T, :) = stats.hedgesgCi;
             end
@@ -74,7 +69,7 @@ elseif nargin == 3 % if two matrices are provided
         for Indx1 = 1:Dims1(2)
             D1 = squeeze(Data1(:, Indx1));
             D2 = squeeze(Data2(:, Indx1));
-            stats = mes(D2, D1, StatsP.Paired.ES, 'isDep', 1, 'nBoot', StatsP.ANOVA.nBoot);
+            stats = mes(D2, D1, StatsP.Paired.ES, 'isDep', 1);
             gValues(Indx1) = stats.hedgesg;
             CI(Indx1, :) = stats.hedgesgCi;
         end
