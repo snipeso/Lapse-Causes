@@ -63,14 +63,14 @@ RadiusQuantile = 1/6; % bin size for quantiles
 clc
 
 PlotProps = Parameters.PlotProps.Manuscript;
-PlotProps.Axes.xPadding = 25;
-PlotProps.Axes.yPadding = 25;
+PlotProps.Axes.xPadding = 30;
+PlotProps.Axes.yPadding = 30;
 Grid = [2 3];
 
 Legend = {'EC Lapses', 'EO Lapses', 'Slow responses', 'Fast responses'};
 
 
-figure('Units','centimeters', 'Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
+figure('Units','centimeters', 'Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.55])
 
 %%% PVT
 % A: Reaction time distributions

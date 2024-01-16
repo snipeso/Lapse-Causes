@@ -64,10 +64,11 @@ BandIndex = 2;
 [BurstAmplitudes, BurstDurations] = burst_properties(SourceBursts, ...
     Participants, SessionBlocks, Bands, SampleRate, CacheDir, RerunAnalysis);
 
+%%
 
 %%% Plot
 %%%%%%%%%%%%%
-%%
+
 clc
 
 Grid = [2 3];
@@ -103,7 +104,7 @@ Stats = plot_change_in_time(Data, XLabels, [], [0 100], Colors, StatParameters, 
 title('Alpha bursts')
 ylabel('% recording')
 
-disp_stats(Stats, [1 2], 'Change in alphs bursts with time awake');
+disp_stats(Stats, [1 2], 'Change in alpha bursts with time awake');
 
 
 
@@ -114,8 +115,10 @@ Data = cat(2, permute(ThetaPowerBurstlessSpectrum, [1 3 2]), permute(ThetaPowerI
 
 chART.sub_plot([], Grid, [1 2], [1 2], true, PlotProps.Indexes.Letters{2}, PlotProps);
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
-title('Theta periodic power')
-ylabel('Whitened power (\muV^2/Hz)')
+legend({'Individual', 'Group average'})
+set(legend, 'ItemTokenSize', [10 10])
+title('Theta burst power')
+ylabel('Periodic power (\muV^2/Hz)')
 ylim([-.5 19])
 
 % alpha
@@ -123,8 +126,8 @@ Data = cat(2, permute(AlphaPowerBurstlessSpectrum, [1 3 2]), permute(AlphaPowerI
 
 chART.sub_plot([], Grid, [2 2], [1 2], true, PlotProps.Indexes.Letters{4}, PlotProps);
 plot_spectrum_increase(Data, Frequencies, xLog, xLims, PlotProps, Labels);
-title('Alpha periodic power')
-ylabel('Whitened power (\muV^2/Hz)')
+title('Alpha burst power')
+ylabel('Periodic power (\muV^2/Hz)')
 ylim([-.5 12])
 
 chART.save_figure('Figure_2', Paths.Results, PlotProps)
