@@ -9,7 +9,7 @@ close all
 
 
 SmoothFactor = 0.2; % in seconds, smooth signal to be visually pleasing
-CheckEyes = false; % check if person had eyes open or closed
+CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 SessionBlockLabel = 'SD';
 
@@ -61,7 +61,6 @@ load(fullfile(CacheDir, ['Bursts_', TitleTag, '.mat']), ...
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% plot
 
-%%
 clc
 YLimEyesClosed = [-.6 1.4];
 YLimAlpha = [-1 1];
@@ -71,7 +70,7 @@ Grid = [2 3];
 PlotProps = Parameters.PlotProps.Manuscript;
 PlotProps.Axes.xPadding = 25;
 
-figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*1.2, PlotProps.Figure.Height*.5])
+figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*1.1, PlotProps.Figure.Height*.55])
 
 %%% stimulus locked
 DispN = true;
@@ -81,21 +80,25 @@ DispStats = true;
 plot_timecourse(TrialTime, flip(ProbEyesClosedStimLockedDiff, 2), ProbabilityEyesClosedDiff(:, 1), ...
     YLimEyesClosed, flip(TallyLabels), 'Stimulus', StatParameters, DispN, DispStats, PlotProps, ...
     Grid, [1 1], PlotProps.Indexes.Letters{1});
-ylabel('Likelihood eyeclosure (z-score)')
+title('Eye closure', 'FontSize', PlotProps.Text.TitleSize)
+ylabel('Likelihood eyes closed (z-score)')
 
 
 % theta
 plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 1, :)), 2), ...
     ProbabilityBurstsDiff(:, 1), YLimTheta, flip(TallyLabels), '', ...
     StatParameters, DispN, DispStats, PlotProps, Grid, [1 2], PlotProps.Indexes.Letters{2});
-ylabel('Globality theta burst (z-score)')
+ylabel('Likelihood theta burst (z-score)')
+title('Theta bursts', 'FontSize', PlotProps.Text.TitleSize)
 legend off
 
 % alpha
 plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 2, :)), 2), ...
     ProbabilityBurstsDiff(:, 2), YLimAlpha, flip(TallyLabels), '', ...
     StatParameters, DispN, DispStats, PlotProps, Grid, [1 3], PlotProps.Indexes.Letters{3});
-ylabel('Globality alpha burst (z-score)')
+ylabel('Likelihood alpha burst (z-score)')
+title('Alpha bursts', 'FontSize', PlotProps.Text.TitleSize)
+
 legend off
 
 

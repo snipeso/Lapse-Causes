@@ -7,7 +7,7 @@ close all
 
 CheckEyes = false; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionGroup = 'SD';
+SessionGroup = 'BL';
 
 
 Parameters = analysisParameters();
@@ -50,14 +50,18 @@ WindowCount = size(Windows, 1);
 
 PlotProps = Parameters.PlotProps.Manuscript;
 CLims = [-7 7];
-
+PlotProps.Text.AxisSize = 14;
+PlotProps.Text.TitleSize = 16;
+PlotProps.Text.IndexSize = 20;
+PlotProps.Figure.Padding = 20;
 PlotProps.Colorbar.Location = 'north';
 Grid = [5 2];
 miniGrid = [3 WindowCount];
 
 Types = [3 2 1];
 
-figure('Units','centimeters', 'Position',[0 0 PlotProps.Figure.Width*1.3, PlotProps.Figure.Height*.43])
+% figure('Units','centimeters', 'Position',[0 0 PlotProps.Figure.Width*1.3, PlotProps.Figure.Height*.6])
+figure('Units','normalized', 'Position',[0 0 .5, .45])
 for idxBand = 1:2 % subplot A and B
 
     Space = set_sub_figure(Grid, [4 idxBand], PlotProps, PlotProps.Indexes.Letters{idxBand});
@@ -159,7 +163,7 @@ PlotProps.Axes.yPadding = 20;
 A = chART.sub_plot([], Grid, Position, [], false, '', PlotProps);
 A.Position(4) = A.Position(4)*2;
 A.Position(2) = A.Position(2)-.1;
-chART.plot.pretty_colorbar('Divergent', CLims, [BandLabel, ' t-values'], PlotProps)
+chART.plot.pretty_colorbar('Divergent', CLims, 't value', PlotProps)
 end
 
 
