@@ -54,6 +54,27 @@ Parameters.Labels.RT = 'RT (s)';
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Locations
 
+% if eeglab has not run, run it so all the subdirectories get added
+if ~exist('topoplot', 'file')
+    eeglab
+    close all
+end
+
+% get path where these scripts were saved
+CD = mfilename('fullpath');
+Paths.Analysis = fullfile(extractBefore(CD, 'Lapse-Causes'), 'Lapse-Causes');
+
+% get all folders in functions
+Subfolders = deblank(string(ls(fullfile(Paths.Analysis, 'functions')))); % all content
+Subfolders(contains(Subfolders, '.')) = []; % remove all files
+
+for Indx_F = 1:numel(Subfolders)
+    addpath(fullfile(Paths.Analysis, 'functions', Subfolders{Indx_F}))
+end
+
+addExternalFunctions
+
+
 if exist( 'D:\LSM\Preprocessed', 'dir') % KISPI desktop
     Core = 'D:\LSM\';
     addpath('H:\Code\chART')
@@ -85,25 +106,6 @@ if ~exist(Paths.Results, 'dir')
     mkdir(Paths.Results)
 end
 
-% if eeglab has not run, run it so all the subdirectories get added
-if ~exist('topoplot', 'file')
-    eeglab
-    close all
-end
-
-% get path where these scripts were saved
-CD = mfilename('fullpath');
-Paths.Analysis = fullfile(extractBefore(CD, 'Lapse-Causes'), 'Lapse-Causes');
-
-% get all folders in functions
-Subfolders = deblank(string(ls(fullfile(Paths.Analysis, 'functions')))); % all content
-Subfolders(contains(Subfolders, '.')) = []; % remove all files
-
-for Indx_F = 1:numel(Subfolders)
-    addpath(fullfile(Paths.Analysis, 'functions', Subfolders{Indx_F}))
-end
-
-addExternalFunctions
 
 Parameters.Paths = Paths;
 
