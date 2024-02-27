@@ -103,7 +103,7 @@ Stats = plot_change_in_time(Data, XLabels, [], [0 100], Colors, StatParameters, 
 title('Alpha bursts')
 ylabel('% recording')
 
-disp_stats(Stats, [1 2], 'Change in alphs bursts with time awake');
+disp_stats(Stats, [1 2], 'Change in alpha bursts with time awake');
 
 
 
