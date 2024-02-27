@@ -1,3 +1,4 @@
+
 % gets the data showing the probability of eyesclosed over time for each
 % trial outcome type.
 
@@ -11,7 +12,6 @@ close all
 OnlyClosestStimuli = false; % only use closest trials
 OnlyEyesOpen = false; % only used eyes-open trials
 ChannelsCount = 123; % just to pre-allocate before loading in data
-FrequenciesCount = 
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
@@ -29,11 +29,12 @@ Bands = Parameters.Bands;
 
 % locations
 EyetrackingDir = fullfile(Paths.Data, 'Pupils', ['Raw_', num2str(SampleRate), 'Hz'], Task);
-BurstDir = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_Lapse-Causes', Task);
+EEGDir = fullfile(Paths.CleanEEG, Task);
+MetadataDir = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_Lapse-Causes', Task);
 TrialCacheDir = fullfile(Paths.Cache, 'Trial_Information');
 CacheFilename = [Task, '_TrialsTable.mat'];
 
-BurstsCacheDir = fullfile(Paths.Cache, 'Data_Figures');
+CacheDir = fullfile(Paths.Cache, 'Data_Figures');
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -43,6 +44,7 @@ BurstsCacheDir = fullfile(Paths.Cache, 'Data_Figures');
 load(fullfile(TrialCacheDir, CacheFilename), 'TrialsTable')
 
 TrialTime = linspace(TrialWindow(1), TrialWindow(2), SampleRate*(TrialWindow(2)-TrialWindow(1))); % time vector
+TotBands = numel(fieldnames(Bands));
 
 % if requested, exclude trials during which eyes were closed during the
 % stimulus window
@@ -54,27 +56,25 @@ TrialTime = linspace(TrialWindow(1), TrialWindow(2), SampleRate*(TrialWindow(2)-
     OnlyClosestStimuli, MaxStimulusDistanceProportion, TitleTag);
 
 
-%%% get burst information
+%%% get power
 
 for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
 
     Sessions = SessionBlocks.(SessionBlockLabels{idxSessionBlock});
 
     % set up blanks
-    BurstStimLockedTopography = nan(numel(Participants), 3, ChannelsCount, FrequenciesCount, numel(TrialTime)); % P x TT x Ch x B x t matrix with final probabilities
-    BurstRespLockedTopography = BurstStimLockedTopography;
+    BurstStimLockedTopography = nan(numel(Participants), 3, ChannelsCount, TotBands, numel(TrialTime)); % P x TT x Ch x B x t matrix with final probabilities
 
-    BurstStimLocked =  nan(numel(Participants), 3, FrequenciesCount, numel(TrialTime));  % P x TT x B x t
-    BurstRespLocked = BurstStimLocked;
+    BurstStimLockedSpectrum =  nan(numel(Participants), 3, TotBands, numel(TrialTime));  % P x TT x B x t
 
-    BurstDescriptivesTopography = zeros(numel(Participants), ChannelsCount, FrequenciesCount, 2); % get general probability of a burst for a given session block (to control for when z-scoring)
-    BurstDescriptives = zeros(numel(Participants), FrequenciesCount, 2);
+    BurstDescriptivesTopography = zeros(numel(Participants), ChannelsCount, TotBands, 2); % get general probability of a burst for a given session block (to control for when z-scoring)
+    BurstDescriptives = zeros(numel(Participants), TotBands, 2);
 
     for idxParticipant = 1:numel(Participants)
 
         [PooledTrialsStim, PooledTrialsResp, PooledTrialsTable, ...
             PooledBurstDescriptives, PooledBurstDescriptivesTopography, Chanlocs] = ...
-            pool_burst_trials(TrialsTable, EyetrackingQualityTable, BurstDir, ...
+            pool_burst_trials(TrialsTable, EyetrackingQualityTable, EEGDir, ...
             Bands, EyesOpenTrialIndexes, EyetrackingDir, Participants{idxParticipant}, ...
             Sessions, MaxStimulusDistance, TrialWindow, SampleRate, ConfidenceThreshold);
 
@@ -83,7 +83,7 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
             continue
         end
 
-        [BurstStimLocked(idxParticipant, :, :, :), ...
+        [BurstStimLockedSpectrum(idxParticipant, :, :, :), ...
             BurstStimLockedTopography(idxParticipant, :, :, :, :)] = ...
             probability_burst_by_outcome(PooledTrialsStim, PooledTrialsTable, ...
             MaxNaNProportion, MinTrials, false);
@@ -101,9 +101,9 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
     end
 
     %%% save
-    save(fullfile(BurstsCacheDir, ['Bursts_', SessionBlockLabels{idxSessionBlock}, TitleTag, '.mat']), ...
+    save(fullfile(CacheDir, ['Power_', SessionBlockLabels{idxSessionBlock}, TitleTag, '.mat']), ...
         'BurstRespLockedTopography', 'BurstStimLockedTopography', ...
-        'BurstStimLocked', 'BurstRespLocked', 'Chanlocs', ...
+        'BurstStimLockedSpectrum', 'BurstRespLocked', 'Chanlocs', ...
         'TrialTime', 'BurstDescriptives', 'BurstDescriptivesTopography')
 end
 
