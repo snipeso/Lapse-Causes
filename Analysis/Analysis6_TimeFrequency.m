@@ -76,7 +76,7 @@ for FilenameSource = Filenames'
     EEGMetadata.data = []; % only save the metadata
 
     % save
-    save(fullfile(Destination, FilenameDestination), 'Power', 'Frequencies', 'EEGMetadata')
+    save(fullfile(Destination, FilenameDestination), 'Power', 'Frequencies', 'EEGMetadata', '-v7.3')
     disp(['Finished ', FilenameSource])
 end
 
@@ -93,6 +93,7 @@ if exist(CutsPath, 'file')
     NoiseEEG = remove_noise(EEG, CutsPath);
     CleanTimepoints = ~isnan(NoiseEEG.data(1, :));
 else
+    warning(['no cuts filepath ' CutsPath])
     CleanTimepoints = ones(1, TimepointsCount);
 end
 end

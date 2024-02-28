@@ -34,8 +34,7 @@ TotFrequencies = numel(Frequencies);
 
 % locations
 EyetrackingDir = fullfile(Paths.Data, 'Pupils', ['Raw_', num2str(SampleRate), 'Hz'], Task);
-EEGDir = fullfile(Paths.CleanEEG, Task);
-MetadataDir = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_New', Task);
+EEGDir = fullfile(Paths.AnalyzedData, 'EEG', 'TimeFrequency', Task);
 TrialCacheDir = fullfile(Paths.Cache, 'Trial_Information');
 CacheFilename = [Task, '_TrialsTable.mat'];
 
@@ -71,7 +70,7 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
     for idxParticipant = 1:numel(Participants)
 
         [PooledTrials, PooledTrialsTable,  AllRecordingPower, Chanlocs] = pool_eeg(TrialsTable, ...
-            EyetrackingQualityTable, EEGDir, MetadataDir, EyesOpenTrialIndexes, EyetrackingDir, ...
+            EyetrackingQualityTable, EEGDir, EyesOpenTrialIndexes, EyetrackingDir, ...
             Participants{idxParticipant}, Sessions, MaxStimulusDistance, TrialWindow, SampleRate, ...
             ConfidenceThreshold, Frequencies, CycleRange);
 
@@ -104,7 +103,7 @@ end
 %%% functions
 
 function [PooledTrials, PooledTrialsTable, AllRecordingPower, Chanlocs] = pool_eeg(TrialsTable, ...
-    EyetrackingQualityTable, EEGDir, MetadataDir, EyesOpenTrials, EyetrackingDir, ...
+    EyetrackingQualityTable, EEGDir, EyesOpenTrials, EyetrackingDir, ...
     Participant, Sessions, MaxStimulusDistance, TrialWindow, SampleRate, ...
     ConfidenceThreshold)
 % EyeclosureTimepointCount is a 1 x 2 array indicating the total number of
@@ -123,8 +122,9 @@ for idxSession = 1:numel(Sessions)
         TrialsTable.Radius < MaxStimulusDistance & EyesOpenTrials;
 
     % load in eye data
-    EEG = load_datafile(EEGDir, Participant, Sessions{idxSession}, 'EEG');
-    if isempty(EEG); continue; end
+    Power = load_datafile(EEGDir, Participant, Sessions{idxSession}, 'Power');
+    if isempty(Power); continue; end
+    EEG = load_datafile(EEGDir, Participant, Sessions{idxSession}, 'EEGMetadata');
     Chanlocs = EEG.chanlocs;
 
     % identify task, artifact free, eyes open timepoints
@@ -136,10 +136,8 @@ for idxSession = 1:numel(Sessions)
             EyetrackingQualityTable, ConfidenceThreshold, Participant, Sessions{idxSession}, SampleRate);
     end
 
-
     % cut into trials
     Trials = chop_power_trials(Power, TrialsTable, CurrentTrials, TrialWindow, SampleRate);
-
 
     % pool sessions
     PooledTrials = cat(1, PooledTrials, Trials);
