@@ -5,7 +5,6 @@ function plot_spectrum_increase(Data, Freqs, xLog, xLims, PlotProps, Labels)
 % xLog is either true or false, about whether the x axis should be logged.
 % Lapse-causes
 
-Dims = size(Data);
 
 % plot axis ticks
 if xLog

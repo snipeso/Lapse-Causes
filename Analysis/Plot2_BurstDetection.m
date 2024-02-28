@@ -46,12 +46,12 @@ BandIndex = 1;
     average_band(ThetaPowerIntactSpectrum, ThetaPowerBurstsSpectrum, ThetaPowerBurstlessSpectrum, ...
     Frequencies, Bands, BandIndex);
 
-
+%%
 %%% Alpha
 [AlphaPowerIntactSpectrum, AlphaPowerBurstsSpectrum, AlphaPowerBurstlessSpectrum, ~, AlphaTimeSpent] = ...
     whitened_burst_power_by_ROI(SourceEEG, SourceBursts, Participants, SessionBlocks, 1, Channels, 'Back', ...
     Bands, 'Alpha', WelchWindow, Overlap, MinDuration, FooofFittingFrequencyRange, SampleRate, CacheDir, RerunAnalysis);
-
+%%
 
 % average alpha power
 BandIndex = 2;
@@ -133,6 +133,12 @@ ylim([-.5 12])
 chART.save_figure('Figure_2', Paths.Results, PlotProps)
 
 
+%% single participant
+
+P = 7;
+
+figure
+plot_spectrum_increase(Data(7, :, :), Frequencies, xLog, xLims, PlotProps, Labels);
 
 %% Statistics
 %%%%%%%%%%%%%

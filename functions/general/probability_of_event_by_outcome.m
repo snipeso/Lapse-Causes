@@ -42,13 +42,6 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
 
-function TypeTrialData = remove_trials_too_much_nan(TypeTrialData, MaxNaNProportion)
-% remove trials that are missing too much data in time
-TrialsTime = size(TypeTrialData, 2);
-NanProportion = sum(isnan(TypeTrialData), 2)./TrialsTime;
-TypeTrialData(NanProportion>MaxNaNProportion, :) = [];
-end
-
 
 function Prob = event_probability(TypeTrialData, MinTrials)
 
@@ -63,32 +56,12 @@ Prob(TrialCount<MinTrials) = nan;
 end
 
 
-function NewData = close_small_gaps(Data, MaxSize)
+function TypeTrialData = remove_trials_too_much_nan(TypeTrialData, MaxNaNProportion)
+% remove trials that are missing too much data in time
+%TypeTrialData is Trials x time
 
-% identify gaps
-[Starts, Ends] = data2windows(isnan(Data));
-if isempty(Starts) || all(isnan(Data))
-    NewData = Data;
-    return
-end
-Gaps = (Ends-Starts);
-
-% if any gap is too large, return only nans
-if any(Gaps>MaxSize)
-    NewData = nan(size(Data));
-    return
+TrialsTime = size(TypeTrialData, 2);
+NanProportion = sum(isnan(TypeTrialData), 2)./TrialsTime;
+TypeTrialData(NanProportion>MaxNaNProportion, :) = [];
 end
 
-% if starts with a gap, fill the gap with just the first value
-if Starts(1)==1
-    Data(1:Ends(1)) = Data(Ends(1)+1);
-end
-
-% likewise for if it ends with a gap
-if Ends(end) == numel(Data)
-    Data(Starts(end):Ends(end)) = Data(Starts(end)-1);
-end
-
-% interpolate all missing data
-NewData = fillmissing(Data, 'linear');
-end
