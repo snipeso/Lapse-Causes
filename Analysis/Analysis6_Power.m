@@ -30,13 +30,12 @@ MinTrials = Parameters.Trials.MinPerSubGroupCount;
 Bands = Parameters.Bands;
 
 Frequencies = 1:20;
-CycleRange = [3, 15];
 TotFrequencies = numel(Frequencies);
 
 % locations
 EyetrackingDir = fullfile(Paths.Data, 'Pupils', ['Raw_', num2str(SampleRate), 'Hz'], Task);
 EEGDir = fullfile(Paths.CleanEEG, Task);
-MetadataDir = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_Lapse-Causes', Task);
+MetadataDir = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_New', Task);
 TrialCacheDir = fullfile(Paths.Cache, 'Trial_Information');
 CacheFilename = [Task, '_TrialsTable.mat'];
 
@@ -83,7 +82,7 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
 
         % normalize trials
         PooledTrials = normalize_trials(PooledTrials, AllRecordingPower);
-
+        
 
         % average trials by trial type
         for idxChannel = 1:numel(Chanlocs) % a hack, easier to loop here than fix everything in the function
@@ -104,16 +103,10 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
 
-
-
-
-
-
-
 function [PooledTrials, PooledTrialsTable, AllRecordingPower, Chanlocs] = pool_eeg(TrialsTable, ...
     EyetrackingQualityTable, EEGDir, MetadataDir, EyesOpenTrials, EyetrackingDir, ...
     Participant, Sessions, MaxStimulusDistance, TrialWindow, SampleRate, ...
-    ConfidenceThreshold, Frequencies, CycleRange)
+    ConfidenceThreshold)
 % EyeclosureTimepointCount is a 1 x 2 array indicating the total number of
 % points in the pooled sessions that has eyes closed and the total number of
 % points.
@@ -143,12 +136,6 @@ for idxSession = 1:numel(Sessions)
             EyetrackingQualityTable, ConfidenceThreshold, Participant, Sessions{idxSession}, SampleRate);
     end
 
-    % run wavelets
-    [Power, ~, ~] = wavetransform(EEG.data, EEG.srate, Frequencies, CycleRange(1), CycleRange(2));
-    EEG.data = Power;
-
-    % nan noise
-    Power(:, :, ~CleanTimepoints) = nan;
 
     % cut into trials
     Trials = chop_power_trials(Power, TrialsTable, CurrentTrials, TrialWindow, SampleRate);
@@ -162,16 +149,21 @@ end
 end
 
 
-function PooledTrials = normalize_trials(PooledTrials, AllRecordingPower)
+function LogPooledTrials = normalize_trials(PooledTrials, AllRecordingPower)
 % Pooled Trials is T x Ch x F x t
 % AllRecording is Ch x F x t
 
-Mean = mean(AllRecordingPower, 4, 'omitnan');
-% Std = std(AllRecordingPower, [], 4, 'omitnan');
-%
-% PooledTrials = (PooledTrials-Mean)./Std;
+Mean = mean(log(AllRecordingPower), 3, 'omitnan');
+LogPooledTrials = nan(size(PooledTrials));
 
-PooledTrials = log(PooledTrials)-log(Mean);
+PooledTrials = log(PooledTrials);
+
+for idxTrial = 1:size(PooledTrials, 1)
+    for idxFrequency = 1:size(PooledTrials, 3)
+        LogPooledTrials(idxTrial, :, idxFrequency, :) = ...
+            PooledTrials(idxTrial, :, idxFrequency, :)-Mean(:, idxFrequency)';
+    end
+end
 end
 
 
@@ -186,7 +178,7 @@ FrequencyCount = size(Trials, 2);
 
 AveragedTrials = nan(3, FrequencyCount, TimepointsCount);
 
-for idxType = TrialTypes
+for idxType = 1:3
 
     % select subset of trials
     TrialIndexes = TrialsTable.Type==idxType;
@@ -225,6 +217,10 @@ function TypeTrialData = remove_trials_too_much_nan(TypeTrialData, MaxNaNProport
 TrialsTime = size(TypeTrialData, 3);
 NanProportion = squeeze(sum(isnan(TypeTrialData(:, 1, :)), 3))./TrialsTime;
 TypeTrialData(NanProportion>MaxNaNProportion, :, :) = [];
+
+if any(NanProportion>MaxNaNProportion)
+    a=1
+end
 end
 
 
