@@ -104,31 +104,8 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
 
-function [EyesOpenTrialIndexes, EyetrackingQualityTable, TitleTag] = ...
-    only_eyes_open_trials(TrialsTable, CheckEyes, Paths, Task)
-TitleTag = '';
-if CheckEyes
-    TitleTag = [TitleTag, '_EO'];
-    EyesOpenTrialIndexes = TrialsTable.EyesClosed == 0;
-    EyetrackingQualityTable = readtable(fullfile(Paths.QualityCheck, 'EyeTracking', ...
-        ['DataQuality_', Task, '_Pupils.csv']));
-else
-    EyesOpenTrialIndexes = true(size(TrialsTable, 1), 1);
-    EyetrackingQualityTable = [];
-end
-end
 
 
-function [MaxStimulusDistance, TitleTag] = max_stimulus_distance(TrialsTable, ...
-    OnlyClosestStimuli, MaxStimulusDistanceProportion, TitleTag)
-% specify only close trials, or all trials
-if OnlyClosestStimuli
-    TitleTag = [ TitleTag, '_Close'];
-    MaxStimulusDistance = quantile(TrialsTable.Radius, MaxStimulusDistanceProportion);
-else
-    MaxStimulusDistance = max(TrialsTable.Radius);
-end
-end
 
 
 
