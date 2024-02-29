@@ -2,10 +2,12 @@ clear
 clc
 close all
 
+addpath('D:\Code\ExternalToolboxes\Morlet-Wavelet')
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% load in and set parameters for analysis
-RerunAnalysis = true; % false to skip files already analyzed
+RerunAnalysis = false; % false to skip files already analyzed
 
 
 % load in parameters that are in common across scripts

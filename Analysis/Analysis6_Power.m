@@ -1,12 +1,8 @@
-
 % gets the data showing the probability of eyesclosed over time for each
 % trial outcome type.
-
 clear
 clc
 close all
-
-addpath('D:\Code\ExternalToolboxes\Morlet-Wavelet')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
@@ -72,7 +68,7 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
         [PooledTrials, PooledTrialsTable,  AllRecordingPower, Chanlocs] = pool_eeg(TrialsTable, ...
             EyetrackingQualityTable, EEGDir, EyesOpenTrialIndexes, EyetrackingDir, ...
             Participants{idxParticipant}, Sessions, MaxStimulusDistance, TrialWindow, SampleRate, ...
-            ConfidenceThreshold, Frequencies, CycleRange);
+            ConfidenceThreshold);
 
         if isempty(PooledTrialsTable)
             warning('empty table')
@@ -81,7 +77,7 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
 
         % normalize trials
         PooledTrials = normalize_trials(PooledTrials, AllRecordingPower);
-        
+
 
         % average trials by trial type
         for idxChannel = 1:numel(Chanlocs) % a hack, easier to loop here than fix everything in the function
@@ -127,13 +123,17 @@ for idxSession = 1:numel(Sessions)
     EEG = load_datafile(EEGDir, Participant, Sessions{idxSession}, 'EEGMetadata');
     Chanlocs = EEG.chanlocs;
 
-    % identify task, artifact free, eyes open timepoints
-    EEGMetadata = load_datafile(MetadataDir, Participant, Sessions{idxSession}, 'EEGMetadata');
-    CleanTimepoints = EEGMetadata.CleanTaskTimepoints;
-
+    % Remove also eyes closed data
     if ~isempty(EyetrackingQualityTable)
+
+        % identify task, artifact free, eyes open timepoints
+        EEGMetadata = load_datafile(EEGDir, Participant, Sessions{idxSession}, 'EEGMetadata');
+        CleanTimepoints = EEGMetadata.CleanTaskTimepoints;
+
         CleanTimepoints = check_eyes_open(CleanTimepoints, EyetrackingDir, ...
             EyetrackingQualityTable, ConfidenceThreshold, Participant, Sessions{idxSession}, SampleRate);
+
+        EEG.data(:, CleanTimepoints) = nan;
     end
 
     % cut into trials
@@ -143,6 +143,7 @@ for idxSession = 1:numel(Sessions)
     PooledTrials = cat(1, PooledTrials, Trials);
     AllRecordingPower = cat(3, AllRecordingPower, Power);
     PooledTrialsTable = cat(1, PooledTrialsTable, TrialsTable(CurrentTrials, :));
+    disp(['Finished loading session ', Sessions{idxSession}])
 end
 end
 
@@ -162,6 +163,8 @@ for idxTrial = 1:size(PooledTrials, 1)
             PooledTrials(idxTrial, :, idxFrequency, :)-Mean(:, idxFrequency)';
     end
 end
+
+disp('finished normalizing trials')
 end
 
 
@@ -216,9 +219,6 @@ TrialsTime = size(TypeTrialData, 3);
 NanProportion = squeeze(sum(isnan(TypeTrialData(:, 1, :)), 3))./TrialsTime;
 TypeTrialData(NanProportion>MaxNaNProportion, :, :) = [];
 
-if any(NanProportion>MaxNaNProportion)
-    a=1
-end
 end
 
 
