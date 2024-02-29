@@ -56,7 +56,7 @@ TrialTime = linspace(TrialWindow(1), TrialWindow(2), SampleRate*(TrialWindow(2)-
 
 
 %%% get power
-for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
+for idxSessionBlock = 2%1:numel(SessionBlockLabels) % loop through BL and SD
 
     Sessions = SessionBlocks.(SessionBlockLabels{idxSessionBlock});
 
@@ -78,7 +78,6 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
         % normalize trials
         PooledTrials = normalize_trials(PooledTrials, AllRecordingPower);
 
-
         % average trials by trial type
         for idxChannel = 1:numel(Chanlocs) % a hack, easier to loop here than fix everything in the function
             TimeFrequencyEpochs(idxParticipant, :, idxChannel, :, :) = average_trial_types(...
@@ -90,7 +89,7 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
 
     %%% save
     save(fullfile(CacheDir, ['Power_', SessionBlockLabels{idxSessionBlock}, TitleTag, '.mat']), ...
-        'TimeFrequencyEpochs', 'Chanlocs', 'TrialTime')
+        'TimeFrequencyEpochs', 'Chanlocs', 'TrialTime', 'Frequencies')
 end
 
 
@@ -202,7 +201,7 @@ for idxType = 1:3
     end
 
     if isempty(Average) || any(isnan(Average(:)))
-        AveragedTrials(idxType, :, :) = nan(1, TimepointsCount);
+        AveragedTrials(idxType, :, :) = nan(1, FrequencyCount, TimepointsCount);
     else
         AveragedTrials(idxType, :, :) = Average;
     end
