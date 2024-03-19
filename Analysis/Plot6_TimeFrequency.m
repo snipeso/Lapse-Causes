@@ -24,7 +24,7 @@ end
 CacheDir = fullfile(Paths.Cache, 'Data_Figures');
 
 
-load(fullfile(CacheDir, ['Power_', SessionBlockLabel, TitleTag, '.mat']), ...
+load(fullfile(CacheDir, ['Power_', SessionBlockLabel, '.mat']), ...
         'TimeFrequencyEpochs', 'Chanlocs', 'TrialTime', 'Frequencies')
 
 
@@ -33,19 +33,22 @@ load(fullfile(CacheDir, ['Power_', SessionBlockLabel, TitleTag, '.mat']), ...
 
 Grid = [1 3];
 PlotProps.Axes.xPadding = 25;
-figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*1.1, PlotProps.Figure.Height*.3])
+figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.23])
 
 CLim = [-.2 .2];
 
-chART.sub_plot([], Grid, [1 1], [], true, PlotProps.Indexes.Letters{1}, PlotProps);
+chART.sub_plot([], Grid, [1 1], [], true, '', PlotProps);
 Data = squeeze(mean(mean(TimeFrequencyEpochs(:, 3, :, :, :), 1, 'omitnan'), 3, 'omitnan'));
 plot_timefrequency(Data, TrialTime, Frequencies, CLim, 'Fast', PlotProps)
+colorbar off
     
-chART.sub_plot([], Grid, [1 2], [], true, PlotProps.Indexes.Letters{2}, PlotProps);
+chART.sub_plot([], Grid, [1 2], [], true, '', PlotProps);
 Data = squeeze(mean(mean(TimeFrequencyEpochs(:, 2, :, :, :), 1, 'omitnan'), 3, 'omitnan'));
 plot_timefrequency(Data, TrialTime, Frequencies, CLim, 'Slow', PlotProps)
+colorbar off
+
     
-chART.sub_plot([], Grid, [1 3], [], true, PlotProps.Indexes.Letters{3}, PlotProps);
+chART.sub_plot([], Grid, [1 3], [], true, '', PlotProps);
 Data = squeeze(mean(mean(TimeFrequencyEpochs(:, 1, :, :, :), 1, 'omitnan'), 3, 'omitnan'));
 plot_timefrequency(Data, TrialTime, Frequencies, CLim, 'Lapse', PlotProps)
     
