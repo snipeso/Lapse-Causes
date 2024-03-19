@@ -7,7 +7,7 @@ addpath('D:\Code\ExternalToolboxes\Morlet-Wavelet')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% load in and set parameters for analysis
-RerunAnalysis = false; % false to skip files already analyzed
+RerunAnalysis = true; % false to skip files already analyzed
 
 
 % load in parameters that are in common across scripts
@@ -19,7 +19,7 @@ Participants = Parameters.Participants;
 Bands = Parameters.Narrowbands;
 Triggers = Parameters.Triggers;
 
-Frequencies = 1:20;
+Frequencies = 1:35;
 CycleRange = [3, 15];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -28,7 +28,7 @@ CycleRange = [3, 15];
 % set paths and files
 EEGSource = fullfile(Paths.CleanEEG, Task);
 EEGSourceCuts = fullfile(Paths.Data, 'Cutting', 'Cuts', Task); % timepoints marked as artefacts
-Destination = fullfile(Paths.AnalyzedData, 'EEG', 'TimeFrequency', Task);
+Destination = fullfile(Paths.AnalyzedData, 'EEG', 'TimeFrequency_Broad', Task);
 if ~exist(Destination, 'dir')
     mkdir(Destination)
 end

@@ -25,7 +25,8 @@ Parameters.SampleRate = 250; % ideally this would be extracted from the EEG, but
 
 Parameters.Stimuli.MaxDistance = 4/6; % exclude outermost stimuli, since lapses are likely just not seeing the thing (not used in main analysis, just a quality check)
 
-Parameters.Trials.Window = [-2, 4]; % time around stimulus to plot
+% Parameters.Trials.Window = [-2, 4]; % time around stimulus to plot
+Parameters.Trials.Window = [-4, 4]; % time around stimulus to plot
 Parameters.Trials.SubWindows = [-2 0; 0 0.3; 0.3 1; 2 4]; % windows in which to average values for topographies
 Parameters.Labels.TrialSubWindows = {'Pre', 'Stimulus', 'Response', 'Post'};
 

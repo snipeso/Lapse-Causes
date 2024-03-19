@@ -7,7 +7,7 @@ Paths = Parameters.Paths;
 
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionBlockLabel = 'BL';
+SessionBlockLabel = 'SD';
 
 TitleTag = SessionBlockLabel;
 if CheckEyes
@@ -35,35 +35,46 @@ Grid = [1 3];
 PlotProps.Axes.xPadding = 25;
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.23])
 
-CLim = [-.2 .2];
+% CLim = [-.2 .2];
+CLim = [-10 10];
+
+Channels = labels2indexes(Parameters.Channels.PreROI.Back, Chanlocs);
 
 chART.sub_plot([], Grid, [1 1], [], true, '', PlotProps);
-Data = squeeze(mean(mean(TimeFrequencyEpochs(:, 3, :, :, :), 1, 'omitnan'), 3, 'omitnan'));
-plot_timefrequency(Data, TrialTime, Frequencies, CLim, 'Fast', PlotProps)
+Data = squeeze(mean(TimeFrequencyEpochs(:, 3, Channels, :, :), 3, 'omitnan')); % average across channels
+Stats = ttest_timefrequency(Data, Parameters.Stats);
+plot_timefrequency(Stats, TrialTime, Frequencies, CLim, 'Fast', PlotProps)
 colorbar off
     
 chART.sub_plot([], Grid, [1 2], [], true, '', PlotProps);
-Data = squeeze(mean(mean(TimeFrequencyEpochs(:, 2, :, :, :), 1, 'omitnan'), 3, 'omitnan'));
-plot_timefrequency(Data, TrialTime, Frequencies, CLim, 'Slow', PlotProps)
+Data = squeeze(mean(TimeFrequencyEpochs(:, 2, Channels, :, :), 3, 'omitnan')); % average across channels
+Stats = ttest_timefrequency(Data, Parameters.Stats);
+plot_timefrequency(Stats, TrialTime, Frequencies, CLim, 'Slow', PlotProps)
 colorbar off
 
     
 chART.sub_plot([], Grid, [1 3], [], true, '', PlotProps);
-Data = squeeze(mean(mean(TimeFrequencyEpochs(:, 1, :, :, :), 1, 'omitnan'), 3, 'omitnan'));
-plot_timefrequency(Data, TrialTime, Frequencies, CLim, 'Lapse', PlotProps)
-    
+Data = squeeze(mean(TimeFrequencyEpochs(:, 1, Channels, :, :), 3, 'omitnan')); % average across channels
+Stats = ttest_timefrequency(Data, Parameters.Stats);
+plot_timefrequency(Stats, TrialTime, Frequencies, CLim, 'Lapse', PlotProps)
 chART.save_figure(['Figure_',TitleTag, 'TF'], Paths.Results, PlotProps)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
 
-function plot_timefrequency(Data, Time, Frequencies, CLim, Title, PlotProps)
+function plot_timefrequency(Stats, Time, Frequencies, CLim, Title, PlotProps)
 
 
+Data = Stats.t;
+hold on
 contourf(Time, Frequencies, Data, 30,  'linecolor','none')
 chART.set_axis_properties(PlotProps)
 
+Dims = size(Data);
+Mask = zeros(Dims);
+Mask(~Stats.sig) = 0.5;
+image(Time, Frequencies, ones(Dims(1), Dims(2), 3), 'AlphaData', Mask)
 
 if isempty(CLim)
     Quantiles = quantile(Data(:), [.1 .99]);
@@ -71,6 +82,7 @@ Lim = max(abs(Quantiles));
     CLim = [-Lim Lim];
 end
 clim(CLim)
+ylim([Frequencies(1), Frequencies(end)])
 
 PlotProps.Colorbar.Location = 'eastoutside';
 chART.plot.pretty_colorbar('Divergent', CLim, 'difference log power', PlotProps)
