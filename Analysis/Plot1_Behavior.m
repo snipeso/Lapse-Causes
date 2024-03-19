@@ -55,50 +55,69 @@ RadiusQuantile = 1/6; % bin size for quantiles
 [LapseCountLAT, RadiusBinsLAT] = lapse_count_by_radius(TrialsTableLAT, RadiusQuantile, Participants, ...
     Sessions.LAT, {1:3, 4:6}, MinTrialCount);
 
+%%
+%%% get questionnaire data
+KSSLAT = assemble_questionnaire(fullfile(Paths.AnalyzedData, "Questionnaires/", 'LAT_All.csv'), ...
+    Participants, Sessions.LAT);
+% KSSLAT = [mean(KSSLAT(:, 1:3), 2, 'omitnan'), mean(KSSLAT(:, 4:6), 2, 'omitnan')];
 
+KSSPVT = assemble_questionnaire(fullfile(Paths.AnalyzedData, "Questionnaires/", 'PVT_All.csv'), ...
+    Participants, Sessions.PVT);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Plot
 
 clc
+close all
 
 PlotProps = Parameters.PlotProps.Manuscript;
-PlotProps.Axes.xPadding = 30;
-PlotProps.Axes.yPadding = 30;
-Grid = [2 3];
+PlotProps.Axes.xPadding = 18;
+PlotProps.Axes.yPadding = 18;
+PlotProps.Scatter.Size = 20;
+Grid = [2 4];
 
 Legend = {'EC Lapses', 'EO Lapses', 'Slow responses', 'Fast responses'};
 
 
-figure('Units','centimeters', 'Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.55])
+figure('Units','centimeters', 'Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.4])
 
 %%% PVT
-% A: Reaction time distributions
-plot_RTs(RTStructPVT, Grid, [1 1], PlotProps.Indexes.Letters{1}, PlotProps, [.5 2.5], [ 0.1 1.01])
+% A: KSS
+plot_questionnaire(KSSPVT, {'BL', 'SD'}, Parameters.Stats, Grid,[1 1], PlotProps.Indexes.Letters{1}, PlotProps)
+ylabel('PVT sleepiness (KSS)')
+
+% B: Reaction time distributions
+plot_RTs(RTStructPVT, Grid, [1 2], PlotProps.Indexes.Letters{2}, PlotProps, [.5 2.5], [ 0.1 1.01])
 ylabel('PVT reaction times (s)')
 
-% B: Proportion of trials
-plot_trial_outcome(OutcomeCountPVT, Grid, [1, 2], PlotProps.Indexes.Letters{2}, Legend, PlotProps)
+% C: Proportion of trials
+plot_trial_outcome(OutcomeCountPVT, Grid, [1, 3], PlotProps.Indexes.Letters{3}, Legend, PlotProps)
 ylabel('% PVT trials')
 legend off
 
-% C: proportion of trials as lapses
-plot_lapses_by_threshold(LapseCountPVT, Thresholds, Grid, [1 3], PlotProps.Indexes.Letters{3}, PlotProps)
-ylabel('PVT lapses with EC (% lapses)')
+% D: proportion of trials as lapses
+plot_lapses_by_threshold(LapseCountPVT, Thresholds, Grid, [1 4], PlotProps.Indexes.Letters{4}, PlotProps)
+ylabel('PVT lapses EC (%lapses)')
 
 
 %%% LAT
-% D: Reaction time distributions
-plot_RTs(RTStructLAT, Grid, [2 1], PlotProps.Indexes.Letters{4}, PlotProps, [.5 2.5], [ 0.1  1.01])
+
+% E: KSS
+plot_questionnaire(KSSLAT(:, [1 2 4 5 6 3]), {'Baseline', 'Pre', 'SD1', 'SD2','SD3', 'Post'}, Parameters.Stats, Grid,[2 1], PlotProps.Indexes.Letters{5}, PlotProps)
+ylabel('LAT sleepiness (KSS)')
+
+
+% F: Reaction time distributions
+plot_RTs(RTStructLAT, Grid, [2 2], PlotProps.Indexes.Letters{6}, PlotProps, [.5 2.5], [ 0.1  1.01])
 ylabel('LAT reaction times (s)')
 
-% E: Proportion of trials
-plot_trial_outcome(OutcomeCountLAT, Grid, [2, 2], PlotProps.Indexes.Letters{5}, Legend, PlotProps)
+% G: Proportion of trials
+plot_trial_outcome(OutcomeCountLAT, Grid, [2, 3], PlotProps.Indexes.Letters{7}, Legend, PlotProps)
 ylabel('% LAT trials')
 
-% F: plot change in lapses with distance
+% H: plot change in lapses with distance
 LegendRadius = {'BL, EO', 'BL, EC', 'SD, EO', 'SD, EC'};
-plot_radius_lapses(LapseCountLAT, Grid, [2 3], PlotProps.Indexes.Letters{6}, ...
+plot_radius_lapses(LapseCountLAT, Grid, [2 4], PlotProps.Indexes.Letters{8}, ...
     LegendRadius, [0 60], PlotProps)
 ylabel('LAT lapses (% trials)')
 
@@ -283,6 +302,23 @@ end
 %%%%%%%%%%%%%%%%%%%%%%
 %%% plots
 
+function plot_questionnaire(Data, SessionLabels, StatsParameters, Grid, Position, Letter, PlotProps)
+chART.sub_plot([], Grid, Position, [], true, Letter, PlotProps);
+
+Stats = paired_ttest(Data, [], StatsParameters);
+try
+disp_stats(Stats, [1, 3], [SessionLabels{1}, ' vs ', SessionLabels{3}, ' kss:']);
+catch
+disp_stats(Stats, [1, 2], [SessionLabels{1}, ' vs ', SessionLabels{2}, ' kss:']);
+end
+chART.plot.individual_rows(Data, Stats, SessionLabels, [1 9], PlotProps, PlotProps.Color.Participants)
+ylabel('Subjective sleepiness')
+yticks(1:9)
+% ylim([.5 9.5])
+disp([Letter, ': N=', num2str(Stats.N(1, 2))])
+end
+
+
 function plot_RTs(DataStruct, Grid, Position, Letter, PlotProps, XLim, YLim)
 chART.sub_plot([], Grid, Position, [], true, Letter, PlotProps);
 hold on
@@ -424,3 +460,26 @@ disp('*')
 
 disp('______________________')
 end
+
+
+
+function KSS = assemble_questionnaire(Path, Participants, Sessions)
+
+CSV = readtable(Path);
+
+KSS = nan(numel(Participants), numel(Sessions));
+
+for ParticipantIdx = 1:numel(Participants)
+for SessionIdx = 1:numel(Sessions)
+    Row = strcmp(CSV.dataset, Participants{ParticipantIdx}) & ...
+        strcmp(CSV.qID, 'BAT_1') & strcmp(CSV.Level2, Sessions{SessionIdx});
+   Data = CSV.numAnswer(Row);
+   if numel(Data)==1
+       KSS(ParticipantIdx, SessionIdx) = Data*9;
+   else
+       warning('something wrong with KSS')
+   end
+end
+end
+end
+
