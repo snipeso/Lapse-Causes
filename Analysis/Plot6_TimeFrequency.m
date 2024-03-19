@@ -7,7 +7,7 @@ Paths = Parameters.Paths;
 
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionBlockLabel = 'SD';
+SessionBlockLabel = 'BL';
 
 TitleTag = SessionBlockLabel;
 if CheckEyes
@@ -24,7 +24,7 @@ end
 CacheDir = fullfile(Paths.Cache, 'Data_Figures');
 
 
-load(fullfile(CacheDir, ['Power_', SessionBlockLabel, '.mat']), ...
+load(fullfile(CacheDir, ['Power_', TitleTag, '.mat']), ...
         'TimeFrequencyEpochs', 'Chanlocs', 'TrialTime', 'Frequencies')
 
 
@@ -38,7 +38,9 @@ figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.
 % CLim = [-.2 .2];
 CLim = [-10 10];
 
-Channels = labels2indexes(Parameters.Channels.PreROI.Back, Chanlocs);
+% Channels = labels2indexes(Parameters.Channels.PreROI.Back, Chanlocs);
+Channels = 1:numel(Chanlocs);
+
 
 chART.sub_plot([], Grid, [1 1], [], true, '', PlotProps);
 Data = squeeze(mean(TimeFrequencyEpochs(:, 3, Channels, :, :), 3, 'omitnan')); % average across channels

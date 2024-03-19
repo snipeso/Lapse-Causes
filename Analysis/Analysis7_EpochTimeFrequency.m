@@ -8,7 +8,7 @@ close all
 %%% Parameters
 
 OnlyClosestStimuli = false; % only use closest trials
-OnlyEyesOpen = false; % only used eyes-open trials
+OnlyEyesOpen = true; % only used eyes-open trials
 ChannelsCount = 123; % just to pre-allocate before loading in data
 
 Parameters = analysisParameters();
@@ -56,7 +56,7 @@ TrialTime = linspace(TrialWindow(1), TrialWindow(2), SampleRate*(TrialWindow(2)-
 
 
 %%% get power
-for idxSessionBlock = 2%1:numel(SessionBlockLabels) % loop through BL and SD
+for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
 
     Sessions = SessionBlocks.(SessionBlockLabels{idxSessionBlock});
 
@@ -65,11 +65,12 @@ for idxSessionBlock = 2%1:numel(SessionBlockLabels) % loop through BL and SD
 
     for idxParticipant = 1:numel(Participants)
 
+        %%
         [PooledTrials, PooledTrialsTable,  AllRecordingPower, Chanlocs] = pool_eeg(TrialsTable, ...
             EyetrackingQualityTable, EEGDir, EyesOpenTrialIndexes, EyetrackingDir, ...
             Participants{idxParticipant}, Sessions, MaxStimulusDistance, TrialWindow, SampleRate, ...
             ConfidenceThreshold);
-
+%%
         if isempty(PooledTrialsTable)
             warning('empty table')
             continue
@@ -126,13 +127,10 @@ for idxSession = 1:numel(Sessions)
     if ~isempty(EyetrackingQualityTable)
 
         % identify task, artifact free, eyes open timepoints
-        EEGMetadata = load_datafile(EEGDir, Participant, Sessions{idxSession}, 'EEGMetadata');
-        CleanTimepoints = EEGMetadata.CleanTaskTimepoints;
-
-        CleanTimepoints = check_eyes_open(CleanTimepoints, EyetrackingDir, ...
+        CleanTimepoints = check_eyes_open(EEG.CleanTaskTimepoints, EyetrackingDir, ...
             EyetrackingQualityTable, ConfidenceThreshold, Participant, Sessions{idxSession}, SampleRate);
 
-        EEG.data(:, CleanTimepoints) = nan;
+        Power(:, :, ~logical(CleanTimepoints)) = nan;
     end
 
     % cut into trials
