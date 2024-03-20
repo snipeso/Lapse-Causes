@@ -2,9 +2,6 @@ clear
 clc
 close all
 
-addpath('D:\Code\ExternalToolboxes\Morlet-Wavelet')
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% load in and set parameters for analysis
 RerunAnalysis = true; % false to skip files already analyzed
@@ -16,7 +13,6 @@ Paths = Parameters.Paths;
 Task = Parameters.Task;
 Sessions = Parameters.Sessions.(Task);
 Participants = Parameters.Participants;
-Participants = {'P09'};
 Bands = Parameters.Narrowbands;
 Triggers = Parameters.Triggers;
 
