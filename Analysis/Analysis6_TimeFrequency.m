@@ -7,7 +7,7 @@ addpath('D:\Code\ExternalToolboxes\Morlet-Wavelet')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% load in and set parameters for analysis
-RerunAnalysis = false; % false to skip files already analyzed
+RerunAnalysis = true; % false to skip files already analyzed
 
 
 % load in parameters that are in common across scripts
@@ -16,6 +16,7 @@ Paths = Parameters.Paths;
 Task = Parameters.Task;
 Sessions = Parameters.Sessions.(Task);
 Participants = Parameters.Participants;
+Participants = {'P09'};
 Bands = Parameters.Narrowbands;
 Triggers = Parameters.Triggers;
 
@@ -36,6 +37,7 @@ end
 Filenames = list_filenames(EEGSource);
 Filenames(~contains(Filenames, Sessions)) = [];
 Filenames(~contains(Filenames, Participants)) = [];
+
 
 %%% run
 for FilenameSource = Filenames'
@@ -62,9 +64,8 @@ for FilenameSource = Filenames'
 
     % only use clean task timepoints
     KeepTimepoints = CleanTimepoints & TaskPoints;
-
     % run wavelets
-    [Power, ~, ~] = wavetransform(EEG.data, EEG.srate, Frequencies, CycleRange(1), CycleRange(2));
+    [Power, ~, ~] = time_frequency(EEG.data, EEG.srate, Frequencies, CycleRange(1), CycleRange(2));
 
     % nan noise
     Power(:, :, ~KeepTimepoints) = nan;

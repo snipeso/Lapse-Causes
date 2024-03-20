@@ -25,12 +25,12 @@ SessionBlockLabels = fieldnames(SessionBlocks);
 MinTrials = Parameters.Trials.MinPerSubGroupCount;
 Bands = Parameters.Bands;
 
-Frequencies = 1:20;
+Frequencies = 1:35;
 TotFrequencies = numel(Frequencies);
 
 % locations
 EyetrackingDir = fullfile(Paths.Data, 'Pupils', ['Raw_', num2str(SampleRate), 'Hz'], Task);
-EEGDir = fullfile(Paths.AnalyzedData, 'EEG', 'TimeFrequency', Task);
+EEGDir = fullfile(Paths.AnalyzedData, 'EEG', 'TimeFrequency_Broad', Task);
 TrialCacheDir = fullfile(Paths.Cache, 'Trial_Information');
 CacheFilename = [Task, '_TrialsTable.mat'];
 
