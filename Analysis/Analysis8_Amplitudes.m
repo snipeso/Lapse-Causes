@@ -114,7 +114,7 @@ for idxParticipant = 1:numel(Participants)
                     end
                 end
             end
-
+        disp(['finished ', Sessions{idxSession}])
         end
     end
     disp(['Finished ', Participant])
