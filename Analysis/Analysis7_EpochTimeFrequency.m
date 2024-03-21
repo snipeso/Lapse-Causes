@@ -64,20 +64,19 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
     TimeFrequencyEpochs = nan(numel(Participants), 3, ChannelsCount, TotFrequencies, numel(TrialTime)); % P x TT x Ch x F x t matrix with final probabilities
 
     for idxParticipant = 1:numel(Participants)
-
-        %%
-        [PooledTrials, PooledTrialsTable,  AllRecordingPower, Chanlocs] = pool_eeg(TrialsTable, ...
+       
+        [PooledTrials, PooledTrialsTable,  AllRecordingMean, Chanlocs] = pool_eeg(TrialsTable, ...
             EyetrackingQualityTable, EEGDir, EyesOpenTrialIndexes, EyetrackingDir, ...
             Participants{idxParticipant}, Sessions, MaxStimulusDistance, TrialWindow, SampleRate, ...
             ConfidenceThreshold);
-%%
+
         if isempty(PooledTrialsTable)
             warning('empty table')
             continue
         end
 
         % normalize trials
-        PooledTrials = normalize_trials(PooledTrials, AllRecordingPower);
+        PooledTrials = normalize_trials(PooledTrials, AllRecordingMean);
 
         % average trials by trial type
         for idxChannel = 1:numel(Chanlocs) % a hack, easier to loop here than fix everything in the function
@@ -90,7 +89,7 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
 
     %%% save
     save(fullfile(CacheDir, ['Power_', SessionBlockLabels{idxSessionBlock}, TitleTag, '.mat']), ...
-        'TimeFrequencyEpochs', 'Chanlocs', 'TrialTime', 'Frequencies')
+        'TimeFrequencyEpochs', 'Chanlocs', 'TrialTime', 'Frequencies', '-v7.3')
 end
 
 
@@ -98,7 +97,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
 
-function [PooledTrials, PooledTrialsTable, AllRecordingPower, Chanlocs] = pool_eeg(TrialsTable, ...
+function [PooledTrials, PooledTrialsTable, AllRecordingMean, Chanlocs] = pool_eeg(TrialsTable, ...
     EyetrackingQualityTable, EEGDir, EyesOpenTrials, EyetrackingDir, ...
     Participant, Sessions, MaxStimulusDistance, TrialWindow, SampleRate, ...
     ConfidenceThreshold)
@@ -108,7 +107,6 @@ function [PooledTrials, PooledTrialsTable, AllRecordingPower, Chanlocs] = pool_e
 
 PooledTrials = []; % Trials x Ch x F x t
 PooledTrialsTable = table();
-AllRecordingPower = [];
 
 for idxSession = 1:numel(Sessions)
 
@@ -133,23 +131,37 @@ for idxSession = 1:numel(Sessions)
         Power(:, :, ~logical(CleanTimepoints)) = nan;
     end
 
+    PowerSum = sum(log(Power), 3, 'omitnan');
+    PowerCount = sum(~isnan(Power), 3);
+    if ~exist("AllRecordingPower", 'var') % have to do this to avoid running out of RAM
+        AllRecordingPower = PowerSum;
+        AllRecordingPoints = PowerCount;
+    else
+        AllRecordingPower = AllRecordingPower + PowerSum;
+        AllRecordingPoints = AllRecordingPoints + PowerCount;
+    end
+
     % cut into trials
     Trials = chop_power_trials(Power, TrialsTable, CurrentTrials, TrialWindow, SampleRate);
+    clear Power
 
     % pool sessions
     PooledTrials = cat(1, PooledTrials, Trials);
-    AllRecordingPower = cat(3, AllRecordingPower, Power);
     PooledTrialsTable = cat(1, PooledTrialsTable, TrialsTable(CurrentTrials, :));
     disp(['Finished loading session ', Sessions{idxSession}])
 end
+
+% provide average power of all sessions
+AllRecordingMean = AllRecordingPower./AllRecordingPoints;
+
+
 end
 
 
-function LogPooledTrials = normalize_trials(PooledTrials, AllRecordingPower)
+function LogPooledTrials = normalize_trials(PooledTrials, AllRecordingMean)
 % Pooled Trials is T x Ch x F x t
 % AllRecording is Ch x F x t
 
-Mean = mean(log(AllRecordingPower), 3, 'omitnan');
 LogPooledTrials = nan(size(PooledTrials));
 
 PooledTrials = log(PooledTrials);
@@ -157,7 +169,7 @@ PooledTrials = log(PooledTrials);
 for idxTrial = 1:size(PooledTrials, 1)
     for idxFrequency = 1:size(PooledTrials, 3)
         LogPooledTrials(idxTrial, :, idxFrequency, :) = ...
-            PooledTrials(idxTrial, :, idxFrequency, :)-Mean(:, idxFrequency)';
+            PooledTrials(idxTrial, :, idxFrequency, :)-AllRecordingMean(:, idxFrequency)';
     end
 end
 
