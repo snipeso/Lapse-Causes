@@ -30,6 +30,8 @@ SessionBlocks = Parameters.Sessions.Conditions;
 SessionBlockLabels = fieldnames(SessionBlocks);
 Window = [-1 0];
 % Window = [.5 1.5];
+Windows = Parameters.Trials.SubWindows;
+WindowLabel = Parameters.Labels.TrialSubWindows;
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -54,7 +56,9 @@ BurstsCacheDir = fullfile(Paths.Cache, 'Data_Figures');
 %%% get burst information
 
 for Band = BandLabels'
-    TrialsTable.(['Amplitude', Band{1}]) = nan(size(TrialsTable, 1), 1);
+    for Window = WindowLabel
+    TrialsTable.(['Amp', Window{1} Band{1}]) = nan(size(TrialsTable, 1), 1);
+    end
 end
 
 AllBurstsTable = table();
@@ -83,23 +87,29 @@ for idxParticipant = 1:numel(Participants)
 
             for idxTrial = CurrentTrials'
                 for idxBand = 1:numel(BandLabels)
-                    WindowPoints = TrialsTable.StimTimepoint(idxTrial) + Window*SampleRate;
 
-                    OverlapBursts = find_overlapping_bursts(Bursts, WindowPoints(1), WindowPoints(2));
-                    BandBursts = find_band_bursts(OverlapBursts, Bands.(BandLabels{idxBand}));
-                    if isempty(BandBursts)
-                        continue
+                    for idxWindow = 1:size(Windows, 1)
+                        Window = Windows(idxWindow, :);
+                        WindowPoints = TrialsTable.StimTimepoint(idxTrial) + Window*SampleRate;
+
+                        OverlapBursts = find_overlapping_bursts(Bursts, WindowPoints(1), WindowPoints(2));
+                        BandBursts = find_band_bursts(OverlapBursts, Bands.(BandLabels{idxBand}));
+                        if isempty(BandBursts)
+                            continue
+                        end
+
+                        TrialsTable.(['Amp', WindowLabel{idxWindow}, BandLabels{idxBand}])(idxTrial) = mean([BandBursts.Amplitude]);
+
+                        % assign trial type to burst structure
+                        if idxWindow == 1 % only for pre
+                            TrialOutcome = TrialsTable.Type(idxTrial);
+                            EyesClosed = TrialsTable.EyesClosed(idxTrial);
+                            RT = TrialsTable.RT(idxTrial);
+                            AllBurstsTable = aggregate_burst_info(AllBurstsTable,  BandBursts, ...
+                                Participant, idxSessionBlock, idxSession, idxBand, TrialOutcome, EyesClosed, ...
+                                RT);
+                        end
                     end
-
-                    TrialsTable.(['Amplitude', BandLabels{idxBand}])(idxTrial) = mean([BandBursts.Amplitude]);
-
-                    % assign trial type to burst structure
-                    TrialOutcome = TrialsTable.Type(idxTrial);
-                    EyesClosed = TrialsTable.EyesClosed(idxTrial);
-                    RT = TrialsTable.RT(idxTrial);
-                    AllBurstsTable = aggregate_burst_info(AllBurstsTable,  BandBursts, ...
-                        Participant, idxSessionBlock, idxSession, idxBand, TrialOutcome, EyesClosed, ...
-                        RT);
                 end
             end
 

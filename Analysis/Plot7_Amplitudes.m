@@ -35,14 +35,14 @@ for idxColumn = 1:numel(ColumnNames)
         Stats = paired_ttest(Data, [], Parameters.Stats);
         chART.plot.individual_rows(Data, Stats, {'Lapses', 'Late', 'Fast'}, [], PlotProps, PlotProps.Color.Participants);
         title(SessionBlockLabels{idxSession})
-        ylim([10 38])
+        ylim([10 35])
         ylabel('Amplitude')
 
         chART.sub_plot(Space, Grid, [2 idxSession], [], true, '', PlotProps);
         Data = squeeze(TotTrials(:, idxSession, :));
         Stats = paired_ttest(Data, [], Parameters.Stats);
         chART.plot.individual_rows(Data, Stats, {'Lapses', 'Late', 'Fast'}, [], PlotProps, PlotProps.Color.Participants);
-          ylim([0 .9])
+              ylim([0 1.1])
         ylabel('Trials with a burst')
               
 
