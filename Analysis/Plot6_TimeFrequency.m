@@ -46,10 +46,12 @@ Grid = [2 5];
 PlotProps = Parameters.PlotProps.Manuscript;
 PlotProps.Axes.xPadding = 25;
 PlotProps.Color.Steps.Divergent = 100;
-figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
-LetterIdx = 1;
+figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*1.3, PlotProps.Figure.Height*.45])
+FigureIdx = 1;
+StartPoint = dsearchn(TrialTime', 0);
+YLims = [-.1 .1];
 
-TrialTypeTypes = { 'Lapse', 'Slow', 'Fast'};
+TrialTypes = { 'Lapse', 'Slow', 'Fast'};
 
 CLim = [-10 10];
 for SessionIdx = 1:2
@@ -62,37 +64,72 @@ for SessionIdx = 1:2
         Letter2 = '';
     end
 
-    %%% plot pre-stimulus power
+    %%% plot pre-stimulus power  %TODO remove
     chART.sub_plot([], Grid, [SessionIdx 1], [], true, Letter1, PlotProps);
-    LetterIdx = LetterIdx+1;
-
-    for TrialTypeIdx = 3:-1:1
-
-    %%% plot time-frequency
-    chART.sub_plot([], Grid, [SessionIdx 2], [], true, Letter2, PlotProps);
-    LetterIdx = LetterIdx+1;
-    Data = squeeze(AllTimeFrequencyEpochs(:, SessionIdx, TrialTypeIdx, :, :)); 
-    Stats = ttest_timefrequency(Data, Parameters.Stats);
-    plot_timefrequency(Stats, TrialTime, Frequencies, CLim, PlotProps)
-    if SessionIdx ==1
-        title(TrialTypeTypes{TrialTypeIdx})
+    Data = squeeze(mean(AllTimeFrequencyEpochs(:, SessionIdx, :, :, 1:StartPoint), 5, 'omitnan'));
+    plot_spectrum(Data, Frequencies, TrialTypes, PlotProps)
+    ylim([YLims])
+    if SessionIdx ==2
+        legend off
+    else
+        xlabel('')
     end
+
+    FigureIdx = 2;  
+    for TrialTypeIdx = 3:-1:1
+        if TrialTypeIdx < 3
+            Letter2 = '';
+        end
+
+        %%% plot time-frequency
+        chART.sub_plot([], Grid, [SessionIdx FigureIdx], [], true, Letter2, PlotProps);
+        FigureIdx = FigureIdx+1;
+        Data = squeeze(AllTimeFrequencyEpochs(:, SessionIdx, TrialTypeIdx, :, :));
+        Stats = ttest_timefrequency(Data, Parameters.Stats);
+        plot_timefrequency(Stats, TrialTime, Frequencies, CLim, PlotProps)
+        if SessionIdx ==1
+            title(TrialTypes{TrialTypeIdx})
+            xlabel('')
+        end
+        if TrialTypeIdx < 3
+            ylabel('')
+        end
     end
 end
 
-  chART.sub_plot([], Grid, [SessionIdx 5], [2, 1], true, '', PlotProps);
-    PlotProps.Colorbar.Location = 'eastoutside';
+Axes = chART.sub_plot([], Grid, [SessionIdx 5], [2, 1], false, '', PlotProps);
+% Axes.Position(1) = Axes.Position(1)-.05; 
 chART.plot.pretty_colorbar('Divergent', CLim, 't-values', PlotProps)
-
+axis off
 chART.save_figure(['Figure_',TitleTag, 'TF'], Paths.Results, PlotProps)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
 
+
+function plot_spectrum(Data, Frequencies, Legend, PlotProps)
+
+nTypes = size(Data, 2);
+Colors = flip(chART.color_picker(nTypes));
+
+hold on
+for TrialTypeIdx = 1:nTypes
+    Spectrum = squeeze(mean(Data(:, TrialTypeIdx, :), 1, 'omitnan'));
+    plot(Frequencies, Spectrum, 'Color', [Colors(TrialTypeIdx, :), .5], 'LineWidth',PlotProps.Line.Width)
+end
+
+chART.set_axis_properties(PlotProps)
+
+plot(Frequencies([1 end]), [0 0], 'Color', 'k', 'LineWidth', PlotProps.Line.Width*2, 'HandleVisibility', 'off')
+xlim(Frequencies([1 end]))
+xlabel('Frequencies (Hz)')
+ylabel('Log power difference')
+legend(Legend)
+ set(legend, 'ItemTokenSize', [10 10], 'location', 'northeast')
+end
+
 function plot_timefrequency(Stats, Time, Frequencies, CLim, PlotProps)
-
-
 Data = Stats.t;
 hold on
 contourf(Time, Frequencies, Data, PlotProps.Color.Steps.Divergent,  'linecolor','none')
@@ -115,7 +152,6 @@ ylim([Frequencies(1), Frequencies(end)])
 xlabel('Time (s)')
 ylabel('Frequency (Hz)')
 set(gca, 'TickDir', 'in')
-hold on
 plot([0 0], Frequencies([1 end]),  'Color', 'k', 'LineWidth',PlotProps.Line.Width/2, 'HandleVisibility', 'off')
 
 end
