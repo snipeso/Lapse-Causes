@@ -57,7 +57,7 @@ for Band = BandLabels'
 end
 
 AllBurstsTable = table();
-for idxParticipant = 1:numel(Participants)
+for idxParticipant = 6 %1:numel(Participants)
     for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
 
         Sessions = SessionBlocks.(SessionBlockLabels{idxSessionBlock});
@@ -76,13 +76,6 @@ for idxParticipant = 1:numel(Participants)
             % identify task, artifact free, eyes open timepoints
             EEGMetadata = load_datafile(BurstDir, Participant, Sessions{idxSession}, 'EEGMetadata');
             SampleRate = EEGMetadata.srate;
-            % CleanTimepoints = EEGMetadata.CleanTaskTimepoints;
-            %
-            % if ~isempty(EyetrackingQualityTable)
-            %     CleanTimepoints = check_eyes_open(CleanTimepoints, EyetrackingDir, ...
-            %         EyetrackingQualityTable, ConfidenceThreshold, Participant, Sessions{idxSession}, SampleRate);
-            % end
-
 
             % get average amplitudes of bursts of each band before each
             % trial
