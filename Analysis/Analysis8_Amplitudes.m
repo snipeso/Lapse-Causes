@@ -92,20 +92,22 @@ for idxParticipant = 1:numel(Participants)
                         Window = Windows(idxWindow, :);
                         WindowPoints = TrialsTable.StimTimepoint(idxTrial) + Window*SampleRate;
 
-                        OverlapBursts = find_overlapping_bursts(Bursts, WindowPoints(1), WindowPoints(2));
-                        BandBursts = find_band_bursts(OverlapBursts, Bands.(BandLabels{idxBand}));
-                        if isempty(BandBursts)
+                        BandBursts = find_band_bursts(Bursts, Bands.(BandLabels{idxBand}));
+                        OverlapBursts = find_overlapping_bursts(BandBursts, WindowPoints(1), WindowPoints(2));
+                        if isempty(OverlapBursts)
                             continue
                         end
 
-                        TrialsTable.(['Amp', WindowLabel{idxWindow}, BandLabels{idxBand}])(idxTrial) = mean([BandBursts.Amplitude]);
+                        Amplitudes = [OverlapBursts.Amplitude];
+                        InWindow = [OverlapBursts.PeakInWindow];
+                        TrialsTable.(['Amp', WindowLabel{idxWindow}, BandLabels{idxBand}])(idxTrial) = mean(Amplitudes(InWindow));
 
                         % assign trial type to burst structure
                         if idxWindow == 1 % only for pre
                             TrialOutcome = TrialsTable.Type(idxTrial);
                             EyesClosed = TrialsTable.EyesClosed(idxTrial);
                             RT = TrialsTable.RT(idxTrial);
-                            AllBurstsTable = aggregate_burst_info(AllBurstsTable,  BandBursts, ...
+                            AllBurstsTable = aggregate_burst_info(AllBurstsTable,  OverlapBursts, ...
                                 Participant, idxSessionBlock, idxSession, idxBand, TrialOutcome, EyesClosed, ...
                                 RT);
                         end
@@ -131,6 +133,12 @@ Ends = [Bursts.End];
 
 KeepBurstIndexes = Starts<EndWindow & Ends>StartWindow;
 OverlapBursts = Bursts(KeepBurstIndexes);
+
+% keep track only of cycles within the window
+for idxBurst = 1:numel(OverlapBursts)
+    Peaks = [OverlapBursts(idxBurst).NegPeakIdx];
+    OverlapBursts(idxBurst).PeakInWindow = Peaks >= StartWindow & Peaks <= EndWindow;
+end
 end
 
 function OverlapBursts = find_band_bursts(Bursts, Band)
