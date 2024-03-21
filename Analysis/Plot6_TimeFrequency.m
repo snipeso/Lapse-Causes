@@ -32,15 +32,16 @@ for SBL = SessionBlockLabels
     load(fullfile(CacheDir, ['Power_', TitleTag, '.mat']), ...
         'TimeFrequencyEpochs', 'Chanlocs', 'TrialTime', 'Frequencies')
 
-    % Channels = labels2indexes(Parameters.Channels.PreROI.Back, Chanlocs);
-    Channels = 1:numel(Chanlocs);
-    Data = mean(TimeFrequencyEpochs(:, :, Channels, :, :), 3, 'omitnan'); % average across channels
-
-    AllTimeFrequencyEpochs = cat(2, AllTimeFrequencyEpochs, permute(Data, [1 3 2 4 5])); % P x S x TT x F x t
+    Data = permute(TimeFrequencyEpochs, [1 6, 2, 3, 4 5]);
+    AllTimeFrequencyEpochs = cat(2, AllTimeFrequencyEpochs, Data); % P x S x TT x Ch x F x t
 end
 
 
 %%
+
+    % Channels = labels2indexes(Parameters.Channels.PreROI.Back, Chanlocs);
+    Channels = 1:numel(Chanlocs);
+MeanChannels = squeeze(mean(AllTimeFrequencyEpochs(:, :, :, Channels, :, :), 4, 'omitnan'));
 
 Grid = [2 5];
 PlotProps = Parameters.PlotProps.Manuscript;
@@ -66,7 +67,7 @@ for SessionIdx = 1:2
 
     %%% plot pre-stimulus power  %TODO remove
     chART.sub_plot([], Grid, [SessionIdx 1], [], true, Letter1, PlotProps);
-    Data = squeeze(mean(AllTimeFrequencyEpochs(:, SessionIdx, :, :, 1:StartPoint), 5, 'omitnan'));
+    Data = squeeze(mean(MeanChannels(:, SessionIdx, :, :, 1:StartPoint), 5, 'omitnan'));
     plot_spectrum(Data, Frequencies, TrialTypes, PlotProps)
     ylim([YLims])
     if SessionIdx ==2
@@ -84,7 +85,7 @@ for SessionIdx = 1:2
         %%% plot time-frequency
         chART.sub_plot([], Grid, [SessionIdx FigureIdx], [], true, Letter2, PlotProps);
         FigureIdx = FigureIdx+1;
-        Data = squeeze(AllTimeFrequencyEpochs(:, SessionIdx, TrialTypeIdx, :, :));
+        Data = squeeze(MeanChannels(:, SessionIdx, TrialTypeIdx, :, :));
         Stats = ttest_timefrequency(Data, Parameters.Stats);
         plot_timefrequency(Stats, TrialTime, Frequencies, CLim, PlotProps)
         if SessionIdx ==1
@@ -103,6 +104,16 @@ chART.plot.pretty_colorbar('Divergent', CLim, 't-values', PlotProps)
 axis off
 chART.save_figure(['Figure_',TitleTag, 'TF'], Paths.Results, PlotProps)
 
+
+
+%% Topography of theta SD lapses
+
+Data 
+
+
+
+
+%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
