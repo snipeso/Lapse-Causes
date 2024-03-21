@@ -2,10 +2,9 @@ clear
 clc
 close all
 Parameters = analysisParameters();
-PlotProps = Parameters.PlotProps.Manuscript;
 Paths = Parameters.Paths;
 
-CheckEyes = false; % check if person had eyes open or closed
+CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 
 
@@ -99,18 +98,76 @@ for SessionIdx = 1:2
 end
 
 Axes = chART.sub_plot([], Grid, [SessionIdx 5], [2, 1], false, '', PlotProps);
-% Axes.Position(1) = Axes.Position(1)-.05; 
 chART.plot.pretty_colorbar('Divergent', CLim, 't-values', PlotProps)
 axis off
-chART.save_figure(['Figure_',TitleTag, 'TF'], Paths.Results, PlotProps)
+chART.save_figure(['Figure_',TitleTag, 'TimeFrequency'], Paths.Results, PlotProps)
 
 
 
-%% Topography of theta SD lapses
-
-Data 
 
 
+%% Topography sandbox
+
+PlotProps = Parameters.PlotProps.Manuscript;
+PlotProps.Colorbar.Location = 'eastoutside';
+
+% Range = dsearchn(Frequencies', [4; 8]);
+% Start = 1;
+% End = dsearchn(TrialTime', 2);
+% SessionIdx = 2;
+% TrialType = 1;
+
+Range = [15; 30];
+Window = [0; 1];
+SessionIdx = 1;
+TrialTypeIdx = 3;
+CLims = [];
+
+
+figure('Units','centimeters','Position', [0 0 10 10])
+
+plot_topography_sequence(AllTimeFrequencyEpochs, Frequencies, Chanlocs, ...
+    SessionIdx, TrialTypeIdx, TrialTime, Window, ...
+    Range, CLims, PlotProps, Parameters.Stats)
+
+
+%% topography sequence of fast response
+
+PlotProps = Parameters.PlotProps.Manuscript;
+PlotProps.Colorbar.Location = 'eastoutside';
+Windows = [-2,  0, .1, .5, 1, 2;
+            0, .1, .5,  1, 2, 4];
+Ranges = [1, 4,  8, 12, 25;
+          4, 8, 12, 25, 30];
+
+CLims = [-10 10];
+TrialTypeIdx = 3; % fast
+SessionIdx = 1; % BL
+
+figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*1.3, PlotProps.Figure.Height*.8])
+plot_topography_sequence(AllTimeFrequencyEpochs, Frequencies, Chanlocs, SessionIdx, ...
+    TrialTypeIdx, TrialTime, Windows, Ranges, CLims, PlotProps, Parameters.Stats)
+chART.save_figure(['Figure_',TitleTag, 'FastTopographies'], Paths.Results, PlotProps)
+
+
+%% topography sequence of SD lapse
+
+PlotProps = Parameters.PlotProps.Manuscript;
+PlotProps.Colorbar.Location = 'eastoutside';
+Windows = [-2,  -1, 1, 2;
+            -1, 0, 2,  4];
+Ranges = [1, 4,  8, 12, 25;
+          4, 8, 12, 25, 30];
+
+CLims = [-6 6];
+TrialTypeIdx = 1; % lapse
+
+for SessionIdx = 1:2
+figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.8, PlotProps.Figure.Height*.8])
+plot_topography_sequence(AllTimeFrequencyEpochs, Frequencies, Chanlocs, SessionIdx, ...
+    TrialTypeIdx, TrialTime, Windows, Ranges, CLims, PlotProps, Parameters.Stats)
+chART.save_figure(['Figure_',TitleTag, 'LapseTopographies_', num2str(SessionIdx)], Paths.Results, PlotProps)
+end
 
 
 %%
@@ -167,4 +224,35 @@ plot([0 0], Frequencies([1 end]),  'Color', 'k', 'LineWidth',PlotProps.Line.Widt
 
 end
 
+function plot_topography_sequence(AllData, Frequencies, Chanlocs, SessionIdx, TrialTypeIdx, TrialTime, Windows, ...
+    Ranges, CLims, PlotProps, StatsParameters)
 
+nWindows = size(Windows, 2);
+nRanges = size(Ranges, 2);
+
+Grid = [nRanges, nWindows];
+
+
+for RangeIdx = 1:nRanges
+    for WindowIdx = 1:nWindows
+
+        Range = dsearchn(Frequencies', Ranges(:, RangeIdx));
+        Window = dsearchn(TrialTime', Windows(:, WindowIdx));
+
+        Data = AllData(:, SessionIdx, TrialTypeIdx, :, Range(1):Range(2), Window(1):Window(2));
+        Data = squeeze(mean(mean(Data, 5, 'omitnan'), 6, 'omitnan'));
+
+          chART.sub_plot([],  Grid, [RangeIdx WindowIdx], [], false, '', PlotProps);
+        paired_ttest_topography(zeros(size(Data)), Data, Chanlocs, CLims, StatsParameters, PlotProps);
+        colorbar off
+
+        if RangeIdx==1
+            title([num2str(Windows(1, WindowIdx)), '-', num2str(Windows(2, WindowIdx)), 's'])
+        end
+
+        if WindowIdx ==1
+            chART.plot.vertical_text([num2str(Ranges(1, RangeIdx)), '-', num2str(Ranges(2, RangeIdx)), 'Hz'], .15, .5, PlotProps)
+        end
+    end
+end
+end
