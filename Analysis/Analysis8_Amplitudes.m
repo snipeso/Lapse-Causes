@@ -52,14 +52,12 @@ BurstsCacheDir = fullfile(Paths.Cache, 'Data_Figures');
 
 %%% get burst information
 
-for Band = BandLabels
+for Band = BandLabels'
     TrialsTable.(['Amplitude', Band{1}]) = nan(size(TrialsTable, 1), 1);
 end
 
-
+AllBurstsTable = table();
 for idxParticipant = 1:numel(Participants)
-    AllBursts = struct();
-
     for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
 
         Sessions = SessionBlocks.(SessionBlockLabels{idxSessionBlock});
@@ -89,29 +87,35 @@ for idxParticipant = 1:numel(Participants)
             % get average amplitudes of bursts of each band before each
             % trial
 
-            for idxTrial = CurrentTrials
+            for idxTrial = CurrentTrials'
                 for idxBand = 1:numel(BandLabels)
                     WindowPoints = TrialsTable.StimTimepoint(idxTrial) - Window*SampleRate;
+
                     OverlapBursts = find_overlapping_bursts(Bursts, WindowPoints(1), WindowPoints(2));
-                    BandBursts = find_band_bursts(Bursts, Band);
-                    TrialsTable.(['Amplitude', BandLabels{idxBand}]) = mean([BandBursts.Amplitude]);
+                    BandBursts = find_band_bursts(OverlapBursts, Bands.(BandLabels{idxBand}));
+                    if isempty(BandBursts)
+                        continue
+                    end
+
+                    TrialsTable.(['Amplitude', BandLabels{idxBand}])(idxTrial) = mean([BandBursts.Amplitude]);
 
                     % assign trial type to burst structure
-                    TrialOutcome = TrialsTable(idxTrial).Type;
-                    EyesClosed = TrialsTable(idxTrial).EyesClosed;
-                    AllBursts = cat_struct(AllBursts, assign_trial_outcome(BandBursts, TrialOutcome, EyesClosed));
+                    TrialOutcome = TrialsTable.Type(idxTrial);
+                    EyesClosed = TrialsTable.EyesClosed(idxTrial);
+                    RT = TrialsTable.RT(idxTrial);
+                    AllBurstsTable = aggregate_burst_info(AllBurstsTable,  BandBursts, ...
+                        Participant, idxSessionBlock, idxSession, idxBand, TrialOutcome, EyesClosed, ...
+                        RT);
                 end
             end
+
         end
-
-        %%% Determine lapse probability by burst amplitude quantile
-        A=1
-
     end
+    disp(['Finished ', Participant])
 end
 
 %%% save new trial table
-save(fullfile(BurstsCacheDir, CacheFilename), 'TrialsTable')
+save(fullfile(BurstsCacheDir, CacheFilename), 'TrialsTable', 'AllBurstsTable')
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
@@ -133,12 +137,28 @@ KeepBurstIndexes = Frequencies>=Band(1) & Frequencies<Band(2);
 OverlapBursts = Bursts(KeepBurstIndexes);
 end
 
-function Bursts = assign_trial_outcome(Bursts, TrialOutcome, EyesClosed)
+function AllBurstTable = aggregate_burst_info(AllBurstTable, Bursts, Participant, ...
+    idxSessionBlock, idxSession, idxBand, TrialOutcome, EyesClosed, RT)
 
+KeepInfo = {'CyclesCount', 'Amplitude', 'BurstFrequency', 'DurationPoints', 'ChannelIndex', 'ChannelIndexLabel', 'Start'};
+
+BurstTable = struct();
 for idxBurst = 1:numel(Bursts)
-    Bursts(idxBurst).TrialType = TrialOutcome;
-    Bursts(idxBurst).EyesClosed = EyesClosed;
-end
+    for Field = KeepInfo
+        BurstTable(idxBurst).(Field{1}) = mean(Bursts(idxBurst).(Field{1}));
+    end
 end
 
- 
+BurstTable = struct2table(BurstTable);
+nBursts = size(BurstTable, 1);
+BurstTable.TrialType = repmat(TrialOutcome, nBursts, 1);
+BurstTable.EyesClosed = repmat(EyesClosed, nBursts, 1);
+BurstTable.Session = repmat(idxSession, nBursts, 1);
+BurstTable.SessionBlock = repmat(idxSessionBlock, nBursts, 1);
+BurstTable.Band = repmat(idxBand, nBursts, 1);
+BurstTable.Participant = repmat(Participant, nBursts, 1);
+BurstTable.RT = repmat(RT, nBursts, 1);
+
+AllBurstTable = [AllBurstTable; BurstTable];
+end
+
