@@ -29,6 +29,7 @@ BurstDir = fullfile(Paths.AnalyzedData, 'EEG', 'Bursts_Lapse-Causes', Task);
 SessionBlocks = Parameters.Sessions.Conditions;
 SessionBlockLabels = fieldnames(SessionBlocks);
 Window = [-1 0];
+% Window = [.5 1.5];
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -57,7 +58,7 @@ for Band = BandLabels'
 end
 
 AllBurstsTable = table();
-for idxParticipant = 6 %1:numel(Participants)
+for idxParticipant = 1:numel(Participants)
     for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
 
         Sessions = SessionBlocks.(SessionBlockLabels{idxSessionBlock});
@@ -82,7 +83,7 @@ for idxParticipant = 6 %1:numel(Participants)
 
             for idxTrial = CurrentTrials'
                 for idxBand = 1:numel(BandLabels)
-                    WindowPoints = TrialsTable.StimTimepoint(idxTrial) - Window*SampleRate;
+                    WindowPoints = TrialsTable.StimTimepoint(idxTrial) + Window*SampleRate;
 
                     OverlapBursts = find_overlapping_bursts(Bursts, WindowPoints(1), WindowPoints(2));
                     BandBursts = find_band_bursts(OverlapBursts, Bands.(BandLabels{idxBand}));
