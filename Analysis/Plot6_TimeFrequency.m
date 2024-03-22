@@ -4,9 +4,8 @@ close all
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
 
-CheckEyes = true; % check if person had eyes open or closed
+CheckEyes = false; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-
 
 SessionBlockLabels = {'BL', 'SD'};
 
@@ -38,16 +37,14 @@ end
 
 %%
 
-    % Channels = labels2indexes(Parameters.Channels.PreROI.Back, Chanlocs);
-    Channels = 1:numel(Chanlocs);
+Channels = 1:numel(Chanlocs);
 MeanChannels = squeeze(mean(AllTimeFrequencyEpochs(:, :, :, Channels, :, :), 4, 'omitnan'));
 
-Grid = [2 5];
+Grid = [2 4];
 PlotProps = Parameters.PlotProps.Manuscript;
 PlotProps.Axes.xPadding = 25;
 PlotProps.Color.Steps.Divergent = 100;
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*1.3, PlotProps.Figure.Height*.45])
-FigureIdx = 1;
 StartPoint = dsearchn(TrialTime', 0);
 YLims = [-.1 .1];
 
@@ -55,27 +52,7 @@ TrialTypes = { 'Lapse', 'Slow', 'Fast'};
 
 CLim = [-10 10];
 for SessionIdx = 1:2
-
-    if SessionIdx ==1
-        Letter1 = 'A';
-        Letter2 = 'B';
-    else
-        Letter1 = '';
-        Letter2 = '';
-    end
-
-    %%% plot pre-stimulus power  %TODO remove
-    chART.sub_plot([], Grid, [SessionIdx 1], [], true, Letter1, PlotProps);
-    Data = squeeze(mean(MeanChannels(:, SessionIdx, :, :, 1:StartPoint), 5, 'omitnan'));
-    plot_spectrum(Data, Frequencies, TrialTypes, PlotProps)
-    ylim([YLims])
-    if SessionIdx ==2
-        legend off
-    else
-        xlabel('')
-    end
-
-    FigureIdx = 2;  
+    FigureIdx = 1;
     for TrialTypeIdx = 3:-1:1
         if TrialTypeIdx < 3
             Letter2 = '';
@@ -97,7 +74,7 @@ for SessionIdx = 1:2
     end
 end
 
-Axes = chART.sub_plot([], Grid, [SessionIdx 5], [2, 1], false, '', PlotProps);
+Axes = chART.sub_plot([], Grid, [SessionIdx 4], [2, 1], false, '', PlotProps);
 chART.plot.pretty_colorbar('Divergent', CLim, 't-values', PlotProps)
 axis off
 chART.save_figure(['Figure_',TitleTag, 'TimeFrequency'], Paths.Results, PlotProps)
@@ -136,9 +113,9 @@ plot_topography_sequence(AllTimeFrequencyEpochs, Frequencies, Chanlocs, ...
 PlotProps = Parameters.PlotProps.Manuscript;
 PlotProps.Colorbar.Location = 'eastoutside';
 Windows = [-2,  0, .1, .5, 1, 2;
-            0, .1, .5,  1, 2, 4];
+    0, .1, .5,  1, 2, 4];
 Ranges = [1, 4,  8, 12, 25;
-          4, 8, 12, 25, 30];
+    4, 8, 12, 25, 30];
 
 CLims = [-10 10];
 TrialTypeIdx = 3; % fast
@@ -155,18 +132,18 @@ chART.save_figure(['Figure_',TitleTag, 'FastTopographies'], Paths.Results, PlotP
 PlotProps = Parameters.PlotProps.Manuscript;
 PlotProps.Colorbar.Location = 'eastoutside';
 Windows = [-2,  -1, 1, 2;
-            -1, 0, 2,  4];
+    -1, 0, 2,  4];
 Ranges = [1, 4,  8, 12, 25;
-          4, 8, 12, 25, 30];
+    4, 8, 12, 25, 30];
 
 CLims = [-6 6];
 TrialTypeIdx = 1; % lapse
 
 for SessionIdx = 1:2
-figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.8, PlotProps.Figure.Height*.8])
-plot_topography_sequence(AllTimeFrequencyEpochs, Frequencies, Chanlocs, SessionIdx, ...
-    TrialTypeIdx, TrialTime, Windows, Ranges, CLims, PlotProps, Parameters.Stats)
-chART.save_figure(['Figure_',TitleTag, 'LapseTopographies_', num2str(SessionIdx)], Paths.Results, PlotProps)
+    figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.8, PlotProps.Figure.Height*.8])
+    plot_topography_sequence(AllTimeFrequencyEpochs, Frequencies, Chanlocs, SessionIdx, ...
+        TrialTypeIdx, TrialTime, Windows, Ranges, CLims, PlotProps, Parameters.Stats)
+    chART.save_figure(['Figure_',TitleTag, 'LapseTopographies_', num2str(SessionIdx)], Paths.Results, PlotProps)
 end
 
 
@@ -194,7 +171,7 @@ xlim(Frequencies([1 end]))
 xlabel('Frequencies (Hz)')
 ylabel('Log power difference')
 legend(Legend)
- set(legend, 'ItemTokenSize', [10 10], 'location', 'northeast')
+set(legend, 'ItemTokenSize', [10 10], 'location', 'northeast')
 end
 
 function plot_timefrequency(Stats, Time, Frequencies, CLim, PlotProps)
@@ -207,7 +184,7 @@ chART.set_axis_properties(PlotProps)
 Dims = size(Data);
 Mask = zeros(Dims);
 Mask(~Stats.sig) = 0.7;
-image(Time, Frequencies, ones(Dims(1), Dims(2), 3), 'AlphaData', Mask)
+image(Time, Frequencies, 0.95*ones(Dims(1), Dims(2), 3), 'AlphaData', Mask)
 
 
 if isempty(CLim)
@@ -242,7 +219,7 @@ for RangeIdx = 1:nRanges
         Data = AllData(:, SessionIdx, TrialTypeIdx, :, Range(1):Range(2), Window(1):Window(2));
         Data = squeeze(mean(mean(Data, 5, 'omitnan'), 6, 'omitnan'));
 
-          chART.sub_plot([],  Grid, [RangeIdx WindowIdx], [], false, '', PlotProps);
+        chART.sub_plot([],  Grid, [RangeIdx WindowIdx], [], false, '', PlotProps);
         paired_ttest_topography(zeros(size(Data)), Data, Chanlocs, CLims, StatsParameters, PlotProps);
         colorbar off
 
