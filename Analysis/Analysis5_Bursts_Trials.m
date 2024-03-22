@@ -25,6 +25,7 @@ SessionBlocks = Parameters.Sessions.Conditions;
 SessionBlockLabels = fieldnames(SessionBlocks);
 MinTrials = Parameters.Trials.MinPerSubGroupCount;
 Bands = Parameters.Bands;
+FrequenciesCount = numel(fieldnames(Bands));
 
 % locations
 EyetrackingDir = fullfile(Paths.Data, 'Pupils', ['Raw_', num2str(SampleRate), 'Hz'], Task);
