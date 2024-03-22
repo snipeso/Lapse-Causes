@@ -163,9 +163,10 @@ nQuantiles = 5;
 
 [LapseProbabilityBursts, RTs] = lapse_probability_by_quantile(AllBurstsTable, Participants, nQuantiles);
 
-LapseProbability = mean_lapse_probability(TrialsTable, Participants, SessionBlocks);
+% LapseProbability = mean_lapse_probability(TrialsTable, Participants, SessionBlocks);
 
-%%
+% zLapseProbability = zScoreData(permute(LapseProbabilityBursts, [1 2 4 3]), 'last');
+% zLapseProbability = permute(zLapseProbability, [1 2 4 3]);
 
 Grid = [2 2];
 PlotProps = Parameters.PlotProps.Manuscript;
@@ -176,13 +177,14 @@ for idxBand = 1:numel(BandLabels)
 
     for idxSession = 1:2
             chART.sub_plot([], Grid, [idxSession, idxBand], [], true, '', PlotProps);
-            Data = squeeze(LapseProbabilityBursts(:, idxSession, idxBand, :))-LapseProbability(:, idxSession);
-            % Stats = paired_ttest(Data, [], Parameters.Stats);
-            Stats = paired_ttest(Data, zeros(size(Data)), Parameters.Stats);
-            chART.plot.individual_rows(Data, [], string(1:nQuantiles), [], PlotProps, PlotProps.Color.Participants);
+            % Data = squeeze(LapseProbabilityBursts(:, idxSession, idxBand, :))-LapseProbability(:, idxSession);
+            Data = squeeze(LapseProbabilityBursts(:, idxSession, idxBand, :));
+            % zData = squeeze(zLapseProbability(:, idxSession, idxBand, :));
+            zData = zScoreData(Data, 'first');
+            Stats = paired_ttest(zData, [], Parameters.Stats);
+            % Stats = paired_ttest(Data, zeros(size(Data)), Parameters.Stats);
+            chART.plot.individual_rows(zData, Stats, string(1:nQuantiles), [], PlotProps, PlotProps.Color.Participants);
 
-            Y = max(Data(:)) + .05*(max(Data(:))-min(Data(:)));
-            plot_stars(Y, Stats.p_fdr, PlotProps)
             if idxSession == 1
                 title(BandLabels{idxBand})
 
@@ -241,6 +243,8 @@ end
 
 
 function [LapseProbability, RTs] = lapse_probability_by_quantile(AllBurstsTable, Participants, nQuantiles)
+
+AllBurstsTable(AllBurstsTable.EyesClosed==1, :) = [];
 
 LapseProbability = nan(numel(Participants), 2, 2, nQuantiles);
 RTs = LapseProbability;
