@@ -9,9 +9,9 @@ close all
 
 
 SmoothFactor = 0.2; % in seconds, smooth signal to be visually pleasing
-CheckEyes = true; % check if person had eyes open or closed
+CheckEyes = false; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionBlockLabel = 'SD';
+SessionBlockLabels = {'BL', 'SD'};
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
@@ -19,44 +19,10 @@ Task = Parameters.Task;
 TallyLabels = Parameters.Labels.TrialOutcome; % rename to outcome labels TODO
 StatParameters = Parameters.Stats;
 
-
-TitleTag = SessionBlockLabel;
-if CheckEyes
-    TitleTag = [TitleTag, '_EO'];
-end
-
-if Closest
-    TitleTag = [TitleTag, '_Close'];
-    EyeclosureTag = '_Close';
-else
-    EyeclosureTag = '';
-end
-
 CacheDir = fullfile(Paths.Cache, 'Data_Figures');
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% load data
-
-
-% eyeclosure data
-load(fullfile(CacheDir, ['Eyeclosures_', SessionBlockLabel, EyeclosureTag, '.mat']), ...
-    'EyesClosedStimLocked', 'EyesClosedRespLocked', 'TrialTime', 'EyeclosureDescriptives')
-
-[ProbEyesClosedStimLockedDiff, ProbEyesClosedRespLockedDiff, ProbabilityEyesClosedDiff] = ...
-    process_data(EyesClosedStimLocked, EyesClosedRespLocked, EyeclosureDescriptives, ...
-    TrialTime, SmoothFactor, []);
-
-
-% burst data
-load(fullfile(CacheDir, ['Bursts_', TitleTag, '.mat']), ...
-    'BurstStimLocked', 'BurstRespLocked', 'BurstDescriptives')
-
-[ProbBurstsStimLockedDiff, ProbBurstsRespLockedDiff, ProbabilityBurstsDiff] = ...
-    process_data(BurstStimLocked, BurstRespLocked, BurstDescriptives, ...
-    TrialTime, SmoothFactor, 3);
-
-
+%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% plot
@@ -69,62 +35,83 @@ YLimTheta = [-1 1];
 Grid = [2 3];
 PlotProps = Parameters.PlotProps.Manuscript;
 PlotProps.Axes.xPadding = 25;
+PlotProps.Figure.Padding = 25;
 
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*1.1, PlotProps.Figure.Height*.55])
+FigIdx = 1;
+for idxSession = 1:2
 
-%%% stimulus locked
-DispN = true;
-DispStats = true;
+    SessionBlockLabel = SessionBlockLabels{idxSession};
+    %%%%%%%%%%%%%%%%%
+    %%% load data
 
-% eyeclosure
-plot_timecourse(TrialTime, flip(ProbEyesClosedStimLockedDiff, 2), ProbabilityEyesClosedDiff(:, 1), ...
-    YLimEyesClosed, flip(TallyLabels), 'Stimulus', StatParameters, DispN, DispStats, PlotProps, ...
-    Grid, [1 1], PlotProps.Indexes.Letters{1});
-title('Eye closure', 'FontSize', PlotProps.Text.TitleSize)
-ylabel('Likelihood eyes closed (z-score)')
+    TitleTag = SessionBlockLabel;
+    if CheckEyes
+        TitleTag = [TitleTag, '_EO'];
+    end
 
-
-% theta
-plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 1, :)), 2), ...
-    ProbabilityBurstsDiff(:, 1), YLimTheta, flip(TallyLabels), '', ...
-    StatParameters, DispN, DispStats, PlotProps, Grid, [1 2], PlotProps.Indexes.Letters{2});
-ylabel('Likelihood theta burst (z-score)')
-title('Theta bursts', 'FontSize', PlotProps.Text.TitleSize)
-legend off
-
-% alpha
-plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 2, :)), 2), ...
-    ProbabilityBurstsDiff(:, 2), YLimAlpha, flip(TallyLabels), '', ...
-    StatParameters, DispN, DispStats, PlotProps, Grid, [1 3], PlotProps.Indexes.Letters{3});
-ylabel('Likelihood alpha burst (z-score)')
-title('Alpha bursts', 'FontSize', PlotProps.Text.TitleSize)
-
-legend off
+    if Closest
+        TitleTag = [TitleTag, '_Close'];
+        EyeclosureTag = '_Close';
+    else
+        EyeclosureTag = '';
+    end
 
 
-%%% response locked
-DispStats = false;
+    % eyeclosure data
+    load(fullfile(CacheDir, ['Eyeclosures_', SessionBlockLabel, EyeclosureTag, '.mat']), ...
+        'EyesClosedStimLocked', 'EyesClosedRespLocked', 'TrialTime', 'EyeclosureDescriptives')
 
-% eyeclosure
-plot_timecourse(TrialTime, flip(ProbEyesClosedRespLockedDiff, 2), ProbabilityEyesClosedDiff(:, 1), ...
-    YLimEyesClosed, flip(TallyLabels), 'Response', StatParameters, DispN, DispStats, PlotProps, ...
-    Grid, [2 1], PlotProps.Indexes.Letters{4});
-ylabel('Likelihood eyeclosure (z-score)')
-legend off
+    [ProbEyesClosedStimLockedDiff, ProbEyesClosedRespLockedDiff, ProbabilityEyesClosedDiff] = ...
+        process_data(EyesClosedStimLocked, EyesClosedRespLocked, EyeclosureDescriptives, ...
+        TrialTime, SmoothFactor, []);
 
-% theta
-plot_timecourse(TrialTime, flip(squeeze(ProbBurstsRespLockedDiff(:, :, 1, :)), 2), ...
-    ProbabilityBurstsDiff(:, 1), YLimTheta, flip(TallyLabels), '', ...
-    StatParameters, DispN, DispStats, PlotProps, Grid, [2 2], PlotProps.Indexes.Letters{5});
-ylabel('Likelihood theta burst (z-score)')
-legend off
+    % burst data
+    load(fullfile(CacheDir, ['Bursts_', TitleTag, '.mat']), ...
+        'BurstStimLocked', 'BurstRespLocked', 'BurstDescriptives')
 
-% alpha
-plot_timecourse(TrialTime, flip(squeeze(ProbBurstsRespLockedDiff(:, :, 2, :)), 2), ...
-    ProbabilityBurstsDiff(:, 2), YLimAlpha, flip(TallyLabels), '', ...
-    StatParameters, DispN, DispStats, PlotProps, Grid, [2 3], PlotProps.Indexes.Letters{6});
-ylabel('Likelihood alpha burst (z-score)')
-legend off
+    [ProbBurstsStimLockedDiff, ProbBurstsRespLockedDiff, ProbabilityBurstsDiff] = ...
+        process_data(BurstStimLocked, BurstRespLocked, BurstDescriptives, ...
+        TrialTime, SmoothFactor, 3);
+
+
+    %%%%%%%%%%%%%%%%%%%%
+    %%% Plot
+
+    %%% stimulus locked
+    DispN = true;
+    DispStats = true;
+
+    % eyeclosure
+    plot_timecourse(TrialTime, flip(ProbEyesClosedStimLockedDiff, 2), ProbabilityEyesClosedDiff(:, 1), ...
+        YLimEyesClosed, flip(TallyLabels), 'Stimulus', StatParameters, DispN, DispStats, PlotProps, ...
+        Grid, [idxSession 1], PlotProps.Indexes.Letters{FigIdx}, 'Eye closure');
+    FigIdx = FigIdx+1;
+    ylabel('Likelihood eyes closed (z-score)')
+        chART.plot.vertical_text(SessionBlockLabel, .3, .5, PlotProps)
+
+
+
+    % theta
+    plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 1, :)), 2), ...
+        ProbabilityBurstsDiff(:, 1), YLimTheta, flip(TallyLabels), '', ...
+        StatParameters, DispN, DispStats, PlotProps, Grid, [idxSession 2], PlotProps.Indexes.Letters{FigIdx}, ...
+        'Theta bursts');
+    FigIdx = FigIdx+1;
+    ylabel('Likelihood theta burst (z-score)')
+    legend off
+
+    % alpha
+    plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 2, :)), 2), ...
+        ProbabilityBurstsDiff(:, 2), YLimAlpha, flip(TallyLabels), '', ...
+        StatParameters, DispN, DispStats, PlotProps, Grid, [idxSession 3], PlotProps.Indexes.Letters{FigIdx}, ...
+        'Alpha bursts');
+    FigIdx = FigIdx+1;
+    ylabel('Likelihood alpha burst (z-score)')
+    legend off
+
+
+end
 
 chART.save_figure(['Figure_',TitleTag], Paths.Results, PlotProps)
 
@@ -168,7 +155,7 @@ end
 
 function Stats = plot_timecourse(TrialTime, ProbabilityByOutput, BaselineProbability, ...
     YLims, LineLabels, Time0Label, StatParameters, DispN, DispStats, PlotProps, ...
-    Grid, Position, Letter)
+    Grid, Position, Letter, Title)
 % plots the timecourse locked to stimulus onset.
 % ProbabilityByOutput is a P x TrialOutput x t matrix
 
@@ -220,12 +207,17 @@ chART.plot.individual_rows_by_group(TrialTime, ProbabilityByOutput, Colors, [], 
 chART.plot.highlighted_segments(ProbabilityMeans, CI, TrialTime, 15, logical(Sig), Colors, PlotProps)
 
 % labels
-if ~isempty(LineLabels)
+if Position(1)==1
+    title(Title, 'FontSize', PlotProps.Text.TitleSize)
+elseif Position(1)==Grid(1)
+    xlabel('Time (s)')
+end
+
+if ~isempty(LineLabels) && Position(1)==1 && Position(2)==1
     legend([LineLabels, 'p<.05'])
     set(legend, 'ItemTokenSize', [10 10], 'location', 'northeast')
 end
 
-xlabel('Time (s)')
 
 % indicate what the plot is timelocked to
 YShift = .05*diff(Range);
