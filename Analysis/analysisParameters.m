@@ -146,7 +146,10 @@ Parameters.Triggers = Triggers;
 
 Parameters.PlotProps.Manuscript = chART.load_plot_properties({'LSM', 'Manuscript'});
 Parameters.PlotProps.Manuscript.Figure.Width = 22;
-Parameters.PlotProps.Text.AxisSize = 10;
+Parameters.PlotProps.Manuscript.Text.LegendSize = 9;
+Parameters.PlotProps.Manuscript.Text.AxisSize = 11;
+Parameters.PlotProps.Manuscript.Text.TitleSize = 14;
+Parameters.PlotProps.Manuscript.Text.IndexSize = 16;
 
 Parameters.PlotProps.Powerpoint = chART.load_plot_properties({'LSM', 'Powerpoint'});
 Parameters.PlotProps.Poster = chART.load_plot_properties({'LSM', 'Poster'});
