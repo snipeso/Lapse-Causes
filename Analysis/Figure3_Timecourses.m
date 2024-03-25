@@ -12,6 +12,7 @@ SmoothFactor = 0.2; % in seconds, smooth signal to be visually pleasing
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 SessionBlockLabels = {'BL', 'SD'};
+SessionLabels = {'BL', 'EW'}; % because I switched the names late
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
@@ -83,8 +84,8 @@ for idxSession = 1:2
     plot_timecourse(TrialTime, flip(ProbEyesClosedStimLockedDiff, 2), ProbabilityEyesClosedDiff(:, 1), ...
         YLimEyesClosed, flip(TallyLabels), 'Stimulus', StatParameters, DispN, DispStats, PlotProps, ...
         Grid, [idxSession 1], '', 'Eye closure');
-    ylabel('Likelihood eyes closed (z-score)')
-        chART.plot.vertical_text(SessionBlockLabel, .3, .5, PlotProps)
+    ylabel('Porportion eyes closed (z-score)')
+    chART.plot.vertical_text(SessionLabels{idxSession}, .3, .5, PlotProps)
 
 
 
@@ -93,7 +94,7 @@ for idxSession = 1:2
         ProbabilityBurstsDiff(:, 1), YLimTheta, flip(TallyLabels), '', ...
         StatParameters, DispN, DispStats, PlotProps, Grid, [idxSession 2], '', ...
         'Theta bursts');
-    ylabel('Likelihood theta burst (z-score)')
+    ylabel('Proportion bursts (z-score)')
     legend off
 
     % alpha
@@ -101,7 +102,7 @@ for idxSession = 1:2
         ProbabilityBurstsDiff(:, 2), YLimAlpha, flip(TallyLabels), '', ...
         StatParameters, DispN, DispStats, PlotProps, Grid, [idxSession 3], '', ...
         'Alpha bursts');
-    ylabel('Likelihood alpha burst (z-score)')
+    ylabel('Proportion bursts (z-score)')
     legend off
 
 

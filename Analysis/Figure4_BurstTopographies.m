@@ -7,7 +7,7 @@ close all
 
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionGroup = 'BL';
+SessionGroup = 'SD';
 
 
 Parameters = analysisParameters();
@@ -50,10 +50,10 @@ WindowCount = size(Windows, 1);
 
 PlotProps = Parameters.PlotProps.Manuscript;
 CLims = [-7 7];
-PlotProps.Text.AxisSize = 14;
-PlotProps.Text.TitleSize = 16;
-PlotProps.Text.IndexSize = 20;
-PlotProps.Figure.Padding = 20;
+% PlotProps.Text.AxisSize = 14;
+% PlotProps.Text.TitleSize = 16;
+% PlotProps.Text.IndexSize = 20;
+% PlotProps.Figure.Padding = 20;
 PlotProps.Colorbar.Location = 'north';
 Grid = [5 2];
 miniGrid = [3 WindowCount];
