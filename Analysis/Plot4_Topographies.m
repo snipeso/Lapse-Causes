@@ -5,7 +5,7 @@ close all
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
 
-CheckEyes = false; % check if person had eyes open or closed
+CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 SessionGroup = 'BL';
 
@@ -64,7 +64,7 @@ Types = [3 2 1];
 figure('Units','normalized', 'Position',[0 0 .5, .45])
 for idxBand = 1:2 % subplot A and B
 
-    Space = set_sub_figure(Grid, [4 idxBand], PlotProps, PlotProps.Indexes.Letters{idxBand});
+    Space = set_sub_figure(Grid, [4 idxBand], PlotProps, '');
     for idxOutcome = 1:3 % rows
         for idxWindow = 1:WindowCount % columns
             Data = squeeze(WindowedStim(:, Types(idxOutcome), :, idxBand, idxWindow));
