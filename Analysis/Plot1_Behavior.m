@@ -72,6 +72,7 @@ close all
 
 PlotProps = Parameters.PlotProps.Manuscript;
 PlotProps.Scatter.Size = 50;
+PlotProps.Figure.Padding = 30;
 Grid = [2 4];
 
 Legend = {'EC lapses', 'EO lapses', 'Slow responses', 'Fast responses'};
@@ -81,7 +82,7 @@ figure('Units','centimeters', 'Position', [0 0 PlotProps.Figure.Width, PlotProps
 
 %%% PVT
 % A: KSS
-plot_questionnaire(KSSPVT, {'BL', 'SD'}, Parameters.Stats, Grid,[1 1], PlotProps.Indexes.Letters{1}, PlotProps)
+plot_questionnaire(KSSPVT, SessionBlockLabels, Parameters.Stats, Grid,[1 1], PlotProps.Indexes.Letters{1}, PlotProps)
 ylabel('PVT sleepiness (KSS)')
 
 % B: Reaction time distributions
@@ -89,7 +90,7 @@ plot_RTs(RTStructPVT, Grid, [1 2], PlotProps.Indexes.Letters{2}, PlotProps, [.5 
 ylabel('PVT reaction times (s)')
 
 % C: Proportion of trials
-plot_trial_outcome(OutcomeCountPVT, Grid, [1, 3], PlotProps.Indexes.Letters{3}, Legend, PlotProps)
+plot_trial_outcome(OutcomeCountPVT, SessionBlockLabels, Grid, [1, 3], PlotProps.Indexes.Letters{3}, Legend, PlotProps)
 ylabel('% PVT trials')
 legend off
 
@@ -101,7 +102,7 @@ ylabel('PVT lapses EC (%lapses)')
 %%% LAT
 
 % E: KSS
-plot_questionnaire(KSSLAT(:, [1 2 4 5 6 3]), {'Baseline', 'Pre', 'SD1', 'SD2','SD3', 'Post'}, Parameters.Stats, Grid,[2 1], PlotProps.Indexes.Letters{5}, PlotProps)
+plot_questionnaire(KSSLAT(:, [1 2 4 5 6 3]), {'Baseline', 'Pre', 'EW1', 'EW2','EW3', 'Post'}, Parameters.Stats, Grid,[2 1], PlotProps.Indexes.Letters{5}, PlotProps)
 ylabel('LAT sleepiness (KSS)')
 
 
@@ -110,11 +111,11 @@ plot_RTs(RTStructLAT, Grid, [2 2], PlotProps.Indexes.Letters{6}, PlotProps, [.5 
 ylabel('LAT reaction times (s)')
 
 % G: Proportion of trials
-plot_trial_outcome(OutcomeCountLAT, Grid, [2, 3], PlotProps.Indexes.Letters{7}, Legend, PlotProps)
+plot_trial_outcome(OutcomeCountLAT, SessionBlockLabels, Grid, [2, 3], PlotProps.Indexes.Letters{7}, Legend, PlotProps)
 ylabel('% LAT trials')
 
 % H: plot change in lapses with distance
-LegendRadius = {'BL, EO', 'BL, EC', 'SD, EO', 'SD, EC'};
+LegendRadius = {'BL, EO', 'BL, EC', 'EW, EO', 'EW, EC'};
 plot_radius_lapses(LapseCountLAT, Grid, [2 4], PlotProps.Indexes.Letters{8}, ...
     LegendRadius, [0 60], PlotProps)
 ylabel('LAT lapses (% trials)')
@@ -135,7 +136,7 @@ Lapses = squeeze(OutcomeCountLAT(:, 1, 1)+OutcomeCountLAT(:, 1, 4));
 disp_stats_descriptive(Lapses, 'Total lapses BL:', '%', 0);
 
 Lapses = squeeze(OutcomeCountLAT(:, 2, 1)+OutcomeCountLAT(:, 2, 4));
-disp_stats_descriptive(Lapses, 'Total lapses SD:', '%', 0);
+disp_stats_descriptive(Lapses, 'Total lapses EW:', '%', 0);
 
 % determine proportion of lapses with eyes opened and closed
 [EyesOpenOutcomeCount, EyesClosedOutcomeCount] = count_trials_by_eye_status( ...
@@ -158,7 +159,7 @@ Lapses = squeeze(OutcomeCountPVT(:, 1, 1)+OutcomeCountPVT(:, 1, 4));
 disp_stats_descriptive(Lapses, 'Total lapses BL:', '%', 0);
 
 Lapses = squeeze(OutcomeCountPVT(:, 2, 1)+OutcomeCountPVT(:, 2, 4));
-disp_stats_descriptive(Lapses, 'Total lapses SD:', '%', 0);
+disp_stats_descriptive(Lapses, 'Total lapses EW:', '%', 0);
 
 % split by eye status
 [EyesOpenOutcomeCount, EyesClosedOutcomeCount] = count_trials_by_eye_status( ...
@@ -330,7 +331,7 @@ disp([Letter, ': N=', num2str(numel(fieldnames(DataStruct.BL)))])
 end
 
 
-function plot_trial_outcome(OutcomeCount, Grid, Position, Letter, Legend, PlotProps)
+function plot_trial_outcome(OutcomeCount, xLabels, Grid, Position, Letter, Legend, PlotProps)
 % OutcomeCount should be a P x S (BL, SD) x O (EO Lapse, EO Late, EO F, EC L, EC L, EC F)
 
 OutcomeCount = OutcomeCount(:, :, [4, 1, 2, 3]); % only look at EC Lapses, EO lapses, EO late, EO fast
@@ -341,7 +342,7 @@ TallyColors = [Red(1, :); flip(chART.color_picker(3))];
 
 
 chART.sub_plot([], Grid, Position, [], true, Letter, PlotProps);
-chART.plot.stacked_bars(OutcomeCountMeans, {'BL', 'SD'}, [0 100], Legend, ...
+chART.plot.stacked_bars(OutcomeCountMeans, xLabels, [0 100], Legend, ...
     PlotProps, TallyColors)
 
 set(legend, 'location', 'northwest')

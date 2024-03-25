@@ -9,7 +9,7 @@ close all
 
 
 SmoothFactor = 0.2; % in seconds, smooth signal to be visually pleasing
-CheckEyes = false; % check if person had eyes open or closed
+CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 SessionBlockLabels = {'BL', 'SD'};
 
@@ -34,11 +34,8 @@ YLimTheta = [-1 1];
 
 Grid = [2 3];
 PlotProps = Parameters.PlotProps.Manuscript;
-PlotProps.Axes.xPadding = 25;
-PlotProps.Figure.Padding = 25;
 
-figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*1.1, PlotProps.Figure.Height*.55])
-FigIdx = 1;
+figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.5])
 for idxSession = 1:2
 
     SessionBlockLabel = SessionBlockLabels{idxSession};
@@ -85,8 +82,7 @@ for idxSession = 1:2
     % eyeclosure
     plot_timecourse(TrialTime, flip(ProbEyesClosedStimLockedDiff, 2), ProbabilityEyesClosedDiff(:, 1), ...
         YLimEyesClosed, flip(TallyLabels), 'Stimulus', StatParameters, DispN, DispStats, PlotProps, ...
-        Grid, [idxSession 1], PlotProps.Indexes.Letters{FigIdx}, 'Eye closure');
-    FigIdx = FigIdx+1;
+        Grid, [idxSession 1], '', 'Eye closure');
     ylabel('Likelihood eyes closed (z-score)')
         chART.plot.vertical_text(SessionBlockLabel, .3, .5, PlotProps)
 
@@ -95,25 +91,23 @@ for idxSession = 1:2
     % theta
     plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 1, :)), 2), ...
         ProbabilityBurstsDiff(:, 1), YLimTheta, flip(TallyLabels), '', ...
-        StatParameters, DispN, DispStats, PlotProps, Grid, [idxSession 2], PlotProps.Indexes.Letters{FigIdx}, ...
+        StatParameters, DispN, DispStats, PlotProps, Grid, [idxSession 2], '', ...
         'Theta bursts');
-    FigIdx = FigIdx+1;
     ylabel('Likelihood theta burst (z-score)')
     legend off
 
     % alpha
     plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 2, :)), 2), ...
         ProbabilityBurstsDiff(:, 2), YLimAlpha, flip(TallyLabels), '', ...
-        StatParameters, DispN, DispStats, PlotProps, Grid, [idxSession 3], PlotProps.Indexes.Letters{FigIdx}, ...
+        StatParameters, DispN, DispStats, PlotProps, Grid, [idxSession 3], '', ...
         'Alpha bursts');
-    FigIdx = FigIdx+1;
     ylabel('Likelihood alpha burst (z-score)')
     legend off
 
 
 end
 
-chART.save_figure(['Figure_burstTimecourse',TitleTag], Paths.Results, PlotProps)
+chART.save_figure(['Figure_BurstTimecourse_',TitleTag], Paths.Results, PlotProps)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

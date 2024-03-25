@@ -12,8 +12,8 @@ Parameters = struct();
 Parameters.Task = 'LAT'; % main analysis is done on LAT, but some parts use PVT
 
 Parameters.Sessions.Conditions.BL = {'BaselineBeam',  'MainPre', 'MainPost'};
-Parameters.Sessions.Conditions.SD = { 'Session2Beam1', 'Session2Beam2', 'Session2Beam3'};
-Parameters.Sessions.LAT = [Parameters.Sessions.Conditions.BL, Parameters.Sessions.Conditions.SD];
+Parameters.Sessions.Conditions.EW = { 'Session2Beam1', 'Session2Beam2', 'Session2Beam3'};
+Parameters.Sessions.LAT = [Parameters.Sessions.Conditions.BL, Parameters.Sessions.Conditions.EW];
 
 Parameters.Sessions.PVT = {'BaselineBeam', 'Session2Beam'};
 
@@ -148,9 +148,9 @@ Parameters.PlotProps.Manuscript = chART.load_plot_properties({'LSM', 'Manuscript
 Parameters.PlotProps.Manuscript.Figure.Width = 30;
 Parameters.PlotProps.Manuscript.Figure.Height = 42;
 Parameters.PlotProps.Manuscript.Figure.Padding = 25;
-Parameters.PlotProps.Manuscript.Axes.labelPadding = 20;
-Parameters.PlotProps.Manuscript.Axes.xPadding = 25;
-Parameters.PlotProps.Manuscript.Axes.yPadding = 25;
+Parameters.PlotProps.Manuscript.Axes.labelPadding = 25;
+Parameters.PlotProps.Manuscript.Axes.xPadding = 30;
+Parameters.PlotProps.Manuscript.Axes.yPadding = 30;
 Parameters.PlotProps.Manuscript.Text.LegendSize = 11;
 Parameters.PlotProps.Manuscript.Text.AxisSize = 14;
 Parameters.PlotProps.Manuscript.Text.TitleSize = 16;

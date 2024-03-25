@@ -73,13 +73,11 @@ clc
 
 Grid = [2 3];
 PlotProps = Parameters.PlotProps.Manuscript;
-PlotProps.Axes.yPadding = 30;
-PlotProps.Axes.xPadding = 30;
 PlotProps.HandleVisibility = 'on';
 xLog = false;
 xLims = [3 17];
 
-figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*.75, PlotProps.Figure.Height*.5])
+figure('units', 'centimeters', 'position', [0 0 PlotProps.Figure.Width*.6, PlotProps.Figure.Height*.5])
 
 %%% change in quantities of bursts
 XLabels = fieldnames(SessionBlocks);
@@ -130,7 +128,7 @@ title('Alpha burst power')
 ylabel('Periodic power (\muV^2/Hz)')
 ylim([-.5 12])
 
-chART.save_figure('Figure_2', Paths.Results, PlotProps)
+chART.save_figure('SupplFig_BurstPower', Paths.Results, PlotProps)
 
 
 %% single participant
