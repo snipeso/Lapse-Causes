@@ -113,7 +113,7 @@ for idxSession = 1:2
 
 end
 
-chART.save_figure(['Figure_',TitleTag], Paths.Results, PlotProps)
+chART.save_figure(['Figure_burstTimecourse',TitleTag], Paths.Results, PlotProps)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

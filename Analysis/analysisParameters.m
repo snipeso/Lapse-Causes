@@ -145,11 +145,17 @@ Triggers.Tones = 'S 12';
 Parameters.Triggers = Triggers;
 
 Parameters.PlotProps.Manuscript = chART.load_plot_properties({'LSM', 'Manuscript'});
-Parameters.PlotProps.Manuscript.Figure.Width = 22;
-Parameters.PlotProps.Manuscript.Text.LegendSize = 9;
-Parameters.PlotProps.Manuscript.Text.AxisSize = 11;
-Parameters.PlotProps.Manuscript.Text.TitleSize = 14;
+Parameters.PlotProps.Manuscript.Figure.Width = 30;
+Parameters.PlotProps.Manuscript.Figure.Height = 42;
+Parameters.PlotProps.Manuscript.Figure.Padding = 25;
+Parameters.PlotProps.Manuscript.Axes.labelPadding = 20;
+Parameters.PlotProps.Manuscript.Axes.xPadding = 25;
+Parameters.PlotProps.Manuscript.Axes.yPadding = 25;
+Parameters.PlotProps.Manuscript.Text.LegendSize = 11;
+Parameters.PlotProps.Manuscript.Text.AxisSize = 14;
+Parameters.PlotProps.Manuscript.Text.TitleSize = 16;
 Parameters.PlotProps.Manuscript.Text.IndexSize = 20;
+Parameters.PlotProps.Manuscript.Scatter.Size = 50;
 
 Parameters.PlotProps.Powerpoint = chART.load_plot_properties({'LSM', 'Powerpoint'});
 Parameters.PlotProps.Poster = chART.load_plot_properties({'LSM', 'Poster'});

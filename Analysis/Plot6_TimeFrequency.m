@@ -49,9 +49,10 @@ load(fullfile(CacheDir, CacheFilename), 'AllBurstsTable')
 %% Plot Main figure
 
 PlotProps = Parameters.PlotProps.Manuscript;
+PlotProps.Figure.Padding
 MegaGrid = [1 3];
 CLim = [-10 10];
-
+PlotProps.Figure.Padding = 20;
 PlotProps.Colorbar.Location = 'southoutside';
 
 
@@ -75,7 +76,6 @@ Position(2) = Position(2)+65;
 Position(4) = 290;
 xlabel('')
 set(gca, 'position', Position)
-Position = get(gca, 'Position');
 title('BL fast trials', 'FontSize', PlotProps.Text.TitleSize)
 
 % SD lapses
@@ -99,6 +99,7 @@ chART.plot.pretty_colorbar('Divergent', CLim, 't-values', PlotProps)
 
 
 %%% topographiesTopoPlotProps = Parameters.PlotProps.Manuscript;
+TopoPlotProps = Parameters.PlotProps.Manuscript;
 TopoPlotProps.Axes.xPadding = 5;
 TopoPlotProps.Axes.yPadding = 5;
 TrialTypeIdx = 1; % lapse
@@ -161,7 +162,9 @@ Axes1.Position(4) = Axes.Position(4);
 
 %%% lapses by quantiles
 BandLabels = {'Theta', 'Alpha'};
-Space = set_sub_figure(MegaGrid, [1 3], TopoPlotProps, 'C');
+PlotProps.Line.MarkerSize = 15;
+PlotProps.Scatter.Size = 100;
+Space = set_sub_figure(MegaGrid, [1 3], PlotProps, 'C');
 Space(2) = 70;
 Space(4) = Space(4)-40;
 nQuantiles = 5;

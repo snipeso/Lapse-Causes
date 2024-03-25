@@ -71,12 +71,10 @@ clc
 close all
 
 PlotProps = Parameters.PlotProps.Manuscript;
-PlotProps.Axes.xPadding = 18;
-PlotProps.Axes.yPadding = 18;
-PlotProps.Scatter.Size = 20;
+PlotProps.Scatter.Size = 50;
 Grid = [2 4];
 
-Legend = {'EC Lapses', 'EO Lapses', 'Slow responses', 'Fast responses'};
+Legend = {'EC lapses', 'EO lapses', 'Slow responses', 'Fast responses'};
 
 
 figure('Units','centimeters', 'Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.4])
@@ -122,7 +120,7 @@ plot_radius_lapses(LapseCountLAT, Grid, [2 4], PlotProps.Indexes.Letters{8}, ...
 ylabel('LAT lapses (% trials)')
 
 
-chART.save_figure('Figure_1', Paths.Results, PlotProps)
+chART.save_figure('Figure_Behavior', Paths.Results, PlotProps)
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
