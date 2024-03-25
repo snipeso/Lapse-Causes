@@ -159,7 +159,7 @@ chART.save_figure('SupplFigure_Amplitudes_byTrialType', Paths.Results, PlotProps
 
 %% plot lapse probabilities
 
-nQuantiles = 5;
+nQuantiles = 6;
 
 [LapseProbabilityBursts, RTs] = lapse_probability_by_quantile(AllBurstsTable, Participants, nQuantiles);
 

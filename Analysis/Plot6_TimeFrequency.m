@@ -49,56 +49,49 @@ load(fullfile(CacheDir, CacheFilename), 'AllBurstsTable')
 %% Plot Main figure
 
 PlotProps = Parameters.PlotProps.Manuscript;
-PlotProps.Figure.Padding
 MegaGrid = [1 3];
 CLim = [-10 10];
-PlotProps.Figure.Padding = 20;
-PlotProps.Colorbar.Location = 'southoutside';
-
-
-figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*1.3, PlotProps.Figure.Height*.7])
-
 
 %%% Time frequency
-miniGrid = [2 1];
-Space = set_sub_figure(MegaGrid, [1 1], PlotProps, 'A');
 
 % BL fast
-chART.sub_plot(Space, miniGrid, [1 1], [], true, '', PlotProps);
+figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.33, PlotProps.Figure.Height*.25])
+
 SessionIdx = 1; % BL
 TrialTypeIdx = 3; % fast
 Data = squeeze(MeanChannelTF(:, SessionIdx, TrialTypeIdx, :, :));
 Stats = ttest_timefrequency(Data, Parameters.Stats);
 plot_timefrequency(Stats, TrialTime, Frequencies, CLim, PlotProps)
-set(gca, 'Units', 'pixels')
-Position = get(gca, 'Position');
-Position(2) = Position(2)+65;
-Position(4) = 290;
 xlabel('')
-set(gca, 'position', Position)
 title('BL fast trials', 'FontSize', PlotProps.Text.TitleSize)
 
+chART.save_figure(['Figure_Exploration_TF_BL'], Paths.Results, PlotProps)
+
 % SD lapses
-chART.sub_plot(Space, miniGrid, [2 1], [], true, '', PlotProps);
+figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.33, PlotProps.Figure.Height*.25])
 SessionIdx = 2; % SD
 TrialTypeIdx = 1; % lapse
 Data = squeeze(MeanChannelTF(:, SessionIdx, TrialTypeIdx, :, :));
 Stats = ttest_timefrequency(Data, Parameters.Stats);
 plot_timefrequency(Stats, TrialTime, Frequencies, CLim, PlotProps)
-set(gca, 'Units', 'pixels')
-Position = get(gca, 'Position');
-Position(2) = Position(2)+80;
-Position(4) = 290;
-set(gca, 'position', Position)
-Position = get(gca, 'Position');
-title('SD lapse trials', 'FontSize', PlotProps.Text.TitleSize)
+title('EW lapse trials', 'FontSize', PlotProps.Text.TitleSize)
 
-Axes1 = chART.sub_plot(Space, miniGrid, [2 1], [], true, '', PlotProps);
+Axes1 = chART.sub_plot(Space, Grid, [2 1], [], true, '', PlotProps);
+
+
+chART.save_figure(['Figure_Exploration_TF_SD'], Paths.Results, PlotProps)
+
+
+figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.33, PlotProps.Figure.Height*.25])
+PlotProps.Colorbar.Location = 'southoutside';
+
 chART.plot.pretty_colorbar('Divergent', CLim, 't-values', PlotProps)
+chART.save_figure(['Figure_Exploration_TF_colorbar'], Paths.Results, PlotProps)
 
 
-
+%%
 %%% topographiesTopoPlotProps = Parameters.PlotProps.Manuscript;
+figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.33, PlotProps.Figure.Height*.53])
 TopoPlotProps = Parameters.PlotProps.Manuscript;
 TopoPlotProps.Axes.xPadding = 5;
 TopoPlotProps.Axes.yPadding = 5;
@@ -112,10 +105,7 @@ Ranges = [1, 4,  8, 15, 25;
 BandLabels = {'Delta', 'Theta', 'Alpha', 'Beta', 'Gamma'};
 nBands = size(Ranges, 2);
 
-miniGrid = [nBands 2];
-Space = set_sub_figure(MegaGrid, [1 2], TopoPlotProps, 'B');
-Space(2) = 70;
-Space(4) = Space(4)-40;
+Grid = [nBands 2];
 Window = dsearchn(TrialTime', Window);
 
 for RangeIdx = 1:nBands
@@ -125,12 +115,12 @@ for RangeIdx = 1:nBands
     Data = AllTimeFrequencyEpochs(:, SessionIdx, TrialTypeIdx, :, Range(1):Range(2), Window(1):Window(2));
     Data = squeeze(mean(mean(Data, 5, 'omitnan'), 6, 'omitnan')); % mean in frequency and in time
 
-    chART.sub_plot(Space,  miniGrid, [RangeIdx 1], [], false, '', TopoPlotProps);
+    chART.sub_plot([],  Grid, [RangeIdx 1], [], false, '', TopoPlotProps);
     paired_ttest_topography(zeros(size(Data)), Data, Chanlocs, CLim, Parameters.Stats, TopoPlotProps);
     colorbar off
     chART.plot.vertical_text(BandLabels{RangeIdx}, .15, .5, TopoPlotProps)
     if RangeIdx==1
-        title('-1 to 1 s',  'FontSize', TopoPlotProps.Text.TitleSize)
+        title('Lapses [-1 to 1 s]',  'FontSize', TopoPlotProps.Text.TitleSize)
     end
 
 
@@ -138,7 +128,7 @@ for RangeIdx = 1:nBands
     Data = TimeFrequencyEpochsEO(:, TrialTypeIdx, :, Range(1):Range(2), Window(1):Window(2));
     Data = squeeze(mean(mean(Data, 4, 'omitnan'), 5, 'omitnan')); % mean in frequency and in time
 
-    chART.sub_plot(Space,  miniGrid, [RangeIdx 2], [], false, '', TopoPlotProps);
+    chART.sub_plot([],  Grid, [RangeIdx 2], [], false, '', TopoPlotProps);
     paired_ttest_topography(zeros(size(Data)), Data, Chanlocs, CLim, Parameters.Stats, TopoPlotProps);
     colorbar off
     if RangeIdx==1
@@ -146,38 +136,33 @@ for RangeIdx = 1:nBands
     end
 end
 
+chART.save_figure('Figure_Exploration_topopower', Paths.Results, PlotProps)
+
 
 % plot colobar at bottom
+figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.33, PlotProps.Figure.Height*.25])
 TopoPlotProps.Colorbar.Location = 'southoutside';
-Axes = chART.sub_plot(Space, miniGrid, [nBands 1], [1 2], false, '', TopoPlotProps);
-Axes.Units = 'pixels';
-Axes.Position(2) = 20;
 chART.plot.pretty_colorbar('Divergent', CLim, 't-values', TopoPlotProps)
-Axes.Position(4) = 100;
-
-Axes1.Units = 'pixels';
-Axes1.Position(2) = Axes.Position(2);
-Axes1.Position(4) = Axes.Position(4);
-
+chART.save_figure(['Figure_Exploration_topopower_colorbar'], Paths.Results, PlotProps)
+%%
 
 %%% lapses by quantiles
+SessionLabels = {'BL', 'EW'};
+PlotProps = Parameters.PlotProps.Manuscript;
+PlotProps.Figure.Padding=35;
+figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.4, PlotProps.Figure.Height*.6])
+
 BandLabels = {'Theta', 'Alpha'};
-PlotProps.Line.MarkerSize = 15;
-PlotProps.Scatter.Size = 100;
-Space = set_sub_figure(MegaGrid, [1 3], PlotProps, 'C');
-Space(2) = 70;
-Space(4) = Space(4)-40;
-nQuantiles = 5;
+nQuantiles = 6;
 
 [LapseProbabilityBursts, RTs] = lapse_probability_by_quantile(AllBurstsTable, Participants, nQuantiles);
 
-miniGrid = [2 2];
-PlotProps = Parameters.PlotProps.Manuscript;
+Grid = [2 2];
 
 for idxBand = 1:numel(BandLabels)
 
     for idxSession = 1:2
-        chART.sub_plot(Space, miniGrid, [idxSession, idxBand], [], true, '', PlotProps);
+        chART.sub_plot([], Grid, [idxSession, idxBand], [], false, '', PlotProps);
         Data = squeeze(LapseProbabilityBursts(:, idxSession, idxBand, :));
         zData = zScoreData(Data, 'first');
         Stats = paired_ttest(zData, [], Parameters.Stats);
@@ -190,12 +175,12 @@ for idxBand = 1:numel(BandLabels)
         end
 
         if idxBand == 1
-            ylabel([SessionBlockLabels{idxSession}, ' lapse likelihood'])
+            ylabel([SessionLabels{idxSession}, ' lapse likelihood'])
         end
     end
 end
 
-chART.save_figure(['Figure_Exploration'], Paths.Results, PlotProps)
+chART.save_figure(['Figure_Exploration_Amplitudes'], Paths.Results, PlotProps)
 
 
 

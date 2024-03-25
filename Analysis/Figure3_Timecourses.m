@@ -120,7 +120,6 @@ chART.save_figure(['Figure_BurstTimecourse_',TitleTag], Paths.Results, PlotProps
 clc
 
 disp_stats_descriptive(100*EyeclosureDescriptives(:, 1), 'EC gen prop', '%', 0);
-
 disp_stats_descriptive(100*BurstDescriptives(:, 1, 1), 'Theta gen prop', '%', 0);
 disp_stats_descriptive(100*BurstDescriptives(:, 2, 1), 'Alpha gen prop', '%', 0);
 
