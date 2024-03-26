@@ -57,14 +57,12 @@ RadiusQuantile = 1/6; % bin size for quantiles
 
 %%
 %%% get questionnaire data
-KSSLabelsLAT = {'Baseline Desk', 'Baseline', 'Pre', 'EW Desk', 'EW1', 'EW2', 'EW3', 'Post'};
 KSSLAT = assemble_questionnaire(fullfile(Paths.AnalyzedData, "Questionnaires/", 'LAT_All.csv'), ...
-    Participants, {'BaselineComp', 'BaselineBeam', 'MainPre' 'Session2Comp', 'Session2Beam1', 'Session2Beam2', 'Session2Beam3', 'MainPost'});
+    Participants, Sessions.LAT);
 % KSSLAT = [mean(KSSLAT(:, 1:3), 2, 'omitnan'), mean(KSSLAT(:, 4:6), 2, 'omitnan')];
 
-KSSLabelsPVT = {'Baseline Desk', 'Baseline', 'EW Desk', 'EW'};
 KSSPVT = assemble_questionnaire(fullfile(Paths.AnalyzedData, "Questionnaires/", 'PVT_All.csv'), ...
-    Participants, {'BaselineComp', 'BaselineBeam', 'Session2Comp', 'Session2Beam'});
+    Participants, Sessions.PVT);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Plot
@@ -84,7 +82,7 @@ figure('Units','centimeters', 'Position', [0 0 PlotProps.Figure.Width, PlotProps
 
 %%% PVT
 % A: KSS
-plot_questionnaire(KSSPVT, KSSLabelsPVT, Parameters.Stats, Grid,[1 1], PlotProps.Indexes.Letters{1}, PlotProps)
+plot_questionnaire(KSSPVT, SessionBlockLabels, Parameters.Stats, Grid,[1 1], PlotProps.Indexes.Letters{1}, PlotProps)
 ylabel('PVT sleepiness (KSS)')
 
 % B: Reaction time distributions
@@ -104,7 +102,7 @@ ylabel('PVT lapses EC (%lapses)')
 %%% LAT
 
 % E: KSS
-plot_questionnaire(KSSLAT(:, [1 2 4 5 6 3]), KSSLabelsLAT, Parameters.Stats, Grid,[2 1], PlotProps.Indexes.Letters{5}, PlotProps)
+plot_questionnaire(KSSLAT(:, [1 2 4 5 6 3]), {'Baseline', 'Pre', 'EW1', 'EW2','EW3', 'Post'}, Parameters.Stats, Grid,[2 1], PlotProps.Indexes.Letters{5}, PlotProps)
 ylabel('LAT sleepiness (KSS)')
 
 
@@ -478,7 +476,7 @@ for SessionIdx = 1:numel(Sessions)
    if numel(Data)==1
        KSS(ParticipantIdx, SessionIdx) = Data*9;
    else
-       warning(['something wrong with KSS ' Participants{ParticipantIdx}, ' ', Sessions{SessionIdx}])
+       warning('something wrong with KSS')
    end
 end
 end
