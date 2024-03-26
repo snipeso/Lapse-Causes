@@ -89,8 +89,6 @@ chART.plot.pretty_colorbar('Divergent', CLim, 't-values', PlotProps)
 chART.save_figure(['Figure_Exploration_TF_colorbar'], Paths.Results, PlotProps)
 
 
-%%
-%%% topographiesTopoPlotProps = Parameters.PlotProps.Manuscript;
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.33, PlotProps.Figure.Height*.53])
 TopoPlotProps = Parameters.PlotProps.Manuscript;
 TopoPlotProps.Axes.xPadding = 5;
@@ -144,6 +142,7 @@ figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.33, PlotPr
 TopoPlotProps.Colorbar.Location = 'southoutside';
 chART.plot.pretty_colorbar('Divergent', CLim, 't-values', TopoPlotProps)
 chART.save_figure(['Figure_Exploration_topopower_colorbar'], Paths.Results, PlotProps)
+
 %%
 
 %%% lapses by quantiles
@@ -165,6 +164,7 @@ for idxBand = 1:numel(BandLabels)
         chART.sub_plot([], Grid, [idxSession, idxBand], [], false, '', PlotProps);
         Data = squeeze(LapseProbabilityBursts(:, idxSession, idxBand, :));
         zData = zScoreData(Data, 'first');
+
         Stats = paired_ttest(zData, [], Parameters.Stats);
         chART.plot.individual_rows(zData, Stats, string(1:nQuantiles), [], PlotProps, PlotProps.Color.Participants);
 
@@ -175,12 +175,24 @@ for idxBand = 1:numel(BandLabels)
         end
 
         if idxBand == 1
-            ylabel([SessionLabels{idxSession}, ' lapse likelihood'])
+            ylabel([SessionLabels{idxSession}, ' lapse likelihood (z-scored)'])
         end
     end
 end
 
-chART.save_figure(['Figure_Exploration_Amplitudes'], Paths.Results, PlotProps)
+chART.save_figure('Figure_Exploration_Amplitudes', Paths.Results, PlotProps)
+
+
+%% stats
+
+clc
+SessionIdx = 2;
+
+disp('increase in lapses during EW: ')
+for BandIdx = 1:2
+    Data = squeeze(LapseProbabilityBursts(:, SessionIdx, BandIdx, [1 end]));
+    disp_stats_descriptive(diff(Data, 1, 2)*100, BandLabels{BandIdx}, '%', 0);
+end
 
 
 
@@ -194,7 +206,7 @@ Grid = [2 4];
 PlotProps = Parameters.PlotProps.Manuscript;
 PlotProps.Axes.xPadding = 25;
 PlotProps.Color.Steps.Divergent = 100;
-figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*1.3, PlotProps.Figure.Height*.45])
+figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.45])
 StartPoint = dsearchn(TrialTime', 0);
 YLims = [-.1 .1];
 
@@ -209,7 +221,7 @@ for SessionIdx = 1:2
         end
 
         %%% plot time-frequency
-        chART.sub_plot([], Grid, [SessionIdx FigureIdx], [], true, Letter2, PlotProps);
+        chART.sub_plot([], Grid, [SessionIdx FigureIdx], [], true, '', PlotProps);
         FigureIdx = FigureIdx+1;
         Data = squeeze(MeanChannelTF(:, SessionIdx, TrialTypeIdx, :, :));
         Stats = ttest_timefrequency(Data, Parameters.Stats);
@@ -220,6 +232,8 @@ for SessionIdx = 1:2
         end
         if TrialTypeIdx < 3
             ylabel('')
+        elseif TrialTypeIdx == 3
+            chART.plot.vertical_text(SessionLabels{SessionIdx}, .35, .5, PlotProps)
         end
     end
 end
@@ -227,7 +241,7 @@ end
 Axes = chART.sub_plot([], Grid, [SessionIdx 4], [2, 1], false, '', PlotProps);
 chART.plot.pretty_colorbar('Divergent', CLim, 't-values', PlotProps)
 axis off
-chART.save_figure(['Figure_',TitleTag, 'TimeFrequency'], Paths.Results, PlotProps)
+chART.save_figure('Figure_All_TimeFrequency', Paths.Results, PlotProps)
 
 
 %% topography sequence of SD lapse
