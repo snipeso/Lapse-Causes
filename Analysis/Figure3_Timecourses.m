@@ -40,6 +40,7 @@ figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.
 for idxSession = 1:2
 
     SessionBlockLabel = SessionBlockLabels{idxSession};
+    disp(SessionBlockLabel)
     %%%%%%%%%%%%%%%%%
     %%% load data
 
@@ -80,16 +81,14 @@ for idxSession = 1:2
     DispN = true;
     DispStats = true;
 
-    % eyeclosure
+    disp('EC')
     plot_timecourse(TrialTime, flip(ProbEyesClosedStimLockedDiff, 2), ProbabilityEyesClosedDiff(:, 1), ...
         YLimEyesClosed, flip(TallyLabels), 'Stimulus', StatParameters, DispN, DispStats, PlotProps, ...
         Grid, [idxSession 1], '', 'Eye closure');
     ylabel('Porportion eyes closed (z-score)')
     chART.plot.vertical_text(SessionLabels{idxSession}, .3, .5, PlotProps)
 
-
-
-    % theta
+     disp('theta')
     plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 1, :)), 2), ...
         ProbabilityBurstsDiff(:, 1), YLimTheta, flip(TallyLabels), '', ...
         StatParameters, DispN, DispStats, PlotProps, Grid, [idxSession 2], '', ...
@@ -97,7 +96,7 @@ for idxSession = 1:2
     ylabel('Proportion bursts (z-score)')
     legend off
 
-    % alpha
+     disp('alpha')
     plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 2, :)), 2), ...
         ProbabilityBurstsDiff(:, 2), YLimAlpha, flip(TallyLabels), '', ...
         StatParameters, DispN, DispStats, PlotProps, Grid, [idxSession 3], '', ...
@@ -105,7 +104,9 @@ for idxSession = 1:2
     ylabel('Proportion bursts (z-score)')
     legend off
 
-
+disp("++++++++++++++++++++++++++++++++++++")
+disp("++++++++++++++++++++++++++++++++++++")
+disp("++++++++++++++++++++++++++++++++++++")
 end
 
 chART.save_figure(['Figure_BurstTimecourse_',TitleTag], Paths.Results, PlotProps)
