@@ -75,9 +75,6 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
             continue
         end
 
-        % normalize trials
-        PooledTrials = normalize_trials(PooledTrials, AllRecordingMean);
-
         % average trials by trial type
         for idxChannel = 1:numel(Chanlocs) % a hack, easier to loop here than fix everything in the function
             TimeFrequencyEpochs(idxParticipant, :, idxChannel, :, :) = average_trial_types(...
@@ -88,7 +85,7 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
     end
 
     %%% save
-    save(fullfile(CacheDir, ['Power_', SessionBlockLabels{idxSessionBlock}, TitleTag, '.mat']), ...
+    save(fullfile(CacheDir, ['Session_Power_', SessionBlockLabels{idxSessionBlock}, TitleTag, '.mat']), ...
         'TimeFrequencyEpochs', 'Chanlocs', 'TrialTime', 'Frequencies', '-v7.3')
 end
 
@@ -143,7 +140,10 @@ for idxSession = 1:numel(Sessions)
 
     % cut into trials
     Trials = chop_power_trials(Power, TrialsTable, CurrentTrials, TrialWindow, SampleRate);
-    clear Power
+
+    % normalize trials
+    RecordingMean = mean(log(Power), 3, 'omitnan');
+    Trials = normalize_trials(Trials, RecordingMean);
 
     % pool sessions
     PooledTrials = cat(1, PooledTrials, Trials);
