@@ -46,8 +46,8 @@ for idxFrequencyRow = 1:size(Frequencies, 1)
 
             % create
             Max = max(TF(idxSigCycles, :));
-            StartPatch = find(TF(idxSigCycles, :)>Max*.1, 1, 'first');
-            EndPatch = find(TF(idxSigCycles, :)>Max*.1, 1, 'last');
+            StartPatch = find(TF(idxSigCycles, :)>Max*.5, 1, 'first');
+            EndPatch = find(TF(idxSigCycles, :)>Max*.5, 1, 'last');
             FinalMap(Freq, StartPatch:EndPatch) = SigCyc;
         end
 
@@ -62,6 +62,8 @@ for idxFrequencyRow = 1:size(Frequencies, 1)
     end
 end
 
+chART.save_figure('ERP_Time', Parameters.Paths.Results, PlotProps)
+
 
 %%
 
@@ -73,10 +75,21 @@ figure('Units','normalized', 'Position',[0 0 .7 .5])
 hold on
 % contourf(t_total, sort(Frequencies(:)), FinalMapPlot, 40, 'edgecolor','none')
 imagesc(t_total, sort(Frequencies(:)), FinalMapPlot)
-colorbar
+chART.set_axis_properties(PlotProps)
 % clim([0,Max+0.5])
 clim([0.5,Max+0.5])
 colormap(chART.color_picker(Max, 'rainbow'))
 xlim([-.5 4])
-plot([0 0], [0 MaxFrequency], 'k', 'LineWidth',2)
-ylim([.5 20])
+plot([0 0], [0 MaxFrequency+1], 'k', 'LineWidth',2)
+ylim([.5 20.5])
+xlabel('Time (s)')
+ylabel('Frequency (Hz)')
+h = colorbar('location', 'eastoutside', 'Color', 'k', ...
+   'Ticks', 1:6);
+
+    ylabel(h, '# cycles', 'FontName', PlotProps.Text.FontName, ...
+        'FontSize', PlotProps.Text.AxisSize,'Color', 'k')
+
+
+chART.save_figure('ERP_Timefrequency', Parameters.Paths.Results, PlotProps)
+
