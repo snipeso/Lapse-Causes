@@ -6,12 +6,13 @@ Paths = Parameters.Paths;
 
 Participants = Parameters.Participants;
 
-CheckEyes = true; % check if person had eyes open or closed
+CheckEyes = false; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 
-SessionBlockLabels = {'BL', 'SD'};
+SessionBlockLabels = {'BL', 'EW'};
 CacheDir = fullfile(Paths.Cache, 'Data_Figures');
 
+Paths.Results =  'D:\Data\LSM\Results\Lapse-Causes\ControlSession';
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% load data
@@ -19,8 +20,8 @@ CacheDir = fullfile(Paths.Cache, 'Data_Figures');
 %%% don't check eyes (for TF and topo)
 AllTimeFrequencyEpochs = [];
 
-for SBL = SessionBlockLabels(1)
-    load(fullfile(CacheDir, ['Session_Power_', SBL{1}, '_EO.mat']), ...
+for SBL = SessionBlockLabels
+    load(fullfile(CacheDir, ['Session_Power_', SBL{1}, '.mat']), ...
         'TimeFrequencyEpochs', 'Chanlocs', 'TrialTime', 'Frequencies')
 
     Data = permute(TimeFrequencyEpochs, [1 6, 2, 3, 4 5]);
@@ -30,9 +31,10 @@ end
 Channels = 1:numel(Chanlocs);
 MeanChannelTF = squeeze(mean(AllTimeFrequencyEpochs(:, :, :, Channels, :, :), 4, 'omitnan'));
 
+%%
 
 %%% check eyes (only topo SD)
-load(fullfile(CacheDir, ['Power_', SessionBlockLabels{2}, '_EO.mat']), ...
+load(fullfile(CacheDir, ['Power_SD_EO.mat']), ...
     'TimeFrequencyEpochs')
 
 TimeFrequencyEpochsEO = TimeFrequencyEpochs;
@@ -59,8 +61,8 @@ figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.33, PlotPr
 
 SessionIdx = 1; % BL
 TrialTypeIdx = 3; % fast
-% Data = squeeze(MeanChannelTF(:, SessionIdx, TrialTypeIdx, :, :));
-Data = squeeze(MeanChannelTF(:, TrialTypeIdx, :, :));
+Data = squeeze(MeanChannelTF(:, SessionIdx, TrialTypeIdx, :, :));
+% Data = squeeze(MeanChannelTF(:, TrialTypeIdx, :, :));
 Stats = ttest_timefrequency(Data, Parameters.Stats);
 plot_timefrequency(Stats, TrialTime, Frequencies, CLim, PlotProps)
 xlabel('')
@@ -76,8 +78,6 @@ Data = squeeze(MeanChannelTF(:, SessionIdx, TrialTypeIdx, :, :));
 Stats = ttest_timefrequency(Data, Parameters.Stats);
 plot_timefrequency(Stats, TrialTime, Frequencies, CLim, PlotProps)
 title('EW lapse trials', 'FontSize', PlotProps.Text.TitleSize)
-
-Axes1 = chART.sub_plot(Space, Grid, [2 1], [], true, '', PlotProps);
 
 
 chART.save_figure(['Figure_Exploration_TF_SD'], Paths.Results, PlotProps)
@@ -262,7 +262,7 @@ for SessionIdx = 1:2
     figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.8])
     plot_topography_sequence(AllTimeFrequencyEpochs, Frequencies, Chanlocs, SessionIdx, ...
         TrialTypeIdx, TrialTime, Windows, Ranges, CLim, PlotProps, Parameters.Stats, [])
-    chART.save_figure(['Figure_',TitleTag, 'LapseTopographies_', num2str(SessionIdx)], Paths.Results, PlotProps)
+    chART.save_figure(['Figure_QC_LapseTopographies_', num2str(SessionIdx)], Paths.Results, PlotProps)
 end
 
 
