@@ -8,7 +8,7 @@ close all
 %%% Parameters
 
 OnlyClosestStimuli = false; % only use closest trials
-OnlyEyesOpen = true; % only used eyes-open trials
+OnlyEyesOpen = false; % only used eyes-open trials
 ChannelsCount = 123; % just to pre-allocate before loading in data
 
 Parameters = analysisParameters();

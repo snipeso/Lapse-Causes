@@ -6,7 +6,7 @@ Paths = Parameters.Paths;
 
 Participants = Parameters.Participants;
 
-CheckEyes = false; % check if person had eyes open or closed
+CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
 
 SessionBlockLabels = {'BL', 'SD'};
@@ -19,8 +19,8 @@ CacheDir = fullfile(Paths.Cache, 'Data_Figures');
 %%% don't check eyes (for TF and topo)
 AllTimeFrequencyEpochs = [];
 
-for SBL = SessionBlockLabels
-    load(fullfile(CacheDir, ['Power_', SBL{1}, '.mat']), ...
+for SBL = SessionBlockLabels(1)
+    load(fullfile(CacheDir, ['Session_Power_', SBL{1}, '_EO.mat']), ...
         'TimeFrequencyEpochs', 'Chanlocs', 'TrialTime', 'Frequencies')
 
     Data = permute(TimeFrequencyEpochs, [1 6, 2, 3, 4 5]);
@@ -59,7 +59,8 @@ figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.33, PlotPr
 
 SessionIdx = 1; % BL
 TrialTypeIdx = 3; % fast
-Data = squeeze(MeanChannelTF(:, SessionIdx, TrialTypeIdx, :, :));
+% Data = squeeze(MeanChannelTF(:, SessionIdx, TrialTypeIdx, :, :));
+Data = squeeze(MeanChannelTF(:, TrialTypeIdx, :, :));
 Stats = ttest_timefrequency(Data, Parameters.Stats);
 plot_timefrequency(Stats, TrialTime, Frequencies, CLim, PlotProps)
 xlabel('')
