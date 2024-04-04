@@ -1,8 +1,30 @@
 # Lapse-Causes
- 
+This is the code for the publication {Title}.  
+The EEG preprocessing was previously done with the scripts from this [other respository](https://github.com/snipeso/Theta-SD-vs-WM).
+The Lateralized Attention Task (LAT) task code can be found [here](https://github.com/snipeso/LAT).
+
+## The Code
+
+### Analyses
+The scripts need to be run in order, since most of them depend on some aspect of at least one of the previous ones.
+
+- [analysisParameters.m](./Analysis/analysisParameters.m): This is where all the parameters and variables (e.g. paths, thresholds, frequency band ranges) are indicated that are common across multiple scripts.
+- [Analysis1_Detect_Bursts.m](./Analysis/Analysis1_Detect_Bursts.m): This is the script that runs the toolbox I made, [Matcycle](https://github.com/HuberSleepLab/Matcycle), which detects bursts of oscillations. The exact criteria for detection can all be found in here.
+- [Analysis2_SynchronizeEyeclosures.m](./Analysis/Analysis2_Synchronize_Eyeclosures.m): This script accesses the pupillometry data, synchronizes it to the EEG so I know when participants had their eyes closed.
+- [Analysis3_AssembleTrial_Information.m](./Analysis/Analysis3_Assemble_Trial_Information.m): This script gets all the behavioral trial data for the LAT and PVT, and identifies trials during which eyes were closed. This is especially relevant for Figure 2.
+- [Analysis4_EyeclosureTrials.m](./Analysis/Analysis4_Eyeclosure_Trials.m): This script epochs and averages the eye-closure data synchronized to the stimuli, split by trial outcome. If you wan't to directly see how the likelihood of an event in time was calculated for both eye closures and bursts, see the function [probability_of_event_by_outcome.m](./functions/general/probability_of_event_by_outcome.m).
+- [Analysis5_Burst_Trials.m](./Analysis/Analysis5_Bursts_Trials.m): same as Analysis4, but for bursts.
+- [Analysis6_TimeFrequency.m](./Analysis/Analysis6_TimeFrequency.m): this script runs a time-frequency analysis on each EEG recording. For the actual time-frequency function, see [time_frequency.m](./functions/eeg/time_frequency.m).
+- [Analysis7_EpochTimeFrequency.m](./Analysis/Analysis7_EpochTimeFrequency.m): epochs the time-frequency data. Run twice, once for eyes-open trials, once all trials.
+- [Analysis8_Amplitudes.m](./Analysis/Analysis8_Amplitudes.m): identifies information about amplitudes of bursts around stimuli.
 
 
+### Plotting & statistics
+- [Figure2_Behavior.m](./Analysis/Figure2_Behavior.m): plots all figures related to the tasks, and provides descriptive statistics of lapses and reaction times and such.
+- [Figure3_Timecourses.m](./Analysis/Figure3_Timecourses.m): plots relationship between trial outcome and burst/eyeclosure likelihood.
 
+
+All the statistics are done with the function [paired_ttest.m](/functions/stats/paired_ttest.m). Whenever this function is called for a single plot, FDR correction is applied to all values.
 
 ## Installation & requirements
 

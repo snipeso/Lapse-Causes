@@ -1,6 +1,12 @@
+% plots the final exploratory analyses
+
 clear
 clc
 close all
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% parameters
+
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
 
@@ -64,7 +70,7 @@ title('BL fast trials', 'FontSize', PlotProps.Text.TitleSize)
 
 chART.save_figure(['Figure_Exploration_TF_BL'], Paths.Results, PlotProps)
 
-% SD lapses
+%EWlapses
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.33, PlotProps.Figure.Height*.25])
 SessionIdx = 2; % SD
 TrialTypeIdx = 1; % lapse
@@ -265,7 +271,7 @@ axis off
 chART.save_figure('Figure_All_TimeFrequency', Paths.Results, PlotProps)
 
 
-%% topography sequence of SD lapse
+%% topography sequence ofEWlapse
 
 PlotProps = Parameters.PlotProps.Manuscript;
 PlotProps.Figure.Padding = 20;

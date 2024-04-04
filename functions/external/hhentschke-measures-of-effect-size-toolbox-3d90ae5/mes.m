@@ -127,13 +127,13 @@ function stats=mes(X,Y,esm,varargin)
 
 % -------------------------------------------------------------------------
 % Measures of Effect Size Toolbox Version 1.6.1, November 2018
-% Code by Harald Hentschke (University Hospital of Tübingen) and 
-% Maik Stüttgen (University Medical Center Mainz)
-% For additional information see Hentschke and Stüttgen, 
+% Code by Harald Hentschke (University Hospital of Tï¿½bingen) and 
+% Maik Stï¿½ttgen (University Medical Center Mainz)
+% For additional information see Hentschke and Stï¿½ttgen, 
 % Eur J Neurosci 34:1887-1894, 2011
 % 
 % Acknowledgements:
-% - Thanks to Rainer Düsing University of Osnabrück) for discussion of and
+% - Thanks to Rainer Dï¿½sing University of Osnabrï¿½ck) for discussion of and
 %   cooperation on bias correction for Hedges's g for dependent data
 % - Function fast_corr by Elliot Layden
 % (https://de.mathworks.com/matlabcentral/fileexchange/63082-fast-corr)
@@ -470,7 +470,7 @@ for g=1:nColX
   n1=repmat(n1,[1 nBoot+1]);
   n2=repmat(n2,[1 nBoot+1]);
 
-  % - degrees of freedom, t statistics, sd of diff score & pooled var
+  % - degrees of freedom, t statistics,EWof diff score & pooled var
   if isDep || isequal(uTag,1)
     % df in dependent case: n=n1-1=n2-1
     df=n1-1;
@@ -891,7 +891,7 @@ for g=1:nColX
         
       case 'rbcorr'
         % rank-biserial correlation coefficient
-        % § compared to all other analyses this one takes an awfully long
+        % ï¿½ compared to all other analyses this one takes an awfully long
         % time because of function corr and the functions it calls
         % (tiedrank and so on) - possibly this could be sped up
         es=corr(cat(1,x,y),cat(1,zeros(n1(1),1),ones(n2(1),1)),'type','Spearman');

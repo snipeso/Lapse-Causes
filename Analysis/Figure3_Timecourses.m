@@ -7,11 +7,10 @@ close all
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
 
-
 SmoothFactor = 0.2; % in seconds, smooth signal to be visually pleasing
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionBlockLabels = {'BL', 'SD'};
+SessionBlockLabels = {'BL', 'SD'}; % might need to change to EW.
 SessionLabels = {'BL', 'EW'}; % because I switched the names late
 
 Parameters = analysisParameters();
@@ -28,6 +27,10 @@ CacheDir = fullfile(Paths.Cache, 'Data_Figures');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% plot
 
+DispN = true;
+DispStats = true;
+
+
 clc
 YLimEyesClosed = [-.6 1.4];
 YLimAlpha = [-1 1];
@@ -41,6 +44,7 @@ for idxSession = 1:2
 
     SessionBlockLabel = SessionBlockLabels{idxSession};
     disp(SessionBlockLabel)
+
     %%%%%%%%%%%%%%%%%
     %%% load data
 
@@ -63,7 +67,7 @@ for idxSession = 1:2
 
     [ProbEyesClosedStimLockedDiff, ProbEyesClosedRespLockedDiff, ProbabilityEyesClosedDiff] = ...
         process_data(EyesClosedStimLocked, EyesClosedRespLocked, EyeclosureDescriptives, ...
-        TrialTime, SmoothFactor, []);
+        TrialTime, SmoothFactor, []); % smooth and z-score data
 
     % burst data
     load(fullfile(CacheDir, ['Bursts_', TitleTag, '.mat']), ...
@@ -78,9 +82,6 @@ for idxSession = 1:2
     %%% Plot
 
     %%% stimulus locked
-    DispN = true;
-    DispStats = true;
-
     disp('EC')
     plot_timecourse(TrialTime, flip(ProbEyesClosedStimLockedDiff, 2), ProbabilityEyesClosedDiff(:, 1), ...
         YLimEyesClosed, flip(TallyLabels), 'Stimulus', StatParameters, DispN, DispStats, PlotProps, ...
@@ -88,7 +89,7 @@ for idxSession = 1:2
     ylabel('Porportion eyes closed (z-score)')
     chART.plot.vertical_text(SessionLabels{idxSession}, .3, .5, PlotProps)
 
-     disp('theta')
+    disp('theta')
     plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 1, :)), 2), ...
         ProbabilityBurstsDiff(:, 1), YLimTheta, flip(TallyLabels), '', ...
         StatParameters, DispN, DispStats, PlotProps, Grid, [idxSession 2], '', ...
@@ -96,7 +97,7 @@ for idxSession = 1:2
     ylabel('Proportion bursts (z-score)')
     legend off
 
-     disp('alpha')
+    disp('alpha')
     plot_timecourse(TrialTime, flip(squeeze(ProbBurstsStimLockedDiff(:, :, 2, :)), 2), ...
         ProbabilityBurstsDiff(:, 2), YLimAlpha, flip(TallyLabels), '', ...
         StatParameters, DispN, DispStats, PlotProps, Grid, [idxSession 3], '', ...
@@ -104,9 +105,9 @@ for idxSession = 1:2
     ylabel('Proportion bursts (z-score)')
     legend off
 
-disp("++++++++++++++++++++++++++++++++++++")
-disp("++++++++++++++++++++++++++++++++++++")
-disp("++++++++++++++++++++++++++++++++++++")
+    disp("++++++++++++++++++++++++++++++++++++")
+    disp("++++++++++++++++++++++++++++++++++++")
+    disp("++++++++++++++++++++++++++++++++++++")
 end
 
 chART.save_figure(['Figure_BurstTimecourse_',TitleTag], Paths.Results, PlotProps)
@@ -116,7 +117,7 @@ chART.save_figure(['Figure_BurstTimecourse_',TitleTag], Paths.Results, PlotProps
 %%% Stats
 
 
-%% display general prop of things
+%% display general probability of things
 
 clc
 
@@ -126,7 +127,7 @@ disp_stats_descriptive(100*BurstDescriptives(:, 2, 1), 'Alpha gen prop', '%', 0)
 
 
 
-%%
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
 
@@ -134,10 +135,10 @@ function [ProbStimProcessed, ProbRespProcessed, ProbEventProcessed] = ...
     process_data(ProbStimLocked, ProbRespLocked, ProbEvent, TrialTime, SmoothFactor, BandDimention)
 
 % smooth data
-ProbStimSmooth = smooth_frequencies(ProbStimLocked, TrialTime, 'last', SmoothFactor);
+ProbStimSmooth = smooth_frequencies(ProbStimLocked, TrialTime, 'last', SmoothFactor); % NB, the original function was intended to smooth power spectra, but it works just as well for time, since the SmoothFactor is relative to the the TrialTime vector
 ProbRespSmooth = smooth_frequencies(ProbRespLocked, TrialTime, 'last', SmoothFactor);
 
-% center data to recording average
+% z-score the data
 [ProbStimProcessed, ProbEventProcessed] = mean_center_timescore(ProbStimSmooth, ProbEvent, BandDimention);
 [ProbRespProcessed, ~] = mean_center_timescore(ProbRespSmooth, ProbEvent, BandDimention);
 end
@@ -176,6 +177,7 @@ if ~isempty(YLims)
 else
     Range = [min(ProbabilityByOutput(:)), max(ProbabilityByOutput(:))];
 end
+
 
 chART.sub_plot([], Grid, Position, [], true, Letter, PlotProps);
 

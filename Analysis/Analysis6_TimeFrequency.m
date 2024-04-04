@@ -1,3 +1,8 @@
+% This script conducts a time-frequency analysis across the entire EEG
+% recording. The next script will then epoch the data. A special thanks to
+% Sven Leach and Maria Dimitriades for the script for the wavelet
+% transformation.
+
 clear
 clc
 close all
@@ -6,21 +11,17 @@ close all
 %%% load in and set parameters for analysis
 RerunAnalysis = true; % false to skip files already analyzed
 
-
 % load in parameters that are in common across scripts
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
 Task = Parameters.Task;
 Sessions = Parameters.Sessions.(Task);
 Participants = Parameters.Participants;
-Bands = Parameters.Narrowbands;
 Triggers = Parameters.Triggers;
 
 Frequencies = 1:35;
-CycleRange = [3, 15];
+CycleRange = [3, 15]; % chosen without thinking too hard about it. Sue me.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Analysis
 
 % set paths and files
 EEGSource = fullfile(Paths.CleanEEG, Task);
@@ -30,12 +31,14 @@ if ~exist(Destination, 'dir')
     mkdir(Destination)
 end
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Analysis
+
 Filenames = list_filenames(EEGSource);
 Filenames(~contains(Filenames, Sessions)) = [];
 Filenames(~contains(Filenames, Participants)) = [];
 
-
-%%% run
 for FilenameSource = Filenames'
 
     % load data
@@ -60,6 +63,7 @@ for FilenameSource = Filenames'
 
     % only use clean task timepoints
     KeepTimepoints = CleanTimepoints & TaskPoints;
+    
     % run wavelets
     [Power, ~, ~] = time_frequency(EEG.data, EEG.srate, Frequencies, CycleRange(1), CycleRange(2));
 

@@ -1,5 +1,5 @@
 function Stats = paired_ttest_topography(Data1, Data2, Chanlocs, CLims, StatParameters, PlotProps)
-% topoDiff(Data1, Data2, Chanlocs, CLims, StatsP, PlotProps)
+% Stats = paired_ttest_topography(Data1, Data2, Chanlocs, CLims, StatParameters, PlotProps)
 %
 % plots the t-values (color) and significant channels (white dots) of
 % Data2 vs Data1 using chART plots.

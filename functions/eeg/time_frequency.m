@@ -16,8 +16,9 @@ function [power, phase, times, wavelets] = time_frequency(data, srate, freqs, mi
 
     % ---------------------------------------------------------------------
     % Wavelet transform as taught by Mike Cohen using Morlet Wavelets       
-    % See also: https://mikexcohen.com/lectures.html
-
+        % See also: https://mikexcohen.com/lectures.html
+        % By Sven Leach and Maria Dimitriades, with minor fixes from Sophia
+        % Snipes. 2024.
     % *** Input
     %
     % data:         EEG data, either as a 3D (channels x samples x trials)

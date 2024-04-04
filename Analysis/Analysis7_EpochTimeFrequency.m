@@ -1,5 +1,6 @@
-% gets the data showing the probability of eyesclosed over time for each
-% trial outcome type.
+% epochs the time-frequency data, and corrects each trial by the session
+% average.
+
 clear
 clc
 close all
@@ -7,8 +8,8 @@ close all
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% Parameters
 
-OnlyClosestStimuli = false; % only use closest trials
-OnlyEyesOpen = true; % only used eyes-open trials
+OnlyClosestStimuli = false; % only use closest trials (legacy)
+OnlyEyesOpen = true; % only used eyes-open trials. Need to run script twice, once true, once false!
 ChannelsCount = 123; % just to pre-allocate before loading in data
 
 Parameters = analysisParameters();
@@ -23,7 +24,6 @@ MaxStimulusDistanceProportion = Parameters.Stimuli.MaxDistance;
 SessionBlocks = Parameters.Sessions.Conditions;
 SessionBlockLabels = fieldnames(SessionBlocks);
 MinTrials = Parameters.Trials.MinPerSubGroupCount;
-Bands = Parameters.Bands;
 
 Frequencies = 1:35;
 TotFrequencies = numel(Frequencies);
@@ -43,7 +43,8 @@ CacheDir = fullfile(Paths.Cache, 'Data_Figures');
 %%% get trial information
 load(fullfile(TrialCacheDir, CacheFilename), 'TrialsTable')
 
-TrialTime = linspace(TrialWindow(1), TrialWindow(2), SampleRate*(TrialWindow(2)-TrialWindow(1))); % time vector
+% time vector
+TrialTime = linspace(TrialWindow(1), TrialWindow(2), SampleRate*(TrialWindow(2)-TrialWindow(1)));
 
 % if requested, exclude trials during which eyes were closed during the
 % stimulus window
@@ -56,7 +57,7 @@ TrialTime = linspace(TrialWindow(1), TrialWindow(2), SampleRate*(TrialWindow(2)-
 
 
 %%% get power
-for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
+for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and EW
 
     Sessions = SessionBlocks.(SessionBlockLabels{idxSessionBlock});
 
@@ -65,6 +66,8 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
 
     for idxParticipant = 1:numel(Participants)
        
+        % assemble all trials from same session block, and then average
+        % power for that session block
         [PooledTrials, PooledTrialsTable,  AllRecordingMean, Chanlocs] = pool_eeg(TrialsTable, ...
             EyetrackingQualityTable, EEGDir, EyesOpenTrialIndexes, EyetrackingDir, ...
             Participants{idxParticipant}, Sessions, MaxStimulusDistance, TrialWindow, SampleRate, ...
@@ -75,7 +78,7 @@ for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
             continue
         end
 
-        % normalize trials
+        % normalize trials by average power
         PooledTrials = normalize_trials(PooledTrials, AllRecordingMean);
 
         % average trials by trial type
@@ -131,8 +134,9 @@ for idxSession = 1:numel(Sessions)
         Power(:, :, ~logical(CleanTimepoints)) = nan;
     end
 
-    PowerSum = sum(log(Power), 3, 'omitnan');
+    PowerSum = sum(log(Power), 3, 'omitnan'); % IMPORTANT: log happens first! This is so that its most comparable to the trial data from which this gets subtracted
     PowerCount = sum(~isnan(Power), 3);
+
     if ~exist("AllRecordingPower", 'var') % have to do this to avoid running out of RAM
         AllRecordingPower = PowerSum;
         AllRecordingPoints = PowerCount;
@@ -153,9 +157,29 @@ end
 
 % provide average power of all sessions
 AllRecordingMean = AllRecordingPower./AllRecordingPoints;
-
-
 end
+
+
+
+function Trials = chop_power_trials(Power, TrialsTable, ...
+    CurrentTrials, TrialWindow, SampleRate)
+% epoch time-frequency data
+
+FrequencyCount = size(Power, 2);
+ChannelCount = size(Power, 1);
+TrialWindowTimepoints = SampleRate*(TrialWindow(2)-TrialWindow(1));
+
+Trials = nan(nnz(CurrentTrials), ChannelCount,  FrequencyCount, TrialWindowTimepoints); % T x Ch x F x t
+
+for idxFrequency = 1:FrequencyCount
+    SingleFrequencyTimes = squeeze(Power(:, idxFrequency, :));
+
+    Trials(:, :, idxFrequency, :) = chop_trials(SingleFrequencyTimes, SampleRate, ...
+        TrialsTable.StimTimepoint(CurrentTrials), TrialWindow);
+end
+end
+
+
 
 
 function LogPooledTrials = normalize_trials(PooledTrials, AllRecordingMean)
@@ -216,9 +240,8 @@ for idxType = 1:3
         AveragedTrials(idxType, :, :) = Average;
     end
 end
-
-
 end
+
 
 function TypeTrialData = remove_trials_too_much_nan(TypeTrialData, MaxNaNProportion)
 % remove trials that are missing too much data in time
@@ -227,10 +250,7 @@ function TypeTrialData = remove_trials_too_much_nan(TypeTrialData, MaxNaNProport
 TrialsTime = size(TypeTrialData, 3);
 NanProportion = squeeze(sum(isnan(TypeTrialData(:, 1, :)), 3))./TrialsTime;
 TypeTrialData(NanProportion>MaxNaNProportion, :, :) = [];
-
 end
-
-
 
 
 function CleanTimepoints = check_eyes_open(CleanTimepoints, EyetrackingPath, ...
@@ -255,24 +275,5 @@ if numel(EyeClosed) ~= numel(CleanTimepoints)
     error(['mismatch datapoints ', Participant, Session])
 end
 CleanTimepoints(EyeClosed==1) = 0;
-end
-
-
-
-function Trials = chop_power_trials(Power, TrialsTable, ...
-    CurrentTrials, TrialWindow, SampleRate)
-
-FrequencyCount = size(Power, 2);
-ChannelCount = size(Power, 1);
-TrialWindowTimepoints = SampleRate*(TrialWindow(2)-TrialWindow(1));
-
-Trials = nan(nnz(CurrentTrials), ChannelCount,  FrequencyCount, TrialWindowTimepoints); % T x Ch x F x t
-
-for idxFrequency = 1:FrequencyCount
-    SingleFrequencyTimes = squeeze(Power(:, idxFrequency, :));
-
-    Trials(:, :, idxFrequency, :) = chop_trials(SingleFrequencyTimes, SampleRate, ...
-        TrialsTable.StimTimepoint(CurrentTrials), TrialWindow);
-end
 end
 

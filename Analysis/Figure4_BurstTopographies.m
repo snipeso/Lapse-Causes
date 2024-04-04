@@ -1,3 +1,6 @@
+% plots the topographies of the liklihood of theta and alpha bursts for
+% different windows around stimulus onset.
+
 clear
 clc
 close all
@@ -7,12 +10,11 @@ close all
 
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionGroup = 'SD';
+SessionGroup = 'SD'; % needs to be run twice! First BL then EW/SD
 
 
 Parameters = analysisParameters();
 Paths = Parameters.Paths;
-Task = Parameters.Task;
 Participants = Parameters.Participants;
 TallyLabels = Parameters.Labels.TrialOutcome; % rename to outcome labels TODO
 StatParameters = Parameters.Stats;
@@ -21,8 +23,6 @@ WindowTitles = {["Pre", "[-2, 0]"], ["Stimulus", "[0, 0.3]"], ["Response", "[0.3
 Bands = Parameters.Bands;
 BandLabels = fieldnames(Bands);
 CacheDir = fullfile(Paths.Cache, 'Data_Figures');
-
-
 
 TitleTag = SessionGroup;
 if CheckEyes
@@ -57,13 +57,14 @@ miniGrid = [3 WindowCount];
 
 Types = [3 2 1];
 
-% figure('Units','centimeters', 'Position',[0 0 PlotProps.Figure.Width*1.3, PlotProps.Figure.Height*.6])
 figure('Units','normalized', 'Position',[0 0 .5, .45])
 for idxBand = 1:2 % subplot A and B
 
     Space = set_sub_figure(Grid, [4 idxBand], PlotProps, '');
     for idxOutcome = 1:3 % rows
         for idxWindow = 1:WindowCount % columns
+            
+            % assemble data
             Data = squeeze(WindowedStim(:, Types(idxOutcome), :, idxBand, idxWindow));
             Baseline = squeeze(BurstDescriptivesTopography(:, :, idxBand));
 
@@ -73,11 +74,13 @@ for idxBand = 1:2 % subplot A and B
                 PlotProps.Stats.PlotN = false;
             end
 
+            % plot
             Stats = plot_burst_probability_change_topoplot(Data, Baseline, ...
                 StatParameters, Chanlocs, Space, miniGrid, [idxOutcome, idxWindow], ...
                 CLims, PlotProps);
             write_titles(idxWindow, idxOutcome, WindowTitles, TallyLabels, Types, PlotProps)
 
+            % print out most significant channels for each plot
             disp_topo_stats(Stats, Chanlocs, TallyLabels{Types(idxOutcome)}, ...
                 BandLabels{idxBand}, WindowTitles{idxWindow})
         end
@@ -88,26 +91,21 @@ end
 chART.save_figure(['Figure_',TitleTag, '_Topography'], Paths.Results, PlotProps)
 
 
-%%
-close all
 
-Windows = {'Pre', 'Stim', 'Resp', 'Post'};
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% functions
 
-idxOutcome = 1;
-for idxBand = 1:2
-    for idxWindow = 1:WindowCount
-        Data = squeeze(WindowedStim(:, Types(idxOutcome), :, idxBand, idxWindow));
-        Baseline = squeeze(BurstDescriptivesTopography(:, :, idxBand));
-        plot_individual_differences(Data, Baseline, Participants, Chanlocs, PlotProps)
-        chART.save_figure(strjoin(['IndividualTopos',TitleTag, ...
-            BandLabels(idxBand), Windows(idxWindow), TallyLabels(idxOutcome)], '_'), Paths.Results, PlotProps)
-    end
+
+function disp_topo_stats(Stats, Chanlocs, OutcomeType, BandLabel, WindowTitle)
+String = strjoin({BandLabel, OutcomeType, char(WindowTitle(1)), ...
+    '; globality:' [num2str(round(100*nnz(Stats.sig)/numel(Stats.sig))), '%'], ...
+    'max ch:', }, ' ');
+disp_highest_tvalue(Stats, Chanlocs, String);
 end
 
 
-%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% functions
+%%%%%%%%%%%%%%%%%%%%%%%
+%%% plot stuff
 
 function Space = set_sub_figure(Grid, Position, PlotProps, Letter)
 PlotProps.Axes.xPadding = 20;
@@ -128,14 +126,6 @@ colorbar off
 end
 
 
-function disp_topo_stats(Stats, Chanlocs, OutcomeType, BandLabel, WindowTitle)
-
-String = strjoin({BandLabel, OutcomeType, char(WindowTitle(1)), ...
-    '; globality:' [num2str(round(100*nnz(Stats.sig)/numel(Stats.sig))), '%'], ...
-    'max ch:', }, ' ');
-disp_highest_tvalue(Stats, Chanlocs, String);
-end
-
 function write_titles(idxWindow, idxOutcome, WindowTitles, TallyLabels, Types, PlotProps)
 
 if idxOutcome == 1
@@ -153,7 +143,7 @@ end
 end
 
 
-function plot_colorbar(PlotProps, Grid, Position, CLims, BandLabel)
+function plot_colorbar(PlotProps, Grid, Position, CLims)
 PlotProps.Axes.xPadding = 20;
 PlotProps.Axes.yPadding = 20;
 

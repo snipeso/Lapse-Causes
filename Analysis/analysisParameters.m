@@ -1,5 +1,6 @@
 function Parameters = analysisParameters()
-% parameters for detecting bursts
+% parameters for detecting bursts that get called repeatedly from all the
+% scripts.
 % Lapses-Causes
 
 Parameters = struct();
@@ -74,7 +75,6 @@ end
 
 addExternalFunctions
 
-
 if exist( 'D:\LSM\Preprocessed', 'dir') % KISPI desktop
     Core = 'D:\LSM\';
     addpath('H:\Code\chART')
@@ -144,6 +144,12 @@ Triggers.RightBlock = 'S 11';
 Triggers.Tones = 'S 12';
 Parameters.Triggers = Triggers;
 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Plotting information
+
+
 Parameters.PlotProps.Manuscript = chART.load_plot_properties({'LSM', 'Manuscript'});
 Parameters.PlotProps.Manuscript.Figure.Width = 30;
 Parameters.PlotProps.Manuscript.Figure.Height = 42;
@@ -160,7 +166,7 @@ Parameters.PlotProps.Manuscript.Scatter.Size = 50;
 Parameters.PlotProps.Powerpoint = chART.load_plot_properties({'LSM', 'Powerpoint'});
 Parameters.PlotProps.Poster = chART.load_plot_properties({'LSM', 'Poster'});
 
-%%% channel clusters
+%%% channel clusters (legacy)
 
 Frontspot = [22 15 9 23 18 16 10 3 24 19 11 4 124 20 12 5 118 13 6 112];
 Backspot = [66 71 76 84 65 70 75 83 90 69 74 82 89];

@@ -1,4 +1,5 @@
 % plot outcome of task performance, to compare PVT and LAT
+
 clear
 clc
 close all
@@ -40,6 +41,7 @@ OutcomeCountPVT = assemble_trial_outcome_count(TrialsTablePVT, Participants, Ses
 Thresholds = .3:.1:1; % plot number of eyes closed trials with different RT thresholds
 LapseCountPVT = lapse_count_by_threshold(TrialsTable, Participants, Sessions.PVT, TraditionalOutcomePVT, Thresholds);
 
+
 %%% get LAT trial data
 load(fullfile(CacheDir, 'LAT_TrialsTable.mat'), 'TrialsTable') % from script Load_Trials
 TrialsTableLAT = TrialsTable;
@@ -55,11 +57,10 @@ RadiusQuantile = 1/6; % bin size for quantiles
 [LapseCountLAT, RadiusBinsLAT] = lapse_count_by_radius(TrialsTableLAT, RadiusQuantile, Participants, ...
     Sessions.LAT, {1:3, 4:6}, MinTrialCount);
 
-%%
+
 %%% get questionnaire data
 KSSLAT = assemble_questionnaire(fullfile(Paths.AnalyzedData, "Questionnaires/", 'LAT_All.csv'), ...
     Participants, Sessions.LAT);
-% KSSLAT = [mean(KSSLAT(:, 1:3), 2, 'omitnan'), mean(KSSLAT(:, 4:6), 2, 'omitnan')];
 
 KSSPVT = assemble_questionnaire(fullfile(Paths.AnalyzedData, "Questionnaires/", 'PVT_All.csv'), ...
     Participants, Sessions.PVT);
@@ -170,6 +171,7 @@ describe_lapses(EyesOpenOutcomeCount, EyesClosedOutcomeCount, StatParameters)
 
 
 %%
+
 describe_reaction_times(MeansLAT, Quantile99LAT, StatParameters)
 
 %%
@@ -189,7 +191,6 @@ function NormalizedOutcomeCount = assemble_trial_outcome_count(TrialsTable, Part
     TrialsTable, Participants, Sessions, SessionGroups);
 
 OutcomeCount = cat(3, EyesOpenOutcomeCount, EyesClosedOutcomeCount); % EO Lapses, EO Late, EO Fast, EC Lapses, EC Late, EC Fast
-% TotalTrialsCount = sum(EyesOpenOutcomeCount, 3)+sum(EyesClosedOutcomeCount, 3);
 
 [OutcomeCount, TotalTrialsCount] = remove_participants_missing_data(OutcomeCount, MinTrialCount);
 
@@ -395,7 +396,7 @@ disp_stats(Stats, [1 1], 'SD effect on RTs:');
 
 % distribution of RTs to show that they don't go over 1s
 SB_Indx = 2;
-disp_stats_descriptive(1000*Quantile99(:, SB_Indx), 'RT for 99% of SD data:', ' ms', 0);
+disp_stats_descriptive(1000*Quantile99(:, SB_Indx), 'RT for 99% ofEWdata:', ' ms', 0);
 disp('______________________')
 end
 
@@ -453,7 +454,7 @@ disp('*')
 % each distance
 for Indx_Q = 1:size(LapseCount, 2)
     disp_stats_descriptive(squeeze(LapseCount(:, Indx_Q, 3)-LapseCount(:, Indx_Q, 1)), ... ...
-        ['BL v SD EO lapses Q', num2str(Indx_Q)], '%', '%.1f');
+        ['BL vEWEO lapses Q', num2str(Indx_Q)], '%', '%.1f');
 end
 disp('*')
 
