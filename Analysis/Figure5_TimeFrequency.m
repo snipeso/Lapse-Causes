@@ -145,6 +145,8 @@ chART.save_figure(['Figure_Exploration_topopower_colorbar'], Paths.Results, Plot
 
 %%
 
+clc
+
 %%% lapses by quantiles
 SessionLabels = {'BL', 'EW'};
 PlotProps = Parameters.PlotProps.Manuscript;
@@ -154,7 +156,7 @@ figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.4, PlotPro
 BandLabels = {'Theta', 'Alpha'};
 nQuantiles = 6;
 
-[LapseProbabilityBursts, RTs] = lapse_probability_by_quantile(AllBurstsTable, Participants, nQuantiles);
+[LapseProbabilityBursts, Amplitudes, RTs] = lapse_probability_by_quantile(AllBurstsTable, Participants, nQuantiles);
 
 Grid = [2 2];
 
@@ -177,11 +179,30 @@ for idxBand = 1:numel(BandLabels)
         if idxBand == 1
             ylabel([SessionLabels{idxSession}, ' lapse likelihood (z-scored)'])
         end
+
+    % amplitudes of quantiles
+    Amps = squeeze(Amplitudes(:, idxSession, idxBand, :));
+    for idxQuantile = 1:nQuantiles
+    disp_stats_descriptive(Amps(:, idxQuantile), [SessionLabels{idxSession}, ' ', BandLabels{idxBand}, ' Q', num2str(idxQuantile)], 'miV', 0);
+    end
     end
 end
 
 chART.save_figure('Figure_Exploration_Amplitudes', Paths.Results, PlotProps)
 
+
+%% plot distribution of amplitudes of bursts
+
+AmplitudeStruct = assemble_amplitudes(AllBurstsTable, Participants, SessionBlockLabels, BandLabels);
+
+figure
+for idxBand = 1:2
+subplot(1, 2, idxBand)
+chART.plot.overlapping_distributions(AmplitudeStruct.(BandLabels{idxBand}), PlotProps, PlotProps.Color.Participants, .15)
+title(BandLabels{idxBand})
+ylim([0 70])
+legend off
+end
 
 %% stats
 
@@ -364,13 +385,14 @@ end
 
 
 
-function [LapseProbability, RTs] = lapse_probability_by_quantile(AllBurstsTable, Participants, nQuantiles)
+function [LapseProbability, Amplitudes, RTs] = lapse_probability_by_quantile(AllBurstsTable, Participants, nQuantiles)
 % sorts bursts into quantiles by amplitude, and identifies how many of
 % those result in a lapse. Also provides RTs for funzies.
 
 AllBurstsTable(AllBurstsTable.EyesClosed==1, :) = [];
 
 LapseProbability = nan(numel(Participants), 2, 2, nQuantiles);
+Amplitudes = LapseProbability;
 RTs = LapseProbability;
 
 for idxParticipant = 1:numel(Participants)
@@ -394,10 +416,29 @@ for idxParticipant = 1:numel(Participants)
                 LapseProbability(idxParticipant, idxSession, idxBand, idxQuantile) = ...
                     nnz(QuantileBurstTypes==1)/numel(QuantileBurstTypes);
 
+                Amplitudes(idxParticipant, idxSession, idxBand, idxQuantile) = ...
+                    mean(Bursts.Amplitude(BinnedBursts==idxQuantile));
+
                 RTs(idxParticipant, idxSession, idxBand, idxQuantile) = ...
                     mean(Bursts.RT(BinnedBursts==idxQuantile));
             end
         end
     end
+end
+end
+
+
+function AmplitudeStruct = assemble_amplitudes(BurstsTable, Participants, SessionBlockLabels, BandLabels)
+
+AmplitudeStruct = struct();
+
+for idxBand = 1:numel(BandLabels)
+for idxSession = 1:numel(SessionBlockLabels)
+for idxParticipant = 1:numel(Participants)
+    Amplitudes = BurstsTable.Amplitude(strcmp(string(BurstsTable.Participant), Participants{idxParticipant}) & ...
+        BurstsTable.SessionBlock == idxSession & BurstsTable.Band == idxBand);
+        AmplitudeStruct.(BandLabels{idxBand}).(SessionBlockLabels{idxSession}).(Participants{idxParticipant}) = Amplitudes;
+end
+end
 end
 end
