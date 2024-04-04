@@ -19,7 +19,7 @@ CacheDir = fullfile(Paths.Cache, 'Data_Figures');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% load data
 
-%%% don't check eyes (for TF and topo)
+%%% don't check eyes (for timefrequency and topography)
 AllTimeFrequencyEpochs = [];
 
 for SBL = SessionBlockLabels
@@ -34,13 +34,13 @@ Channels = 1:numel(Chanlocs);
 MeanChannelTF = squeeze(mean(AllTimeFrequencyEpochs(:, :, :, Channels, :, :), 4, 'omitnan'));
 
 
-%%% check eyes (only topo SD)
+%%% check eyes (only topography EW)
 load(fullfile(CacheDir, ['Power_', SessionBlockLabels{2}, '_EO.mat']), ...
     'TimeFrequencyEpochs')
 
 TimeFrequencyEpochsEO = TimeFrequencyEpochs;
 
-%%% amplitude data
+%%% amplitude data (already set for eyes-open).
 CacheFilename = 'LAT_TrialsTable.mat';
 load(fullfile(CacheDir, CacheFilename), 'AllBurstsTable')
 
@@ -50,14 +50,14 @@ load(fullfile(CacheDir, CacheFilename), 'AllBurstsTable')
 
 
 %% Plot Main figure
+% plotted in pieces, that I then assemble in powerpoint.
 
 PlotProps = Parameters.PlotProps.Manuscript;
-MegaGrid = [1 3];
 CLim = [-10 10];
 
 %%% Time frequency
 
-% BL fast
+% BL fast trials
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.33, PlotProps.Figure.Height*.25])
 
 SessionIdx = 1; % BL
@@ -68,49 +68,47 @@ plot_timefrequency(Stats, TrialTime, Frequencies, CLim, PlotProps)
 xlabel('')
 title('BL fast trials', 'FontSize', PlotProps.Text.TitleSize)
 
-chART.save_figure(['Figure_Exploration_TF_BL'], Paths.Results, PlotProps)
+chART.save_figure('Figure_Exploration_TF_BL', Paths.Results, PlotProps)
 
-%EWlapses
+% EW slow trials
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.33, PlotProps.Figure.Height*.25])
-SessionIdx = 2; % SD
+SessionIdx = 2; % EW
 TrialTypeIdx = 1; % lapse
 Data = squeeze(MeanChannelTF(:, SessionIdx, TrialTypeIdx, :, :));
 Stats = ttest_timefrequency(Data, Parameters.Stats);
 plot_timefrequency(Stats, TrialTime, Frequencies, CLim, PlotProps)
 title('EW lapse trials', 'FontSize', PlotProps.Text.TitleSize)
 
-Axes1 = chART.sub_plot(Space, Grid, [2 1], [], true, '', PlotProps);
+chART.save_figure('Figure_Exploration_TF_EW', Paths.Results, PlotProps)
 
-
-chART.save_figure(['Figure_Exploration_TF_SD'], Paths.Results, PlotProps)
-
-
+% colorbar
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.33, PlotProps.Figure.Height*.25])
 PlotProps.Colorbar.Location = 'southoutside';
-
 chART.plot.pretty_colorbar('Divergent', CLim, 't-values', PlotProps)
-chART.save_figure(['Figure_Exploration_TF_colorbar'], Paths.Results, PlotProps)
+chART.save_figure('Figure_Exploration_TF_colorbar', Paths.Results, PlotProps)
 
 
-figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.33, PlotProps.Figure.Height*.53])
+%%% topographies around lapses
+
 TopoPlotProps = Parameters.PlotProps.Manuscript;
 TopoPlotProps.Axes.xPadding = 5;
 TopoPlotProps.Axes.yPadding = 5;
 TrialTypeIdx = 1; % lapse
-SessionIdx = 2;
+SessionIdx = 2; % EW
 CLim = [-6 6];
 
 Window = [-1; 1];
-Ranges = [1, 4,  8, 15, 25;
+BandRanges = [1, 4,  8, 15, 25;
     4, 8, 14, 25, 30];
 BandLabels = {'Delta', 'Theta', 'Alpha', 'Beta', 'Gamma'};
-nBands = size(Ranges, 2);
+nBands = size(BandRanges, 2);
 
 Grid = [nBands 2];
 Window = dsearchn(TrialTime', Window);
 
+figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.33, PlotProps.Figure.Height*.53])
 for RangeIdx = 1:nBands
-    Range = dsearchn(Frequencies', Ranges(:, RangeIdx));
+    Range = dsearchn(Frequencies', BandRanges(:, RangeIdx));
 
     % plot not controlling eyes
     Data = AllTimeFrequencyEpochs(:, SessionIdx, TrialTypeIdx, :, Range(1):Range(2), Window(1):Window(2));
@@ -140,40 +138,42 @@ end
 chART.save_figure('Figure_Exploration_topopower', Paths.Results, PlotProps)
 
 
-% plot colobar at bottom
+% colobar
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.33, PlotProps.Figure.Height*.25])
 TopoPlotProps.Colorbar.Location = 'southoutside';
 chART.plot.pretty_colorbar('Divergent', CLim, 't-values', TopoPlotProps)
-chART.save_figure(['Figure_Exploration_topopower_colorbar'], Paths.Results, PlotProps)
+chART.save_figure('Figure_Exploration_topopower_colorbar', Paths.Results, PlotProps)
 
-%%
 
 clc
 
-%%% lapses by quantiles
+%%% lapses by amplitude quantiles
 SessionLabels = {'BL', 'EW'};
 PlotProps = Parameters.PlotProps.Manuscript;
 PlotProps.Figure.Padding=30;
 PlotProps.Axes.xPadding = 20;
-figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.45, PlotProps.Figure.Height*.6])
+Grid = [2 2];
 
 BandLabels = {'Theta', 'Alpha'};
 nQuantiles = 10;
 MinTotalBursts = 10;
 MinTotalTrials = Parameters.Trials.MinPerSubGroupCount;
 
+% calculate proportion of bursts that anticipate a lapse for each quantile
 [LapseProbabilityBursts, Amplitudes, RTs] = lapse_probability_by_quantile(AllBurstsTable, Participants, nQuantiles, MinTotalBursts, MinTotalTrials);
 
-Grid = [2 2];
-
+%%% plot
+figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.45, PlotProps.Figure.Height*.6])
 for idxBand = 1:numel(BandLabels)
-
     for idxSession = 1:2
-        chART.sub_plot([], Grid, [idxSession, idxBand], [], false, '', PlotProps);
+
+        % prepare data
         Data = squeeze(LapseProbabilityBursts(:, idxSession, idxBand, :));
         zData = zScoreData(Data, 'first');
-
         Stats = paired_ttest(zData, [], Parameters.Stats);
+
+        % plot
+        chART.sub_plot([], Grid, [idxSession, idxBand], [], false, '', PlotProps);
         chART.plot.individual_rows(zData, Stats, string(1:nQuantiles), [.75, 2.75], PlotProps, PlotProps.Color.Participants);
         ylim([-2.5 4.2])
         if idxSession == 1
@@ -186,7 +186,7 @@ for idxBand = 1:numel(BandLabels)
             ylabel([SessionLabels{idxSession}, ' lapse likelihood (z-scored)'])
         end
 
-        % amplitudes of quantiles
+        % display amplitudes of quantiles
         Amps = squeeze(Amplitudes(:, idxSession, idxBand, :));
         for idxQuantile = 1:nQuantiles
             disp_stats_descriptive(Amps(:, idxQuantile), [SessionLabels{idxSession}, ' ', BandLabels{idxBand}, ' Q', num2str(idxQuantile)], 'miV', 0);
@@ -278,7 +278,7 @@ PlotProps.Figure.Padding = 20;
 PlotProps.Colorbar.Location = 'eastoutside';
 Windows = [-2,  -1, 0, 1, 2;
     -1, 0, 1, 2,  4];
-Ranges = [1, 4,  8, 12, 25;
+BandRanges = [1, 4,  8, 12, 25;
     4, 8, 12, 25, 30];
 
 CLim = [-6 6];
@@ -287,7 +287,7 @@ TrialTypeIdx = 1; % lapse
 for SessionIdx = 1:2
     figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.8])
     plot_topography_sequence(AllTimeFrequencyEpochs, Frequencies, Chanlocs, SessionIdx, ...
-        TrialTypeIdx, TrialTime, Windows, Ranges, CLim, PlotProps, Parameters.Stats, [])
+        TrialTypeIdx, TrialTime, Windows, BandRanges, CLim, PlotProps, Parameters.Stats, [])
     chART.save_figure(['Figure_',TitleTag, 'LapseTopographies_', num2str(SessionIdx)], Paths.Results, PlotProps)
 end
 

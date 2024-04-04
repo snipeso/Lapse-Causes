@@ -20,13 +20,15 @@ The scripts need to be run in order, since most of them depend on some aspect of
 
 
 ### Plotting & statistics
-- [Figure2_Behavior.m](./Analysis/Figure2_Behavior.m): plots all figures related to the tasks, and provides descriptive statistics of lapses and reaction times and such.
-- [Figure3_Timecourses.m](./Analysis/Figure3_Timecourses.m): plots relationship between trial outcome and burst/eyeclosure likelihood.
-
+- [Figure2_Behavior.m](./Analysis/Figure2_Behavior.m): plots all figures related to the tasks, and provides descriptive statistics of lapses and reaction times and such. relies on Analyses 2,3.
+- [Figure3_Timecourses.m](./Analysis/Figure3_Timecourses.m): plots relationship between trial outcome and burst/eyeclosure likelihood. Relies on analyses 1-5.
+- [Figure4_BurstTopographies.m](./Analysis/Figure4_BurstTopographies.m): plots topographies of burst likelihood. Relies on analyses 1-5.
+- [Figure5_TimeFrequency.m](./Analysis/Figure5_TimeFrequency.m): plots all the exploratory analyses. Relies especially on analyses 6,7.
 
 All the statistics are done with the function [paired_ttest.m](/functions/stats/paired_ttest.m). Whenever this function is called for a single plot, FDR correction is applied to all values.
 
 ## Installation & requirements
+(TODO)
 
 
 
