@@ -180,11 +180,11 @@ for idxBand = 1:numel(BandLabels)
             ylabel([SessionLabels{idxSession}, ' lapse likelihood (z-scored)'])
         end
 
-    % amplitudes of quantiles
-    Amps = squeeze(Amplitudes(:, idxSession, idxBand, :));
-    for idxQuantile = 1:nQuantiles
-    disp_stats_descriptive(Amps(:, idxQuantile), [SessionLabels{idxSession}, ' ', BandLabels{idxBand}, ' Q', num2str(idxQuantile)], 'miV', 0);
-    end
+        % amplitudes of quantiles
+        Amps = squeeze(Amplitudes(:, idxSession, idxBand, :));
+        for idxQuantile = 1:nQuantiles
+            disp_stats_descriptive(Amps(:, idxQuantile), [SessionLabels{idxSession}, ' ', BandLabels{idxBand}, ' Q', num2str(idxQuantile)], 'miV', 0);
+        end
     end
 end
 
@@ -197,11 +197,11 @@ AmplitudeStruct = assemble_amplitudes(AllBurstsTable, Participants, SessionBlock
 
 figure
 for idxBand = 1:2
-subplot(1, 2, idxBand)
-chART.plot.overlapping_distributions(AmplitudeStruct.(BandLabels{idxBand}), PlotProps, PlotProps.Color.Participants, .15)
-title(BandLabels{idxBand})
-ylim([0 70])
-legend off
+    subplot(1, 2, idxBand)
+    chART.plot.overlapping_distributions(AmplitudeStruct.(BandLabels{idxBand}), PlotProps, PlotProps.Color.Participants, .15)
+    title(BandLabels{idxBand})
+    ylim([0 70])
+    legend off
 end
 
 %% stats
@@ -433,12 +433,12 @@ function AmplitudeStruct = assemble_amplitudes(BurstsTable, Participants, Sessio
 AmplitudeStruct = struct();
 
 for idxBand = 1:numel(BandLabels)
-for idxSession = 1:numel(SessionBlockLabels)
-for idxParticipant = 1:numel(Participants)
-    Amplitudes = BurstsTable.Amplitude(strcmp(string(BurstsTable.Participant), Participants{idxParticipant}) & ...
-        BurstsTable.SessionBlock == idxSession & BurstsTable.Band == idxBand);
-        AmplitudeStruct.(BandLabels{idxBand}).(SessionBlockLabels{idxSession}).(Participants{idxParticipant}) = Amplitudes;
-end
-end
+    for idxSession = 1:numel(SessionBlockLabels)
+        for idxParticipant = 1:numel(Participants)
+            Amplitudes = BurstsTable.Amplitude(strcmp(string(BurstsTable.Participant), Participants{idxParticipant}) & ...
+                BurstsTable.SessionBlock == idxSession & BurstsTable.Band == idxBand);
+            AmplitudeStruct.(BandLabels{idxBand}).(SessionBlockLabels{idxSession}).(Participants{idxParticipant}) = Amplitudes;
+        end
+    end
 end
 end
