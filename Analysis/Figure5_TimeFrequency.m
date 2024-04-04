@@ -197,19 +197,6 @@ end
 chART.save_figure('Figure_Exploration_Amplitudes', Paths.Results, PlotProps)
 
 
-%% plot distribution of amplitudes of bursts
-
-AmplitudeStruct = assemble_amplitudes(AllBurstsTable, Participants, SessionBlockLabels, BandLabels);
-
-figure
-for idxBand = 1:2
-    subplot(1, 2, idxBand)
-    chART.plot.overlapping_distributions(AmplitudeStruct.(BandLabels{idxBand}), PlotProps, PlotProps.Color.Participants, .15)
-    title(BandLabels{idxBand})
-    ylim([0 70])
-    legend off
-end
-
 %% stats
 
 clc
