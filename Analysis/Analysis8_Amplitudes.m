@@ -6,7 +6,7 @@ close all
 %%% Parameters
 
 RerunAnalysis = true;
-OnlyEyesOpen = false; % only used eyes-open trials
+OnlyEyesOpen = true; % only used eyes-open trials
 OnlyClosestStimuli = false; % only use closest trials
 
 
@@ -61,6 +61,8 @@ for Band = BandLabels'
     end
 end
 
+TrialsTable.UniqueTrial = [1:size(TrialsTable, 1)]';
+
 AllBurstsTable = table();
 for idxParticipant = 1:numel(Participants)
     for idxSessionBlock = 1:numel(SessionBlockLabels) % loop through BL and SD
@@ -107,9 +109,10 @@ for idxParticipant = 1:numel(Participants)
                             TrialOutcome = TrialsTable.Type(idxTrial);
                             EyesClosed = TrialsTable.EyesClosed(idxTrial);
                             RT = TrialsTable.RT(idxTrial);
+                            Trial = TrialsTable.UniqueTrial(idxTrial);
                             AllBurstsTable = aggregate_burst_info(AllBurstsTable,  OverlapBursts, ...
                                 Participant, idxSessionBlock, idxSession, idxBand, TrialOutcome, EyesClosed, ...
-                                RT);
+                                RT, Trial);
                         end
                     end
                 end
@@ -150,7 +153,7 @@ OverlapBursts = Bursts(KeepBurstIndexes);
 end
 
 function AllBurstTable = aggregate_burst_info(AllBurstTable, Bursts, Participant, ...
-    idxSessionBlock, idxSession, idxBand, TrialOutcome, EyesClosed, RT)
+    idxSessionBlock, idxSession, idxBand, TrialOutcome, EyesClosed, RT, TrialID)
 
 KeepInfo = {'CyclesCount', 'Amplitude', 'BurstFrequency', 'DurationPoints', 'ChannelIndex', 'ChannelIndexLabel', 'Start'};
 
@@ -170,6 +173,7 @@ BurstTable.SessionBlock = repmat(idxSessionBlock, nBursts, 1);
 BurstTable.Band = repmat(idxBand, nBursts, 1);
 BurstTable.Participant = repmat(Participant, nBursts, 1);
 BurstTable.RT = repmat(RT, nBursts, 1);
+BurstTable.TrialID = repmat(TrialID, nBursts, 1);
 
 AllBurstTable = [AllBurstTable; BurstTable];
 end
