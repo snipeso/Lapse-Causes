@@ -395,9 +395,16 @@ LapseProbability = nan(numel(Participants), 2, 2, nQuantiles);
 Amplitudes = LapseProbability;
 RTs = LapseProbability;
 
+
 for idxParticipant = 1:numel(Participants)
+            for idxBand = 1:2
+    % assign bursts to quantiles
+    BurstIndexes = strcmp(string(AllBurstsTable.Participant), Participants{idxParticipant}) & ...
+        AllBurstsTable.Band==idxBand;
+    Bursts = AllBurstsTable(BurstIndexes, :);
+    Quantiles = quantile(Bursts.Amplitude, linspace(0, 1, nQuantiles+1));
+
     for idxSession = 1:2
-        for idxBand = 1:2
             BurstIndexes = strcmp(string(AllBurstsTable.Participant), Participants{idxParticipant}) & ...
                 AllBurstsTable.SessionBlock==idxSession & AllBurstsTable.Band==idxBand;
             Bursts = AllBurstsTable(BurstIndexes, :);
@@ -406,8 +413,8 @@ for idxParticipant = 1:numel(Participants)
                 continue
             end
 
-            % assign bursts to quantiles
-            Quantiles = quantile(Bursts.Amplitude, linspace(0, 1, nQuantiles+1));
+            % % assign bursts to quantiles
+            % Quantiles = quantile(Bursts.Amplitude, linspace(0, 1, nQuantiles+1));
             BinnedBursts = discretize(Bursts.Amplitude, Quantiles);
 
             % get lapse probability by quantile
