@@ -197,10 +197,9 @@ end
 chART.save_figure('Figure_Exploration_Amplitudes', Paths.Results, PlotProps)
 
 
-%% stats
-
+%% provide actual average change in lapse proportion to have a feel how big the effect really is
 clc
-SessionIdx = 2;
+SessionIdx = 2; % only for EW for sanity
 
 disp('increase in lapses during EW: ')
 for BandIdx = 1:2
@@ -209,9 +208,7 @@ for BandIdx = 1:2
 end
 
 
-
-
-%%
+%% Suppl figure of all time-frequency plots
 
 Channels = 1:numel(Chanlocs);
 MeanChannelTF = squeeze(mean(AllTimeFrequencyEpochs(:, :, :, Channels, :, :), 4, 'omitnan'));
@@ -220,13 +217,12 @@ Grid = [2 4];
 PlotProps = Parameters.PlotProps.Manuscript;
 PlotProps.Axes.xPadding = 25;
 PlotProps.Color.Steps.Divergent = 100;
-figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.45])
 StartPoint = dsearchn(TrialTime', 0);
 YLims = [-.1 .1];
-
 TrialTypes = { 'Lapse', 'Slow', 'Fast'};
-
 CLim = [-10 10];
+
+figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.45])
 for SessionIdx = 1:2
     FigureIdx = 1;
     for TrialTypeIdx = 3:-1:1
@@ -258,125 +254,11 @@ axis off
 chART.save_figure('Figure_All_TimeFrequency', Paths.Results, PlotProps)
 
 
-%% topography sequence ofEWlapse
-
-PlotProps = Parameters.PlotProps.Manuscript;
-PlotProps.Figure.Padding = 20;
-PlotProps.Colorbar.Location = 'eastoutside';
-Windows = [-2,  -1, 0, 1, 2;
-    -1, 0, 1, 2,  4];
-BandRanges = [1, 4,  8, 12, 25;
-    4, 8, 12, 25, 30];
-
-CLim = [-6 6];
-TrialTypeIdx = 1; % lapse
-
-for SessionIdx = 1:2
-    figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width, PlotProps.Figure.Height*.8])
-    plot_topography_sequence(AllTimeFrequencyEpochs, Frequencies, Chanlocs, SessionIdx, ...
-        TrialTypeIdx, TrialTime, Windows, BandRanges, CLim, PlotProps, Parameters.Stats, [])
-    chART.save_figure(['Figure_',TitleTag, 'LapseTopographies_', num2str(SessionIdx)], Paths.Results, PlotProps)
-end
-
 
 %%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%% functions
-
-function Space = set_sub_figure(Grid, Position, PlotProps, Letter)
-PlotProps.Axes.xPadding = 20;
-PlotProps.Axes.yPadding = 20;
-Space = chART.sub_figure(Grid, Position, [], Letter, PlotProps);
-Space(2) = Space(2)-Space(4)*.05;
-end
-
-
-function plot_spectrum(Data, Frequencies, Legend, PlotProps)
-
-nTypes = size(Data, 2);
-Colors = flip(chART.color_picker(nTypes));
-
-hold on
-for TrialTypeIdx = 1:nTypes
-    Spectrum = squeeze(mean(Data(:, TrialTypeIdx, :), 1, 'omitnan'));
-    plot(Frequencies, Spectrum, 'Color', [Colors(TrialTypeIdx, :), .5], 'LineWidth',PlotProps.Line.Width)
-end
-
-chART.set_axis_properties(PlotProps)
-
-plot(Frequencies([1 end]), [0 0], 'Color', 'k', 'LineWidth', PlotProps.Line.Width*2, 'HandleVisibility', 'off')
-xlim(Frequencies([1 end]))
-xlabel('Frequencies (Hz)')
-ylabel('Log power difference')
-legend(Legend)
-set(legend, 'ItemTokenSize', [10 10], 'location', 'northeast')
-end
-
-function plot_timefrequency(Stats, Time, Frequencies, CLim, PlotProps)
-Data = Stats.t;
-hold on
-contourf(Time, Frequencies, Data, PlotProps.Color.Steps.Divergent,  'linecolor','none')
-colormap(PlotProps.Color.Maps.Divergent)
-chART.set_axis_properties(PlotProps)
-
-Dims = size(Data);
-Mask = zeros(Dims);
-Mask(~Stats.sig) = 0.65;
-image(Time, Frequencies, 0.95*ones(Dims(1), Dims(2), 3), 'AlphaData', Mask)
-
-
-if isempty(CLim)
-    Quantiles = quantile(Data(:), [.1 .99]);
-    Lim = max(abs(Quantiles));
-    CLim = [-Lim Lim];
-end
-clim(CLim)
-ylim([Frequencies(1), Frequencies(end)])
-xlabel('Time (s)')
-ylabel('Frequency (Hz)')
-set(gca, 'TickDir', 'in')
-plot([0 0], Frequencies([1 end]),  'Color', 'k', 'LineWidth',PlotProps.Line.Width/2, 'HandleVisibility', 'off')
-
-end
-
-function plot_topography_sequence(AllData, Frequencies, Chanlocs, SessionIdx, TrialTypeIdx, TrialTime, Windows, ...
-    Ranges, CLims, PlotProps, StatsParameters, Space)
-
-% PlotProps.Stats.PlotN = true; % To see sample size
-nWindows = size(Windows, 2);
-nRanges = size(Ranges, 2);
-PlotProps.Axes.xPadding = 10;
-PlotProps.Axes.yPadding = 10;
-
-Grid = [nRanges, nWindows];
-
-
-for RangeIdx = 1:nRanges
-    for WindowIdx = 1:nWindows
-
-        Range = dsearchn(Frequencies', Ranges(:, RangeIdx));
-        Window = dsearchn(TrialTime', Windows(:, WindowIdx));
-
-        Data = AllData(:, SessionIdx, TrialTypeIdx, :, Range(1):Range(2), Window(1):Window(2));
-        Data = squeeze(mean(mean(Data, 5, 'omitnan'), 6, 'omitnan'));
-
-        chART.sub_plot(Space,  Grid, [RangeIdx WindowIdx], [], false, '', PlotProps);
-        paired_ttest_topography(zeros(size(Data)), Data, Chanlocs, CLims, StatsParameters, PlotProps);
-        colorbar off
-
-        if RangeIdx==1
-            title([num2str(Windows(1, WindowIdx)), '-', num2str(Windows(2, WindowIdx)), 's'])
-        end
-
-        if WindowIdx ==1
-            chART.plot.vertical_text([num2str(Ranges(1, RangeIdx)), '-', num2str(Ranges(2, RangeIdx)), ' Hz'], .15, .5, PlotProps)
-        end
-    end
-end
-end
-
-
 
 function [LapseProbability, Amplitudes, RTs] = lapse_probability_by_quantile(AllBurstsTable, Participants, nQuantiles, MinBurstsQuantile, MinTrials)
 % sorts bursts into quantiles by amplitude, and identifies how many of
@@ -392,10 +274,12 @@ RTs = LapseProbability;
 for idxParticipant = 1:numel(Participants)
     for idxBand = 1:2
 
-        BurstIndexes = strcmp(string(AllBurstsTable.Participant), Participants{idxParticipant}) & ...
-            AllBurstsTable.Band==idxBand;
-        Bursts = AllBurstsTable(BurstIndexes, :);
-        Quantiles = quantile(Bursts.Amplitude, linspace(0, 1, nQuantiles+1));
+        % for quality check: see if effect holds with constant quantiles
+        % BurstIndexes = strcmp(string(AllBurstsTable.Participant), Participants{idxParticipant}) & ...
+        %     AllBurstsTable.Band==idxBand;
+        % Bursts = AllBurstsTable(BurstIndexes, :);
+        % Quantiles = quantile(Bursts.Amplitude, linspace(0, 1, nQuantiles+1));
+
         for idxSession = 1:2
             BurstIndexes = strcmp(string(AllBurstsTable.Participant), Participants{idxParticipant}) & ...
                 AllBurstsTable.SessionBlock==idxSession & AllBurstsTable.Band==idxBand;
@@ -436,17 +320,36 @@ end
 end
 
 
-function AmplitudeStruct = assemble_amplitudes(BurstsTable, Participants, SessionBlockLabels, BandLabels)
+%%%%%%%%%%%%%%%%%
+%%% plots
 
-AmplitudeStruct = struct();
+function plot_timefrequency(Stats, Time, Frequencies, CLim, PlotProps)
 
-for idxBand = 1:numel(BandLabels)
-    for idxSession = 1:numel(SessionBlockLabels)
-        for idxParticipant = 1:numel(Participants)
-            Amplitudes = BurstsTable.Amplitude(strcmp(string(BurstsTable.Participant), Participants{idxParticipant}) & ...
-                BurstsTable.SessionBlock == idxSession & BurstsTable.Band == idxBand);
-            AmplitudeStruct.(BandLabels{idxBand}).(SessionBlockLabels{idxSession}).(Participants{idxParticipant}) = Amplitudes;
-        end
-    end
+% plot t-values
+Data = Stats.t;
+hold on
+contourf(Time, Frequencies, Data, PlotProps.Color.Steps.Divergent,  'linecolor','none')
+colormap(PlotProps.Color.Maps.Divergent)
+chART.set_axis_properties(PlotProps)
+
+% plot statistics mask
+Dims = size(Data);
+Mask = zeros(Dims);
+Mask(~Stats.sig) = 0.65;
+image(Time, Frequencies, 0.95*ones(Dims(1), Dims(2), 3), 'AlphaData', Mask)
+
+% set limits and labels
+if isempty(CLim)
+    Quantiles = quantile(Data(:), [.1 .99]);
+    Lim = max(abs(Quantiles));
+    CLim = [-Lim Lim];
 end
+clim(CLim)
+ylim([Frequencies(1), Frequencies(end)])
+xlabel('Time (s)')
+ylabel('Frequency (Hz)')
+set(gca, 'TickDir', 'in')
+
+% stim start line
+plot([0 0], Frequencies([1 end]),  'Color', 'k', 'LineWidth',PlotProps.Line.Width/2, 'HandleVisibility', 'off')
 end
