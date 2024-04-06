@@ -1,5 +1,5 @@
 # Lapse-Causes
-This is the code for the publication {Title}.  
+This is the code for the publication {Title}.
 The EEG preprocessing was previously done with the scripts from this [other respository](https://github.com/snipeso/Theta-SD-vs-WM).
 The Lateralized Attention Task (LAT) task code can be found [here](https://github.com/snipeso/LAT).
 
@@ -28,7 +28,7 @@ The scripts need to be run in order, since most of them depend on some aspect of
 All the statistics are done with the function [paired_ttest.m](/functions/stats/paired_ttest.m). Whenever this function is called for a single plot, FDR correction is applied to all values.
 
 ## Installation & requirements
-(TODO)
+
 
 
 

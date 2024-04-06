@@ -9,7 +9,7 @@ close all
 %%% Parameters
 
 OnlyClosestStimuli = false; % only use closest trials (legacy)
-OnlyEyesOpen = true; % only used eyes-open trials. Need to run script twice, once true, once false!
+OnlyEyesOpen = false; % only used eyes-open trials. Need to run script twice, once true, once false!
 ChannelsCount = 123; % just to pre-allocate before loading in data
 
 Parameters = analysisParameters();
@@ -54,6 +54,7 @@ TrialTime = linspace(TrialWindow(1), TrialWindow(2), SampleRate*(TrialWindow(2)-
 % if requested, exclude furthest trials
 [MaxStimulusDistance, TitleTag] = max_stimulus_distance(TrialsTable, ...
     OnlyClosestStimuli, MaxStimulusDistanceProportion, TitleTag);
+TitleTag = [TitleTag, 'rando'];
 
 
 %%% get power
