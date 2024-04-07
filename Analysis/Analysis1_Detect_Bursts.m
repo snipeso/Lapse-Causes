@@ -12,7 +12,10 @@ RunParallelBurstDetection = true; % true for faster processing
 RerunAnalysis = true; % false to skip files already analyzed
 
 %%% criteria to find bursts in single channels
-% irregular shaped bursts, few criteria, but needs more cycles
+% irregular shaped bursts, few criteria, but needs more cycles. This is
+% criteria set 3 in the paper. (I don't change the order now in the script, 
+% because it would inaccurately refect the indexing saved in the detected 
+% bursts).
 Idx = 1; % this is to make it easier to skip some
 CriteriaSets = struct();
 CriteriaSets(Idx).PeriodConsistency = .6;
@@ -22,7 +25,7 @@ CriteriaSets(Idx).FlankConsistency = .6;
 CriteriaSets(Idx).MinCyclesPerBurst = 5;
 % % without periodneg, to capture bursts that accelerate/decelerate
 
-% short bursts, strict monotonicity requirements
+% short bursts, strict monotonicity requirements. This is criteria set 2.
 Idx = Idx+1;
 CriteriaSets(Idx).PeriodNeg = true;
 CriteriaSets(Idx).PeriodConsistency = .7;
@@ -30,7 +33,9 @@ CriteriaSets(Idx).FlankConsistency = .3;
 CriteriaSets(Idx).MonotonicityInAmplitude = .9;
 CriteriaSets(Idx).MinCyclesPerBurst = 3;
 
-% relies on shape but low other criteria; gets most of the bursts
+% relies on shape but low other criteria; gets most of the bursts (in the
+% paper, this is referred to as criteria set 1, because it uses the most
+% criteria, so was good for an initial explanation).
 Idx = Idx+1;
 CriteriaSets(Idx).PeriodNeg = true;
 CriteriaSets(Idx).PeriodConsistency = .5;
