@@ -145,6 +145,7 @@ chART.plot.pretty_colorbar('Divergent', CLim, 't-values', TopoPlotProps)
 chART.save_figure('Figure_Exploration_topopower_colorbar', Paths.Results, PlotProps)
 
 
+%%
 clc
 
 %%% lapses by amplitude quantiles
@@ -171,6 +172,9 @@ for idxBand = 1:numel(BandLabels)
         Data = squeeze(LapseProbabilityBursts(:, idxSession, idxBand, :));
         zData = zScoreData(Data, 'first');
         Stats = paired_ttest(zData, [], Parameters.Stats);
+         disp_stats(Stats, [1 nQuantiles], BandLabels{idxBand});
+         disp_stats_descriptive(100*Data(:, 1), 'Q1:', '%', 0);
+         disp_stats_descriptive(100*Data(:, end), 'Qend:', '%', 0);
 
         % plot
         chART.sub_plot([], Grid, [idxSession, idxBand], [], false, '', PlotProps);
@@ -179,7 +183,7 @@ for idxBand = 1:numel(BandLabels)
         if idxSession == 1
             title(BandLabels{idxBand})
         else
-            xlabel('Amplitude quantile')
+            xlabel('Burst amplitudes (\muV)')
         end
 
         if idxBand == 1
@@ -188,6 +192,7 @@ for idxBand = 1:numel(BandLabels)
 
         % display amplitudes of quantiles
         Amps = squeeze(Amplitudes(:, idxSession, idxBand, :));
+        xticklabels(round(mean(Amps, 1, 'omitnan')))
         for idxQuantile = 1:nQuantiles
             disp_stats_descriptive(Amps(:, idxQuantile), [SessionLabels{idxSession}, ' ', BandLabels{idxBand}, ' Q', num2str(idxQuantile)], 'miV', 0);
         end
@@ -203,8 +208,12 @@ SessionIdx = 2; % only for EW for sanity
 
 disp('increase in lapses during EW: ')
 for BandIdx = 1:2
-    Data = squeeze(LapseProbabilityBursts(:, SessionIdx, BandIdx, [1 end]));
-    disp_stats_descriptive(diff(Data, 1, 2)*100, BandLabels{BandIdx}, '%', 0);
+    % Data = squeeze(LapseProbabilityBursts(:, SessionIdx, BandIdx, [1 end]));
+    % disp_stats_descriptive(diff(Data, 1, 2)*100, BandLabels{BandIdx}, '%', 0);
+
+     Data = squeeze(LapseProbabilityBursts(:, SessionIdx, BandIdx, :));
+    Stats = paired_ttest(Data, [], Parameters.Stats);
+    disp_stats(Stats, [1 nQuantiles], BandLabels{BandIdx});
 end
 
 
