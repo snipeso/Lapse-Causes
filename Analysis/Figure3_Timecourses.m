@@ -86,7 +86,7 @@ for idxSession = 1:2
     plot_timecourse(TrialTime, flip(ProbEyesClosedStimLockedDiff, 2), ProbabilityEyesClosedDiff(:, 1), ...
         YLimEyesClosed, flip(TallyLabels), 'Stimulus', StatParameters, DispN, DispStats, PlotProps, ...
         Grid, [idxSession 1], '', 'Eye closure');
-    ylabel('Porportion eyes closed (z-score)')
+    ylabel('Porportion of trials (z-scored)')
     chART.plot.vertical_text(SessionLabels{idxSession}, .3, .5, PlotProps)
 
     disp('theta')
@@ -94,7 +94,7 @@ for idxSession = 1:2
         ProbabilityBurstsDiff(:, 1), YLimTheta, flip(TallyLabels), '', ...
         StatParameters, DispN, DispStats, PlotProps, Grid, [idxSession 2], '', ...
         'Theta bursts');
-    ylabel('Proportion bursts (z-score)')
+    ylabel('Proportion of channels (z-scored)')
     legend off
 
     disp('alpha')
@@ -102,7 +102,7 @@ for idxSession = 1:2
         ProbabilityBurstsDiff(:, 2), YLimAlpha, flip(TallyLabels), '', ...
         StatParameters, DispN, DispStats, PlotProps, Grid, [idxSession 3], '', ...
         'Alpha bursts');
-    ylabel('Proportion bursts (z-score)')
+    ylabel('Proportion of channels (z-scored)')
     legend off
 
     disp("++++++++++++++++++++++++++++++++++++")

@@ -10,7 +10,7 @@ close all
 
 CheckEyes = true; % check if person had eyes open or closed
 Closest = false; % only use closest trials
-SessionGroup = 'SD'; % needs to be run twice! First BL then EW/SD
+SessionGroup = 'BL'; % needs to be run twice! First BL then EW/SD
 
 
 Parameters = analysisParameters();
@@ -86,7 +86,7 @@ for idxBand = 1:2 % subplot A and B
         end
         disp('__________')
     end
-    plot_colorbar(PlotProps, Grid, [5, idxBand], CLims, BandLabels{idxBand})
+    plot_colorbar(PlotProps, Grid, [5, idxBand], CLims)
 end
 chART.save_figure(['Figure_',TitleTag, '_Topography'], Paths.Results, PlotProps)
 
@@ -150,7 +150,7 @@ PlotProps.Axes.yPadding = 20;
 A = chART.sub_plot([], Grid, Position, [], false, '', PlotProps);
 A.Position(4) = A.Position(4)*2;
 A.Position(2) = A.Position(2)-.1;
-chART.plot.pretty_colorbar('Divergent', CLims, 't value', PlotProps)
+chART.plot.pretty_colorbar('Divergent', CLims, 't-values', PlotProps)
 end
 
 
