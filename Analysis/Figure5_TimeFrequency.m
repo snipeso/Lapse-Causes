@@ -89,7 +89,7 @@ chART.save_figure('Figure_Exploration_TF_colorbar', Paths.Results, PlotProps)
 
 
 %%% topographies around lapses
-
+%%
 TopoPlotProps = Parameters.PlotProps.Manuscript;
 TopoPlotProps.Axes.xPadding = 5;
 TopoPlotProps.Axes.yPadding = 5;
@@ -97,41 +97,49 @@ TrialTypeIdx = 1; % lapse
 SessionIdx = 2; % EW
 CLim = [-6 6];
 
-Window = [-1; 1];
+Windows = [-2, 0;
+            0, .3];
+WindowTitles = {["EW Lapses", "[-2, 0]"], ["EW Lapses","[0 0.3]"]};
 BandRanges = [1, 4,  8, 15, 25;
     4, 8, 14, 25, 30];
 BandLabels = {'Delta', 'Theta', 'Alpha', 'Beta', 'Gamma'};
 nBands = size(BandRanges, 2);
-
-Grid = [nBands 2];
-Window = dsearchn(TrialTime', Window);
+nWindows = size(Windows, 1);
+Grid = [nBands nWindows];
+Windows = dsearchn(TrialTime', Windows(:));
+Windows = reshape(Windows, nWindows, []);
 
 figure('Units','centimeters','Position', [0 0 PlotProps.Figure.Width*.33, PlotProps.Figure.Height*.53])
 for RangeIdx = 1:nBands
+    for WindowIdx = 1:nWindows
     Range = dsearchn(Frequencies', BandRanges(:, RangeIdx));
 
     % plot not controlling eyes
-    Data = AllTimeFrequencyEpochs(:, SessionIdx, TrialTypeIdx, :, Range(1):Range(2), Window(1):Window(2));
-    Data = squeeze(mean(mean(Data, 5, 'omitnan'), 6, 'omitnan')); % mean in frequency and in time
+     Data = TimeFrequencyEpochsEO(:, TrialTypeIdx, :, Range(1):Range(2), Windows(WindowIdx, 1):Windows(WindowIdx, 2));
+     Data = squeeze(mean(mean(Data, 4, 'omitnan'), 5, 'omitnan')); % mean in frequency and in time
 
-    chART.sub_plot([],  Grid, [RangeIdx 1], [], false, '', TopoPlotProps);
+    chART.sub_plot([],  Grid, [RangeIdx WindowIdx], [], false, '', TopoPlotProps);
     paired_ttest_topography(zeros(size(Data)), Data, Chanlocs, CLim, Parameters.Stats, TopoPlotProps);
     colorbar off
+    if WindowIdx ==1
     chART.plot.vertical_text(BandLabels{RangeIdx}, .15, .5, TopoPlotProps)
+    end
     if RangeIdx==1
-        title('Lapses [-1 to 1 s]',  'FontSize', TopoPlotProps.Text.TitleSize)
+        % title('Lapses [-1 to 1 s]',  'FontSize', TopoPlotProps.Text.TitleSize)
+         title(WindowTitles{WindowIdx},  'FontSize', TopoPlotProps.Text.TitleSize)
     end
 
 
-    % plot controlling eyes
-    Data = TimeFrequencyEpochsEO(:, TrialTypeIdx, :, Range(1):Range(2), Window(1):Window(2));
-    Data = squeeze(mean(mean(Data, 4, 'omitnan'), 5, 'omitnan')); % mean in frequency and in time
-
-    chART.sub_plot([],  Grid, [RangeIdx 2], [], false, '', TopoPlotProps);
-    paired_ttest_topography(zeros(size(Data)), Data, Chanlocs, CLim, Parameters.Stats, TopoPlotProps);
-    colorbar off
-    if RangeIdx==1
-        title('Only EO', 'FontSize', TopoPlotProps.Text.TitleSize)
+    % % plot controlling eyes
+    % Data = TimeFrequencyEpochsEO(:, TrialTypeIdx, :, Range(1):Range(2), Window(1):Window(2));
+    % Data = squeeze(mean(mean(Data, 4, 'omitnan'), 5, 'omitnan')); % mean in frequency and in time
+    % 
+    % chART.sub_plot([],  Grid, [RangeIdx 2], [], false, '', TopoPlotProps);
+    % paired_ttest_topography(zeros(size(Data)), Data, Chanlocs, CLim, Parameters.Stats, TopoPlotProps);
+    % colorbar off
+    % if RangeIdx==1
+    %     title('Only EO', 'FontSize', TopoPlotProps.Text.TitleSize)
+    % end
     end
 end
 
