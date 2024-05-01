@@ -86,7 +86,7 @@ for idxSession = 1:2
     plot_timecourse(TrialTime, flip(ProbEyesClosedStimLockedDiff, 2), ProbabilityEyesClosedDiff(:, 1), ...
         YLimEyesClosed, flip(TallyLabels), 'Stimulus', StatParameters, DispN, DispStats, PlotProps, ...
         Grid, [idxSession 1], '', 'Eye closure');
-    ylabel('Porportion of trials (z-scored)')
+    ylabel('Proportion of trials (z-scored)')
     chART.plot.vertical_text(SessionLabels{idxSession}, .3, .5, PlotProps)
 
     disp('theta')

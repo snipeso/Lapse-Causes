@@ -68,12 +68,13 @@ KSSPVT = assemble_questionnaire(fullfile(Paths.AnalyzedData, "Questionnaires/", 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Plot
 
-clc
-close all
 
 PlotProps = Parameters.PlotProps.Manuscript;
 PlotProps.Scatter.Size = 50;
 PlotProps.Figure.Padding = 30;
+PlotProps.Text.IndexSize = 18;
+PlotProps.Axes.labelPadding = 25;
+PlotProps.Axes.yPadding= 40;
 Grid = [2 4];
 
 Legend = {'EC lapses', 'EO lapses', 'Slow responses', 'Fast responses'};
@@ -373,7 +374,7 @@ Colors = [flip(chART.color_picker([1 2], '', 'gray'));
 chART.sub_plot([], Grid, Position, [1 1], true, Letter, PlotProps);
 chART.plot.average_rows(LapseCount, [], Legend, 'IQ', PlotProps, Colors)
 ylim(YLim)
-xlabel('Distance from center (quantiles)')
+xlabel('Distance from centre (quantiles)')
 set(legend, 'Location','northwest')
 
 disp([Letter, ': N=', num2str(nnz(~isnan(mean(mean(LapseCount, 2), 3))))])

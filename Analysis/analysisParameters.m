@@ -162,6 +162,7 @@ Parameters.PlotProps.Manuscript.Text.AxisSize = 14;
 Parameters.PlotProps.Manuscript.Text.TitleSize = 16;
 Parameters.PlotProps.Manuscript.Text.IndexSize = 20;
 Parameters.PlotProps.Manuscript.Scatter.Size = 50;
+Parameters.PlotProps.Manuscript.Indexes.Letters = append('(', lower(Parameters.PlotProps.Manuscript.Indexes.Letters), ')');
 
 Parameters.PlotProps.Powerpoint = chART.load_plot_properties({'LSM', 'Powerpoint'});
 Parameters.PlotProps.Poster = chART.load_plot_properties({'LSM', 'Poster'});
